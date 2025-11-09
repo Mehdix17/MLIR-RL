@@ -1,0 +1,66 @@
+# Environment and Secrets
+.env
+.env.debug
+.env.local
+*.secret
+
+# Neptune tracking
+.neptune/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build directories
+tools/*/build/
+tools/*/cmake-build-*/
+
+# LLVM/MLIR build (HUGE - 8.6GB!)
+llvm-project/
+
+# Training artifacts
+results/
+logs/
+*.log
+*.out
+*.err
+
+# Data directories (3GB!)
+data/
+
+# Keep test data - it's small and useful
+!data/test/
+
+# Dask logs
+dask-logs/
+
+# Model checkpoints (can be large)
+*.pt
+*.pth
+*.ckpt
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+tmp/
+temp/
