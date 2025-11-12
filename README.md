@@ -237,8 +237,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ## 📧 Contact
 
 mehdi.benchikh1@gmail.com \
-bessai.tayeb2003@gmail.com 
-
----
-
-**For HPC users:** This project is designed for SLURM clusters but can be adapted for other schedulers or standalone execution.
+bessai.tayeb2003@gmail.com
