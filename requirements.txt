@@ -1,6 +1,7 @@
 numpy
 python-dotenv
 torch
+transformers>=4.30.0
 neptune
 tqdm
 dask-jobqueue

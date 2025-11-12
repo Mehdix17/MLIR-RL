@@ -5,6 +5,7 @@ from typing import Optional
 from rl_autoschedular.actions import ActionSpace, Interchange
 from rl_autoschedular.observation import OpFeatures, ActionHistory, ProducerOpFeatures, Observation
 from utils.config import Config
+from rl_autoschedular.models import get_embedding_layer
 
 
 ACTIVATION = nn.ReLU
@@ -79,10 +80,10 @@ class ValueModel(nn.Module):
         """Initialize the model."""
         super(ValueModel, self).__init__()
 
-        self.lstm = LSTMEmbedding()
+        self.embedding = get_embedding_layer()
 
         self.network = nn.Sequential(
-            nn.Linear(self.lstm.output_size, 512),
+            nn.Linear(self.embedding.output_size, 512),
             ACTIVATION(),
             nn.Linear(512, 512),
             ACTIVATION(),
@@ -103,7 +104,7 @@ class ValueModel(nn.Module):
         Returns:
             torch.Tensor: The value tensor.
         """
-        return self.network(self.lstm(obs)).squeeze(-1)
+        return self.network(self.embedding(obs)).squeeze(-1)
 
     def loss(self, new_values: torch.Tensor, values: torch.Tensor, returns: torch.Tensor) -> torch.Tensor:
         """Calculate the value loss.
@@ -132,10 +133,10 @@ class PolicyModel(nn.Module):
 
         self.log_std = Interchange.log_std
 
-        self.lstm = LSTMEmbedding()
+        self.embedding = get_embedding_layer()
 
         self.backbone = nn.Sequential(
-            nn.Linear(self.lstm.output_size, 512),
+            nn.Linear(self.embedding.output_size, 512),
             ACTIVATION(),
             nn.Linear(512, 512),
             ACTIVATION(),
@@ -167,7 +168,7 @@ class PolicyModel(nn.Module):
         Returns:
             tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: The logits of the transformations, parallelizations, tilings, and interchanges.
         """
-        embedded = self.backbone(self.lstm(obs))
+        embedded = self.backbone(self.embedding(obs))
         actions_logits = [head(embedded) if head else None for head in self.heads]
 
         return ActionSpace.distributions(obs, *actions_logits)
@@ -191,37 +192,3 @@ class PolicyModel(nn.Module):
         surr2 = torch.clamp(ratios, (1 - clip_range) * off_policy_rates, (1 + clip_range) * off_policy_rates) * advantages
         clip_frac = (torch.abs((ratios / off_policy_rates - 1)) > clip_range).float().mean()
         return - torch.min(surr1, surr2).mean(), clip_frac
-
-
-class LSTMEmbedding(nn.Module):
-    def __init__(self):
-        super(LSTMEmbedding, self).__init__()
-
-        embedding_size = 411
-
-        self.output_size = embedding_size + ActionHistory.size()
-
-        self.embedding = nn.Sequential(
-            nn.Linear(OpFeatures.size(), 512),
-            nn.ELU(),
-            nn.Dropout(0.225),
-            nn.Linear(512, 512),
-            nn.ELU(),
-            nn.Dropout(0.225),
-        )
-
-        self.lstm = nn.LSTM(512, embedding_size)
-
-    def __call__(self, obs: torch.Tensor) -> torch.Tensor:
-        return super().__call__(obs)
-
-    def forward(self, obs: torch.Tensor) -> torch.Tensor:
-        consumer_feats = Observation.get_part(obs, OpFeatures)
-        producer_feats = Observation.get_part(obs, ProducerOpFeatures)
-
-        consumer_embeddings = self.embedding(consumer_feats).unsqueeze(0)
-        producer_embeddings = self.embedding(producer_feats).unsqueeze(0)
-
-        _, (final_hidden, _) = self.lstm(torch.cat((consumer_embeddings, producer_embeddings)))
-
-        return torch.cat((final_hidden.squeeze(0), Observation.get_part(obs, ActionHistory)), 1)

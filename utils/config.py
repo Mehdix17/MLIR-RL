@@ -8,6 +8,8 @@ import os
 class Config(metaclass=Singleton):
     """Class to store and load global configuration"""
 
+    model_type: Literal['lstm', 'distilbert', 'bert', 'convnext']
+    """The type of neural network model to use for policy and value networks"""
     max_num_stores_loads: int
     """The maximum number of loads in the nested loops"""
     max_num_loops: int

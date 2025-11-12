@@ -72,6 +72,27 @@ torch.set_num_threads(4)
 if cfg.debug:
     torch.autograd.set_detect_anomaly(True)
 
+# Validate model configuration
+if cfg.model_type == "distilbert":
+    print_info("Using DistilBERT model - validating configuration...")
+    from rl_autoschedular.observation import OpFeatures
+    
+    # Check if feature sizes are reasonable for tokenization
+    op_feature_size = OpFeatures.size()
+    print_info(f"  Operation feature size: {op_feature_size}")
+    print_info(f"  Tokenizer will create sequences of ~{op_feature_size * 2 + 2} tokens")
+    
+    # Warn if sequences might be very long
+    if op_feature_size * 2 + 2 > 100:
+        print_info(f"  ⚠️  Large feature size may result in long sequences")
+        print_info(f"     Consider increasing max_seq_length in tokenizer if needed")
+    
+    print_success("DistilBERT configuration validated")
+elif cfg.model_type == "lstm":
+    print_info("Using LSTM model (default)")
+else:
+    raise ValueError(f"Unknown model type: {cfg.model_type}")
+
 # Initiate model
 model = Model().to(device)
 optimizer = torch.optim.Adam(
