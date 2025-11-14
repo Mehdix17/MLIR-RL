@@ -16,22 +16,28 @@ MLIR-RL learns to optimize MLIR code by:
 
 ## 📁 Project Structure
 
-See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) for detailed organization.
+See [docs/architecture/PROJECT_STRUCTURE.md](docs/architecture/PROJECT_STRUCTURE.md) for detailed organization.
 
 ```
 MLIR-RL/
 ├── bin/                  # Main executable scripts
 ├── rl_autoschedular/    # Core RL implementation (PPO, environment, models)
+│   └── models/          # Modular neural network architectures (LSTM, DistilBERT)
+├── data_generation/     # ✨ Generate training data & convert models
+├── evaluation/          # ✨ Evaluate trained agents vs baselines
+├── benchmarks/          # ✨ Benchmark suites (single ops, neural nets)
 ├── utils/               # Utility modules (config, logging, Dask)
 ├── analysis/            # Plotting and analysis tools
 ├── experiments/         # Neptune sync and experiment utilities
 ├── notebooks/           # Jupyter notebooks for exploration
-├── docs/                # Documentation
+├── docs/                # Documentation (organized by topic)
 ├── scripts/             # SLURM job submission scripts
 ├── config/              # Training configuration files
 ├── data/                # Benchmark datasets
 └── tools/               # MLIR analysis tools (AST dumper, vectorizer)
 ```
+
+✨ **New**: Integrated data generation and evaluation systems from previous project!
 
 ## 🚀 Quick Start
 
@@ -89,7 +95,21 @@ NEPTUNE_PROJECT=your-workspace/your-project  # Optional: for tracking
 NEPTUNE_TOKEN=your-api-token                  # Optional: for tracking
 ```
 
-### 4. Run Training
+### 4. Generate Training Data (Optional)
+
+If you want to create custom training data:
+
+```bash
+# Generate random MLIR programs
+python data_generation/random_mlir_gen.py
+
+# Convert neural networks to MLIR
+python data_generation/nn_to_mlir.py
+```
+
+See [Data Generation Guide](docs/guides/DATA_GENERATION_INTEGRATION.md) for details.
+
+### 5. Run Training
 
 **On SLURM cluster:**
 ```bash
@@ -138,7 +158,46 @@ If Neptune is configured, view results at:
 https://app.neptune.ai/<your-workspace>/<your-project>
 ```
 
-See [docs/NEPTUNE_AUTO_SYNC.md](docs/NEPTUNE_AUTO_SYNC.md) for auto-sync details.
+See [docs/guides/NEPTUNE_AUTO_SYNC.md](docs/guides/NEPTUNE_AUTO_SYNC.md) for auto-sync details.
+
+## 🧪 Evaluation
+
+### Evaluate Trained Agent
+
+```bash
+# Evaluate on single operations
+python -c "
+from evaluation import SingleOperationEvaluator
+from pathlib import Path
+
+evaluator = SingleOperationEvaluator(
+    agent_model_path=Path('results/best_model.pt'),
+    benchmark_dir=Path('benchmarks/single_ops')
+)
+results = evaluator.evaluate_benchmark_suite(
+    output_file=Path('results/eval_results.json')
+)
+"
+
+# Evaluate on neural networks
+python -c "
+from evaluation import NeuralNetworkEvaluator
+from pathlib import Path
+
+evaluator = NeuralNetworkEvaluator(
+    agent_model_path=Path('results/best_model.pt'),
+    benchmark_dir=Path('benchmarks/neural_nets')
+)
+results = evaluator.evaluate_benchmark_suite(
+    output_file=Path('results/nn_eval.json')
+)
+"
+
+# Run PyTorch baseline
+python evaluation/pytorch_baseline.py
+```
+
+See [Evaluation Guide](docs/guides/DATA_GENERATION_INTEGRATION.md) for details.
 
 ## 🔧 Configuration
 
@@ -161,11 +220,29 @@ See [config/example.json](config/example.json) for all options.
 
 ## 📚 Documentation
 
-- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Complete directory guide
-- **[MLIR Setup](docs/MLIR_Python_Setup_Steps.md)** - Detailed LLVM/MLIR build
-- **[Plotting Guide](docs/PLOTTING_README.md)** - Visualization documentation
-- **[Neptune Auto-Sync](docs/NEPTUNE_AUTO_SYNC.md)** - Experiment tracking
-- **[Quick Reference](docs/quick_reference.sh)** - Common commands
+### Quick Links
+- **[📖 Documentation Index](docs/README.md)** - Complete documentation guide
+
+### Architecture & Design
+- **[Project Structure](docs/architecture/PROJECT_STRUCTURE.md)** - Complete directory guide
+- **[Model Architecture Comparison](docs/architecture/MODEL_ARCHITECTURE_COMPARISON.py)** - LSTM vs DistilBERT
+- **[Refactoring Guide](docs/architecture/REFACTORING_PHASE1_COMPLETE.md)** - Modular architecture
+
+### Models
+- **[DistilBERT Model](docs/models/DISTILBERT_MODEL.md)** - Transformer-based embedding
+- **[DistilBERT Implementation](docs/models/DISTILBERT_IMPLEMENTATION.md)** - Technical details
+- **[DistilBERT Data Integration](docs/models/DISTILBERT_DATA_INTEGRATION.md)** - Data preprocessing
+
+### Guides
+- **[Data Generation Integration](docs/guides/DATA_GENERATION_INTEGRATION.md)** - Generate training data & evaluate
+- **[SLURM Guide](docs/guides/SLURM_GUIDE.md)** - Running on clusters
+- **[Plotting Guide](docs/guides/PLOTTING_README.md)** - Visualization
+- **[Neptune Auto-Sync](docs/guides/NEPTUNE_AUTO_SYNC.md)** - Experiment tracking
+- **[GitHub Checklist](docs/guides/GITHUB_CHECKLIST.md)** - Pre-push checklist
+
+### Setup
+- **[MLIR Setup](docs/setup/MLIR_Python_Setup_Steps.md)** - Detailed LLVM/MLIR build
+- **[Quick Reference](docs/setup/quick_reference.sh)** - Common commands
 
 ## 🎓 How It Works
 
