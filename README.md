@@ -95,21 +95,38 @@ NEPTUNE_PROJECT=your-workspace/your-project  # Optional: for tracking
 NEPTUNE_TOKEN=your-api-token                  # Optional: for tracking
 ```
 
-### 4. Generate Training Data (Optional)
+### 4. (Optional) Augment Training Data
 
-If you want to create custom training data:
+The project includes **9441 existing MLIR files** in `data/all/`. You can optionally augment with more:
 
 ```bash
-# Generate random MLIR programs
+# Generate 500 additional MLIR files matching existing format
+python scripts/augment_dataset.py
+
+# Or generate random operations for testing
 python data_generation/random_mlir_gen.py
 
-# Convert neural networks to MLIR
+# Or convert neural networks to MLIR
 python data_generation/nn_to_mlir.py
+
+# Quick reference for all data commands
+bash scripts/data_quickref.sh
 ```
 
-See [Data Generation Guide](docs/guides/DATA_GENERATION_INTEGRATION.md) for details.
+See [Data Organization Guide](docs/guides/DATA_ORGANIZATION_COMPLETE.md) for details.
 
 ### 5. Run Training
+
+**With existing data only** (original workflow):
+```bash
+sbatch scripts/train.sh
+# or: CONFIG_FILE_PATH=config/config.json python bin/train.py
+```
+
+**With augmented data** (recommended for better generalization):
+```bash
+CONFIG_FILE_PATH=config/config_augmented.json python bin/train.py
+```
 
 **On SLURM cluster:**
 ```bash

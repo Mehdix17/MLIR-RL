@@ -182,24 +182,34 @@ func.func @elementwise_{op}(
 
 def main():
     """Example usage"""
+    print("="*60)
+    print("Random MLIR Generator")
+    print("="*60)
+    print("\nNote: For augmenting existing data/all/ with matching format,")
+    print("      use: python augment_dataset.py")
+    print("\nThis script generates random operations for testing/benchmarking.\n")
+    
     generator = RandomMLIRGenerator(seed=42)
     
     # Generate training dataset
     train_files = generator.generate_dataset(
-        num_samples=1000,
+        num_samples=100,
         output_dir=Path("data/generated/train"),
         operation_types=['matmul', 'conv2d', 'pooling']
     )
     
     # Generate test dataset
     test_files = generator.generate_dataset(
-        num_samples=200,
+        num_samples=20,
         output_dir=Path("data/generated/test"),
         operation_types=['matmul', 'conv2d', 'pooling']
     )
     
     print(f"\n✓ Generated {len(train_files)} training files")
     print(f"✓ Generated {len(test_files)} test files")
+    print(f"\n📁 Files saved to:")
+    print(f"   - data/generated/train/")
+    print(f"   - data/generated/test/")
 
 
 if __name__ == "__main__":
