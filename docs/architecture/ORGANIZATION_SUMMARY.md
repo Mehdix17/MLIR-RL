@@ -12,8 +12,8 @@ The MLIR-RL project has been reorganized from a flat structure with many loose f
 bin/          # Executable scripts
 notebooks/    # Jupyter notebooks and demos
 docs/         # All documentation
-analysis/     # Analysis and plotting tools
-experiments/  # Research utilities
+utils/     # Analysis and plotting tools
+utils/  # Research utilities
 ```
 
 ### File Migrations
@@ -33,24 +33,24 @@ experiments/  # Research utilities
 - ✅ Created `docs/quick_reference.sh` (new)
 - ✅ Created `docs/ORGANIZATION_SUMMARY.md` (this file)
 
-#### Analysis Tools → `analysis/`
-- ✅ `plot_results.py` → `analysis/plot_results.py`
-- ✅ `filelog_clean.py` → `analysis/filelog_clean.py`
+#### Analysis Tools → `utils/`
+- ✅ `plot_results.py` → `utils/plot_results.py`
+- ✅ `filelog_clean.py` → `utils/filelog_clean.py`
 
-#### Experiment Utilities → `experiments/`
-- ✅ `neptune_sync.py` → `experiments/neptune_sync.py`
-- ✅ `sync_neptune_with_plots.py` → `experiments/sync_neptune_with_plots.py`
-- ✅ `test_neptune.py` → `experiments/test_neptune.py`
-- ✅ `gen.py` → `experiments/gen.py`
-- ✅ `get_base.py` → `experiments/get_base.py`
-- ✅ `fill_db.py` → `experiments/fill_db.py`
+#### Experiment Utilities → `utils/`
+- ✅ `neptune_sync.py` → `utils/neptune_sync.py`
+- ✅ `sync_neptune_with_plots.py` → `utils/sync_neptune_with_plots.py`
+- ✅ `test_neptune.py` → `utils/test_neptune.py`
+- ✅ `gen.py` → `utils/gen.py`
+- ✅ `get_base.py` → `utils/get_base.py`
+- ✅ `fill_db.py` → `utils/fill_db.py`
 
 ### Updated Script References
 
 #### SLURM Job Scripts
 - ✅ `scripts/train.sh` - Updated path to `bin/train.py`
 - ✅ `scripts/eval.sh` - Updated path to `bin/evaluate.py`
-- ✅ `scripts/neptune-sync.sh` - Updated path to `experiments/neptune_sync.py`
+- ✅ `scripts/neptune-sync.sh` - Updated path to `utils/neptune_sync.py`
 
 #### Documentation Files
 - ✅ `docs/quick_reference.sh` - All paths updated to new structure
@@ -106,8 +106,8 @@ MLIR-RL/
 ├── bin/                # 2 executable scripts
 ├── notebooks/          # 2 demo files
 ├── docs/              # 5 documentation files
-├── analysis/          # 2 analysis scripts
-├── experiments/       # 6 utility scripts
+├── utils/          # 2 analysis scripts
+├── utils/       # 6 utility scripts
 ├── README.md
 ├── requirements.txt
 └── [Clean root with standard files only]
@@ -145,10 +145,10 @@ bash scripts/train.sh --help
 bash scripts/eval.sh --help
 
 # 3. Test plotting
-python analysis/plot_results.py results/run_9
+python utils/plot_results.py results/run_9
 
 # 4. Test Neptune sync
-python experiments/sync_neptune_with_plots.py results/run_9
+python utils/sync_neptune_with_plots.py results/run_9
 
 # 5. View quick reference
 bash docs/quick_reference.sh
@@ -173,8 +173,8 @@ bash docs/quick_reference.sh
 - ✅ **bin/** for executable scripts
 - ✅ **docs/** for all documentation
 - ✅ **notebooks/** for interactive work
-- ✅ **analysis/** for analysis scripts
-- ✅ **experiments/** for research utilities
+- ✅ **utils/** for analysis scripts
+- ✅ **utils/** for research utilities
 - ✅ **Root minimalism** - Only essential files in root
 - ✅ **Standard locations** - README.md, requirements.txt in root
 - ✅ **Clear naming** - Descriptive directory names

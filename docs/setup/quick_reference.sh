@@ -13,7 +13,7 @@ cat << 'EOF'
 
 📊 GENERATE PLOTS LOCALLY
 ──────────────────────────────────────────────────────────────────────
-  python analysis/plot_results.py results/run_9
+  python utils/plot_results.py results/run_9
 
   Output: results/run_9/plots/
     • speedup_by_op_type.png       (bar chart by operation type)
@@ -24,10 +24,10 @@ cat << 'EOF'
 🌊 NEPTUNE SYNC (3 OPTIONS)
 ──────────────────────────────────────────────────────────────────────
   Option 1: Quick test (single run with plots)
-    python experiments/sync_neptune_with_plots.py results/run_9
+    python utils/sync_neptune_with_plots.py results/run_9
 
   Option 2: Simple test (without plots)
-    python experiments/test_neptune.py
+    python utils/test_neptune.py
 
   Option 3: Continuous sync during training
     bash scripts/neptune-sync.sh   # Run in separate terminal
@@ -46,7 +46,7 @@ cat << 'EOF'
   bash scripts/neptune-sync.sh
 
   # Manual sync after training (if auto-sync disabled)
-  python experiments/sync_neptune_with_plots.py results/run_X
+  python utils/sync_neptune_with_plots.py results/run_X
 
 🔍 VIEW RESULTS
 ──────────────────────────────────────────────────────────────────────
@@ -89,12 +89,12 @@ cat << 'EOF'
 
   # Generate plots for multiple runs
   for run in results/run_{9..12}; do
-      python analysis/plot_results.py $run
+      python utils/plot_results.py $run
   done
 
   # Sync multiple runs to Neptune
   for run in results/run_{9..12}; do
-      python experiments/sync_neptune_with_plots.py $run
+      python utils/sync_neptune_with_plots.py $run
   done
 
   # Check training progress

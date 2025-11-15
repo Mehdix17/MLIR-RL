@@ -78,7 +78,7 @@ SYNCING: run_12
 ### Manual Sync (if auto-sync disabled)
 
 ```bash
-python experiments/sync_neptune_with_plots.py results/run_12
+python utils/sync_neptune_with_plots.py results/run_12
 ```
 
 ## What Gets Synced
@@ -105,7 +105,7 @@ python experiments/sync_neptune_with_plots.py results/run_12
 Auto-sync has a 5-minute timeout. If sync takes longer:
 - Training completes successfully
 - Sync times out with warning message
-- Use manual sync: `python experiments/sync_neptune_with_plots.py results/run_X`
+- Use manual sync: `python utils/sync_neptune_with_plots.py results/run_X`
 
 ## Error Handling
 
@@ -118,7 +118,7 @@ Example:
 ```
 ⚠ Neptune sync failed (exit code 1)
 Error: Connection timeout
-[INFO] To sync manually: python experiments/sync_neptune_with_plots.py results/run_12
+[INFO] To sync manually: python utils/sync_neptune_with_plots.py results/run_12
 ```
 
 ## Troubleshooting
@@ -131,7 +131,7 @@ Error: Connection timeout
 **Cause**: Network issues or Neptune service unavailable  
 **Solution**: Try manual sync later:
 ```bash
-python experiments/sync_neptune_with_plots.py results/run_12
+python utils/sync_neptune_with_plots.py results/run_12
 ```
 
 ### "Invalid credentials"
@@ -139,7 +139,7 @@ python experiments/sync_neptune_with_plots.py results/run_12
 **Solution**: Check credentials:
 ```bash
 # Test Neptune connection
-python experiments/test_neptune.py
+python utils/test_neptune.py
 ```
 
 ### "Module not found: neptune"

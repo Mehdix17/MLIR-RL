@@ -1,0 +1,82 @@
+{
+    "_description": "LSTM configuration with augmented dataset",
+    
+    "model_type": "lstm",
+    
+    "model_config": {},
+    
+    "observation_space": {
+        "max_num_stores_loads": 7,
+        "max_num_loops": 12,
+        "max_num_load_store_dim": 12,
+        "num_tile_sizes": 7,
+        "vect_size_limit": 512
+    },
+    
+    "action_space": {
+        "order": [["I"], ["!", "I", "NT"], ["!", "I"], ["V", "NT"]],
+        "interchange_mode": "pointers"
+    },
+    
+    "exploration": {
+        "strategy": ["entropy"],
+        "init_epsilon": 0.5
+    },
+    
+    "architecture": {
+        "new_architecture": false,
+        "activation": "relu",
+        "normalize_bounds": "max",
+        "normalize_adv": "standard"
+    },
+    
+    "reward": {
+        "sparse_reward": true,
+        "split_ops": true
+    },
+    
+    "training": {
+        "bench_count": 64,
+        "replay_count": 10,
+        "nb_iterations": 1000,
+        "reuse_experience": "none",
+        "truncate": 5
+    },
+    
+    "ppo": {
+        "ppo_epochs": 4,
+        "ppo_batch_size": 32,
+        "lr": 0.0001,
+        "gamma": 0.99,
+        "clip_epsilon": 0.2,
+        "entropy_coef": 0.01
+    },
+    
+    "value_function": {
+        "value_epochs": 5,
+        "value_batch_size": 32,
+        "value_coef": 0.5,
+        "value_clip": false
+    },
+    
+    "data_paths": {
+        "benchmarks_folder_path": "data/all/code_files",
+        "json_file": "data/all/execution_times_train.json",
+        "eval_json_file": "data/all/execution_times_eval.json",
+        "augmentation_folder_path": "data/generated/code_files",
+        "augmentation_json_file": "data/generated/execution_times_generated.json",
+        "neural_nets_folder_path": "data/neural_nets"
+    },
+    
+    "augmentation": {
+        "use_augmentation": true,
+        "augmentation_ratio": 0.3
+    },
+    
+    "logging": {
+        "tags": ["lstm", "augmented", "all"],
+        "debug": false,
+        "results_dir": "results",
+        "main_exec_data_file": ""
+    }
+}

@@ -21,8 +21,8 @@ def main():
         ("neural_nets/resnet", "ResNet family converted to MLIR"),
         ("neural_nets/bert", "BERT/Transformer models"),
         ("neural_nets/custom", "Custom neural networks"),
-        ("benchmarks/single_ops", "Single operation benchmarks"),
-        ("benchmarks/neural_nets", "Full neural network benchmarks"),
+        ("data/benchmarks/single_ops", "Single operation benchmarks"),
+        ("data/benchmarks/neural_nets", "Full neural network benchmarks"),
     ]
     
     for dir_path, description in new_dirs:
@@ -133,7 +133,7 @@ data/
 │   ├── test/                   (Test files from integration)
 │   └── .gitignore
 │
-└── benchmarks/                  ✓ NEW: Evaluation suites
+└── data/benchmarks/                  ✓ NEW: Evaluation suites
     ├── single_ops/             (matmul, conv2d, etc.)
     ├── neural_nets/            (End-to-end networks)
     └── .gitignore

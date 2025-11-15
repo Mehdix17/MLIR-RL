@@ -29,11 +29,11 @@ MLIR-RL/
 │   ├── log.py             # Logging helpers
 │   └── singleton.py       # Singleton pattern
 │
-├── analysis/              # Analysis and plotting
+├── utils/              # Analysis and plotting
 │   ├── plot_results.py    # Generate comparison plots
 │   └── filelog_clean.py   # Log file cleaning
 │
-├── experiments/           # Experiment utilities
+├── utils/           # Experiment utilities
 │   ├── neptune_sync.py              # Neptune continuous sync
 │   ├── sync_neptune_with_plots.py   # Neptune sync with plots
 │   ├── test_neptune.py              # Neptune connection test
@@ -109,7 +109,7 @@ bash scripts/eval.sh
 
 ### Generate Plots
 ```bash
-python analysis/plot_results.py results/run_X
+python utils/plot_results.py results/run_X
 ```
 
 ### Sync to Neptune
@@ -118,7 +118,7 @@ python analysis/plot_results.py results/run_X
 bash scripts/neptune-sync.sh
 
 # One-time sync with plots
-python experiments/sync_neptune_with_plots.py results/run_X
+python utils/sync_neptune_with_plots.py results/run_X
 ```
 
 ## 📊 Workflow
@@ -126,8 +126,8 @@ python experiments/sync_neptune_with_plots.py results/run_X
 1. **Configure**: Edit `config/config.json`
 2. **Train**: Run `bash scripts/train.sh`
 3. **Monitor**: (Optional) Run `bash scripts/neptune-sync.sh` in another terminal
-4. **Analyze**: Generate plots with `python analysis/plot_results.py results/run_X`
-5. **Share**: Sync to Neptune with `python experiments/sync_neptune_with_plots.py results/run_X`
+4. **Analyze**: Generate plots with `python utils/plot_results.py results/run_X`
+5. **Share**: Sync to Neptune with `python utils/sync_neptune_with_plots.py results/run_X`
 
 ## 📚 Documentation
 
@@ -142,11 +142,11 @@ python experiments/sync_neptune_with_plots.py results/run_X
 - **train.py**: Main training loop with PPO
 - **evaluate.py**: Evaluate trained models
 
-### Analysis (`analysis/`)
+### Analysis (`utils/`)
 - **plot_results.py**: Generate comparison plots by operation type
 - **filelog_clean.py**: Clean up log files
 
-### Experiments (`experiments/`)
+### Experiments (`utils/`)
 - **neptune_sync.py**: Continuous Neptune synchronization
 - **sync_neptune_with_plots.py**: One-time sync with plot generation
 - **test_neptune.py**: Test Neptune connection
@@ -163,8 +163,8 @@ python experiments/sync_neptune_with_plots.py results/run_X
 - **`rl_autoschedular/`**: Core RL implementation (don't move)
 - **`utils/`**: Utility modules (don't move)
 - **`bin/`**: Main entry points
-- **`analysis/`**: Post-training analysis
-- **`experiments/`**: Research utilities
+- **`utils/`**: Post-training analysis
+- **`utils/`**: Research utilities
 - **`docs/`**: All documentation in one place
 - **`notebooks/`**: Interactive exploration
 

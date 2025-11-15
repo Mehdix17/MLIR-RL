@@ -27,8 +27,8 @@ MLIR-RL/
 ├── evaluation/          # ✨ Evaluate trained agents vs baselines
 ├── benchmarks/          # ✨ Benchmark suites (single ops, neural nets)
 ├── utils/               # Utility modules (config, logging, Dask)
-├── analysis/            # Plotting and analysis tools
-├── experiments/         # Neptune sync and experiment utilities
+├── utils/            # Plotting and analysis tools
+├── utils/              # Configuration, logging, and Neptune sync utilities
 ├── notebooks/           # Jupyter notebooks for exploration
 ├── docs/                # Documentation (organized by topic)
 ├── scripts/             # SLURM job submission scripts
@@ -159,7 +159,7 @@ tail -f logs/p-original-c_<JOB_ID>.out
 ### Generate Plots
 
 ```bash
-python analysis/plot_results.py results/run_X
+python utils/plot_results.py results/run_X
 ```
 
 Creates 4 plots:
@@ -189,7 +189,7 @@ from pathlib import Path
 
 evaluator = SingleOperationEvaluator(
     agent_model_path=Path('results/best_model.pt'),
-    benchmark_dir=Path('benchmarks/single_ops')
+    benchmark_dir=Path('data/benchmarks/single_ops')
 )
 results = evaluator.evaluate_benchmark_suite(
     output_file=Path('results/eval_results.json')
@@ -203,7 +203,7 @@ from pathlib import Path
 
 evaluator = NeuralNetworkEvaluator(
     agent_model_path=Path('results/best_model.pt'),
-    benchmark_dir=Path('benchmarks/neural_nets')
+    benchmark_dir=Path('data/benchmarks/neural_nets')
 )
 results = evaluator.evaluate_benchmark_suite(
     output_file=Path('results/nn_eval.json')

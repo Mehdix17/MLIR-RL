@@ -193,7 +193,7 @@ benchmarks/
            │
            ▼
 ┌─────────────────────┐
-│ 5. Analyze Results  │  python analysis/plot_results.py
+│ 5. Analyze Results  │  python utils/plot_results.py
 └─────────────────────┘
 ```
 
@@ -253,7 +253,7 @@ from pathlib import Path
 
 evaluator = SingleOperationEvaluator(
     agent_model_path=Path('results/best_model.pt'),
-    benchmark_dir=Path('benchmarks/single_ops')
+    benchmark_dir=Path('data/benchmarks/single_ops')
 )
 
 results = evaluator.evaluate_benchmark_suite()
@@ -267,7 +267,7 @@ from pathlib import Path
 
 evaluator = NeuralNetworkEvaluator(
     agent_model_path=Path('results/best_model.pt'),
-    benchmark_dir=Path('benchmarks/neural_nets')
+    benchmark_dir=Path('data/benchmarks/neural_nets')
 )
 
 results = evaluator.evaluate_benchmark_suite()

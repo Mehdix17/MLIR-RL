@@ -33,21 +33,24 @@ tools/*/cmake-build-*/
 # LLVM/MLIR build (HUGE - 8.6GB!)
 llvm-project/
 
-# Training artifacts
-results/
-logs/
+# Training artifacts - keep structure, ignore contents
+results/*
+!results/.gitkeep
+logs/*
+!logs/.gitkeep
 *.log
 *.out
 *.err
 
-# Data directories (3GB!)
-data/
-
+# Data directories (3GB!) - keep structure, ignore contents
+data/*
+!data/.gitkeep
 # Keep test data - it's small and useful
 !data/test/
 
-# Dask logs
-dask-logs/
+# Dask logs - keep structure, ignore contents
+dask-logs/*
+!dask-logs/.gitkeep
 
 # Model checkpoints (can be large)
 *.pt

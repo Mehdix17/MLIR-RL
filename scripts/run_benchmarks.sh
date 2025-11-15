@@ -23,9 +23,9 @@ eval "$(conda shell.bash hook)"
 conda activate mlir
 
 # Change to project root
-if [ -f "benchmarks/benchmark_suite.py" ]; then
+if [ -f "data/benchmarks/benchmark_suite.py" ]; then
     PROJECT_ROOT="$(pwd)"
-elif [ -f "../benchmarks/benchmark_suite.py" ]; then
+elif [ -f "../data/benchmarks/benchmark_suite.py" ]; then
     cd ..
     PROJECT_ROOT="$(pwd)"
 else
@@ -140,7 +140,7 @@ echo ""
 # Step 1: Create benchmark suite
 echo "[1/4] Creating benchmark suite..."
 echo "--------------------------------------------------------------------------------"
-python benchmarks/benchmark_suite.py
+python data/benchmarks/benchmark_suite.py
 if [ $? -ne 0 ]; then
     echo "✗ Error creating benchmark suite"
     exit 1

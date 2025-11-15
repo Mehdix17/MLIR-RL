@@ -25,14 +25,14 @@ eval "$(conda shell.bash hook)"
 conda activate mlir
 
 # Change to project root - handle both submission from project root or scripts dir
-if [ -f "benchmarks/benchmark_suite.py" ]; then
+if [ -f "data/benchmarks/benchmark_suite.py" ]; then
     # Already in project root
     PROJECT_ROOT="$(pwd)"
-elif [ -f "../benchmarks/benchmark_suite.py" ]; then
+elif [ -f "../data/benchmarks/benchmark_suite.py" ]; then
     # In scripts/ directory
     cd ..
     PROJECT_ROOT="$(pwd)"
-elif [ -f "../../benchmarks/benchmark_suite.py" ]; then
+elif [ -f "../../data/benchmarks/benchmark_suite.py" ]; then
     # In scripts/comparison/ directory
     cd ../..
     PROJECT_ROOT="$(pwd)"

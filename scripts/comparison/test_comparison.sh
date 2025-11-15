@@ -62,7 +62,7 @@ echo ""
 # Step 1: Create benchmark suite
 echo "[1/4] Creating benchmark suite..."
 echo "--------------------------------------------------------------------------------"
-python benchmarks/benchmark_suite.py
+python data/benchmarks/benchmark_suite.py
 echo ""
 
 # Step 2: Run PyTorch benchmarks (these are fast)

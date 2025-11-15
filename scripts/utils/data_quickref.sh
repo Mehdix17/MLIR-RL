@@ -53,7 +53,7 @@ echo
 
 # 8. EVALUATE TRAINED AGENT
 echo "8️⃣  Evaluate Trained Agent"
-echo "   python -c 'from evaluation import SingleOperationEvaluator; from pathlib import Path; evaluator = SingleOperationEvaluator(agent_model_path=Path(\"results/best_model.pt\"), benchmark_dir=Path(\"data/benchmarks/single_ops\")); evaluator.evaluate_benchmark_suite()'"
+echo "   python -c 'from evaluation import SingleOperationEvaluator; from pathlib import Path; evaluator = SingleOperationEvaluator(agent_model_path=Path(\"results/best_model.pt\"), benchmark_dir=Path(\"data/data/benchmarks/single_ops\")); evaluator.evaluate_benchmark_suite()'"
 echo
 
 # 9. CLEAN GENERATED DATA

@@ -31,7 +31,7 @@ pip install matplotlib
 
 ```bash
 # Generate plots for a specific run
-python analysis/plot_results.py results/run_9
+python utils/plot_results.py results/run_9
 
 # Plots will be saved to: results/run_9/plots/
 ```
@@ -46,7 +46,7 @@ This creates:
 
 ```bash
 # Generate plots AND sync to Neptune in one command
-python experiments/sync_neptune_with_plots.py results/run_9
+python utils/sync_neptune_with_plots.py results/run_9
 ```
 
 This will:
@@ -108,7 +108,7 @@ You'll see:
 bash scripts/train.sh
 
 # 2. Generate plots
-python analysis/plot_results.py results/run_10
+python utils/plot_results.py results/run_10
 
 # 3. View plots locally
 open results/run_10/plots/speedup_by_op_type.png
@@ -133,12 +133,12 @@ python sync_neptune_with_plots.py results/run_10
 ```bash
 # Generate plots for multiple runs
 for run in results/run_{9..12}; do
-    python analysis/plot_results.py $run
+    python utils/plot_results.py $run
 done
 
 # Sync all to Neptune
 for run in results/run_{9..12}; do
-    python experiments/sync_neptune_with_plots.py $run
+    python utils/sync_neptune_with_plots.py $run
 done
 
 # Now compare runs in Neptune dashboard by filtering tags
@@ -222,16 +222,16 @@ If empty, run evaluation manually or train longer.
 
 ## 📚 Files Created
 
-- `analysis/plot_results.py` - Main plotting script
-- `experiments/sync_neptune_with_plots.py` - Enhanced Neptune sync with plots
-- `experiments/test_neptune.py` - Simple Neptune connection test
+- `utils/plot_results.py` - Main plotting script
+- `utils/sync_neptune_with_plots.py` - Enhanced Neptune sync with plots
+- `utils/test_neptune.py` - Simple Neptune connection test
 - `docs/PLOTTING_README.md` - This documentation
 
 ## 🎓 Next Steps
 
 1. **Install matplotlib**: `conda activate mlir && pip install matplotlib`
-2. **Generate test plots**: `python analysis/plot_results.py results/run_9`
-3. **Sync to Neptune**: `python experiments/sync_neptune_with_plots.py results/run_9`
+2. **Generate test plots**: `python utils/plot_results.py results/run_9`
+3. **Sync to Neptune**: `python utils/sync_neptune_with_plots.py results/run_9`
 4. **View dashboard**: https://app.neptune.ai/mehdix/mlir-project
 5. **Run full training**: Configure `nb_iterations` and run `bash scripts/train.sh`
 

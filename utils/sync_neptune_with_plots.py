@@ -79,7 +79,7 @@ def sync_run_with_plots(run_dir, project, api_token):
             plot_count += 1
         print(f"✓ Uploaded {plot_count} plots")
     else:
-        print(f"  Note: No plots directory found. Run 'python analysis/plot_results.py {run_dir}' to generate plots.")
+        print(f"  Note: No plots directory found. Run 'python utils/plot_results.py {run_dir}' to generate plots.")
     
     # Upload execution data
     exec_data_file = run_path / 'exec_data.json'
@@ -128,7 +128,7 @@ def main():
         plots_dir = Path(run_dir) / 'plots'
         if not plots_dir.exists():
             print(f"\nGenerating plots...")
-            result = subprocess.run(['python', 'analysis/plot_results.py', run_dir], 
+            result = subprocess.run(['python', 'utils/plot_results.py', run_dir], 
                                     capture_output=True, text=True)
             if result.returncode == 0:
                 print(result.stdout)
