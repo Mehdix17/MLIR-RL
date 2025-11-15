@@ -10,6 +10,7 @@ from transformers import DistilBertModel, DistilBertConfig
 from ..base import BaseEmbedding
 from ...observation import OpFeatures, ActionHistory, ProducerOpFeatures, Observation
 from ...distilbert_tokenizer import MLIROperationTokenizer
+from utils.config import Config
 
 
 class DistilBertEmbedding(BaseEmbedding):
@@ -31,10 +32,17 @@ class DistilBertEmbedding(BaseEmbedding):
     def __init__(self):
         super(DistilBertEmbedding, self).__init__()
 
-        # DistilBERT configuration
-        hidden_dim = 768
-        max_seq_length = 128
-        vocab_size = 10000
+        # Load configuration from Config
+        cfg = Config()
+        model_cfg = cfg.model_config
+        
+        # DistilBERT configuration with defaults
+        hidden_dim = model_cfg.get('hidden_size', 768)
+        num_heads = model_cfg.get('num_attention_heads', 12)
+        num_layers = model_cfg.get('num_hidden_layers', 6)
+        max_seq_length = model_cfg.get('max_seq_length', 128)
+        vocab_size = model_cfg.get('vocab_size', 10000)
+        dropout = model_cfg.get('dropout', 0.1)
         
         # Initialize tokenizer
         self.tokenizer = MLIROperationTokenizer(
@@ -45,10 +53,10 @@ class DistilBertEmbedding(BaseEmbedding):
         distilbert_config = DistilBertConfig(
             vocab_size=vocab_size,
             dim=hidden_dim,
-            n_heads=12,
-            n_layers=6,
-            dropout=0.1,
-            attention_dropout=0.1,
+            n_heads=num_heads,
+            n_layers=num_layers,
+            dropout=dropout,
+            attention_dropout=dropout,
             max_position_embeddings=max_seq_length,
         )
         
