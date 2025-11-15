@@ -1,0 +1,66 @@
+{
+  "matmul_small": {
+    "class": "MatMulBenchmark",
+    "name": "matmul_256x256x256",
+    "M": 256,
+    "N": 256,
+    "K": 256
+  },
+  "matmul_medium": {
+    "class": "MatMulBenchmark",
+    "name": "matmul_512x512x512",
+    "M": 512,
+    "N": 512,
+    "K": 512
+  },
+  "matmul_large": {
+    "class": "MatMulBenchmark",
+    "name": "matmul_1024x1024x1024",
+    "M": 1024,
+    "N": 1024,
+    "K": 1024
+  },
+  "conv2d_small": {
+    "class": "Conv2DBenchmark",
+    "name": "conv2d_8x64x28x28",
+    "batch": 8,
+    "in_ch": 64,
+    "out_ch": 128,
+    "size": 28
+  },
+  "conv2d_medium": {
+    "class": "Conv2DBenchmark",
+    "name": "conv2d_16x128x56x56",
+    "batch": 16,
+    "in_ch": 128,
+    "out_ch": 256,
+    "size": 56
+  },
+  "conv2d_large": {
+    "class": "Conv2DBenchmark",
+    "name": "conv2d_32x256x112x112",
+    "batch": 32,
+    "in_ch": 256,
+    "out_ch": 512,
+    "size": 112
+  },
+  "resnet_block": {
+    "class": "SimpleResNetBlock",
+    "name": "resnet_block_64",
+    "channels": 64
+  },
+  "linear_small": {
+    "class": "LinearBenchmark",
+    "name": "linear_64x512x512",
+    "batch": 64,
+    "in_features": 512,
+    "out_features": 512
+  },
+  "linear_large": {
+    "class": "LinearBenchmark",
+    "name": "linear_256x2048x2048",
+    "batch": 256,
+    "in_features": 2048,
+    "out_features": 2048
+  }
+}

@@ -10,11 +10,18 @@ class FileLogger(metaclass=Singleton):
         cfg = Config()
         tags = ['ppo'] + cfg.tags
 
-        # Create run dir
-        dir_path = cfg.results_dir
-        subdir_ids = sorted([int(d.split('_')[-1]) for d in os.listdir(dir_path) if d.startswith('run_')])
+        # Create run dir with model-specific organization
+        base_dir = cfg.results_dir
+        model_type = cfg.model_type  # 'lstm', 'distilbert', etc.
+        
+        # Create model-specific subdirectory
+        model_dir = os.path.join(base_dir, model_type)
+        os.makedirs(model_dir, exist_ok=True)
+        
+        # Find next run ID within model directory
+        subdir_ids = sorted([int(d.split('_')[-1]) for d in os.listdir(model_dir) if d.startswith('run_')])
         run_id = subdir_ids[-1] + 1 if subdir_ids else 0
-        self.run_dir = os.path.join(dir_path, f'run_{run_id}')
+        self.run_dir = os.path.join(model_dir, f'run_{run_id}')
         os.makedirs(self.run_dir, exist_ok=True)
 
         # Create tags file

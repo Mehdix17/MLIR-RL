@@ -1,100 +1,113 @@
-# Scripts
+# Scripts Directory
 
-This directory contains utility scripts for the MLIR-RL project.
-
-## Data Management Scripts
-
-### `organize_data.py`
-Organizes the data folder structure, creating subdirectories for generated data, neural networks, and benchmarks.
-
-**Usage:**
-```bash
-python scripts/organize_data.py
-```
-
-**What it does:**
-- Creates data/generated/, data/neural_nets/, data/benchmarks/
-- Moves test files to appropriate locations
-- Creates .gitignore files
-- Generates README files
+Training and utility scripts for the MLIR-RL project, organized by model type.
 
 ---
 
-### `augment_dataset.py`
-Generates additional MLIR files matching the format of existing data in `data/all/`.
+## 📁 Directory Structure
 
-**Usage:**
-```bash
-python scripts/augment_dataset.py
 ```
-
-**What it does:**
-- Analyzes existing data/all/code_files/ format
-- Generates 500 new MLIR files (add, matmul, conv2d)
-- Creates execution_times_generated.json
-- Saves to data/generated/code_files/
-
----
-
-### `data_quickref.sh`
-Quick reference guide showing all data-related commands and current statistics.
-
-**Usage:**
-```bash
-bash scripts/data_quickref.sh
-```
-
-**What it shows:**
-- Current data statistics
-- Common commands for data generation
-- Training commands
-- Evaluation commands
-
----
-
-## Training Scripts
-
-### `train.sh`
-SLURM job submission script for training on clusters.
-
-**Usage:**
-```bash
-sbatch scripts/train.sh
-```
-
-### `eval.sh`
-SLURM job submission script for evaluation.
-
-**Usage:**
-```bash
-sbatch scripts/eval.sh
-```
-
-### `neptune-sync.sh`
-Syncs results to Neptune.ai for experiment tracking.
-
-**Usage:**
-```bash
-bash scripts/neptune-sync.sh
+scripts/
+├── lstm/                    # LSTM training scripts
+│   ├── test_lstm.sh
+│   ├── train_lstm_baseline.sh
+│   ├── train_lstm_augmented.sh
+│   ├── eval_lstm.sh
+│   └── README.md
+├── distilbert/              # DistilBERT training scripts
+│   ├── test_distilbert.sh
+│   ├── train_distilbert.sh
+│   ├── eval_distilbert.sh
+│   └── README.md
+├── comparison/              # Comparison framework
+│   ├── compare_all.sh
+│   ├── test_comparison.sh
+│   └── README.md
+├── utils/                   # Utility scripts
+│   ├── augment_dataset.py
+│   ├── organize_data.py
+│   ├── data_quickref.sh
+│   └── README.md
+├── run_training.sh          # Interactive launcher
+├── train.sh                 # Legacy generic trainer
+├── eval.sh                  # Model evaluation
+└── neptune-sync.sh          # Neptune sync
 ```
 
 ---
 
-## Quick Reference
+## 🚀 Quick Start
+
+### **Easy Way: Interactive Launcher**
 
 ```bash
-# Organize data structure
-python scripts/organize_data.py
-
-# Generate augmentation data
-python scripts/augment_dataset.py
-
-# View data commands
-bash scripts/data_quickref.sh
-
-# Submit training job
-sbatch scripts/train.sh
-
-# Submit evaluation job
-sbatch scripts/eval.sh
+bash scripts/run_training.sh
 ```
+
+Choose from menu:
+1. Test LSTM (15 min)
+2. Test DistilBERT (20 min)
+3. Train LSTM baseline (1 hour)
+4. Train LSTM augmented (12 hours)
+5. Train DistilBERT (3 hours)
+
+---
+
+## 📋 Model-Specific Scripts
+
+### **LSTM Scripts** → `lstm/`
+
+| Script | Time | Data | Purpose |
+|--------|------|------|---------|
+| test_lstm.sh | 15 min | 17 files | Quick test |
+| train_lstm_baseline.sh | 1 hour | 9,441 files | Baseline |
+| train_lstm_augmented.sh | 12 hours | 9,941 files | Best results |
+
+```bash
+# Quick test
+sbatch scripts/lstm/test_lstm.sh
+
+# Full training
+sbatch scripts/lstm/train_lstm_baseline.sh
+```
+
+See `lstm/README.md` for details.
+
+---
+
+### **DistilBERT Scripts** → `distilbert/`
+
+| Script | Time | Data | Purpose |
+|--------|------|------|---------|
+| test_distilbert.sh | 20 min | 17 files | Quick test |
+| train_distilbert.sh | 3 hours | 9,441 files | Full training |
+
+```bash
+# Quick test
+sbatch scripts/distilbert/test_distilbert.sh
+
+# Full training
+sbatch scripts/distilbert/train_distilbert.sh
+```
+
+See `distilbert/README.md` for details.
+
+---
+
+### **Utility Scripts** → `utils/`
+
+| Script | Purpose |
+|--------|---------|
+| augment_dataset.py | Generate synthetic MLIR data |
+| organize_data.py | Organize data folder structure |
+| data_quickref.sh | Data statistics and commands |
+
+```bash
+# Generate more data
+python scripts/utils/augment_dataset.py --num-samples 1000
+
+# Check data stats
+bash scripts/utils/data_quickref.sh
+```
+
+See `utils/README.md` for details.

@@ -7,3 +7,4 @@ tqdm
 dask-jobqueue
 typeguard
 matplotlib
+pandas>=1.3.0
