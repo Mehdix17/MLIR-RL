@@ -64,3 +64,5 @@ dask-logs/
 *.swp
 tmp/
 temp/
+
+monitor.txt

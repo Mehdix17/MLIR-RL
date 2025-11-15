@@ -12,7 +12,10 @@
 #SBATCH --nodes=1
 #SBATCH -c 28
 #SBATCH --mem=128G
-#SBATCH -t 1-00
+#SBATCH -t 3-00
+#SBATCH -o ../logs/%x_%j.out
+#SBATCH -e ../logs/%x_%j.err
+#SBATCH --mail-type=END,FAIL
 
 # Setup environment
 module load miniconda-nobashrc

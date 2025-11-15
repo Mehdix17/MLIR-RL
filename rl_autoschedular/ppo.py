@@ -46,9 +46,12 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
     traj_start = time()
 
     # Prepare benchmarks to explore
+    print_info(f"Selecting {cfg.bench_count} benchmarks from {len(data)} available...")
     indices = torch.randperm(len(data))[:cfg.bench_count].long().tolist()
     if len(indices) < cfg.bench_count:
+        print_info(f"Padding indices from {len(indices)} to {cfg.bench_count}")
         indices = (indices * cfg.bench_count)[:cfg.bench_count]
+    print_info(f"Initializing {len(indices)} environments...")
     envs: list[Env] = []
     states: list[OperationState] = []
     observations: list[torch.Tensor] = []
@@ -61,7 +64,12 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         observations.append(Observation.from_state(state))
         tcs.append(TrajectoryCollector())
 
+    print_info(f"Initialized {len(envs)} environments, starting collection loop...")
+    loop_iteration = 0
     while (active_states := [(i, s) for i, s in enumerate(states) if not s.terminal]):
+        loop_iteration += 1
+        if loop_iteration % 10 == 0:
+            print_info(f"  Loop iteration {loop_iteration}, active states: {len(active_states)}/{len(states)}")
         # Sample states that are not terminal yet
         obss = torch.cat([observations[i] for i, _ in active_states])
         actions_index, actions_bev_log_p, entropies = model.sample(obss.to(device), eps=eps)

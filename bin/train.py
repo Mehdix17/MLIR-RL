@@ -118,7 +118,9 @@ for step in range(cfg.nb_iterations):
     main_start = time()
 
     # Collect trajectory using the model
+    print_info(f"Starting trajectory collection (train_data has {len(train_data)} benchmarks)...")
     trajectory = collect_trajectory(train_data, model, step)
+    print_info(f"Trajectory collection complete!")
 
     # Extend trajectory with previous trajectory
     if cfg.reuse_experience != 'none':

@@ -10,9 +10,13 @@ from pathlib import Path
 from typing import Dict, List
 import numpy as np
 
-# Set a dummy config path to avoid errors
-if 'CONFIG_FILE_PATH' not in os.environ:
-    os.environ['CONFIG_FILE_PATH'] = str(Path(__file__).parent.parent / 'config' / 'config.json')
+# Load config from environment variable or default
+config_file = os.environ.get('CONFIG_FILE', 'config/config.json')
+if not os.path.exists(config_file):
+    config_file = 'config/config.json'
+
+os.environ['CONFIG_FILE_PATH'] = config_file
+print(f"Using config: {config_file}")
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -174,8 +178,51 @@ def main():
     
     benchmarks_list = metadata['benchmarks']
     
-    # Try to find trained model, but don't require it
-    model_path = Path("results/lstm/run_0/models")
+    # Check for command-line arguments
+    if len(sys.argv) >= 3:
+        # Arguments: model_dir output_dir
+        model_path = Path(sys.argv[1])
+        output_dir = Path(sys.argv[2])
+        run_dir = output_dir.parent
+        
+        if not model_path.exists():
+            print(f"Error: Model directory not found: {model_path}")
+            sys.exit(1)
+        
+        print(f"\n✓ Using specified model: {model_path}")
+        print(f"✓ Output directory: {output_dir}")
+    else:
+        # Auto-detect latest trained model from any model type
+        results_dir = Path("results")
+        model_path = None
+        run_dir = None
+        
+        if results_dir.exists():
+            all_run_dirs = []
+            # Look in all subdirectories (lstm, distilbert, gpt-2, convnext, etc.)
+            for model_type_dir in results_dir.iterdir():
+                if model_type_dir.is_dir() and model_type_dir.name != 'comparison_rl_vs_pytorch':
+                    # Find all run directories with models
+                    run_dirs = [d for d in model_type_dir.iterdir() 
+                               if d.is_dir() and d.name.startswith('run_') 
+                               and (d / 'models').exists() 
+                               and list((d / 'models').glob('*.pt'))]
+                    all_run_dirs.extend(run_dirs)
+            
+            if all_run_dirs:
+                # Sort by modification time and get the latest
+                all_run_dirs.sort(key=lambda x: (x / 'models').stat().st_mtime, reverse=True)
+                run_dir = all_run_dirs[0]
+                model_path = run_dir / 'models'
+                print(f"\n✓ Found trained model in: {run_dir.parent.name}/{run_dir.name}")
+        
+        if model_path is None:
+            model_path = Path("results/lstm/run_0/models")
+            run_dir = Path("results/lstm/run_0")
+        
+        # Set output directory to the run's benchmarks folder
+        output_dir = run_dir / "benchmarks"
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     print("\n" + "="*60)
     print("RL-Optimized Benchmark Executor")
@@ -190,10 +237,17 @@ def main():
     # Run executor (will work with or without model)
     executor = RLOptimizedExecutor(
         model_path=str(model_path),
-        output_dir="evaluation/results"
+        output_dir=str(output_dir)
     )
     
     results = executor.run_all_benchmarks(benchmarks_list)
+    
+    # Rename output file to standard name
+    old_file = output_dir / "rl_optimized_results.json"
+    new_file = output_dir / "agent_output.json"
+    if old_file.exists():
+        old_file.rename(new_file)
+        print(f"\n✓ Agent results saved to {new_file}")
     
     print("\n" + "="*60)
     print("RL-Optimized Benchmarks Complete")

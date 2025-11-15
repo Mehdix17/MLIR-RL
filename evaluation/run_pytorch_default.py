@@ -6,12 +6,20 @@ import time
 import torch
 import json
 import sys
+import os
 from pathlib import Path
 from typing import Dict
 import numpy as np
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Load config from environment variable or default
+config_file = os.environ.get('CONFIG_FILE', 'config/config.json')
+if os.path.exists(config_file):
+    print(f"Using config: {config_file}")
+else:
+    print(f"Config not found: {config_file}, using defaults")
 
 # Import benchmark classes
 sys.path.insert(0, str(Path(__file__).parent.parent / "benchmarks"))
@@ -139,12 +147,53 @@ class PyTorchDefaultExecutor:
 
 def main():
     """Main execution function"""
+    # Check for command-line argument
+    if len(sys.argv) >= 2:
+        # Argument: output_dir
+        output_dir = Path(sys.argv[1])
+        run_dir = output_dir.parent
+        print(f"\n✓ Using specified output directory: {output_dir}")
+        print(f"✓ Model: {run_dir.parent.name}/{run_dir.name}\n")
+    else:
+        # Auto-detect latest run directory from any model type
+        results_dir = Path("results")
+        run_dir = None
+        
+        if results_dir.exists():
+            all_run_dirs = []
+            for model_type_dir in results_dir.iterdir():
+                if model_type_dir.is_dir() and model_type_dir.name != 'comparison_rl_vs_pytorch':
+                    run_dirs = [d for d in model_type_dir.iterdir() 
+                               if d.is_dir() and d.name.startswith('run_')]
+                    all_run_dirs.extend(run_dirs)
+            
+            if all_run_dirs:
+                # Sort by modification time and get latest
+                all_run_dirs.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+                run_dir = all_run_dirs[0]
+        
+        if run_dir is None:
+            print("Error: No run directory found in results/")
+            print("Train a model first")
+            sys.exit(1)
+        
+        output_dir = run_dir / "benchmarks"
+        print(f"\n✓ Using run directory: {run_dir.parent.name}/{run_dir.name}")
+        print(f"✓ Results will be saved to: {output_dir}\n")
+    
     executor = PyTorchDefaultExecutor(
         models_dir="benchmarks/pytorch",
-        output_dir="evaluation/results"
+        output_dir=str(output_dir)
     )
     
     results = executor.run_all_benchmarks()
+    
+    # Rename output file to standard name
+    old_file = output_dir / "pytorch_default_results.json"
+    new_file = output_dir / "pytorch_output.json"
+    if old_file.exists():
+        old_file.rename(new_file)
+        print(f"\n✓ PyTorch results saved to {new_file}")
     
     print("\n" + "="*60)
     print("PyTorch Default Benchmarks Complete")

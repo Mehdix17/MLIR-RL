@@ -11,8 +11,8 @@
 #SBATCH -c 28
 #SBATCH --mem=128G
 #SBATCH -t 1-00
-#SBATCH -o logs/%x_%j.out
-#SBATCH -e logs/%x_%j.err
+#SBATCH -o ../logs/%x_%j.out
+#SBATCH -e ../logs/%x_%j.err
 #SBATCH --mail-type=FAIL,TIME_LIMIT
 #SBATCH --mail-user=mb10856@nyu.edu
 

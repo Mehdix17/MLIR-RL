@@ -13,23 +13,23 @@ import numpy as np
 
 
 def load_results(results_dir: Path) -> dict:
-    """Load all result files"""
+    """Load all result files from benchmarks directory"""
     results = {}
     
-    # Load RL results
-    rl_file = results_dir / "rl_optimized_results.json"
-    if rl_file.exists():
-        with open(rl_file) as f:
+    # Load Agent results
+    agent_file = results_dir / "agent_output.json"
+    if agent_file.exists():
+        with open(agent_file) as f:
             results['RL-Optimized'] = json.load(f)
     
     # Load PyTorch Default results
-    pytorch_file = results_dir / "pytorch_default_results.json"
+    pytorch_file = results_dir / "pytorch_output.json"
     if pytorch_file.exists():
         with open(pytorch_file) as f:
             results['PyTorch-Default'] = json.load(f)
     
     # Load PyTorch JIT results
-    jit_file = results_dir / "pytorch_jit_results.json"
+    jit_file = results_dir / "pytorch_jit_output.json"
     if jit_file.exists():
         with open(jit_file) as f:
             results['PyTorch-JIT'] = json.load(f)
@@ -156,7 +156,7 @@ def plot_comparison(df: pd.DataFrame, output_dir: Path):
             x + offset,
             speedups,
             width_speedup,
-            label=f'{method} vs Default',
+            label=method,
             color=colors[method],
             alpha=0.8
         )
@@ -302,11 +302,53 @@ def run_comparison(results_dir: Path, output_dir: Path):
 
 def main():
     """Main execution function"""
-    results_dir = Path("evaluation/results")
-    output_dir = Path("results/comparison_rl_vs_pytorch")
+    # Check if benchmarks directory provided as argument
+    if len(sys.argv) > 1:
+        benchmarks_dir = Path(sys.argv[1])
+        if not benchmarks_dir.exists():
+            print(f"Error: Benchmarks directory not found: {benchmarks_dir}")
+            sys.exit(1)
+        
+        run_dir = benchmarks_dir.parent
+        print(f"\n✓ Using specified benchmarks directory: {benchmarks_dir}")
+        print(f"✓ Model: {run_dir.parent.name}, Run: {run_dir.name}\n")
+    else:
+        # Auto-detect latest run directory from any model type
+        results_dir = Path("results")
+        run_dir = None
+        
+        if results_dir.exists():
+            all_run_dirs = []
+            for model_type_dir in results_dir.iterdir():
+                if model_type_dir.is_dir() and model_type_dir.name != 'comparison_rl_vs_pytorch':
+                    run_dirs = [d for d in model_type_dir.iterdir() 
+                               if d.is_dir() and d.name.startswith('run_')]
+                    all_run_dirs.extend(run_dirs)
+            
+            if all_run_dirs:
+                # Sort by modification time and get latest
+                all_run_dirs.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+                run_dir = all_run_dirs[0]
+        
+        if run_dir is None:
+            print("Error: No run directory found in results/")
+            print("Train a model first or specify benchmarks directory:")
+            print("  python evaluation/compare_all.py results/lstm/run_1/benchmarks")
+            sys.exit(1)
+        
+        benchmarks_dir = run_dir / "benchmarks"
+        print(f"\n✓ Auto-detected benchmarks directory: {benchmarks_dir}")
+        print(f"✓ Model: {run_dir.parent.name}, Run: {run_dir.name}\n")
     
-    if not results_dir.exists():
-        print(f"Error: Results directory not found: {results_dir}")
+    # Use the benchmarks directory for both input and output
+    results_input_dir = benchmarks_dir
+    output_dir = benchmarks_dir
+    
+    # Create benchmarks directory if it doesn't exist
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    if not results_input_dir.exists():
+        print(f"Error: Results directory not found: {results_input_dir}")
         print("Run the benchmark executors first:")
         print("  1. python benchmarks/benchmark_suite.py")
         print("  2. python evaluation/run_rl_optimized.py")
@@ -314,7 +356,7 @@ def main():
         print("  4. python evaluation/run_pytorch_jit.py")
         sys.exit(1)
     
-    run_comparison(results_dir, output_dir)
+    run_comparison(results_input_dir, output_dir)
 
 
 if __name__ == "__main__":
