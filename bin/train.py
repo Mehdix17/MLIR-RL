@@ -159,9 +159,18 @@ for step in range(cfg.nb_iterations):
     elapsed_dlt = timedelta(seconds=int(elapsed))
     eta_dlt = timedelta(seconds=int(eta))
 
+# Final evaluation
 if (step + 1) % 100 != 0:
     print_info('- Evaluating benchmarks -')
     evaluate_benchmarks(model, eval_data)
+
+# Save final model
+print_info(f"Saving final model...")
+torch.save(
+    model.state_dict(),
+    os.path.join(fl.models_dir, f'model_final.pt')
+)
+print_success(f"Model saved to: {fl.models_dir}/model_final.pt")
 
 # Training complete - sync to Neptune
 print_success("Training complete!")
