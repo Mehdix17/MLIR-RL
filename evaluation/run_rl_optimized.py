@@ -227,14 +227,19 @@ def main():
     print("\n" + "="*60)
     print("RL-Optimized Benchmark Executor")
     print("="*60)
+    print(f"Checking for RL model at {model_path}")
     
-    if not model_path.exists():
-        print("\n⚠️  Note: No trained model found")
-        print("   Using simulated RL optimization with realistic speedup estimates")
-        print("   To use actual trained model, train first:")
+    if not model_path.exists() or not list(model_path.glob('*.pt')):
+        print("\n✗ Error: No trained model found")
+        print(f"   Expected model files in: {model_path}")
+        print("\n   Train a model first:")
         print("   sbatch scripts/lstm/train_lstm_baseline.sh")
+        print("   sbatch scripts/distilbert/train_distilbert.sh")
+        sys.exit(1)
     
-    # Run executor (will work with or without model)
+    print(f"✓ Found trained model")
+    
+    # Run executor
     executor = RLOptimizedExecutor(
         model_path=str(model_path),
         output_dir=str(output_dir)

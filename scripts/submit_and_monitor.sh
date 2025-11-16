@@ -1,21 +1,24 @@
 #!/bin/bash
 #
 # Submit a SLURM job and automatically monitor its output
-# Usage: ./submit_and_monitor.sh <script_path>
+# Usage: ./submit_and_monitor.sh <script_path> [additional_args...]
 # Example: ./submit_and_monitor.sh lstm/test_lstm.sh
+#          ./submit_and_monitor.sh run_benchmarks.sh lstm 4
 #
 
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <script_path>"
+    echo "Usage: $0 <script_path> [additional_args...]"
     echo ""
     echo "Examples:"
     echo "  $0 lstm/test_lstm.sh"
     echo "  $0 distilbert/test_distilbert.sh"
     echo "  $0 comparison/compare_all.sh"
+    echo "  $0 run_benchmarks.sh lstm 4"
     exit 1
 fi
 
 SCRIPT_PATH="$1"
+shift  # Remove first argument, keep the rest
 
 # Check if script exists
 if [ ! -f "$SCRIPT_PATH" ]; then
@@ -35,10 +38,13 @@ fi
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="${PROJECT_ROOT}/logs"
 
-# Submit job and capture job ID
+# Submit job and capture job ID (pass remaining arguments)
 echo "Submitting job: $SCRIPT_PATH"
+if [ $# -gt 0 ]; then
+    echo "With arguments: $@"
+fi
 echo "----------------------------------------"
-JOB_OUTPUT=$(sbatch --parsable "$SCRIPT_PATH" 2>&1)
+JOB_OUTPUT=$(sbatch --parsable "$SCRIPT_PATH" "$@" 2>&1)
 
 if [ $? -ne 0 ]; then
     echo "Error submitting job:"
