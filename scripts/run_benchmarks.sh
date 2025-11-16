@@ -144,7 +144,7 @@ echo ""
 # Step 2: Run RL Agent optimization
 echo "[2/4] Running RL Agent benchmarks..."
 echo "--------------------------------------------------------------------------------"
-python evaluation/run_rl_optimized.py "$RUN_DIR" "$BENCHMARK_OUTPUT_DIR"
+python evaluation/run_rl_optimized.py "${RUN_DIR}/models" "$BENCHMARK_OUTPUT_DIR"
 if [ $? -ne 0 ]; then
     echo "⚠️  RL Agent benchmarks failed, continuing..."
 fi
