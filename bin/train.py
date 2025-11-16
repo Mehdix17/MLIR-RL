@@ -172,7 +172,7 @@ if os.getenv('NEPTUNE_PROJECT') and os.getenv('NEPTUNE_TOKEN'):
     print_info("Syncing results to Neptune...")
     try:
         import subprocess
-        sync_script = os.path.join(os.path.dirname(__file__), '..', 'experiments', 'sync_neptune_with_plots.py')
+        sync_script = os.path.join(os.path.dirname(__file__), '..', 'utils', 'sync_neptune_with_plots.py')
         result = subprocess.run(
             ['python', sync_script, fl.run_dir],
             capture_output=True,
