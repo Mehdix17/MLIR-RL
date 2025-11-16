@@ -14,8 +14,8 @@
 #SBATCH -c 28
 #SBATCH --mem=128G
 #SBATCH -t 4:00:00
-#SBATCH -o ../logs/%x_%j.out
-#SBATCH -e ../logs/%x_%j.err
+#SBATCH -o logs/%x_%j.out
+#SBATCH -e logs/%x_%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mb10856@nyu.edu
 
@@ -32,12 +32,8 @@ elif [ -f "../data/benchmarks/benchmark_suite.py" ]; then
     # In scripts/ directory
     cd ..
     PROJECT_ROOT="$(pwd)"
-elif [ -f "../../data/benchmarks/benchmark_suite.py" ]; then
-    # In scripts/comparison/ directory
-    cd ../..
-    PROJECT_ROOT="$(pwd)"
 else
-    # Try to find project root by looking for unique file
+    # Try to find project root
     PROJECT_ROOT="/scratch/mb10856/MLIR-RL"
     cd "${PROJECT_ROOT}" || exit 1
 fi
