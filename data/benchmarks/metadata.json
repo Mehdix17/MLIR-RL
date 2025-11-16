@@ -12,18 +12,18 @@
   ],
   "num_benchmarks": 9,
   "mlir_files": [
-    "benchmarks/mlir/matmul_small.mlir",
-    "benchmarks/mlir/matmul_medium.mlir",
-    "benchmarks/mlir/matmul_large.mlir",
-    "benchmarks/mlir/conv2d_small.mlir",
-    "benchmarks/mlir/conv2d_medium.mlir",
-    "benchmarks/mlir/conv2d_large.mlir",
-    "benchmarks/mlir/resnet_block.mlir",
-    "benchmarks/mlir/linear_small.mlir",
-    "benchmarks/mlir/linear_large.mlir"
+    "data/benchmarks/mlir/matmul_small.mlir",
+    "data/benchmarks/mlir/matmul_medium.mlir",
+    "data/benchmarks/mlir/matmul_large.mlir",
+    "data/benchmarks/mlir/conv2d_small.mlir",
+    "data/benchmarks/mlir/conv2d_medium.mlir",
+    "data/benchmarks/mlir/conv2d_large.mlir",
+    "data/benchmarks/mlir/resnet_block.mlir",
+    "data/benchmarks/mlir/linear_small.mlir",
+    "data/benchmarks/mlir/linear_large.mlir"
   ],
-  "pytorch_dir": "benchmarks/pytorch",
-  "mlir_dir": "benchmarks/mlir",
+  "pytorch_dir": "data/benchmarks/pytorch",
+  "mlir_dir": "data/benchmarks/mlir",
   "description": "Benchmark suite for comparing RL vs PyTorch optimizations",
   "model_info": {
     "matmul_small": {
