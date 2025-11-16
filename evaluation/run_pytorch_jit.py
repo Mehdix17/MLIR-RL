@@ -164,7 +164,7 @@ def main():
         print(f"✓ Results will be saved to: {output_dir}\n")
     
     executor = PyTorchJITExecutor(
-        models_dir="benchmarks/pytorch",
+        models_dir="data/benchmarks/pytorch",
         output_dir=str(output_dir)
     )
     
