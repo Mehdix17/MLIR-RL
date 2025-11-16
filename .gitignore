@@ -47,6 +47,11 @@ data/*
 !data/.gitkeep
 # Keep test data - it's small and useful
 !data/test/
+# Keep benchmarks directory with scripts
+!data/benchmarks/
+!data/benchmarks/*.py
+!data/benchmarks/*.json
+!data/benchmarks/*.md
 
 # Dask logs - keep structure, ignore contents
 dask-logs/*
