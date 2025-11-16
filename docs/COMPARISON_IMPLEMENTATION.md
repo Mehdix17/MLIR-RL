@@ -67,7 +67,7 @@ sbatch scripts/comparison/test_comparison.sh
 sbatch scripts/lstm/train_lstm_baseline.sh
 
 # 2. Run comparison
-sbatch scripts/comparison/compare_all.sh
+sbatch scripts/compare_all.sh
 
 # 3. View results
 cat results/comparison_rl_vs_pytorch/comparison_summary.csv
@@ -235,7 +235,7 @@ sbatch scripts/comparison/test_comparison.sh
 sbatch scripts/lstm/train_lstm_baseline.sh
 
 # Run full comparison
-sbatch scripts/comparison/compare_all.sh
+sbatch scripts/compare_all.sh
 ```
 
 ### **Future Enhancements**

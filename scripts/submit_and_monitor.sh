@@ -12,7 +12,7 @@ if [ $# -eq 0 ]; then
     echo "Examples:"
     echo "  $0 lstm/test_lstm.sh"
     echo "  $0 distilbert/test_distilbert.sh"
-    echo "  $0 comparison/compare_all.sh"
+    echo "  $0 compare_all.sh"
     echo "  $0 run_benchmarks.sh lstm 4"
     exit 1
 fi

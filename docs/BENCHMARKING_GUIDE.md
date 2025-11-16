@@ -74,7 +74,7 @@ python evaluation/compare_all.py
 
 ```bash
 # Run all steps automatically
-scripts/submit_and_monitor.sh comparison/compare_all.sh
+scripts/submit_and_monitor.sh compare_all.sh
 ```
 
 ## Output Files
