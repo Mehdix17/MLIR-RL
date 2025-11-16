@@ -90,6 +90,32 @@ def sync_run_with_plots(run_dir, project, api_token):
         neptune_run['num_benchmarks_executed'] = len(exec_data)
         print(f"✓ Logged execution data statistics")
     
+    # Upload benchmark results
+    benchmarks_dir = run_path / 'benchmarks'
+    if benchmarks_dir.exists():
+        print(f"✓ Found benchmarks directory")
+        benchmark_count = 0
+        
+        for benchmark_file in benchmarks_dir.glob('*.json'):
+            try:
+                with open(benchmark_file) as f:
+                    benchmark_data = json.load(f)
+                neptune_run[f"benchmarks/{benchmark_file.name}"] = benchmark_data
+                benchmark_count += 1
+            except Exception as e:
+                print(f"  Warning: Could not upload {benchmark_file.name}: {e}")
+        
+        for benchmark_file in benchmarks_dir.glob('*.csv'):
+            try:
+                neptune_run[f"benchmarks/{benchmark_file.name}"].upload(str(benchmark_file))
+                benchmark_count += 1
+            except Exception as e:
+                print(f"  Warning: Could not upload {benchmark_file.name}: {e}")
+        
+        print(f"✓ Uploaded {benchmark_count} benchmark files")
+    else:
+        print(f"  Note: No benchmarks directory found.")
+    
     # Print summary
     print(f"\n{'='*70}")
     print(f"✓ SYNC COMPLETE")
