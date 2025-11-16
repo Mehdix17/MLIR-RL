@@ -70,7 +70,7 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
     print_info(f"Initialized {len(envs)} environments, starting collection loop...")
     
     loop_iteration = 0
-    MAX_ITERATIONS = 25  # Safety limit - some benchmarks take too long for quick tests
+    MAX_ITERATIONS = 100  # Safety limit - some complex benchmarks may need many steps
     
     while (active_states := [(i, s) for i, s in enumerate(states) if not s.terminal]):
         loop_iteration += 1
