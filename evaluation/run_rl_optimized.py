@@ -168,7 +168,7 @@ class RLOptimizedExecutor:
 def main():
     """Main execution function"""
     # Load metadata
-    metadata_file = Path("benchmarks/metadata.json")
+    metadata_file = Path("data/benchmarks/metadata.json")
     if not metadata_file.exists():
         print("Error: Benchmark suite not found. Run benchmark_suite.py first.")
         sys.exit(1)

@@ -23,15 +23,8 @@ eval "$(conda shell.bash hook)"
 conda activate mlir
 
 # Change to project root
-if [ -f "data/benchmarks/benchmark_suite.py" ]; then
-    PROJECT_ROOT="$(pwd)"
-elif [ -f "../data/benchmarks/benchmark_suite.py" ]; then
-    cd ..
-    PROJECT_ROOT="$(pwd)"
-else
-    PROJECT_ROOT="/scratch/mb10856/MLIR-RL"
-    cd "${PROJECT_ROOT}" || exit 1
-fi
+cd "${SLURM_SUBMIT_DIR}" || cd "/scratch/mb10856/MLIR-RL" || exit 1
+PROJECT_ROOT="$(pwd)"
 
 echo "================================================================================"
 echo "Benchmark Evaluation Suite"
@@ -39,6 +32,7 @@ echo "==========================================================================
 echo ""
 echo "Project: ${PROJECT_ROOT}"
 echo "Date: $(date)"
+echo "Args: $@"
 echo ""
 
 # Parse arguments or auto-detect
@@ -150,7 +144,7 @@ echo ""
 # Step 2: Run RL Agent optimization
 echo "[2/4] Running RL Agent benchmarks..."
 echo "--------------------------------------------------------------------------------"
-python evaluation/run_rl_optimized.py "$MODEL_DIR" "$BENCHMARK_OUTPUT_DIR"
+python evaluation/run_rl_optimized.py "$RUN_DIR" "$BENCHMARK_OUTPUT_DIR"
 if [ $? -ne 0 ]; then
     echo "⚠️  RL Agent benchmarks failed, continuing..."
 fi

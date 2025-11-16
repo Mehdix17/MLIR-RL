@@ -22,7 +22,7 @@ else:
     print(f"Config not found: {config_file}, using defaults")
 
 # Import benchmark classes
-sys.path.insert(0, str(Path(__file__).parent.parent / "benchmarks"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "data" / "benchmarks"))
 from benchmark_suite import (
     MatMulBenchmark, Conv2DBenchmark, SimpleResNetBlock, LinearBenchmark
 )
