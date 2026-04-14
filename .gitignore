@@ -1,3 +1,42 @@
-*
-!gen
-!.gitignore
+# Python cache and build outputs
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments and local env files
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Editor/OS noise
+.vscode/
+.idea/
+.DS_Store
+*.swp
+.claude/
+
+# Generated logs/artifacts
+dask-logs/
+logs/
+results/
+
+# Heavy local dependencies and datasets
+llvm-project/
+tools/ast_dumper/build/
+tools/vectorizer/build/
+data/all/
+data/code_files/
+data/raw/
+data/synthetic/
+data/features/
+data/debug/
+data/multi/
+data/nn/
+data/nn-old/
+data/polybench/
