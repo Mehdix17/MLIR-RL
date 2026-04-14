@@ -1,7 +1,23 @@
 import os
 import subprocess
-from mlir.ir import Context, Module
-from mlir.dialects.transform import interpreter
+try:
+    from mlir.ir import Context, Module
+    from mlir.dialects.transform import interpreter
+except ImportError:
+    # Fallback stubs for when mlir bindings are not available
+    class Context:
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            pass
+    class Module:
+        @staticmethod
+        def parse(code):
+            # Stub parse method that raises error when called
+            raise NotImplementedError("MLIR bindings not available - cannot parse MLIR code")
+    class interpreter:
+        pass
+
 from utils.bindings_process import BindingsProcess
 
 

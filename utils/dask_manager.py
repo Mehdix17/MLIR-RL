@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from dask_jobqueue.slurm import SLURMJob
     from rl_autoschedular.state import OperationState
 
-ENABLED = True
+ENABLED = False
 T = TypeVar('T')
 
 
@@ -46,6 +46,8 @@ class DaskManager(metaclass=Singleton):
                 'eval "$(conda shell.bash hook)"',
                 f'conda activate {os.getenv("CONDA_ENV")}',
                 'export OMP_NUM_THREADS=12',
+                f'export AST_DUMPER_BIN_PATH={os.getenv("AST_DUMPER_BIN_PATH", "")}',
+                f'export CONFIG_FILE_PATH={os.getenv("CONFIG_FILE_PATH", "")}',
             ],
             scheduler_options={
                 'dashboard': enable_dashboard,

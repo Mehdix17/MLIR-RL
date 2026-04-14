@@ -88,3 +88,67 @@ The following list describes every required setting in a configuration file.
 - `json_file (str)`: Path to the JSON file containing the benchmarks code and features if data format is set to "json". Otherwise, it should contain original execution times for every benchmark in the benchmark folder.
 - `tags (list[str])`: List of tags to add to the neptune experiment.
 - `logging (bool)`: Flag to enable logging to neptune.
+
+---
+
+## Troubleshooting an Inherited LLVM Build
+
+If the `llvm-project/build/` directory was compiled by another user, the MLIR Python bindings will be broken because all `.py` files in the build are symlinks pointing to the original user's scratch path. Follow these steps to fix the environment.
+
+### Problem 1: `GLIBCXX_3.4.29` not found
+
+The system `libstdc++` may be too old for numpy/torch. Fix by pointing to the venv's newer library:
+
+```sh
+export LD_LIBRARY_PATH=~/envs/mlir/lib:$LD_LIBRARY_PATH
+```
+
+### Problem 2: Broken MLIR Python symlinks
+
+All `.py` files under `build/tools/mlir/python_packages/mlir_core/` are symlinks to the original builder's path. Since the git repo tracks the source files but they may not be checked out, restore them first:
+
+```sh
+cd llvm-project
+
+# Restore source Python files from git
+git checkout HEAD -- $(git ls-files mlir/python/mlir/ | tr '\n' ' ')
+```
+
+Then rewrite all broken symlinks to use your own path (replace `OTHER_USER` and `YOUR_USER`):
+
+```sh
+find build/tools/mlir/python_packages/mlir_core -type l | while read link; do
+    target=$(readlink "$link")
+    if echo "$target" | grep -q "OTHER_USER"; then
+        new_target=$(echo "$target" | sed 's|/scratch/OTHER_USER/|/scratch/YOUR_USER/|g')
+        rm "$link" && ln -s "$new_target" "$link"
+    fi
+done
+```
+
+> **Note:** Use `rm` + `ln -s` rather than `ln -sf` — the `-f` flag can fail with "Permission denied" on broken symlinks to inaccessible paths on some filesystems, even when you own the symlink.
+
+### Problem 3: Missing environment variables
+
+Add the following to your virtualenv's `activate` script (`~/envs/mlir/bin/activate`) so they are set automatically on every activation:
+
+```sh
+# MLIR Python bindings
+export PYTHONPATH=/scratch/YOUR_USER/MLIR-RL/llvm-project/build/tools/mlir/python_packages/mlir_core${PYTHONPATH:+:$PYTHONPATH}
+export LD_LIBRARY_PATH=~/envs/mlir/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export MLIR_SHARED_LIBS=/scratch/YOUR_USER/MLIR-RL/llvm-project/build/lib/libmlir_runner_utils.so,/scratch/YOUR_USER/MLIR-RL/llvm-project/build/lib/libmlir_c_runner_utils.so
+```
+
+Verify the fix with:
+
+```sh
+python -c "from mlir.ir import Context; print('OK')"
+```
+
+### Generating base execution times
+
+Once the environment is set up, generate base execution times for training:
+
+```sh
+python scripts/get_base.py --benchmarks-dir data/nn/code_files --output data/nn/base_exec_times.json
+```

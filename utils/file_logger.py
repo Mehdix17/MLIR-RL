@@ -1,5 +1,6 @@
 from .singleton import Singleton
 from .config import Config
+from .implementation import get_agent_runs_root, get_autoschedular_impl
 import json
 import os
 
@@ -9,12 +10,18 @@ class FileLogger(metaclass=Singleton):
     def __init__(self):
         cfg = Config()
         tags = ['ppo'] + cfg.tags
+        implementation = get_autoschedular_impl()
 
         # Create run dir
-        dir_path = cfg.results_dir
-        subdir_ids = sorted([int(d.split('_')[-1]) for d in os.listdir(dir_path) if d.startswith('run_')])
+        agent_root = get_agent_runs_root(cfg.results_dir, implementation)
+        os.makedirs(agent_root, exist_ok=True)
+        subdir_ids = sorted([
+            int(d.split('_')[-1])
+            for d in os.listdir(agent_root)
+            if d.startswith('run_') and d.split('_')[-1].isdigit()
+        ])
         run_id = subdir_ids[-1] + 1 if subdir_ids else 0
-        self.run_dir = os.path.join(dir_path, f'run_{run_id}')
+        self.run_dir = os.path.join(agent_root, f'run_{run_id}')
         os.makedirs(self.run_dir, exist_ok=True)
 
         # Create tags file

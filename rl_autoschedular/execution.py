@@ -2,11 +2,46 @@ import os
 import ctypes
 import ctypes.util
 import numpy as np
-from mlir.ir import Context, Module, MemRefType, IntegerType, F64Type, F32Type
-from mlir.execution_engine import ExecutionEngine
-from mlir.runtime import get_ranked_memref_descriptor, make_nd_memref_descriptor, as_ctype, ranked_memref_to_numpy
-from mlir.passmanager import PassManager
-from mlir.dialects.func import FuncOp
+try:
+    from mlir.ir import Context, Module, MemRefType, IntegerType, F64Type, F32Type
+    from mlir.execution_engine import ExecutionEngine
+    from mlir.runtime import get_ranked_memref_descriptor, make_nd_memref_descriptor, as_ctype, ranked_memref_to_numpy
+    from mlir.passmanager import PassManager
+    from mlir.dialects.func import FuncOp
+except ImportError:
+    # Fallback stubs for when mlir bindings are not available
+    class Context:
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            pass
+    class Module:
+        pass
+    class MemRefType:
+        pass
+    class IntegerType:
+        pass
+    class F64Type:
+        pass
+    class F32Type:
+        pass
+    class ExecutionEngine:
+        pass
+    def get_ranked_memref_descriptor(*args, **kwargs):
+        raise NotImplementedError("MLIR bindings not available")
+    def make_nd_memref_descriptor(*args, **kwargs):
+        raise NotImplementedError("MLIR bindings not available")
+    def as_ctype(*args, **kwargs):
+        raise NotImplementedError("MLIR bindings not available")
+    def ranked_memref_to_numpy(*args, **kwargs):
+        raise NotImplementedError("MLIR bindings not available")
+    class PassManager:
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            pass
+    class FuncOp:
+        pass
 from typing import TYPE_CHECKING, Optional, overload
 from rl_autoschedular.transforms import transform_bufferize_and_lower_v
 from utils.bindings_process import BindingsProcess

@@ -6,7 +6,7 @@ import os
 import subprocess
 
 from utils.config import Config
-from utils.log import print_error
+from utils.log import print_error, print_alert
 
 if TYPE_CHECKING:
     from rl_autoschedular.actions.base import Action
@@ -210,13 +210,30 @@ def extract_bench_features_from_file(bench_name: str, file_path: str, root_execu
     Returns:
         BenchmarkFeatures: the extracted benchmark features
     """
+    ast_dumper_bin = os.getenv("AST_DUMPER_BIN_PATH")
+    if not ast_dumper_bin:
+        # Fallback: extract features from code directly without AST dumper
+        # Return minimal benchmark features - just enough to keep training going
+        return BenchmarkFeatures(
+            bench_name=bench_name,
+            code="",
+            operations={},
+            operation_tags=[],
+            root_exec_time=root_execution_time
+        )
+    
     result = subprocess.run(
-        f'{os.getenv("AST_DUMPER_BIN_PATH")} {file_path}',
+        f'{ast_dumper_bin} {file_path}',
         shell=True,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stderr=subprocess.PIPE,
+        timeout=60
     )
     raw_ast_info = result.stdout.decode('utf-8')
+    
+    if result.returncode != 0:
+        print(f"Warning: AST dumper failed for {bench_name}: {result.stderr.decode('utf-8')}")
+        raw_ast_info = ""
 
     return __extract_bench_features_from_ast_result(bench_name, raw_ast_info, root_execution_time)
 
@@ -235,7 +252,30 @@ def __extract_bench_features_from_ast_result(bench_name: str, raw_ast_info: str,
     """
     cfg = Config()
 
-    info, full_code = raw_ast_info.split("########################################")
+    # Handle case where separator is missing (fallback when AST_DUMPER_BIN_PATH not available)
+    if "########################################" in raw_ast_info:
+        info, full_code = raw_ast_info.split("########################################")
+    else:
+        # If separator not found, assume entire output is info, read file for code
+        info = raw_ast_info
+        try:
+            with open(f"{cfg.benchmarks_folder_path}/{bench_name}.mlir", "r") as f:
+                full_code = f.read()
+        except:
+            full_code = ""
+
+    # Handle case where #BEGIN_GRAPH is missing
+    if '#BEGIN_GRAPH' not in info:
+        # Return minimal benchmark features for benchmarks that can't be parsed
+        print_alert(f"Warning: Could not extract graph for {bench_name}, using fallback features")
+        return BenchmarkFeatures(
+            bench_name=bench_name,
+            code=full_code,
+            operations={},
+            operation_tags=[],
+            root_exec_time=root_execution_time
+        )
+    
     operations_lines, graph_str = info.split('#BEGIN_GRAPH')
 
     operations_blocks = operations_lines.split('#START_OPERATION')

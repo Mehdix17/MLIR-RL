@@ -38,10 +38,19 @@ class Benchmarks:
             for op_tag in benchmark_data.operation_tags:
                 if 'conv_2d' not in benchmark_data.operations[op_tag].operation_name:
                     continue
-                bench_code = transform_img2col(bench_code, op_tag)
-                modified = True
+                try:
+                    bench_code = transform_img2col(bench_code, op_tag)
+                    modified = True
+                except Exception as e:
+                    # If transform fails (e.g., no MLIR bindings), skip transformation
+                    print(f"Warning: Could not transform {bench_name}/{op_tag}: {e}")
+                    pass
             if modified:
-                benchmark_data = extract_bench_features_from_code(bench_name, bench_code, root_exec_time)
+                try:
+                    benchmark_data = extract_bench_features_from_code(bench_name, bench_code, root_exec_time)
+                except Exception as e:
+                    print(f"Warning: Could not extract features from transformed code for {bench_name}: {e}")
+                    pass
             self.data.append(benchmark_data)
 
     def __len__(self):

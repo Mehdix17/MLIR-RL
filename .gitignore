@@ -1,6 +1,3 @@
-.env
-.env.debug
-.vscode
-.neptune
-*__pycache__
-tools/*/build
+*
+!gen
+!.gitignore
