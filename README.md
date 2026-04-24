@@ -89,6 +89,26 @@ The following list describes every required setting in a configuration file.
 - `tags (list[str])`: List of tags to add to the neptune experiment.
 - `logging (bool)`: Flag to enable logging to neptune.
 
+Additional fields for versioned agents:
+- `implementation (str)`: Autoscheduler package to run (for example `rl_autoschedular`, `rl_autoschedular_v1`, `rl_autoschedular_v2`).
+- `hardware_auto_detect (bool)`: If true, hardware features are auto-detected from the current machine (recommended for single-HPC training/eval).
+- `hardware_l1_kb`, `hardware_l2_kb`, `hardware_l3_kb`, `hardware_physical_cores`, `hardware_logical_cores`, `hardware_simd_width`, `hardware_clock_mhz`: Optional manual overrides for advanced cross-hardware experiments. For single-machine runs, leave these unset to avoid host/override mismatch.
+- `reward_shaping_enabled (bool)`: Enables dense intermediate reward shaping for shaped-reward agents.
+- `reward_shaping_scale (float)`: Global multiplier for shaped reward delta.
+- `reward_shaping_clip (float)`: Clip bound for each shaped reward term.
+- `reward_shaping_weight_ai (float)`: Weight for arithmetic-intensity proxy in shaped reward.
+- `reward_shaping_weight_vectorizable (float)`: Weight for vectorizability score in shaped reward.
+- `reward_shaping_weight_parallel (float)`: Weight for parallel-loop ratio in shaped reward.
+- `reward_shaping_vectorization_bonus (float)`: Extra bonus for explicit vectorization actions.
+- `transformer_d_model (int)`: Hidden size for transformer token embeddings used by transformer-based agents.
+- `transformer_nhead (int)`: Number of attention heads in transformer encoder layers.
+- `transformer_num_layers (int)`: Number of transformer encoder layers.
+- `transformer_ffn_dim (int)`: Feed-forward hidden dimension used inside each transformer encoder layer.
+- `transformer_dropout (float)`: Dropout ratio used in transformer projections and encoder blocks.
+- `transformer_activation (Literal["relu", "gelu"])`: Activation function used in transformer feed-forward layers.
+- `transformer_pooling (Literal["cls", "mean"])`: Pooling strategy for the transformer sequence output.
+- `transformer_use_action_history_token (bool)`: If true, action history is encoded as a transformer token instead of concatenated after pooling.
+
 ---
 
 ## Troubleshooting an Inherited LLVM Build

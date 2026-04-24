@@ -1,4 +1,5 @@
 {
+  "implementation": "rl_autoschedular",
   "max_num_stores_loads": 7,
   "max_num_loops": 7,
   "max_num_load_store_dim": 7,
@@ -28,6 +29,7 @@
   "truncate": 5,
   "tags": ["nn"],
   "debug": false,
+  "hardware_auto_detect": true,
   "main_exec_data_file": "",
   "results_dir": "results/mehdi"
 }

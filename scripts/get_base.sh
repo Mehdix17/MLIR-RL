@@ -36,11 +36,22 @@ export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJEC
 cd "$PROJECT_ROOT"
 
 CONFIG="${1:?Usage: sbatch scripts/get_base.sh <config>}"
-IMPLEMENTATION="${2:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}"
-export AUTOSCHEDULER_IMPL="$IMPLEMENTATION"
 if [[ "$CONFIG" != /* ]]; then
     CONFIG="$PROJECT_ROOT/$CONFIG"
 fi
+
+CONFIG_IMPL=$(python3 - <<PY
+import json
+try:
+    with open("$CONFIG", "r") as f:
+        print((json.load(f).get("implementation") or "").strip())
+except Exception:
+    print("")
+PY
+)
+
+IMPLEMENTATION="${2:-${CONFIG_IMPL:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}}"
+export AUTOSCHEDULER_IMPL="$IMPLEMENTATION"
 export CONFIG_FILE_PATH="$CONFIG"
 
 echo "=========================================="

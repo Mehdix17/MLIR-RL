@@ -7,10 +7,10 @@ cd /scratch/mb10856/MLIR-RL
 source ~/envs/mlir/bin/activate
 set -a && source .env && set +a
 
-# Pick implementation:
-#   rl_autoschedular            (current)
-#   new_rl_autoschedular        (enhanced, when ready)
-export AUTOSCHEDULER_IMPL=rl_autoschedular
+# Implementation is now selected from the config file via:
+#   "implementation": "rl_autoschedular" | "rl_autoschedular_v1" | "rl_autoschedular_v2" | ...
+# Optional override (only if you want to force one from shell):
+# export AUTOSCHEDULER_IMPL=rl_autoschedular_v1
 
 # Pick config file once (edit as needed)
 export CONFIG=config/train1.json
@@ -18,8 +18,8 @@ export CONFIG_FILE_PATH="$CONFIG"
 
 # ---------- 2) Generate MLIR baseline times ----------
 
-sbatch scripts/get_base.sh "$CONFIG" "$AUTOSCHEDULER_IMPL"
-# Writes: results/<experiment>/exec_times/{old|new}_base.json
+sbatch scripts/get_base.sh "$CONFIG"
+# Writes: results/<experiment>/exec_times/<impl_prefix>_base.json
 
 # ---------- 3) Generate PyTorch baselines ----------
 
@@ -27,18 +27,18 @@ sbatch scripts/get_pytorch_times.sh "$CONFIG"
 
 # ---------- 4) Split implementation baseline into train/eval ----------
 
-python scripts/split_json.py "$CONFIG" "$AUTOSCHEDULER_IMPL"
+python scripts/split_json.py "$CONFIG"
 
 # Reads the implementation-specific base file and writes:
-#   {old|new}_base_train.json and {old|new}_base_eval.json
+#   <impl_prefix>_base_train.json and <impl_prefix>_base_eval.json
 
 # ---------- 5) Train ----------
 
-sbatch scripts/train.sh "$CONFIG" "$AUTOSCHEDULER_IMPL"
+sbatch scripts/train.sh "$CONFIG"
 
 # ---------- 6) Evaluate checkpoints ----------
 
-sbatch scripts/eval.sh "$CONFIG" "$AUTOSCHEDULER_IMPL"
+sbatch scripts/eval.sh "$CONFIG"
 
 # ---------- 7) Compare RL vs MLIR vs PyTorch ----------
 
@@ -54,3 +54,7 @@ streamlit run dashboard.py --server.fileWatcherType none
 scripts/submit_and_monitor.sh scripts/train.sh "$CONFIG"
 
 scripts/submit_and_monitor.sh scripts/eval.sh "$CONFIG"
+
+# ---------- Fast Copy/Paste ----------
+
+rsync -avh --progress /path/source/ /path/destination/

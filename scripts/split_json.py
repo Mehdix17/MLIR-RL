@@ -34,7 +34,7 @@ parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 
 args = parser.parse_args()
 
 config_path = args.config or args.config_path
-implementation = args.implementation or args.implementation_positional or get_autoschedular_impl()
+implementation = args.implementation or args.implementation_positional or get_autoschedular_impl(config_path=config_path)
 
 if config_path:
     with open(config_path) as _f:

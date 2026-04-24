@@ -1,59 +1,125 @@
 import importlib
+import json
 import os
+import re
 from pathlib import Path
 from typing import Optional
 
-OLD_IMPLEMENTATION = "rl_autoschedular"
-NEW_IMPLEMENTATION = "new_rl_autoschedular"
+DEFAULT_IMPLEMENTATION = "rl_autoschedular"
 
-SUPPORTED_IMPLEMENTATIONS = (OLD_IMPLEMENTATION, NEW_IMPLEMENTATION)
-
-IMPLEMENTATION_TO_AGENT_DIR = {
-    OLD_IMPLEMENTATION: "old_agent",
-    NEW_IMPLEMENTATION: "new_agent",
+# Preserve legacy naming for already-produced results.
+LEGACY_IMPLEMENTATION_META = {
+    "rl_autoschedular": {
+        "agent_dir": "old_agent",
+        "base_prefix": "old",
+        "display_name": "Baseline RL",
+    },
+    "new_rl_autoschedular": {
+        "agent_dir": "new_agent",
+        "base_prefix": "new",
+        "display_name": "New RL",
+    },
 }
 
-IMPLEMENTATION_TO_BASE_PREFIX = {
-    OLD_IMPLEMENTATION: "old",
-    NEW_IMPLEMENTATION: "new",
-}
+
+def _load_impl_from_config(config_path: str) -> Optional[str]:
+    try:
+        with open(config_path, "r") as f:
+            config_data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    impl = config_data.get("implementation")
+    if not isinstance(impl, str):
+        return None
+
+    impl = impl.strip()
+    return impl or None
 
 
-def get_autoschedular_impl(default: str = "rl_autoschedular") -> str:
-    """Return the selected autoscheduler implementation name."""
-    impl = os.getenv("AUTOSCHEDULER_IMPL", default).strip()
-    return impl or default
+def get_autoschedular_impl(default: str = DEFAULT_IMPLEMENTATION, config_path: Optional[str] = None) -> str:
+    """Return selected autoscheduler implementation.
+
+    Resolution order:
+      1) AUTOSCHEDULER_IMPL env var
+      2) explicit config_path (if provided)
+      3) CONFIG_FILE_PATH -> config["implementation"]
+      3) provided default
+    """
+    env_impl = os.getenv("AUTOSCHEDULER_IMPL", "").strip()
+    if env_impl:
+        return env_impl
+
+    candidate_paths = []
+    if config_path:
+        candidate_paths.append(config_path)
+    env_config_path = os.getenv("CONFIG_FILE_PATH", "").strip()
+    if env_config_path:
+        candidate_paths.append(env_config_path)
+
+    for candidate_path in candidate_paths:
+        cfg_impl = _load_impl_from_config(candidate_path)
+        if cfg_impl:
+            return cfg_impl
+
+    return default
+
+
+def _implementation_token(implementation: str) -> str:
+    if implementation in LEGACY_IMPLEMENTATION_META:
+        return LEGACY_IMPLEMENTATION_META[implementation]["base_prefix"]
+
+    # Canonical names for versioned agents:
+    #   rl_autoschedular_v1 -> v1
+    #   rl_autoschedular_v2 -> v2
+    version_match = re.fullmatch(r"rl_autoschedular_v(\d+)", implementation)
+    if version_match:
+        return f"v{version_match.group(1)}"
+
+    # Fallback for custom names
+    token = re.sub(r"[^a-zA-Z0-9]+", "_", implementation).strip("_").lower()
+    return token or "custom"
+
+
+def get_implementation_meta(implementation: Optional[str] = None) -> dict[str, str]:
+    """Return naming metadata for implementation specific artifacts."""
+    impl = implementation or get_autoschedular_impl()
+
+    if impl in LEGACY_IMPLEMENTATION_META:
+        return {
+            "implementation": impl,
+            "agent_dir": LEGACY_IMPLEMENTATION_META[impl]["agent_dir"],
+            "base_prefix": LEGACY_IMPLEMENTATION_META[impl]["base_prefix"],
+            "display_name": LEGACY_IMPLEMENTATION_META[impl]["display_name"],
+        }
+
+    token = _implementation_token(impl)
+    display_name = token.upper() + " RL" if token.startswith("v") else impl
+    return {
+        "implementation": impl,
+        "agent_dir": f"{token}_agent",
+        "base_prefix": token,
+        "display_name": display_name,
+    }
 
 
 def get_agent_subdir(implementation: Optional[str] = None) -> str:
     """Return canonical agent subdir name under results/<experiment>/ for an implementation."""
-    impl = implementation or get_autoschedular_impl()
-    if impl not in IMPLEMENTATION_TO_AGENT_DIR:
-        raise ValueError(
-            f"Unsupported autoscheduler implementation '{impl}'. "
-            f"Expected one of {SUPPORTED_IMPLEMENTATIONS}."
-        )
-    return IMPLEMENTATION_TO_AGENT_DIR[impl]
+    return get_implementation_meta(implementation)["agent_dir"]
 
 
 def get_base_prefix(implementation: Optional[str] = None) -> str:
-    """Return canonical baseline filename prefix ('old' or 'new')."""
-    impl = implementation or get_autoschedular_impl()
-    if impl not in IMPLEMENTATION_TO_BASE_PREFIX:
-        raise ValueError(
-            f"Unsupported autoscheduler implementation '{impl}'. "
-            f"Expected one of {SUPPORTED_IMPLEMENTATIONS}."
-        )
-    return IMPLEMENTATION_TO_BASE_PREFIX[impl]
+    """Return canonical baseline filename prefix for an implementation."""
+    return get_implementation_meta(implementation)["base_prefix"]
 
 
 def get_agent_runs_root(results_dir: str, implementation: Optional[str] = None) -> Path:
-    """Return results/<experiment>/<old_agent|new_agent>."""
+    """Return results/<experiment>/<impl_agent_subdir>."""
     return Path(results_dir) / get_agent_subdir(implementation)
 
 
 def get_base_file_path(results_dir: str, implementation: Optional[str] = None) -> Path:
-    """Return results/<experiment>/exec_times/<old|new>_base.json."""
+    """Return results/<experiment>/exec_times/<prefix>_base.json."""
     prefix = get_base_prefix(implementation)
     return Path(results_dir) / "exec_times" / f"{prefix}_base.json"
 
@@ -71,6 +137,6 @@ def import_autoschedular_module(module: str, implementation: Optional[str] = Non
             raise
         raise ModuleNotFoundError(
             f"Could not import autoscheduler implementation '{target}'. "
-            f"Set AUTOSCHEDULER_IMPL to one of {SUPPORTED_IMPLEMENTATIONS} "
+            "Set AUTOSCHEDULER_IMPL or config['implementation'] to a valid package "
             f"and ensure the package exists (for example, add {impl}/__init__.py)."
         ) from exc

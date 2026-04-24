@@ -17,6 +17,11 @@ All steps use the same config file. Start by copying `config/example.json`:
 
 > For all available fields see `utils/config.py`.
 
+For hardware-aware versions (for example V1+), keep the config simple on a single HPC machine:
+- Set `"hardware_auto_detect": true`.
+- Do not set manual `hardware_*` override fields unless you intentionally run a cross-hardware experiment.
+- Hardware detection runs once per process and does not directly change execution-time measurement.
+
 ---
 
 ## Setup
@@ -118,7 +123,7 @@ Or locally:
 
 ```bash
 export CONFIG_FILE_PATH=config/my_config.json
-# optional: override auto-detection
+# optional: choose a specific checkpoint directory
 # export EVAL_DIR=results/my_run/old_agent/run_1/models
 python scripts/eval.py
 ```

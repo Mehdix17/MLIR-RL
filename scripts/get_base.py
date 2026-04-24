@@ -18,7 +18,7 @@ parser.add_argument("--output", default=None, help="Override: path to output JSO
 parser.add_argument("--implementation", default=None, help="Autoscheduler implementation package (default: AUTOSCHEDULER_IMPL or rl_autoschedular)")
 args = parser.parse_args()
 
-implementation = args.implementation or get_autoschedular_impl()
+implementation = args.implementation or get_autoschedular_impl(config_path=args.config)
 Execution = import_autoschedular_module("execution", implementation).Execution
 
 if args.config:

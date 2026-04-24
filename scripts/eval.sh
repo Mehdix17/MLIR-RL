@@ -15,7 +15,7 @@
 #
 # Arguments:
 #   $1  CONFIG  - path to config JSON; results_dir inside it determines which
-#                <old_agent|new_agent>/run_N/models folder to evaluate
+#                <impl_agent>/run_N/models folder to evaluate
 #                (latest run with checkpoints)
 #   $2  implementation - autoscheduler package name (default: rl_autoschedular)
 
@@ -38,24 +38,35 @@ export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
 CONFIG="${1:?Usage: $0 <config>}"
-IMPLEMENTATION="${2:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}"
+if [[ "$CONFIG" != /* ]]; then
+    CONFIG="$PROJECT_ROOT/$CONFIG"
+fi
+
+CONFIG_IMPL=$(python3 - <<PY
+import json
+try:
+    with open("$CONFIG", "r") as f:
+        print((json.load(f).get("implementation") or "").strip())
+except Exception:
+    print("")
+PY
+)
+
+IMPLEMENTATION="${2:-${CONFIG_IMPL:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}}"
 export AUTOSCHEDULER_IMPL="$IMPLEMENTATION"
 export CONFIG_FILE_PATH="$CONFIG"
 
 # Derive EVAL_DIR: latest run_N/models inside results_dir that contains .pt files
-RESULTS_DIR=$(python3 -c "import json; print(json.load(open('$CONFIG'))['results_dir'])")
-case "$IMPLEMENTATION" in
-    rl_autoschedular)
-        AGENT_SUBDIR="old_agent"
-        ;;
-    new_rl_autoschedular)
-        AGENT_SUBDIR="new_agent"
-        ;;
-    *)
-        echo "Unsupported AUTOSCHEDULER_IMPL: $IMPLEMENTATION"
-        exit 1
-        ;;
-esac
+mapfile -t EVAL_META < <(python3 - <<PY
+import json
+from utils.implementation import get_agent_subdir
+cfg = json.load(open("$CONFIG"))
+print(cfg["results_dir"])
+print(get_agent_subdir("$IMPLEMENTATION"))
+PY
+)
+RESULTS_DIR="${EVAL_META[0]}"
+AGENT_SUBDIR="${EVAL_META[1]}"
 AGENT_ROOT="$RESULTS_DIR/$AGENT_SUBDIR"
 LATEST_MODELS=$(python3 -c "
 import os

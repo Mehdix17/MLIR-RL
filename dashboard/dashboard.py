@@ -16,24 +16,13 @@ import streamlit as st
 # CONFIG
 # ─────────────────────────────────────────────
 RESULTS_ROOT = Path(__file__).parent.parent / "results"
-DEFAULT_IMPLEMENTATION = "rl_autoschedular"
-NEW_IMPLEMENTATION = "new_rl_autoschedular"
-IMPL_ORDER = [DEFAULT_IMPLEMENTATION, NEW_IMPLEMENTATION]
-IMPL_AGENT_DIR = {
-    DEFAULT_IMPLEMENTATION: "old_agent",
-    NEW_IMPLEMENTATION: "new_agent",
+LEGACY_AGENT_DIR = {
+    "old": "old_agent",
+    "new": "new_agent",
 }
-IMPL_BASE_PREFIX = {
-    DEFAULT_IMPLEMENTATION: "old",
-    NEW_IMPLEMENTATION: "new",
-}
-IMPL_SHORT = {
-    DEFAULT_IMPLEMENTATION: "old",
-    NEW_IMPLEMENTATION: "new",
-}
-IMPL_DISPLAY = {
-    DEFAULT_IMPLEMENTATION: "Old RL",
-    NEW_IMPLEMENTATION: "New RL",
+LEGACY_DISPLAY = {
+    "old": "Baseline RL",
+    "new": "New RL",
 }
 
 st.set_page_config(
@@ -221,6 +210,36 @@ def normalize_family(name: str) -> str:
     return name
 
 
+def sort_impl_tokens(tokens: list[str]) -> list[str]:
+    def key(token: str):
+        if token == "old":
+            return (0, 0)
+        if token == "new":
+            return (1, 0)
+        v_match = re.fullmatch(r"v(\d+)", token)
+        if v_match:
+            return (2, int(v_match.group(1)))
+        return (3, token)
+
+    return sorted(tokens, key=key)
+
+
+def token_to_agent_dir(token: str) -> str:
+    return LEGACY_AGENT_DIR.get(token, f"{token}_agent")
+
+
+def token_display(token: str) -> str:
+    if token in LEGACY_DISPLAY:
+        return LEGACY_DISPLAY[token]
+    if re.fullmatch(r"v\d+", token):
+        return f"{token.upper()} RL"
+    return token
+
+
+def token_col(token: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9]+", "_", token).strip("_").lower()
+
+
 @st.cache_data(show_spinner=False)
 def load_json(path: Path) -> dict:
     if not path.exists():
@@ -288,18 +307,12 @@ def get_checkpoints(run_path: Path) -> list[str]:
 @st.cache_data(show_spinner=False)
 def build_main_df(
     experiment: str,
+    impl_tokens: tuple[str, ...],
     base_eval_by_impl: dict[str, dict],
     pytorch: dict,
     exec_time_data_by_impl: dict[str, dict[str, list[float]]],
 ) -> pd.DataFrame:
-    """Build a benchmark-level dataframe including both RL implementations.
-
-    exec_time_data_by_impl format:
-      {
-        "rl_autoschedular": {"bench": [..], ...},
-        "new_rl_autoschedular": {"bench": [..], ...}
-      }
-    """
+    """Build a benchmark-level dataframe including all selected implementations."""
     rows = []
     all_keys = set(pytorch.keys())
     for impl_base_eval in base_eval_by_impl.values():
@@ -308,9 +321,13 @@ def build_main_df(
         all_keys |= set(impl_exec_data.keys())
 
     for key in sorted(all_keys):
-        old_baseline_time = base_eval_by_impl.get(DEFAULT_IMPLEMENTATION, {}).get(key)
-        new_baseline_time = base_eval_by_impl.get(NEW_IMPLEMENTATION, {}).get(key)
-        baseline_time = old_baseline_time if old_baseline_time is not None else new_baseline_time
+        baseline_time = None
+        for token in impl_tokens:
+            candidate = base_eval_by_impl.get(token, {}).get(key)
+            if candidate is not None:
+                baseline_time = candidate
+                break
+
         meta = parse_benchmark_key(key)
         pt = pytorch.get(key, {})
 
@@ -323,12 +340,7 @@ def build_main_df(
             "batch_size": meta["batch_size"],
             "op_type": meta["op_type"],
             "op_type_label": label_op_type(meta["op_type"] or ""),
-            # Canonical shared baseline value for aggregate charts.
-            # Prefer old baseline when both exist.
             "mlir_baseline_us": baseline_time,
-            "mlir_old_baseline_us": old_baseline_time,
-            "mlir_new_baseline_us": new_baseline_time,
-            # PyTorch reference times
             "pytorch_eager_us": pt.get("eager"),
             "pytorch_compile_us": pt.get("compile"),
             "pytorch_jit_us": pt.get("jit"),
@@ -338,12 +350,14 @@ def build_main_df(
         rl_speedup_candidates: list[float] = []
 
         # Add per-implementation RL metrics
-        for impl in IMPL_ORDER:
-            suffix = IMPL_SHORT[impl]
-            impl_exec_data = exec_time_data_by_impl.get(impl, {})
+        for token in impl_tokens:
+            suffix = token_col(token)
+            impl_exec_data = exec_time_data_by_impl.get(token, {})
             rl_vals = impl_exec_data.get(key, [])
             rl_optimized = min(rl_vals) if rl_vals else None
-            impl_baseline_time = base_eval_by_impl.get(impl, {}).get(key)
+            impl_baseline_time = base_eval_by_impl.get(token, {}).get(key)
+
+            row[f"mlir_{suffix}_baseline_us"] = impl_baseline_time
             row[f"rl_{suffix}_optimized_us"] = rl_optimized
 
             if rl_optimized and impl_baseline_time:
@@ -379,10 +393,30 @@ def get_experiment_roots() -> list[Path]:
     ])
 
 
-def get_runs(experiment_root: Path) -> list[str]:
+def discover_impl_tokens(experiment_root: Path) -> list[str]:
+    tokens: set[str] = set()
+
+    for d in experiment_root.iterdir():
+        if d.is_dir() and d.name.endswith("_agent"):
+            if d.name == "old_agent":
+                tokens.add("old")
+            elif d.name == "new_agent":
+                tokens.add("new")
+            else:
+                tokens.add(d.name.removesuffix("_agent"))
+
+    exec_times_dir = experiment_root / "exec_times"
+    if exec_times_dir.exists():
+        for f in exec_times_dir.glob("*_base_eval.json"):
+            tokens.add(f.name.removesuffix("_base_eval.json"))
+
+    return sort_impl_tokens(list(tokens))
+
+
+def get_runs(experiment_root: Path, impl_tokens: list[str]) -> list[str]:
     runs: set[str] = set()
-    for impl in IMPL_ORDER:
-        agent_dir = experiment_root / IMPL_AGENT_DIR[impl]
+    for token in impl_tokens:
+        agent_dir = experiment_root / token_to_agent_dir(token)
         if not agent_dir.exists():
             continue
         runs |= {
@@ -392,20 +426,19 @@ def get_runs(experiment_root: Path) -> list[str]:
     return sorted(runs, key=lambda name: int(name.split("_")[1]) if name.split("_")[1].isdigit() else name)
 
 
-def get_run_paths_by_impl(experiment_root: Path, selected_run: str) -> dict[str, Path]:
+def get_run_paths_by_impl(experiment_root: Path, selected_run: str, impl_tokens: list[str]) -> dict[str, Path]:
     run_paths: dict[str, Path] = {}
-    for impl in IMPL_ORDER:
-        run_path = experiment_root / IMPL_AGENT_DIR[impl] / selected_run
+    for token in impl_tokens:
+        run_path = experiment_root / token_to_agent_dir(token) / selected_run
         if run_path.exists() and run_path.is_dir():
-            run_paths[impl] = run_path
+            run_paths[token] = run_path
     return run_paths
 
 
-def get_baselines_by_impl(experiment_root: Path) -> dict[str, dict]:
+def get_baselines_by_impl(experiment_root: Path, impl_tokens: list[str]) -> dict[str, dict]:
     baselines: dict[str, dict] = {}
-    for impl in IMPL_ORDER:
-        prefix = IMPL_BASE_PREFIX[impl]
-        baselines[impl] = load_json(experiment_root / "exec_times" / f"{prefix}_base_eval.json")
+    for token in impl_tokens:
+        baselines[token] = load_json(experiment_root / "exec_times" / f"{token}_base_eval.json")
     return baselines
 
 
@@ -438,7 +471,23 @@ with st.sidebar:
     st.markdown("**Run Selection**")
     experiment = st.selectbox("Experiment", experiments)
     experiment_root = next(p for p in experiment_roots if p.name == experiment)
-    runs = get_runs(experiment_root)
+
+    all_impl_tokens = discover_impl_tokens(experiment_root)
+    if not all_impl_tokens:
+        st.warning("No implementation folders or base files found for this experiment.")
+        st.stop()
+
+    selected_impl_tokens = st.multiselect(
+        "Implementations",
+        options=all_impl_tokens,
+        default=all_impl_tokens,
+        format_func=token_display,
+    )
+    if not selected_impl_tokens:
+        st.warning("Select at least one implementation.")
+        st.stop()
+
+    runs = get_runs(experiment_root, selected_impl_tokens)
     if not runs:
         st.warning("No runs found for this experiment.")
         st.stop()
@@ -447,19 +496,21 @@ with st.sidebar:
     st.divider()
     st.markdown("**Filters**")
 
-    run_paths_by_impl = get_run_paths_by_impl(experiment_root, selected_run)
+    run_paths_by_impl = get_run_paths_by_impl(experiment_root, selected_run, selected_impl_tokens)
     if not run_paths_by_impl:
-        st.warning("Selected run does not exist in old_agent/new_agent.")
+        st.warning("Selected run does not exist for the chosen implementations.")
         st.stop()
 
+    active_impl_tokens = [t for t in selected_impl_tokens if t in run_paths_by_impl]
+
     # Load data for filter population
-    base_eval_by_impl = get_baselines_by_impl(experiment_root)
+    base_eval_by_impl = get_baselines_by_impl(experiment_root, selected_impl_tokens)
     pytorch_data = load_json(experiment_root / "exec_times" / "pytorch.json")
     exec_time_data_by_impl = {
         impl: load_exec_time_folder(run_path / "logs" / "eval" / "exec_time")
         for impl, run_path in run_paths_by_impl.items()
     }
-    df_full = build_main_df(experiment, base_eval_by_impl, pytorch_data, exec_time_data_by_impl)
+    df_full = build_main_df(experiment, tuple(selected_impl_tokens), base_eval_by_impl, pytorch_data, exec_time_data_by_impl)
 
     all_batch_sizes = sorted(df_full["batch_size"].dropna().unique().tolist())
     all_op_types = sorted(df_full["op_type"].dropna().unique().tolist())
@@ -496,7 +547,7 @@ if speedup_min > 0:
 col_title, col_run = st.columns([3, 1])
 with col_title:
     st.markdown(f"# MLIR-RL Evaluation")
-    impls_shown = [IMPL_DISPLAY[impl] for impl in IMPL_ORDER if impl in run_paths_by_impl]
+    impls_shown = [token_display(impl) for impl in active_impl_tokens]
     impls_text = ", ".join(impls_shown) if impls_shown else "No RL implementations"
     st.caption(
         f"Implementations: **{impls_text}** · "
@@ -545,33 +596,20 @@ def impl_metrics(df_in: pd.DataFrame, suffix: str) -> dict[str, float | int | bo
         "beats_all": beats_all,
     }
 
+summary_rows = []
+for token in active_impl_tokens:
+    suffix = token_col(token)
+    metrics = impl_metrics(df, suffix)
+    summary_rows.append({
+        "Implementation": token_display(token),
+        "Avg RL vs PyTorch Eager": f"{metrics['mean']:.2f}×" if metrics["available"] and pd.notna(metrics["mean"]) else "N/A",
+        "Beats All PyTorch Modes": f"{metrics['beats_all']} / {len(df)}" if metrics["available"] else "N/A",
+    })
 
-old_m = impl_metrics(df, "old")
-new_m = impl_metrics(df, "new")
-best_any = df["best_rl_vs_eager"].max() if "best_rl_vs_eager" in df.columns else None
-worst_any = df["best_rl_vs_eager"].min() if "best_rl_vs_eager" in df.columns else None
-
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    st.markdown(metric_card("Avg Old RL vs PyTorch Eager",
-        f"{old_m['mean']:.2f}×" if old_m["available"] and pd.notna(old_m["mean"]) else "N/A",
-        "good" if old_m["available"] and pd.notna(old_m["mean"]) and old_m["mean"] > 1 else "warn"),
-        unsafe_allow_html=True)
-with c2:
-    st.markdown(metric_card("Avg New RL vs PyTorch Eager",
-        f"{new_m['mean']:.2f}×" if new_m["available"] and pd.notna(new_m["mean"]) else "N/A",
-        "good" if new_m["available"] and pd.notna(new_m["mean"]) and new_m["mean"] > 1 else "warn"),
-        unsafe_allow_html=True)
-with c3:
-    st.markdown(metric_card("Old RL Beats All PyTorch Modes",
-        f"{old_m['beats_all']} / {len(df)}" if old_m["available"] else "N/A",
-        "good" if old_m["available"] and old_m["beats_all"] > 0 else "warn"),
-        unsafe_allow_html=True)
-with c4:
-    st.markdown(metric_card("New RL Beats All PyTorch Modes",
-        f"{new_m['beats_all']} / {len(df)}" if new_m["available"] else "N/A",
-        "good" if new_m["available"] and new_m["beats_all"] > 0 else "warn"),
-        unsafe_allow_html=True)
+if summary_rows:
+    st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+else:
+    st.info("No implementation metrics available for selected run.")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -595,27 +633,34 @@ with tab1:
     if df.empty:
         st.info("No benchmarks match the current filters.")
     else:
-        mode_labels = {
-            "rl_old_optimized_us": "Old RL Optimized",
-            "rl_new_optimized_us": "New RL Optimized",
-            "mlir_baseline_us":   "MLIR Baseline",
-            "pytorch_eager_us":   "PyTorch Eager",
+        rl_modes = [
+            (f"rl_{token_col(token)}_optimized_us", f"{token_display(token)} Optimized")
+            for token in active_impl_tokens
+        ]
+        mode_labels = {k: v for k, v in rl_modes}
+        mode_labels.update({
+            "mlir_baseline_us": "MLIR Baseline",
+            "pytorch_eager_us": "PyTorch Eager",
             "pytorch_compile_us": "PyTorch Compile",
-            "pytorch_jit_us":     "PyTorch JIT",
-        }
+            "pytorch_jit_us": "PyTorch JIT",
+        })
+
         COLOR_BASELINE = "#94a3b8"
+        rl_palette = px.colors.qualitative.Set2 + px.colors.qualitative.Set3
         color_map = {
-            "Old RL Optimized": "#1a7f4b",
-            "New RL Optimized": "#0f766e",
-            "MLIR Baseline":   COLOR_BASELINE,
-            "PyTorch Eager":   COLOR_EAGER,
+            "MLIR Baseline": COLOR_BASELINE,
+            "PyTorch Eager": COLOR_EAGER,
             "PyTorch Compile": COLOR_COMPILE,
             "PyTorch JIT":     COLOR_JIT,
         }
+        for i, (_, label) in enumerate(rl_modes):
+            color_map[label] = rl_palette[i % len(rl_palette)]
 
         # ── Chart 1: per model family ──────────────────────────
-        agg_cols = ["model_family", "rl_old_optimized_us", "rl_new_optimized_us", "mlir_baseline_us",
-                    "pytorch_eager_us", "pytorch_compile_us", "pytorch_jit_us"]
+        agg_cols = ["model_family"] + [c for c, _ in rl_modes] + [
+            "mlir_baseline_us", "pytorch_eager_us", "pytorch_compile_us", "pytorch_jit_us"
+        ]
+        agg_cols = [c for c in agg_cols if c in df.columns]
         df_agg = (
             df[agg_cols]
             .groupby("model_family", as_index=False)
@@ -642,8 +687,9 @@ with tab1:
             df_melt["mode"] = df_melt["mode"].map(mode_labels)
 
             # Preserve logical bar order
-            mode_order = ["Old RL Optimized", "New RL Optimized", "MLIR Baseline",
-                          "PyTorch Eager", "PyTorch Compile", "PyTorch JIT"]
+            mode_order = [label for _, label in rl_modes] + [
+                "MLIR Baseline", "PyTorch Eager", "PyTorch Compile", "PyTorch JIT"
+            ]
             df_melt["mode"] = pd.Categorical(
                 df_melt["mode"], categories=mode_order, ordered=True
             )
@@ -696,8 +742,10 @@ with tab1:
             if df_drill.empty:
                 st.info("Select at least one sub-family.")
             else:
-                agg_sub_cols = ["sub_family", "rl_old_optimized_us", "rl_new_optimized_us", "mlir_baseline_us",
-                                "pytorch_eager_us", "pytorch_compile_us", "pytorch_jit_us"]
+                agg_sub_cols = ["sub_family"] + [c for c, _ in rl_modes] + [
+                    "mlir_baseline_us", "pytorch_eager_us", "pytorch_compile_us", "pytorch_jit_us"
+                ]
+                agg_sub_cols = [c for c in agg_sub_cols if c in df_drill.columns]
                 df_sub_agg = (
                     df_drill[agg_sub_cols]
                     .groupby("sub_family", as_index=False)
@@ -735,20 +783,28 @@ with tab1:
         # ── Data table ─────────────────────────────────────────
         st.markdown("#### Data Table")
         st.caption(
-            "`rl_old_vs_eager` / `rl_new_vs_eager` > 1 means that RL implementation is faster than PyTorch Eager. "
-            "`rl_old_speedup_over_baseline` / `rl_new_speedup_over_baseline` show improvement over unoptimized MLIR."
+            "`rl_<impl>_vs_eager > 1` means RL is faster than PyTorch Eager. "
+            "`rl_<impl>_speedup_over_baseline` measures improvement over unoptimized MLIR."
         )
         display_cols = [
             "benchmark", "bench_category", "model_family", "sub_family", "op_type_label",
             "batch_size",
-            "rl_old_optimized_us", "rl_new_optimized_us", "mlir_baseline_us",
-            "mlir_old_baseline_us", "mlir_new_baseline_us",
+            "mlir_baseline_us",
             "pytorch_eager_us", "pytorch_compile_us", "pytorch_jit_us",
-            "rl_old_speedup_over_baseline", "rl_new_speedup_over_baseline",
-            "rl_old_vs_eager", "rl_old_vs_compile", "rl_old_vs_jit",
-            "rl_new_vs_eager", "rl_new_vs_compile", "rl_new_vs_jit",
             "best_rl_vs_eager",
         ]
+
+        for token in active_impl_tokens:
+            suffix = token_col(token)
+            display_cols.extend([
+                f"rl_{suffix}_optimized_us",
+                f"mlir_{suffix}_baseline_us",
+                f"rl_{suffix}_speedup_over_baseline",
+                f"rl_{suffix}_vs_eager",
+                f"rl_{suffix}_vs_compile",
+                f"rl_{suffix}_vs_jit",
+            ])
+
         display_cols = [c for c in display_cols if c in df.columns]
         st.dataframe(
             df[display_cols].sort_values("best_rl_vs_eager", ascending=False, na_position="last"),
@@ -787,7 +843,7 @@ with tab2:
     st.caption(
         "Speedup = unoptimized MLIR baseline exec time / optimized exec time. "
         "**> 1 means the RL agent improved over the baseline.** "
-        "This tab overlays old/new RL implementations when both are available."
+        "This tab overlays all selected RL implementations."
     )
 
     any_speedup_data = any(bool(v) for v in speedup_per_bench_by_impl.values())
@@ -800,7 +856,7 @@ with tab2:
                 rows_sp.append({
                     "benchmark": k,
                     "speedup": sp,
-                    "implementation": IMPL_DISPLAY.get(impl, impl),
+                    "implementation": token_display(impl),
                     "op_type": label_op_type(meta.get("op_type") or "unknown"),
                     "model_family": meta.get("model_family") or "unknown",
                     "bench_category": meta.get("bench_category") or "Other",
@@ -864,14 +920,14 @@ with tab2:
     any_avg = any(bool(vals) for vals in avg_speedup_by_impl.values())
     if any_avg:
         fig3 = go.Figure()
-        for impl in IMPL_ORDER:
+        for impl in active_impl_tokens:
             vals = avg_speedup_by_impl.get(impl, [])
             if not vals:
                 continue
             fig3.add_trace(go.Scatter(
                 x=list(range(len(vals))), y=vals,
                 mode="lines",
-                name=IMPL_DISPLAY.get(impl, impl),
+                name=token_display(impl),
                 line=dict(width=2),
             ))
 
@@ -899,7 +955,7 @@ with tab2:
         )
         if selected_bench:
             fig4 = go.Figure()
-            for impl in IMPL_ORDER:
+            for impl in active_impl_tokens:
                 impl_data = speedup_per_bench_by_impl.get(impl, {})
                 for bench in selected_bench:
                     if bench not in impl_data:
@@ -907,7 +963,7 @@ with tab2:
                     vals = impl_data[bench]
                     fig4.add_trace(go.Scatter(
                         x=list(range(len(vals))), y=vals,
-                        mode="lines", name=f"{bench} ({IMPL_DISPLAY.get(impl, impl)})",
+                        mode="lines", name=f"{bench} ({token_display(impl)})",
                         line=dict(width=1.5),
                     ))
             fig4.add_hline(y=1.0, line_dash="dash", line_color="#5a6480")
@@ -925,7 +981,7 @@ with tab2:
         st.markdown("#### Export")
         sp_csv = pd.DataFrame([
             {
-                "implementation": IMPL_DISPLAY.get(impl, impl),
+                "implementation": token_display(impl),
                 "benchmark": k,
                 "step": i,
                 "speedup": v,
@@ -954,7 +1010,7 @@ with tab3:
     for title, (fname, _) in signals.items():
         fig = go.Figure()
         has_signal = False
-        for impl in IMPL_ORDER:
+        for impl in active_impl_tokens:
             run_path = run_paths_by_impl.get(impl)
             if run_path is None:
                 continue
@@ -966,7 +1022,7 @@ with tab3:
             fig.add_trace(go.Scatter(
                 x=list(range(len(vals))), y=vals,
                 mode="lines",
-                name=IMPL_DISPLAY.get(impl, impl),
+                name=token_display(impl),
                 line=dict(width=2),
             ))
 
@@ -996,7 +1052,7 @@ with tab3:
     for title, (fname, _) in train_signals.items():
         fig = go.Figure()
         has_signal = False
-        for impl in IMPL_ORDER:
+        for impl in active_impl_tokens:
             run_path = run_paths_by_impl.get(impl)
             if run_path is None:
                 continue
@@ -1008,7 +1064,7 @@ with tab3:
             fig.add_trace(go.Scatter(
                 x=list(range(len(vals))), y=vals,
                 mode="lines",
-                name=IMPL_DISPLAY.get(impl, impl),
+                name=token_display(impl),
                 line=dict(width=2),
             ))
 
@@ -1031,7 +1087,7 @@ with tab3:
     # Export training data
     export_data = {}
     for impl, run_path in run_paths_by_impl.items():
-        impl_key = IMPL_DISPLAY.get(impl, impl)
+        impl_key = token_display(impl)
         export_data[impl_key] = {}
         for fname in ["reward", "cumulative_reward", "entropy"]:
             vals = load_plain_floats(run_path / "logs" / "eval" / fname)
@@ -1060,7 +1116,7 @@ with tab4:
     st.caption(
         "Each checkpoint corresponds to a saved `.pt` model in `run_i/models/`. "
         "Exec times are read from `run_i/logs/eval/exec_time/` — one value per checkpoint per benchmark. "
-        "This tab overlays old/new implementations when both are available."
+        "This tab overlays all selected implementations."
     )
 
     ckpt_data_by_impl: dict[str, dict[str, object]] = {}
@@ -1081,7 +1137,7 @@ with tab4:
         # ── Average exec time evolution across all benchmarks ──
         st.markdown("#### Average Exec Time over Checkpoints")
         fig_avg = go.Figure()
-        for impl in IMPL_ORDER:
+        for impl in active_impl_tokens:
             if impl not in ckpt_data_by_impl:
                 continue
             checkpoints = ckpt_data_by_impl[impl]["checkpoints"]
@@ -1104,7 +1160,7 @@ with tab4:
                 x=list(range(max_len)), y=avg_per_ckpt,
                 mode="lines+markers",
                 marker=dict(size=5),
-                name=IMPL_DISPLAY.get(impl, impl),
+                name=token_display(impl),
                 text=x_labels,
                 hovertemplate="Implementation: %{fullData.name}<br>Checkpoint: %{text}<br>Avg Exec Time: %{y:.0f} µs<extra></extra>",
             ))
@@ -1130,7 +1186,7 @@ with tab4:
 
         if selected_benches:
             fig_ckpt = go.Figure()
-            for impl in IMPL_ORDER:
+            for impl in active_impl_tokens:
                 if impl not in ckpt_data_by_impl:
                     continue
                 checkpoints = ckpt_data_by_impl[impl]["checkpoints"]
@@ -1147,7 +1203,7 @@ with tab4:
                     fig_ckpt.add_trace(go.Scatter(
                         x=x_idx, y=vals,
                         mode="lines+markers",
-                        name=f"{bench} ({IMPL_DISPLAY.get(impl, impl)})",
+                        name=f"{bench} ({token_display(impl)})",
                         line=dict(width=1.8),
                         marker=dict(size=4),
                         hovertemplate="Checkpoint: %{text}<br>Exec Time: %{y:.0f} µs<extra>%{fullData.name}</extra>",
@@ -1164,21 +1220,21 @@ with tab4:
             st.plotly_chart(fig_ckpt, use_container_width=True)
 
         # ── Checkpoint list ──
-        for impl in IMPL_ORDER:
+        for impl in active_impl_tokens:
             if impl not in ckpt_data_by_impl:
                 continue
             run_path = ckpt_data_by_impl[impl]["run_path"]
             checkpoints = ckpt_data_by_impl[impl]["checkpoints"]
             assert isinstance(run_path, Path)
             assert isinstance(checkpoints, list)
-            with st.expander(f"📁 {IMPL_DISPLAY.get(impl, impl)}: {len(checkpoints)} checkpoints in `{run_path / 'models'}`"):
+            with st.expander(f"📁 {token_display(impl)}: {len(checkpoints)} checkpoints in `{run_path / 'models'}`"):
                 for i, ckpt in enumerate(checkpoints):
                     st.caption(f"`[{i}]` {ckpt}")
 
         # ── Export ──
         st.markdown("#### Export")
         ckpt_rows = []
-        for impl in IMPL_ORDER:
+        for impl in active_impl_tokens:
             if impl not in ckpt_data_by_impl:
                 continue
             checkpoints = ckpt_data_by_impl[impl]["checkpoints"]
@@ -1188,7 +1244,7 @@ with tab4:
             for bench, vals in exec_time_data.items():
                 for i, v in enumerate(vals):
                     ckpt_rows.append({
-                        "implementation": IMPL_DISPLAY.get(impl, impl),
+                        "implementation": token_display(impl),
                         "benchmark": bench,
                         "checkpoint_index": i,
                         "checkpoint": checkpoints[i] if i < len(checkpoints) else i,

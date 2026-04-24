@@ -16,6 +16,10 @@ class Config(metaclass=Singleton):
     """The max number of dimensions in load/store buffers"""
     num_tile_sizes: int
     """The number of tile sizes"""
+    num_pad_multiples: int = 3
+    """The number of pad multiple candidates (powers of 2: 2, 4, 8)."""
+    num_unroll_factors: int = 3
+    """The number of unroll factor candidates (powers of 2: 2, 4, 8)."""
     vect_size_limit: int
     """Vectorization size limit to prevent large sizes vectorization"""
     order: list[list[str]]
@@ -70,6 +74,54 @@ class Config(metaclass=Singleton):
     """Path to the file containing the execution data"""
     results_dir: str
     """Path to the results directory"""
+    implementation: str = "rl_autoschedular"
+    """Autoscheduler package implementation to use (e.g., rl_autoschedular, rl_autoschedular_v1)."""
+    hardware_auto_detect: bool = True
+    """If true, hardware features are auto-detected when a value is not explicitly provided."""
+    hardware_l1_kb: float = 0.0
+    """L1 cache size in KB (0 means auto-detect/unknown)."""
+    hardware_l2_kb: float = 0.0
+    """L2 cache size in KB (0 means auto-detect/unknown)."""
+    hardware_l3_kb: float = 0.0
+    """L3 cache size in KB (0 means auto-detect/unknown)."""
+    hardware_physical_cores: int = 0
+    """Number of physical CPU cores (0 means auto-detect/unknown)."""
+    hardware_logical_cores: int = 0
+    """Number of logical CPU cores (0 means auto-detect/unknown)."""
+    hardware_simd_width: int = 0
+    """SIMD width in bits (for example 256 AVX2, 512 AVX-512, 0 unknown)."""
+    hardware_clock_mhz: float = 0.0
+    """CPU clock frequency in MHz (0 means auto-detect/unknown)."""
+    reward_shaping_enabled: bool = True
+    """Enable dense intermediate reward shaping (used by shaped-reward implementations)."""
+    reward_shaping_scale: float = 1.0
+    """Global multiplier for shaped reward delta."""
+    reward_shaping_clip: float = 2.0
+    """Absolute clip bound for each shaped reward term."""
+    reward_shaping_weight_ai: float = 1.0
+    """Weight for arithmetic intensity contribution in shaped reward score."""
+    reward_shaping_weight_vectorizable: float = 0.1
+    """Weight for vectorizability contribution in shaped reward score."""
+    reward_shaping_weight_parallel: float = 0.1
+    """Weight for parallel-loop ratio contribution in shaped reward score."""
+    reward_shaping_vectorization_bonus: float = 0.2
+    """Extra bonus assigned to explicit vectorization actions in shaped reward implementations."""
+    transformer_d_model: int = 256
+    """Hidden size for transformer token embeddings."""
+    transformer_nhead: int = 8
+    """Number of attention heads in transformer encoder layers."""
+    transformer_num_layers: int = 3
+    """Number of transformer encoder layers."""
+    transformer_ffn_dim: int = 1024
+    """Feed-forward hidden dimension used in transformer encoder layers."""
+    transformer_dropout: float = 0.1
+    """Dropout ratio used by transformer projections and encoder layers."""
+    transformer_activation: Literal['relu', 'gelu'] = 'gelu'
+    """Activation function used inside transformer encoder feed-forward blocks."""
+    transformer_pooling: Literal['cls', 'mean'] = 'cls'
+    """Token pooling strategy for transformer output."""
+    transformer_use_action_history_token: bool = False
+    """If true, action history is injected as a transformer token instead of post-concatenation."""
 
     def __init__(self):
         """Load the configuration from the JSON file
@@ -80,10 +132,14 @@ class Config(metaclass=Singleton):
             config_data: dict[str, Any] = json.load(f)
 
         for element, element_t in self.__annotations__.items():
-            if element not in config_data:
+            if element in config_data:
+                raw_value = config_data[element]
+            elif hasattr(self.__class__, element):
+                raw_value = getattr(self.__class__, element)
+            else:
                 raise ValueError(f"{element} is missing from the config file")
 
-            element_v = check_type(config_data[element], element_t, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS)
+            element_v = check_type(raw_value, element_t, collection_check_strategy=CollectionCheckStrategy.ALL_ITEMS)
             setattr(self, element, element_v)
 
     def to_dict(self):

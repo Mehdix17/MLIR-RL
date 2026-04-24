@@ -11,7 +11,7 @@
 # Usage:
 #   sbatch scripts/train.sh                          # uses config/train1.json (default)
 #   sbatch scripts/train.sh config/my_config.json   # uses a custom config
-#   sbatch scripts/train.sh config/my_config.json new_rl_autoschedular
+#   sbatch scripts/train.sh config/my_config.json rl_autoschedular_v1
 #   scripts/submit_and_monitor.sh scripts/train.sh config/my_config.json
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -34,7 +34,21 @@ export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJEC
 
 # Accept config path as first positional argument, default to train1.json
 CONFIG="${1:-$PROJECT_ROOT/config/train1.json}"
-IMPLEMENTATION="${2:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}"
+if [[ "$CONFIG" != /* ]]; then
+    CONFIG="$PROJECT_ROOT/$CONFIG"
+fi
+
+CONFIG_IMPL=$(python3 - <<PY
+import json
+try:
+    with open("$CONFIG", "r") as f:
+        print((json.load(f).get("implementation") or "").strip())
+except Exception:
+    print("")
+PY
+)
+
+IMPLEMENTATION="${2:-${CONFIG_IMPL:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}}"
 export AUTOSCHEDULER_IMPL="$IMPLEMENTATION"
 export CONFIG_FILE_PATH="$CONFIG"
 
