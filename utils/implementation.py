@@ -119,9 +119,61 @@ def get_agent_runs_root(results_dir: str, implementation: Optional[str] = None) 
 
 
 def get_base_file_path(results_dir: str, implementation: Optional[str] = None) -> Path:
-    """Return results/<experiment>/exec_times/<prefix>_base.json."""
+    """Return results/<experiment>/exec_times/<prefix>_base.json.
+
+    If implementation is None, returns the dataset-level generic path
+    (exec_times/base.json). This is the preferred path for shared baselines.
+    """
+    if implementation is None:
+        return Path(results_dir) / "exec_times" / "base.json"
     prefix = get_base_prefix(implementation)
     return Path(results_dir) / "exec_times" / f"{prefix}_base.json"
+
+
+def get_split_file_path(results_dir: str, implementation: str, is_training: bool) -> Path:
+    """Return the path to train or eval split JSON.
+
+    First checks for the implementation-specific split file
+    (e.g. exec_times/old_base_train.json), then falls back to the
+    dataset-level generic split (exec_times/base_train.json).
+    """
+    prefix = get_base_prefix(implementation)
+    suffix = "train" if is_training else "eval"
+    specific = Path(results_dir) / "exec_times" / f"{prefix}_base_{suffix}.json"
+    generic = Path(results_dir) / "exec_times" / f"base_{suffix}.json"
+    return specific if specific.exists() else generic
+
+
+def get_base_eval_files(results_dir: str, impl_tokens: list[str]) -> dict[str, dict]:
+    """Load baseline eval JSONs for multiple implementations.
+
+    For each implementation token, tries the implementation-specific file first,
+    then falls back to the generic base_eval.json (shared across implementations).
+    Returns a dict mapping token -> parsed JSON dict.
+    """
+    import json
+    baselines: dict[str, dict] = {}
+    generic_path = Path(results_dir) / "exec_times" / "base_eval.json"
+    generic_data = None
+
+    for token in impl_tokens:
+        specific_path = Path(results_dir) / "exec_times" / f"{token}_base_eval.json"
+        if specific_path.exists():
+            try:
+                with open(specific_path) as f:
+                    baselines[token] = json.load(f)
+                continue
+            except (OSError, json.JSONDecodeError):
+                pass
+        if generic_data is None and generic_path.exists():
+            try:
+                with open(generic_path) as f:
+                    generic_data = json.load(f)
+            except (OSError, json.JSONDecodeError):
+                pass
+        if generic_data is not None:
+            baselines[token] = generic_data
+    return baselines
 
 
 def import_autoschedular_module(module: str, implementation: Optional[str] = None):

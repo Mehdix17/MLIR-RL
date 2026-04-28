@@ -1,8 +1,10 @@
+import multiprocessing
 from multiprocessing import Process, Queue
+from queue import Empty as QueueEmpty
 from typing import Callable, Optional, TypeVar
 
 T = TypeVar('T')
-ENABLED = False
+ENABLED = True
 
 
 class BindingsProcess:
@@ -23,12 +25,22 @@ class BindingsProcess:
         p.join(timeout)
         if p.is_alive():
             p.kill()
-            raise TimeoutError(f"Bindings call {func.__name__} timed out")
+            p.join()
+            raise TimeoutError(f"Bindings call {func.__name__} timed out after {timeout}s")
 
-        if ec := p.exitcode:
+        ec = p.exitcode
+        if ec:
             raise Exception(f"Bindings call {func.__name__} failed with exit code: {ec}")
 
-        res = q.get_nowait()
+        try:
+            res = q.get_nowait()
+        except QueueEmpty:
+            func_name = getattr(func, '__name__', str(func))
+            raise Exception(
+                f"Bindings call {func_name} failed: subprocess exited without result "
+                "(likely a crash in native code)"
+            )
+
         if isinstance(res, Exception):
             raise res
         return res

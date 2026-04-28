@@ -1,0 +1,143 @@
+=== MLIR-RL Pipeline ===
+Started:      Mon Apr 27 05:43:37 +04 2026
+Base config:  /scratch/mb10856/MLIR-RL/config/baseline.json
+Log:          pipeline_logs/pipeline_20260427_054337.log
+
+Implementations to process:
+  [resolve] rl_autoschedular → config/baseline.json
+  rl_autoschedular → baseline.json
+
+──────────── Step 1: MLIR baseline ────────────
+  ✓ Already exists: results/my_experiment/exec_times/base.json
+
+──────────── Step 2: PyTorch baselines ────────────
+  Running get_pytorch_times.py...
+Found 38739 .mlir files in data/all
+[1/38739] albert_batch_matmul_0: eager=56µs  compile=156µs  jit=139µs
+[2/38739] albert_batch_matmul_1: eager=515µs  compile=711µs  jit=377µs
+[3/38739] albert_batch_matmul_2: eager=12µs  compile=133µs  jit=17µs
+[4/38739] albert_batch_matmul_3: eager=13µs  compile=366µs  jit=18µs
+[5/38739] albert_batch_matmul_4: eager=1839µs  compile=2579µs  jit=2172µs
+[6/38739] albert_batch_matmul_5: eager=1812µs  compile=2025µs  jit=1764µs
+[7/38739] SKIP albert_block_0: not enough args for generic
+[8/38739] SKIP albert_block_1: not enough args for generic
+[9/38739] SKIP albert_block_10: not enough args for generic
+[10/38739] SKIP albert_block_100: unsupported linalg op: fill
+[11/38739] SKIP albert_block_1000: not enough args for generic
+[12/38739] SKIP albert_block_1001: not enough args for generic
+[13/38739] SKIP albert_block_1002: unsupported linalg op: fill
+[14/38739] SKIP albert_block_1003: not enough args for generic
+[15/38739] SKIP albert_block_1004: not enough args for batch_matmul
+[16/38739] SKIP albert_block_1005: not enough args for generic
+[17/38739] SKIP albert_block_1006: not enough args for generic
+[18/38739] SKIP albert_block_1007: not enough args for generic
+[19/38739] SKIP albert_block_1008: not enough args for generic
+[20/38739] SKIP albert_block_1009: not enough args for generic
+[21/38739] SKIP albert_block_101: not enough args for generic
+[22/38739] SKIP albert_block_1010: not enough args for generic
+[23/38739] SKIP albert_block_1011: not enough args for generic
+[24/38739] SKIP albert_block_1012: not enough args for generic
+[25/38739] SKIP albert_block_1013: unsupported linalg op: transpose
+[26/38739] SKIP albert_block_1014: not enough args for generic
+[27/38739] SKIP albert_block_1015: unsupported linalg op: transpose
+[28/38739] SKIP albert_block_1016: not enough args for generic
+[29/38739] SKIP albert_block_1017: unsupported linalg op: fill
+[30/38739] SKIP albert_block_1018: not enough args for generic
+[31/38739] SKIP albert_block_1019: not enough args for generic
+[32/38739] SKIP albert_block_102: not enough args for generic
+[33/38739] SKIP albert_block_1020: not enough args for batch_matmul
+[34/38739] SKIP albert_block_1021: unsupported linalg op: transpose
+[35/38739] SKIP albert_block_1022: not enough args for generic
+[36/38739] SKIP albert_block_1023: not enough args for generic
+[37/38739] SKIP albert_block_1024: unsupported linalg op: fill
+[38/38739] SKIP albert_block_1025: not enough args for generic
+[39/38739] SKIP albert_block_1026: not enough args for generic
+[40/38739] SKIP albert_block_1027: not enough args for generic
+[41/38739] SKIP albert_block_1028: not enough args for batch_matmul
+[42/38739] SKIP albert_block_1029: not enough args for generic
+[43/38739] SKIP albert_block_103: not enough args for generic
+[44/38739] SKIP albert_block_1030: not enough args for generic
+[45/38739] SKIP albert_block_1031: not enough args for generic
+[46/38739] SKIP albert_block_1032: unsupported linalg op: fill
+[47/38739] SKIP albert_block_1033: not enough args for generic
+[48/38739] SKIP albert_block_1034: not enough args for generic
+[49/38739] SKIP albert_block_1035: not enough args for generic
+[50/38739] SKIP albert_block_1036: not enough args for batch_matmul
+[51/38739] SKIP albert_block_1037: not enough args for generic
+[52/38739] SKIP albert_block_1038: not enough args for generic
+[53/38739] SKIP albert_block_1039: not enough args for generic
+[54/38739] SKIP albert_block_104: not enough args for batch_matmul
+[55/38739] SKIP albert_block_1040: not enough args for generic
+[56/38739] SKIP albert_block_1041: unsupported linalg op: transpose
+[57/38739] SKIP albert_block_1042: not enough args for generic
+[58/38739] SKIP albert_block_1043: not enough args for generic
+[59/38739] SKIP albert_block_1044: unsupported linalg op: fill
+[60/38739] SKIP albert_block_1045: not enough args for generic
+[61/38739] SKIP albert_block_1046: not enough args for generic
+[62/38739] SKIP albert_block_1047: not enough args for generic
+[63/38739] SKIP albert_block_1048: not enough args for batch_matmul
+[64/38739] SKIP albert_block_1049: not enough args for generic
+[65/38739] SKIP albert_block_105: not enough args for generic
+[66/38739] SKIP albert_block_1050: unsupported linalg op: fill
+[67/38739] SKIP albert_block_1051: not enough args for generic
+[68/38739] SKIP albert_block_1052: not enough args for generic
+[69/38739] SKIP albert_block_1053: not enough args for generic
+[70/38739] SKIP albert_block_1054: not enough args for batch_matmul
+[71/38739] SKIP albert_block_1055: not enough args for generic
+[72/38739] SKIP albert_block_1056: not enough args for generic
+[73/38739] SKIP albert_block_1057: not enough args for generic
+[74/38739] SKIP albert_block_1058: not enough args for generic
+[75/38739] SKIP albert_block_1059: not enough args for generic
+[76/38739] SKIP albert_block_106: unsupported linalg op: fill
+[77/38739] SKIP albert_block_1060: not enough args for generic
+[78/38739] SKIP albert_block_1061: unsupported linalg op: fill
+[79/38739] SKIP albert_block_1062: not enough args for generic
+[80/38739] SKIP albert_block_1063: not enough args for generic
+[81/38739] SKIP albert_block_1064: not enough args for batch_matmul
+[82/38739] SKIP albert_block_1065: not enough args for generic
+[83/38739] SKIP albert_block_1066: not enough args for generic
+[84/38739] SKIP albert_block_1067: not enough args for generic
+[85/38739] SKIP albert_block_1068: not enough args for generic
+[86/38739] SKIP albert_block_1069: not enough args for generic
+[87/38739] SKIP albert_block_107: not enough args for generic
+[88/38739] SKIP albert_block_1070: not enough args for generic
+[89/38739] SKIP albert_block_1071: not enough args for generic
+[90/38739] SKIP albert_block_1072: not enough args for generic
+[91/38739] SKIP albert_block_1073: not enough args for generic
+[92/38739] SKIP albert_block_1074: not enough args for generic
+[93/38739] SKIP albert_block_1075: not enough args for generic
+[94/38739] SKIP albert_block_1076: not enough args for generic
+[95/38739] SKIP albert_block_1077: not enough args for generic
+[96/38739] SKIP albert_block_1078: not enough args for generic
+[97/38739] SKIP albert_block_1079: not enough args for generic
+[98/38739] SKIP albert_block_108: not enough args for generic
+[99/38739] SKIP albert_block_1080: not enough args for generic
+[100/38739] SKIP albert_block_1081: not enough args for generic
+[101/38739] SKIP albert_block_1082: not enough args for generic
+[102/38739] SKIP albert_block_1083: not enough args for generic
+[103/38739] SKIP albert_block_1084: not enough args for generic
+[104/38739] SKIP albert_block_1085: not enough args for generic
+[105/38739] SKIP albert_block_1086: not enough args for generic
+[106/38739] SKIP albert_block_1087: not enough args for generic
+[107/38739] SKIP albert_block_1088: not enough args for generic
+[108/38739] SKIP albert_block_1089: unsupported linalg op: transpose
+[109/38739] SKIP albert_block_109: not enough args for generic
+[110/38739] SKIP albert_block_1090: not enough args for generic
+[111/38739] SKIP albert_block_1091: not enough args for generic
+[112/38739] SKIP albert_block_1092: unsupported linalg op: fill
+[113/38739] SKIP albert_block_1093: not enough args for generic
+[114/38739] SKIP albert_block_1094: not enough args for generic
+[115/38739] SKIP albert_block_1095: not enough args for batch_matmul
+[116/38739] SKIP albert_block_1096: not enough args for generic
+[117/38739] SKIP albert_block_1097: unsupported linalg op: fill
+[118/38739] SKIP albert_block_1098: not enough args for generic
+[119/38739] SKIP albert_block_1099: not enough args for generic
+[120/38739] SKIP albert_block_11: not enough args for generic
+[121/38739] SKIP albert_block_110: not enough args for batch_matmul
+[122/38739] SKIP albert_block_1100: not enough args for batch_matmul
+[123/38739] SKIP albert_block_1101: not enough args for generic
+[124/38739] SKIP albert_block_1102: not enough args for generic
+[125/38739] SKIP albert_block_1103: not enough args for generic
+[126/38739] SKIP albert_block_1104: not enough args for generic
+[127/38739] SKIP albert_block_1105: not enough args for generic
+[128/38739] SKIP albert_block_1106: not enough args for generic

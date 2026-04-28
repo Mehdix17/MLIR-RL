@@ -44,8 +44,8 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with “Permission denied” o
 - **`scripts/get_base.py`** — Measures unoptimized MLIR baseline execution times.
 - **`scripts/get_pytorch_times.py`** — Measures PyTorch eager / compile / JIT baselines.
 - **`scripts/split_json.py`** — Splits a baseline JSON into train/eval sets.
-- **`scripts/compare_baselines.py`** — Compares RL vs MLIR vs PyTorch.
-- **`dashboard/dashboard.py`** — Streamlit evaluation dashboard.
+- **`scripts/pipeline.sh`** — One-shot full pipeline orchestration (baselines → train → eval for all versions).
+- **`dashboard/dashboard.py`** — Streamlit evaluation dashboard (multi-implementation comparison).
 
 ### Implementation Packages (Versioned Agents)
 
@@ -94,8 +94,8 @@ sbatch scripts/train.sh config/my_config.json
 # 5. Evaluate checkpoints (Slurm)
 sbatch scripts/eval.sh config/my_config.json
 
-# 6. Compare
-python scripts/compare_baselines.py --config config/my_config.json
+# 6. Compare in dashboard
+cd dashboard && streamlit run dashboard.py
 ```
 
 Train/eval Slurm scripts automatically derive the implementation from the config. You can override with a second positional arg:

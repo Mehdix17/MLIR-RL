@@ -1,9 +1,27 @@
 from rl_autoschedular_v3.state import BenchmarkFeatures, extract_bench_features_from_code, extract_bench_features_from_file
 from rl_autoschedular_v3.transforms import transform_img2col
 from utils.config import Config
+from utils.implementation import get_autoschedular_impl, get_split_file_path
+from pathlib import Path
 import json
 from tqdm import tqdm
 import os
+
+
+def _resolve_bench_file(cfg: Config, is_training: bool) -> str:
+    """Resolve the train/eval JSON file path.
+
+    Priority:
+    1. cfg.json_file / cfg.eval_json_file (explicit in config — backward compat)
+    2. Auto-derived from implementation + results_dir (preferred)
+    """
+    if is_training and cfg.json_file:
+        return cfg.json_file
+    if not is_training and cfg.eval_json_file:
+        return cfg.eval_json_file
+
+    implementation = get_autoschedular_impl()
+    return str(get_split_file_path(cfg.results_dir, implementation, is_training))
 
 
 class Benchmarks:
@@ -18,12 +36,7 @@ class Benchmarks:
             is_training (bool): Whether to load train or evaluation set
         """
         cfg = Config()
-        # Load benchmark names and execution times from json file
-        bench_json_file = cfg.json_file
-
-        # If we are in evaluation mode, use the evaluation json file if provided
-        if cfg.eval_json_file and not is_training:
-            bench_json_file = cfg.eval_json_file
+        bench_json_file = _resolve_bench_file(cfg, is_training)
 
         with open(bench_json_file) as file:
             benchmarks_json: dict[str, int] = json.load(file)

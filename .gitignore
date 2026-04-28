@@ -30,13 +30,4 @@ results/
 llvm-project/
 tools/ast_dumper/build/
 tools/vectorizer/build/
-data/all/
-data/code_files/
-data/raw/
-data/synthetic/
-data/features/
-data/debug/
-data/multi/
-data/nn/
-data/nn-old/
-data/polybench/
+data/*

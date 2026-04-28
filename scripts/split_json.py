@@ -39,7 +39,8 @@ implementation = args.implementation or args.implementation_positional or get_au
 if config_path:
     with open(config_path) as _f:
         _cfg = json.load(_f)
-    input_path = args.input or str(get_base_file_path(_cfg["results_dir"], implementation))
+    # Default to the dataset-level generic base.json (shared across implementations).
+    input_path = args.input or str(get_base_file_path(_cfg["results_dir"], implementation=None))
 else:
     if not args.input:
         parser.error("Provide --config or --input")

@@ -67,8 +67,9 @@ Cross-version routing and config support (required to run by config only):
 - `scripts/train.sh`, `scripts/eval.sh`, `scripts/get_base.sh`, `scripts/get_pytorch_times.sh`:
 	- Resolve implementation from config by default.
 	- Preserve explicit CLI override behavior.
-- `scripts/get_base.py`, `scripts/split_json.py`, `scripts/compare_baselines.py`:
+- `scripts/get_base.py`, `scripts/split_json.py`:
 	- Resolve implementation from config when provided.
+	- Write to shared `exec_times/base.json` by default (no per-implementation prefix).
 
 Dashboard and comparison support:
 - `dashboard/dashboard.py`:

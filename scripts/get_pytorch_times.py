@@ -281,12 +281,18 @@ def main():
         bench_dir   = Path(args.benchmarks_dir or _cfg["benchmarks_folder_path"])
         output_path = Path(args.output) if args.output else \
                       Path(_cfg["results_dir"]) / "exec_times" / "pytorch.json"
-        # Only measure eval benchmarks — pytorch times are only used for comparison
-        # against RL eval results, so training benchmarks would be wasted work.
-        eval_json = Path(_cfg["eval_json_file"])
-        if eval_json.exists():
-            with open(eval_json) as _f:
-                eval_names = set(json.load(_f).keys())
+        # Only measure eval benchmarks when eval_json_file is provided.
+        # Otherwise measure all benchmarks.
+        eval_json_str = _cfg.get("eval_json_file", "").strip()
+        if eval_json_str:
+            eval_json = Path(eval_json_str)
+            if eval_json.exists():
+                with open(eval_json) as _f:
+                    eval_names = set(json.load(_f).keys())
+            else:
+                eval_names = None
+        else:
+            eval_names = None
     else:
         if not args.benchmarks_dir:
             parser.error("Provide --config or --benchmarks-dir")

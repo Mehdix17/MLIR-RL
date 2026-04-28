@@ -40,11 +40,7 @@ sbatch scripts/train.sh "$CONFIG"
 
 sbatch scripts/eval.sh "$CONFIG"
 
-# ---------- 7) Compare RL vs MLIR vs PyTorch ----------
-
-python scripts/compare_baselines.py "$CONFIG"
-
-# ---------- 8) Launch Dashboard ----------
+# ---------- 7) Compare in Dashboard ----------
 
 cd /scratch/mb10856/MLIR-RL/dashboard
 streamlit run dashboard.py --server.fileWatcherType none

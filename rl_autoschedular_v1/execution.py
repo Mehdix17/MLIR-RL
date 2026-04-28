@@ -180,29 +180,33 @@ class Execution(metaclass=Singleton):
                 cse
             )"""
 
-            with Context():
-                module = Module.parse(code)
-                pm = PassManager.parse(pass_pipeline)
-
-            inputs, outs_struct = self.__create_params(module)
-            args = self.__convert_to_args(inputs, outs_struct)
-
-            pm.run(module.operation)
-            execution_engine = ExecutionEngine(
-                module,
-                opt_level=3,
-                shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
-            )
-
             try:
-                for _ in range(2):
-                    execution_engine.invoke("main", *args)
-                    # If output tensors are needed call `get_results` before `free_outputs`
-                    outs_struct.free_outputs()
-            finally:
-                outs_struct.free_outputs()
+                with Context():
+                    module = Module.parse(code)
+                    pm = PassManager.parse(pass_pipeline)
 
-            return outs_struct.delta, True
+                inputs, outs_struct = self.__create_params(module)
+                args = self.__convert_to_args(inputs, outs_struct)
+
+                pm.run(module.operation)
+                execution_engine = ExecutionEngine(
+                    module,
+                    opt_level=3,
+                    shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
+                )
+
+                try:
+                    for _ in range(2):
+                        execution_engine.invoke("main", *args)
+                        outs_struct.free_outputs()
+                finally:
+                    outs_struct.free_outputs()
+
+                return outs_struct.delta, True
+            except StopIteration:
+                raise Exception("No main function found in MLIR module")
+            except AssertionError as e:
+                raise Exception(f"Type assertion failed: {e}")
 
         return BindingsProcess.call(execute_bind_call, timeout=600)
 

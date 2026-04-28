@@ -62,10 +62,14 @@ class Config(metaclass=Singleton):
     """Learning rate"""
     truncate: int
     """Maximum number of steps in the schedule"""
-    json_file: str
-    """Path to the JSON file containing the benchmarks execution times."""
-    eval_json_file: str
-    """Path to the JSON file containing the benchmarks execution times for evaluation."""
+    json_file: str = ""
+    """Path to the JSON file containing the benchmarks execution times.
+    When empty (default), the path is auto-derived from results_dir and
+    the current implementation via utils.implementation.get_split_file_path."""
+    eval_json_file: str = ""
+    """Path to the JSON file containing the benchmarks execution times for evaluation.
+    When empty (default), the path is auto-derived from results_dir and
+    the current implementation via utils.implementation.get_split_file_path."""
     tags: list[str]
     """List of tags to add to the neptune experiment"""
     debug: bool
