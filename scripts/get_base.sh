@@ -61,7 +61,10 @@ echo "Implementation: $AUTOSCHEDULER_IMPL"
 echo "Node:    $(hostname)"
 echo "=========================================="
 
-python scripts/get_base.py --config "$CONFIG" --implementation "$AUTOSCHEDULER_IMPL"
+CHUNK_IDX=${SLURM_ARRAY_TASK_ID:-0}
+NUM_CHUNKS=${SLURM_ARRAY_TASK_COUNT:-1}
+
+python scripts/get_base.py --config "$CONFIG" --implementation "$AUTOSCHEDULER_IMPL" --timeout 15 --chunk-index $CHUNK_IDX --num-chunks $NUM_CHUNKS
 
 echo "=========================================="
 echo "get_base.py completed at $(date)"

@@ -263,6 +263,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Measure PyTorch eager/compile/jit times for MLIR benchmarks"
     )
+    parser.add_argument("--require-base-success", action="store_true", help="Only run benchmarks that have > 0 time in base.json")
     parser.add_argument("--config", default=None,
                         help="Path to config JSON (derives benchmarks-dir and output)")
     parser.add_argument("--benchmarks-dir", default=None,
@@ -324,40 +325,110 @@ def main():
     results: dict[str, dict] = {}
     skipped = 0
 
-    for i, mlir_file in enumerate(mlir_files):
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, 'r') as f:
+                results = json.load(f)
+            print(f"Resuming from existing output file. Found {len(results)} completed benchmarks.")
+        except Exception as e:
+            print(f"Failed to load existing {output_path}: {e}")
+
+    # Load base.json to filter out failures if requested
+    base_successes = set()
+    if args.require_base_success:
+        base_path = Path("results") / bench_dir.name / "exec_times" / "base.json"
+        if args.config:
+            with open(args.config) as cfgf:
+                cfg = json.load(cfgf)
+            base_path = Path(cfg["results_dir"]) / "exec_times" / "base.json"
+        
+        if base_path.exists():
+            with open(base_path, 'r') as f:
+                base_data = json.load(f)
+            base_successes = {k for k, v in base_data.items() if isinstance(v, (int, float)) and v > 0}
+            print(f"Loaded {len(base_successes)} successful benchmarks from {base_path}")
+        else:
+            print(f"Warning: --require-base-success passed but {base_path} not found.")
+
+    remaining_files = []
+    for f in mlir_files:
+        already_done = f.stem in results and results[f.stem].get("eager") not in (None, "N/A") and not str(results[f.stem].get("eager")).startswith("FAILED")
+        
+        if not already_done:
+            if args.require_base_success and f.stem not in base_successes:
+                continue # Skip files that failed in MLIR base.json
+            remaining_files.append(f)
+
+    print(f"Remaining benchmarks to process: {len(remaining_files)} / {len(mlir_files)}")
+
+    import concurrent.futures
+
+    def _try_measure(fn, label):
+        if fn is None:
+            return None
+        try:
+            return measure_ns(fn, warmup=args.warmup, trials=args.trials)
+        except Exception as exc:
+            return f"FAILED: {exc}"
+
+    def process_file(args_tuple):
+        i, mlir_file = args_tuple
         bench_name = mlir_file.stem
         code = mlir_file.read_text()
 
         fns, err = build_pytorch_fns(code)
         if fns is None:
-            print(f"[{i+1}/{len(mlir_files)}] SKIP {bench_name}: {err}")
-            skipped += 1
-            continue
-
-        def _try_measure(fn, label):
-            if fn is None:
-                return None
-            try:
-                return measure_ns(fn, warmup=args.warmup, trials=args.trials)
-            except Exception as exc:
-                print(f"  [{label}] FAILED: {exc}")
-                return None
+            return i, bench_name, None, err
 
         entry: dict[str, Optional[int]] = {}
         entry["eager"]   = _try_measure(fns["eager"],   "eager")
         entry["compile"] = _try_measure(fns["compile"], "compile")
         entry["jit"]     = _try_measure(fns["jit"],     "jit")
 
-        if entry["eager"] is None and entry["jit"] is None:
-            print(f"[{i+1}/{len(mlir_files)}] SKIP {bench_name}: all modes failed")
-            skipped += 1
-            continue
+        if (entry["eager"] is None or str(entry["eager"]).startswith("FAILED")) and (entry["jit"] is None or str(entry["jit"]).startswith("FAILED")):
+            return i, bench_name, None, "all modes failed"
 
-        results[bench_name] = entry
-        print(f"[{i+1}/{len(mlir_files)}] {bench_name}: "
-              f"eager={entry['eager']//1000 if entry['eager'] else 'N/A'}µs  "
-              f"compile={entry['compile']//1000 if entry['compile'] else 'N/A'}µs  "
-              f"jit={entry['jit']//1000 if entry['jit'] else 'N/A'}µs")
+        return i, bench_name, entry, None
+
+    process_args = [(i, f) for i, f in enumerate(remaining_files)]
+    
+    import os
+    import multiprocessing
+    num_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", 8))
+    mp_context = multiprocessing.get_context("spawn")
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_cores, mp_context=mp_context) as executor:
+        futures = {executor.submit(process_file, arg): arg for arg in process_args}
+        for fut in concurrent.futures.as_completed(futures):
+            i, f = futures[fut]
+            bench_name = f.stem
+            try:
+                _, _, entry, err = fut.result()
+            except Exception as e:
+                err = f"Uncaught Error: {e}"
+                entry = None
+
+            if err:
+                print(f"[{i+1}/{len(remaining_files)}] SKIP {bench_name}: {err}")
+                skipped += 1
+            else:
+                formatted_entry = {}
+                for k, v in entry.items():
+                    if isinstance(v, int):
+                        formatted_entry[k] = v // 1000
+                    else:
+                        formatted_entry[k] = "N/A"
+                results[bench_name] = formatted_entry
+                print(f"[{i+1}/{len(remaining_files)}] {bench_name}: "
+                      f"eager={formatted_entry.get('eager')}µs  "
+                      f"compile={formatted_entry.get('compile')}µs  "
+                      f"jit={formatted_entry.get('jit')}µs")
+                
+                # Write intermediary
+                if (i+1) % 50 == 0:
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(output_path, "w") as f_out:
+                        json.dump(results, f_out, indent=2)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:

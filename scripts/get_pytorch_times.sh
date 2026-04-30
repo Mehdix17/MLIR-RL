@@ -61,7 +61,7 @@ echo "Implementation: $AUTOSCHEDULER_IMPL"
 echo "Node:   $(hostname)"
 echo "=========================================="
 
-python scripts/get_pytorch_times.py --config "$CONFIG"
+python scripts/get_pytorch_times.py --config "$CONFIG" --require-base-success
 
 echo "=========================================="
 echo "get_pytorch_times.py completed at $(date)"

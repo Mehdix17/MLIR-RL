@@ -209,7 +209,7 @@ class Execution(metaclass=Singleton):
             except AssertionError as e:
                 raise Exception(f"Type assertion failed: {e}")
 
-        return BindingsProcess.call(execute_bind_call, timeout=600)
+        return BindingsProcess.call(execute_bind_call, timeout=int(os.environ.get("EXEC_TIMEOUT", 15)))
 
     def __check_execution_cache(self, bench_name: str, cache_key: str) -> Optional[int]:
         """Check the execution cache for the given operation state.
