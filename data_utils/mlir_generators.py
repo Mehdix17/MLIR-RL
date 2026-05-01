@@ -4,7 +4,17 @@ from random import randint, choice, shuffle, random, seed
 import re
 import string
 
-from rl_autoschedular.observation import __remove_duplicate_args
+def __remove_duplicate_args(args: list[str], shapes: list[str]):
+    """Remove duplicate (arg, shape) pairs while preserving order."""
+    seen = set()
+    result = []
+    for pair in zip(args, shapes):
+        if pair not in seen:
+            seen.add(pair)
+            result.append(pair)
+    args = [a for a, _ in result]
+    shapes = [s for _, s in result]
+    return args, shapes
 
 Max = max
 
@@ -20,13 +30,13 @@ def choice_topped(choices, max_value):
         return None
     return n
 
-BATCH_SIZES = []
-SIZES = []
-HEIGHTS = []
-CHANNELS = []
-KERNELS = []
-DILATIONS = []
-STRIDES = []
+BATCH_SIZES = [1, 2, 4, 8, 16, 32, 64, 128]
+SIZES = [64, 128, 256, 512, 768, 1024]
+HEIGHTS = [32, 64, 112, 128, 224, 256]
+CHANNELS = [3, 16, 32, 64, 128, 256, 512, 1024]
+KERNELS = [1, 3, 5, 7]
+DILATIONS = [1, 2, 3]
+STRIDES = [1, 2]
 
 def add(*args):
     if args:

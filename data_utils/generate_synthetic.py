@@ -31,6 +31,10 @@ from typing import Any
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Maximum tensor elements allowed in any generated benchmark.
+# ~500M f32 elements ≈ 2 GiB. The NN model max is ~348M (1.3 GiB).
+MAX_TENSOR_ELEMENTS = 500_000_000
+
 
 # ---------------------------------------------------------------------------
 # Shape extraction (mirrors mlir_generators.getShapes_Args, self-contained)
@@ -447,7 +451,12 @@ def _generate_single(operation_name: str, generator) -> str | None:
     try:
         res = generator()
         operation, maps, additional_function = _unpack_generator_result(res)
-        return _legacy_wrap_single(operation, maps, additional_function)
+        mlir = _legacy_wrap_single(operation, maps, additional_function)
+        if mlir is None:
+            return None
+        if _exceeds_tensor_limit(mlir):
+            return None  # silently retry
+        return mlir
     except Exception:
         traceback.print_exc()
         return None
@@ -475,10 +484,28 @@ def _generate_bench() -> str | None:
             maps = ""
             additional_function = ""
 
-        return _legacy_wrap_bench(operation, maps, additional_function)
+        mlir = _legacy_wrap_bench(operation, maps, additional_function)
+        if mlir is None:
+            return None
+        if _exceeds_tensor_limit(mlir):
+            return None  # silently retry
+        return mlir
     except Exception:
         traceback.print_exc()
         return None
+
+
+def _exceeds_tensor_limit(mlir_text: str) -> bool:
+    """True if any tensor in *mlir_text* exceeds MAX_TENSOR_ELEMENTS."""
+    import math
+    for m in re.finditer(r'tensor<([\dx]+)x[fi]\d+>', mlir_text):
+        try:
+            dims = [int(x) for x in m.group(1).split('x')]
+            if math.prod(dims) > MAX_TENSOR_ELEMENTS:
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 # ---------------------------------------------------------------------------

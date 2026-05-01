@@ -304,7 +304,7 @@ def main():
     if not bench_dir.is_dir():
         raise SystemExit(f"Not a directory: {bench_dir}")
 
-    all_mlir_files = sorted(bench_dir.glob("*.mlir"))
+    all_mlir_files = sorted(bench_dir.rglob("*.mlir"))
     if eval_names is not None:
         mlir_files = [f for f in all_mlir_files if f.stem in eval_names]
         print(f"Found {len(all_mlir_files)} .mlir files in {bench_dir}; "
@@ -361,8 +361,6 @@ def main():
 
     print(f"Remaining benchmarks to process: {len(remaining_files)} / {len(mlir_files)}")
 
-    import concurrent.futures
-
     def _try_measure(fn, label):
         if fn is None:
             return None
@@ -380,7 +378,7 @@ def main():
         if fns is None:
             return i, bench_name, None, err
 
-        entry: dict[str, Optional[int]] = {}
+        entry = {}
         entry["eager"]   = _try_measure(fns["eager"],   "eager")
         entry["compile"] = _try_measure(fns["compile"], "compile")
         entry["jit"]     = _try_measure(fns["jit"],     "jit")
@@ -391,13 +389,13 @@ def main():
         return i, bench_name, entry, None
 
     process_args = [(i, f) for i, f in enumerate(remaining_files)]
-    
-    import os
-    import multiprocessing
-    num_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", 8))
-    mp_context = multiprocessing.get_context("spawn")
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=num_cores, mp_context=mp_context) as executor:
+    import concurrent.futures
+    num_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", 8))
+    # Use ThreadPoolExecutor to avoid pickle issues with nested process_file
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=num_cores)
+
+    with executor:
         futures = {executor.submit(process_file, arg): arg for arg in process_args}
         for fut in concurrent.futures.as_completed(futures):
             i, f = futures[fut]
