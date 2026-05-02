@@ -1,0 +1,179 @@
+\documentclass[12pt,a4paper]{report}
+
+% --- Core Packages ---
+\usepackage[top=2.2cm, bottom=2.6cm, left=2.3cm, right=2.3cm]{geometry}
+\usepackage[dvipsnames,svgnames,x11names]{xcolor}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{mathtools}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{tikz}
+
+% --- Hyperlinks Configuration ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=blue,      
+    urlcolor=blue,       
+    citecolor=blue,      
+    anchorcolor=blue,
+    pdftitle={Master Thesis - Deep Reinforcement Learning for MLIR},
+    pdfpagemode=FullScreen,
+    pdfborder={0 0 0}    
+}
+
+% --- Custom Semantic Styles ---
+\newcommand{\univName}{University of Science and Technology Houari Boumediene}
+\newcommand{\facultyName}{Faculty of Computer Science}
+\newcommand{\deptName}{Department of Artificial Intelligence}
+\newcommand{\specialization}{Intelligent Computer Systems}
+
+% Branding Logo
+\newcommand{\usthbBranding}{%
+    \includegraphics[width=2.5cm]{ressources/frontpage/USTHB_Logo.png} 
+}
+
+\newcommand{\makeThesisTitle}[1]{%
+    \vspace{1cm}
+    \rule{0.88\textwidth}{0.4pt}\\[0.5cm]
+    {\Large\bfseries Title:}\\[0.3cm]
+    {\huge\bfseries #1}\\[0.5cm]
+    \rule{0.82\textwidth}{0.4pt}
+    \vspace{1.5cm}
+}
+
+% --- Chapter/Section Formatting ---
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}{\chaptername\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{1cm}{0.5cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlength{\headheight}{15pt}
+
+% --- Document Start ---
+\begin{document}
+
+% --- TITLE PAGE ---
+\begin{titlepage}
+    \centering
+    
+    \begin{minipage}[t]{0.18\textwidth} \centering \usthbBranding \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.5\textwidth}
+        \centering
+        \small
+        People's Democratic Republic of Algeria\\
+        Ministry of Higher Education and Scientific Research
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.18\textwidth} \centering \usthbBranding \end{minipage}
+
+    \vspace{1.5cm}
+    {\bfseries\large \univName}\par
+    {\large \facultyName}\par
+    {\large \deptName}\par
+    
+    \vspace{1cm}
+    {\Large\bfseries Master's Thesis}\par
+    {\large Specialization: \specialization}\par
+
+    \vfill
+    \makeThesisTitle{Using Deep Reinforcement Learning for Automatic Code Optimization in the MLIR Compiler}
+    \vfill
+
+    \begin{minipage}[t]{0.45\textwidth}
+        \raggedright
+        \textbf{Supervised by:}\\
+        Dr. Riyadh Baghdadi\\[0.8cm]
+        \textbf{Jury Members:}\\
+        Prof. Malika Ioualalen\\
+        Prof. Faiza Khellaf
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.4\textwidth}
+        \raggedright
+        \textbf{Presented by:}\\
+        BESSAI Tayeb\\
+        BENCHIKH Mehdi\\[0.8cm]
+        \textbf{Defense Date:}\\
+        15/06/2026
+    \end{minipage}
+
+    \vfill
+    {\small Project: SII\_09 / 2025}
+\end{titlepage}
+
+% --- FRONT MATTER ---
+\pagenumbering{roman}
+
+\chapter*{Acknowledgements}
+\thispagestyle{empty} 
+First and foremost, we express our deep gratitude to God Almighty...
+
+\chapter*{Abstract}
+\thispagestyle{empty} 
+Abstract content here...
+
+\chapter*{Résumé}
+\thispagestyle{empty} 
+Contenu du résumé ici...
+
+% Table of Contents and Lists
+\newpage
+\pagestyle{plain} 
+\tableofcontents
+\listoftables
+\listoffigures
+
+% --- MAIN CONTENT ---
+\newpage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\fancyfoot{}
+
+% Chapter 0 – General Introduction (unnumbered chapter, added to TOC)
+\include{chapters/general_introduction}
+
+% Chapter 1 – Compiler and Code Optimization
+\include{chapters/code_optimization}
+
+% Chapter 2 – Reinforcement Learning Technology
+\include{chapters/reinforcement_learning}
+
+% Chapter 3 – Related Work on RL for Compiler Optimization
+\include{chapters/reinforcement_learning_for_automatic_code_optimization}
+
+% Chapter 4 – System Design and Implementation
+\include{chapters/design_and_implementation}
+
+% Chapter 5 – Experiments and Results
+\include{chapters/experiments_and_results}
+
+% General Conclusion (unnumbered chapter, added to TOC)
+\include{chapters/general_conclusion}
+
+% --- BACK MATTER ---
+\chapter*{Bibliography}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\chapter*{Appendix}
+\addcontentsline{toc}{chapter}{Appendix}
+
+\end{document}
