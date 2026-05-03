@@ -45,7 +45,12 @@ class Benchmarks:
         self.data = []
         for bench_name, root_exec_time in tqdm(benchmarks_json.items(), desc="Extracting benchmark features", unit="bench"):
             bench_file = os.path.join(cfg.benchmarks_folder_path, bench_name + ".mlir")
-            benchmark_data = extract_bench_features_from_file(bench_name, bench_file, root_exec_time)
+            try:
+                benchmark_data = extract_bench_features_from_file(bench_name, bench_file, root_exec_time)
+            except Exception as e:
+                print(f"Warning: Failed to extract features for {bench_name}: {e}")
+                continue
+
             modified = False
             bench_code = benchmark_data.code
             for op_tag in benchmark_data.operation_tags:
@@ -55,8 +60,7 @@ class Benchmarks:
                     bench_code = transform_img2col(bench_code, op_tag)
                     modified = True
                 except Exception as e:
-                    # If transform fails (e.g., no MLIR bindings), skip transformation
-                    print(f"Warning: Could not transform {bench_name}/{op_tag}: {e}")
+                    # If transform fails (e.g., shape incompatible), silently skip transformation
                     pass
             if modified:
                 try:

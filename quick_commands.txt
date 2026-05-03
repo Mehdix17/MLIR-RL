@@ -54,3 +54,5 @@ scripts/submit_and_monitor.sh scripts/eval.sh "$CONFIG"
 # ---------- Fast Copy/Paste ----------
 
 rsync -avh --progress /path/source/ /path/destination/
+
+rsync -avh --progress dataset_final/ $SCRATCH/MLIR-RL/

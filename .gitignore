@@ -38,3 +38,4 @@ llvm-project/
 tools/ast_dumper/build/
 tools/vectorizer/build/
 data/*
+old_data/*

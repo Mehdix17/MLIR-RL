@@ -112,6 +112,11 @@ config JSON + trained checkpoint (.pt)
 → eval.py → results/<experiment>/<impl>_agent/run_N/logs/eval/{speedup/, exec_time/}
 ```
 
+### Understanding Train vs. Eval (`train.sh` vs `eval.sh`)
+
+- **In-Training Evaluation (`train.sh`)**: The RL agent periodically pauses training to measure validation progress on an evaluation set. This step tells you if the model is actually learning, and it saves intermediate model checkpoints (e.g., `model_200.pt`) while updating `exec_data.json`.
+- **Standalone Verification (`eval.sh`)**: Run *after* training is finished. It relies on the `.pt` checkpoints created by `train.sh` and evaluates each one rigorously against the full `base_eval.json` split (with RL randomness disabled). This populates the final statistics needed for the Dashboard to compare checkpoint-vs-baseline performance.
+
 ### Comparison
 
 Comparison is done interactively via the **Dashboard** (see below). The Head-to-Head tab provides per-implementation speedup, win/loss/tie matrix, and Wilcoxon tests.
