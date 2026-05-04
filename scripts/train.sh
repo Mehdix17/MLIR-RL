@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
-#SBATCH --time=48:00:00
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=16
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out

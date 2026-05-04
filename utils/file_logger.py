@@ -20,7 +20,7 @@ class FileLogger(metaclass=Singleton):
             for d in os.listdir(agent_root)
             if d.startswith('run_') and d.split('_')[-1].isdigit()
         ])
-        run_id = subdir_ids[-1] + 1 if subdir_ids else 0
+        run_id = subdir_ids[-1] if subdir_ids else 0
         self.run_dir = os.path.join(agent_root, f'run_{run_id}')
         os.makedirs(self.run_dir, exist_ok=True)
 
@@ -32,8 +32,9 @@ class FileLogger(metaclass=Singleton):
 
         # Create exec data file
         self.exec_data_file = os.path.join(self.run_dir, 'exec_data.json')
-        with open(self.exec_data_file, "w") as f:
-            json.dump({}, f)
+        if not os.path.exists(self.exec_data_file):
+            with open(self.exec_data_file, "w") as f:
+                json.dump({}, f)
 
         # Create logs dir
         self.logs_dir = os.path.join(self.run_dir, 'logs')
@@ -50,7 +51,7 @@ class FileLogger(metaclass=Singleton):
         if path not in self.files_dict:
             full_path = os.path.join(self.logs_dir, path)
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
-            assert not os.path.exists(full_path), f"File {path} already exists"
+            # File might exist if resuming
             self.files_dict[path] = FileInstance(full_path)
         return self.files_dict[path]
 

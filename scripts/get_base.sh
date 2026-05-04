@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-get-base
 #SBATCH --partition=compute
-#SBATCH --time=12:00:00
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=8
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/get_base_%j.out

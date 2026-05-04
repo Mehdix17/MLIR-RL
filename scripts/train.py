@@ -27,7 +27,6 @@ ppo_module = import_autoschedular_module("ppo", AUTOSCHEDULER_IMPL)
 collect_trajectory = ppo_module.collect_trajectory
 ppo_update = ppo_module.ppo_update
 value_update = ppo_module.value_update
-evaluate_benchmarks = ppo_module.evaluate_benchmarks
 
 logging.basicConfig(
     filename=f"logs/{os.getenv('SLURM_JOB_NAME', 'interactive')}_{os.environ['SLURM_JOB_ID']}.debug",
@@ -49,8 +48,6 @@ def load_train_data():
     return Benchmarks()
 
 
-def load_eval_data():
-    return Benchmarks(is_training=False)
 
 
 def load_main_exec_data() -> Optional[dict[str, dict[str, int]]]:
@@ -62,7 +59,6 @@ def load_main_exec_data() -> Optional[dict[str, dict[str, int]]]:
 
 
 train_data = dm.run_and_register_to_workers(load_train_data)
-eval_data = dm.run_and_register_to_workers(load_eval_data)
 main_exec_data = dm.run_and_register_to_workers(load_main_exec_data)
 
 # Initialize execution singleton
@@ -88,13 +84,25 @@ optimizer = torch.optim.Adam(
 )
 print_success("Model initialized")
 
+# Check for existing models to resume training
+start_step = 0
+import re
+models_list = [f for f in os.listdir(fl.models_dir) if f.startswith('model_') and f.endswith('.pt')]
+if models_list:
+    import builtins
+    latest_model_file = builtins.max(models_list, key=lambda f: int(re.search(r'model_(\d+)\.pt', f).group(1)))
+    latest_step = int(re.search(r'model_(\d+)\.pt', latest_model_file).group(1))
+    model.load_state_dict(torch.load(os.path.join(fl.models_dir, latest_model_file), map_location=device, weights_only=True))
+    start_step = latest_step + 1
+    print_success(f"Resumed model from checkpoint {latest_model_file} (Start step: {start_step})")
+
 # Start training
 old_trajectory: Optional[TrajectoryData] = None
 iter_time_dlt = 0
 elapsed_dlt = 0
 eta_dlt = 0
 overall_start = time()
-for step in range(cfg.nb_iterations):
+for step in range(start_step, cfg.nb_iterations):
     print_info(
         f"- Main Loop {step + 1}/{cfg.nb_iterations}"
         f" ({100 * (step + 1) / cfg.nb_iterations:.2f}%)"
@@ -134,9 +142,7 @@ for step in range(cfg.nb_iterations):
             )
         )
 
-    if (step + 1) % 100 == 0:
-        print_info('- Evaluating benchmarks -')
-        evaluate_benchmarks(model, eval_data)
+
 
     main_end = time()
     iter_time = main_end - main_start
@@ -146,6 +152,4 @@ for step in range(cfg.nb_iterations):
     elapsed_dlt = timedelta(seconds=int(elapsed))
     eta_dlt = timedelta(seconds=int(eta))
 
-if (step + 1) % 100 != 0:
-    print_info('- Evaluating benchmarks -')
-    evaluate_benchmarks(model, eval_data)
+

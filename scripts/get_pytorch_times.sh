@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-pytorch-times
 #SBATCH --partition=compute
-#SBATCH --time=04:00:00
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=8
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/get_pytorch_times_%j.out
