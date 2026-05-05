@@ -18,6 +18,10 @@
 \usepackage{tabularx}
 \usepackage{tikz}
 
+% --- Bibliography ---
+\usepackage[backend=bibtex,style=ieee]{biblatex}
+\addbibresource{references.bib}
+
 % --- Hyperlinks Configuration ---
 \usepackage{hyperref}
 \hypersetup{
@@ -170,8 +174,7 @@ Contenu du résumé ici...
 \include{chapters/general_conclusion}
 
 % --- BACK MATTER ---
-\chapter*{Bibliography}
-\addcontentsline{toc}{chapter}{Bibliography}
+\printbibliography[heading=bibintoc,title={Bibliography}]
 
 \chapter*{Appendix}
 \addcontentsline{toc}{chapter}{Appendix}

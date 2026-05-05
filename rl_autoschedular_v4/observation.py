@@ -2,12 +2,151 @@ from rl_autoschedular_v4.actions import ActionSpace
 from rl_autoschedular_v4.state import OperationState, OperationType, IteratorType, OperationFeatures
 import torch
 import math
+import os
+import re
 
 from utils.config import Config
 
 L = Config().max_num_loops
 LSD = Config().max_num_load_store_dim
 LS = Config().max_num_stores_loads
+
+
+def _parse_size_to_kb(raw_size: str) -> float:
+    token = raw_size.strip().upper()
+    match = re.fullmatch(r"(\d+)([KMG])", token)
+    if not match:
+        return 0.0
+
+    value = float(match.group(1))
+    unit = match.group(2)
+    if unit == "K":
+        return value
+    if unit == "M":
+        return value * 1024.0
+    if unit == "G":
+        return value * 1024.0 * 1024.0
+    return 0.0
+
+
+def _read_cache_level_kb(level: int) -> float:
+    base = "/sys/devices/system/cpu/cpu0/cache"
+    if not os.path.isdir(base):
+        return 0.0
+
+    for entry in os.listdir(base):
+        level_path = os.path.join(base, entry, "level")
+        size_path = os.path.join(base, entry, "size")
+        if not os.path.isfile(level_path) or not os.path.isfile(size_path):
+            continue
+        try:
+            with open(level_path, "r") as f_level:
+                entry_level = int(f_level.read().strip())
+            if entry_level != level:
+                continue
+            with open(size_path, "r") as f_size:
+                return _parse_size_to_kb(f_size.read())
+        except (OSError, ValueError):
+            continue
+    return 0.0
+
+
+def _read_cpuinfo_text() -> str:
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            return f.read()
+    except OSError:
+        return ""
+
+
+def _detect_physical_cores(cpuinfo_text: str, logical_cores: int) -> int:
+    if not cpuinfo_text:
+        return logical_cores
+
+    blocks = [b for b in cpuinfo_text.strip().split("\n\n") if b.strip()]
+    pairs: set[tuple[str, str]] = set()
+    for block in blocks:
+        physical_id = None
+        core_id = None
+        for line in block.splitlines():
+            if line.startswith("physical id"):
+                physical_id = line.split(":", 1)[1].strip()
+            elif line.startswith("core id"):
+                core_id = line.split(":", 1)[1].strip()
+        if physical_id is not None and core_id is not None:
+            pairs.add((physical_id, core_id))
+
+    if pairs:
+        return len(pairs)
+
+    match = re.search(r"cpu cores\s*:\s*(\d+)", cpuinfo_text)
+    if match:
+        try:
+            return int(match.group(1))
+        except ValueError:
+            pass
+    return logical_cores
+
+
+def _detect_simd_width(cpuinfo_text: str) -> int:
+    flags_match = re.search(r"^flags\s*:\s*(.+)$", cpuinfo_text, flags=re.MULTILINE)
+    if not flags_match:
+        return 0
+
+    flags = set(flags_match.group(1).split())
+    if "avx512f" in flags:
+        return 512
+    if "avx2" in flags or "avx" in flags:
+        return 256
+    if "sse2" in flags or "sse" in flags or "neon" in flags:
+        return 128
+    return 0
+
+
+def _detect_clock_mhz(cpuinfo_text: str) -> float:
+    match = re.search(r"cpu MHz\s*:\s*([0-9]+(?:\.[0-9]+)?)", cpuinfo_text)
+    if not match:
+        return 0.0
+    try:
+        return float(match.group(1))
+    except ValueError:
+        return 0.0
+
+
+def _resolve_feature(config_value: float | int, detected_value: float | int, auto_detect: bool) -> float:
+    if config_value > 0:
+        return float(config_value)
+    if auto_detect:
+        return float(detected_value)
+    return 0.0
+
+
+def _build_hardware_vector() -> torch.Tensor:
+    cfg = Config()
+    cpuinfo_text = _read_cpuinfo_text() if cfg.hardware_auto_detect else ""
+
+    logical_cores = os.cpu_count() or 0
+    physical_cores = _detect_physical_cores(cpuinfo_text, logical_cores) if cfg.hardware_auto_detect else 0
+    l1_kb = _read_cache_level_kb(1) if cfg.hardware_auto_detect else 0.0
+    l2_kb = _read_cache_level_kb(2) if cfg.hardware_auto_detect else 0.0
+    l3_kb = _read_cache_level_kb(3) if cfg.hardware_auto_detect else 0.0
+    simd_width = _detect_simd_width(cpuinfo_text) if cfg.hardware_auto_detect else 0
+    clock_mhz = _detect_clock_mhz(cpuinfo_text) if cfg.hardware_auto_detect else 0.0
+
+    features = torch.tensor([
+        _resolve_feature(cfg.hardware_l1_kb, l1_kb, cfg.hardware_auto_detect) / 256.0,
+        _resolve_feature(cfg.hardware_l2_kb, l2_kb, cfg.hardware_auto_detect) / 4096.0,
+        _resolve_feature(cfg.hardware_l3_kb, l3_kb, cfg.hardware_auto_detect) / 65536.0,
+        _resolve_feature(cfg.hardware_physical_cores, physical_cores, cfg.hardware_auto_detect) / 256.0,
+        _resolve_feature(cfg.hardware_logical_cores, logical_cores, cfg.hardware_auto_detect) / 512.0,
+        _resolve_feature(cfg.hardware_simd_width, simd_width, cfg.hardware_auto_detect) / 1024.0,
+        _resolve_feature(cfg.hardware_clock_mhz, clock_mhz, cfg.hardware_auto_detect) / 6000.0,
+    ], dtype=torch.float32)
+
+    return features
+
+
+HARDWARE_VECTOR = _build_hardware_vector()
 
 
 class ObservationPart:
@@ -195,6 +334,18 @@ class NumLoops(ObservationPart):
         return torch.tensor([len(state.operation_features.nested_loops)])
 
 
+class HardwareFeatures(ObservationPart):
+    """Hardware descriptors injected into every observation."""
+
+    @classmethod
+    def size(cls) -> int:
+        return HARDWARE_VECTOR.numel()
+
+    @classmethod
+    def from_state(cls, state: OperationState) -> torch.Tensor:
+        return HARDWARE_VECTOR
+
+
 class Observation:
     """Class to manage creation and use of observations"""
 
@@ -203,6 +354,7 @@ class Observation:
         ProducerOpFeatures,
         ActionHistory,
         NumLoops,
+        HardwareFeatures,
         ActionMask
     ]
 

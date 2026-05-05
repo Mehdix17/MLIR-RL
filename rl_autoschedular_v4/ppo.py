@@ -10,7 +10,7 @@ from rl_autoschedular_v4.observation import Observation, NumLoops
 from rl_autoschedular_v4.actions import ActionSpace
 from rl_autoschedular_v4.benchmarks import Benchmarks
 from rl_autoschedular_v4.execution import Execution
-from rl_autoschedular import device
+from rl_autoschedular_v4 import device
 from utils.config import Config
 from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
