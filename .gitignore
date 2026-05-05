@@ -24,14 +24,7 @@ venv/
 # Generated logs/artifacts
 dask-logs/
 logs/
-# Ignore everything inside results by default...
 results/*
-# ...but allow exploring direct subdirectories (experiment folders)
-!results/*/
-# ...ignore everything inside those experiment folders
-results/*/*
-# ...except for the exec_times folders
-!results/*/exec_times/
 
 # Heavy local dependencies and datasets
 llvm-project/

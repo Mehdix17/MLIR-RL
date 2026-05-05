@@ -72,7 +72,7 @@ if cfg.main_exec_data_file:
 
 # Setup torch
 torch.set_grad_enabled(False)
-torch.set_num_threads(4)
+torch.set_num_threads(8)
 if cfg.debug:
     torch.autograd.set_detect_anomaly(True)
 
@@ -133,7 +133,7 @@ for step in range(start_step, cfg.nb_iterations):
     ppo_update(trajectory, model, optimizer)
 
     # Save the model
-    if (step + 1) % 5 == 0:
+    if (step + 1) % 25 == 0:
         torch.save(
             model.state_dict(),
             os.path.join(

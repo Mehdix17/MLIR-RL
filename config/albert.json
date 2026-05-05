@@ -12,9 +12,9 @@
   "normalize_bounds": "log",
   "normalize_adv": "standard",
   "reuse_experience": "none",
-  "benchmarks_folder_path": "data/nn/extracted/albert",
-  "json_file": "data/nn/albert_base_exec_times.json",
-  "eval_json_file": "data/nn/albert_base_exec_times.json",
+  "benchmarks_folder_path": "data/all",
+  "json_file": "",
+  "eval_json_file": "",
   "bench_count": 10,
   "replay_count": 10,
   "nb_iterations": 1000,
@@ -31,5 +31,5 @@
   "debug": false,
   "hardware_auto_detect": true,
   "main_exec_data_file": "",
-  "results_dir": "results/albert"
+  "results_dir": "results/new_experiment"
 }

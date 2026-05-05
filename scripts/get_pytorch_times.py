@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Measure PyTorch execution times (eager, torch.compile, torch.jit) for each
+Measure PyTorch execution times (eager, torch.jit) for each
 benchmark in a directory of .mlir files.
 
 When called with --config, only the eval split (eval_json_file) is measured —
@@ -40,7 +40,6 @@ import torch.nn.functional as F
 
 NUM_WARMUP = 10
 NUM_TRIALS = 20
-HAS_COMPILE = hasattr(torch, "compile")
 
 
 # ---------------------------------------------------------------------------
@@ -239,18 +238,8 @@ def build_pytorch_fns(
     else:
         return None, f"unsupported linalg op: {op}"
 
-    # -----------------------------------------------------------------------
-    # torch.compile wrapper  (optional)
-    # -----------------------------------------------------------------------
-    if HAS_COMPILE:
-        compiled = torch.compile(eager_fn)
-        compile_run = lambda: compiled()
-    else:
-        compile_run = None
-
     return {
         "eager":   eager_fn,
-        "compile": compile_run,
         "jit":     jit_run,
     }, None
 
@@ -272,6 +261,8 @@ def main():
                         help="Override: output JSON path")
     parser.add_argument("--warmup",  type=int, default=NUM_WARMUP)
     parser.add_argument("--trials",  type=int, default=NUM_TRIALS)
+    parser.add_argument("--chunk-index", type=int, default=0, help="0-based index of the chunk to process")
+    parser.add_argument("--num-chunks", type=int, default=1, help="Total number of chunks to split the workload into")
     args = parser.parse_args()
 
     eval_names: set[str] | None = None  # if set, only measure these benchmarks
@@ -299,7 +290,7 @@ def main():
             parser.error("Provide --config or --benchmarks-dir")
         bench_dir = Path(args.benchmarks_dir)
         output_path = Path(args.output) if args.output else \
-                      Path("results") / bench_dir.name / "exec_times" / "pytorch.json"
+                      Path("results/my_experiment") / "exec_times" / "pytorch.json"
 
     if not bench_dir.is_dir():
         raise SystemExit(f"Not a directory: {bench_dir}")
@@ -312,15 +303,7 @@ def main():
     else:
         mlir_files = all_mlir_files
         print(f"Found {len(mlir_files)} .mlir files in {bench_dir}")
-    if HAS_COMPILE:
-        # Compute nodes don't have g++ in PATH; use clang++ from the LLVM build instead.
-        try:
-            import torch._inductor.config as _inductor_cfg
-            _inductor_cfg.cpp.cxx = "clang++"
-        except Exception:
-            pass
-    else:
-        print("torch.compile not available (requires torch >= 2.0) — compile times will be null")
+    print("torch.compile is disabled — measuring eager + JIT only")
 
     results: dict[str, dict] = {}
     skipped = 0
@@ -336,7 +319,7 @@ def main():
     # Load base.json to filter out failures if requested
     base_successes = set()
     if args.require_base_success:
-        base_path = Path("results") / bench_dir.name / "exec_times" / "base.json"
+        base_path = Path("results/my_experiment") / "exec_times" / "base.json"
         if args.config:
             with open(args.config) as cfgf:
                 cfg = json.load(cfgf)
@@ -361,6 +344,16 @@ def main():
 
     print(f"Remaining benchmarks to process: {len(remaining_files)} / {len(mlir_files)}")
 
+    # Partition into chunks
+    if args.num_chunks > 1:
+        chunk_size = len(remaining_files) // args.num_chunks
+        start_idx = args.chunk_index * chunk_size
+        end_idx = start_idx + chunk_size if args.chunk_index < args.num_chunks - 1 else len(remaining_files)
+        remaining_files = remaining_files[start_idx:end_idx]
+        old_out = Path(output_path)
+        output_path = str(old_out.parent / f"{old_out.stem}_chunk{args.chunk_index}{old_out.suffix}")
+        print(f"-- Processing chunk {args.chunk_index + 1}/{args.num_chunks} -- Files {start_idx} to {end_idx - 1}")
+
     def _try_measure(fn, label):
         if fn is None:
             return None
@@ -380,7 +373,6 @@ def main():
 
         entry = {}
         entry["eager"]   = _try_measure(fns["eager"],   "eager")
-        entry["compile"] = _try_measure(fns["compile"], "compile")
         entry["jit"]     = _try_measure(fns["jit"],     "jit")
 
         if (entry["eager"] is None or str(entry["eager"]).startswith("FAILED")) and (entry["jit"] is None or str(entry["jit"]).startswith("FAILED")):
@@ -419,7 +411,6 @@ def main():
                 results[bench_name] = formatted_entry
                 print(f"[{i+1}/{len(remaining_files)}] {bench_name}: "
                       f"eager={formatted_entry.get('eager')}µs  "
-                      f"compile={formatted_entry.get('compile')}µs  "
                       f"jit={formatted_entry.get('jit')}µs")
                 
                 # Write intermediary

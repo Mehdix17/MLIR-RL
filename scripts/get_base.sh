@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-get-base
 #SBATCH --partition=compute
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=2
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/get_base_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/get_base_%j.err
 #SBATCH --mail-type=END,FAIL

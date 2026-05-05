@@ -56,3 +56,7 @@ scripts/submit_and_monitor.sh scripts/eval.sh "$CONFIG"
 rsync -avh --progress /path/source/ /path/destination/
 
 rsync -avh --progress dataset_final/ $SCRATCH/MLIR-RL/
+
+# ---------- Get number of files of a folder ----------
+
+find . -maxdepth 3 -type f | wc -l

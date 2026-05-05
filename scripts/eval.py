@@ -61,7 +61,7 @@ print_success(f'Logging to: {fl.run_dir}')
 
 # Setup torch
 torch.set_grad_enabled(False)
-torch.set_num_threads(4)
+torch.set_num_threads(8)
 
 # Initiate model
 model = Model().to(device)

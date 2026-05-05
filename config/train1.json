@@ -31,7 +31,7 @@
     "normalize_bounds": "max",
     "normalize_adv": "standard",
     "reuse_experience": "none",
-    "benchmarks_folder_path": "data/dataset",
+    "benchmarks_folder_path": "data/all",
     "bench_count": 10,
     "replay_count": 10,
     "nb_iterations": 1000,
@@ -50,5 +50,5 @@
     "debug": false,
     "hardware_auto_detect": true,
     "main_exec_data_file": "",
-    "results_dir": "results/mehdi"
+    "results_dir": "results/new_experiment"
 }

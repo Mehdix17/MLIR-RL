@@ -2,7 +2,7 @@
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
 #SBATCH --mem=64G
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/train_%j.err
 #SBATCH --mail-type=END,FAIL

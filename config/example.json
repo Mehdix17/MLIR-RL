@@ -12,7 +12,7 @@
     "normalize_bounds": "max",
     "normalize_adv": "standard",
     "reuse_experience": "none",
-    "benchmarks_folder_path": "",
+    "benchmarks_folder_path": "data/all",
     "bench_count": 64,
     "replay_count": 10,
     "nb_iterations": 10000,
@@ -25,8 +25,8 @@
     "entropy_coef": 0.01,
     "lr": 0.001,
     "truncate": 5,
-    "json_file": "data/all/execution_times_train.json",
-    "eval_json_file": "data/all/execution_times_eval.json",
+  "json_file": "",
+  "eval_json_file": "",
     "tags": [],
     "debug": false,
     "hardware_auto_detect": true,
@@ -46,5 +46,5 @@
     "transformer_pooling": "cls",
     "transformer_use_action_history_token": false,
     "main_exec_data_file": "",
-    "results_dir": "results"
+    "results_dir": "results/new_experiment"
 }
