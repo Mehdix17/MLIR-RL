@@ -69,7 +69,7 @@ The policy is an actor-critic network with a recursive LSTM-based embedding. Ope
 
 \subsection{Extension to Full Neural Network Programs}
 
-The previous team in this project~\cite{PREVIOUS_TEAM} extended the Bendib et al. environment to support the optimization of full neural network computation graphs rather than isolated operations. Their key contributions include: (1) an abstract syntax tree (AST) based state representation that encodes the hierarchical structure of consumer and producer operations through a recursive loop embedding; (2) a new Fusion action (\texttt{TiledFusion}) that merges producer-consumer operation pairs using MLIR's tiling and fusion mechanisms; (3) a dataset generator that produces synthesized operation sequences and extracts blocks from convolutional neural network models (VGG, ResNet, MobileNet); and (4) an environment traversal strategy that processes operations from consumer to producer, allowing the agent to make fusion decisions with knowledge of how each operation's output is consumed.
+Tirichine et al.~\cite{tirichine2025reinforcement} extended the Bendib et al. environment to support the optimization of full neural network computation graphs rather than isolated operations. Their key contributions include: (1) an abstract syntax tree (AST) based state representation that encodes the hierarchical structure of consumer and producer operations through a recursive loop embedding; (2) a new Fusion action (\texttt{TiledFusion}) that merges producer-consumer operation pairs using MLIR's tiling and fusion mechanisms; (3) a dataset generator that produces synthesized operation sequences and extracts blocks from convolutional neural network models (VGG, ResNet, MobileNet); and (4) an environment traversal strategy that processes operations from consumer to producer, allowing the agent to make fusion decisions with knowledge of how each operation's output is consumed.
 
 Their evaluation on single operations (matrix multiplication, 2D convolution) and full neural network models showed that the agent could achieve competitive speedups—notably a $2.5\times$ improvement on MobileNetV2 compared to standard PyTorch execution—but underperformed on architectures with highly regular patterns (VGG, $1.09\times$) and on ResNet ($2.1\times$ vs.\ PyTorch's $4.25\times$).
 
@@ -125,7 +125,7 @@ This section provides a comparative analysis of the systems surveyed in this cha
         & 6 actions: T, TP, I, V, NT (+ TF in extension)
         & Log-speedup (sparse) \\
         \addlinespace
-        Previous team~\cite{PREVIOUS_TEAM}
+        Tirichine et al.~\cite{tirichine2025reinforcement}
         & MLIR Linalg
         & AST + recursive LSTM embedding
         & 6 actions including Fusion

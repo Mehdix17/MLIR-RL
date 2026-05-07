@@ -126,6 +126,14 @@ def build_pytorch_fns(
     if not args:
         return None, "cannot parse @main args"
 
+    # Pre-check: skip files with tensors too large to allocate.
+    # ~500M f32 elements ≈ 2 GiB per tensor.
+    import math
+    _MAX_ELEMS = 500_000_000
+    for shape in args:
+        if math.prod(shape) > _MAX_ELEMS:
+            return None, f"tensor too large: {shape}"
+
     # -----------------------------------------------------------------------
     # conv_2d_nchw_fchw
     # -----------------------------------------------------------------------

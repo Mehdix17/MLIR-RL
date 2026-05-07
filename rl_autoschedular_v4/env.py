@@ -35,6 +35,16 @@ class Env:
 
         return self.__init_op_state(-1)
 
+        # If benchmark has no AST-parsed operations, skip it
+        if state is None:
+            bench_idx = (bench_idx if bench_idx is not None else 0) + 1
+            if bench_idx >= len(benchs):
+                bench_idx = 0
+            self.bench_idx = bench_idx
+            self.benchmark_data = benchs[bench_idx].copy()
+            return self.__init_op_state(-1)
+        return state
+
     def step(self, state: OperationState, action: Action) -> OperationState:
         """Take a step in the environment.
 
@@ -139,6 +149,8 @@ class Env:
             OperationState: The new operation state.
             torch.Tensor: The observation vector of the new operation state.
         """
+        if not self.benchmark_data.operation_tags:
+            return None
         operation_tag = self.benchmark_data.operation_tags[operation_idx]
         operation_features = self.benchmark_data.operations[operation_tag].copy()
 
