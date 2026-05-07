@@ -34,7 +34,7 @@ python scripts/split_json.py "$CONFIG"
 
 # ---------- 5) Train ----------
 
-sbatch scripts/train.sh "$CONFIG"
+sbatch --time=48:00:00 --array=0-3 scripts/train.sh
 
 # ---------- 6) Evaluate checkpoints ----------
 

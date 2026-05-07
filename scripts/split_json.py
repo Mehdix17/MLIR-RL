@@ -57,13 +57,26 @@ if failed:
 # Group by model family: take longest prefix before first op-type keyword.
 # Benchmark names look like: albert_generic_0, densenet121_sz192_bs4_conv_0, etc.
 OP_KEYWORDS = {"generic", "matmul", "batch_matmul", "conv", "pooling", "relu",
-               "add", "patterns_bench", "pattern", "residual_bench", "resnet_bench"}
+               "add", "block", "patterns_bench", "pattern", "residual_bench", "resnet_bench"}
 
 def model_family(name: str) -> str:
+    """Extract model family from benchmark name.
+
+    Names follow pattern: <model>_<op>_<index>.mlir  (e.g. albert_generic_0)
+    Some have size/batch tags: densenet121_sz192_bs4_conv_0
+    Legacy synthetic benchmarks: bench_1334.mlir
+    """
     parts = name.split("_")
     for i, part in enumerate(parts):
-        if part in OP_KEYWORDS or (part.startswith("sz") and part[2:].isdigit()):
+        if part in OP_KEYWORDS:
             return "_".join(parts[:i]) or "unknown"
+        if part.startswith("sz") and part[2:].isdigit():
+            return "_".join(parts[:i]) or "unknown"
+        # bench_NNNN — group all numeric suffixes under "bench"
+        if part.isdigit():
+            prefix = "_".join(parts[:i]) or "unknown"
+            if prefix == "bench":
+                return "bench"
     return "_".join(parts[:2])  # fallback: first two tokens
 
 # Stratified split: sample eval_ratio from each family

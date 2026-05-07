@@ -91,7 +91,14 @@ class DaskManager(metaclass=Singleton):
         training: bool,
     ) -> list[Optional[T]]:
         if not ENABLED or self.num_workers == 0:
-            return [func(s, FileLogger().exec_data_file, benchs, main_exec_data) for s in states]
+            n_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", 1))
+            if n_workers <= 1:
+                return [func(s, FileLogger().exec_data_file, benchs, main_exec_data) for s in states]
+            import concurrent.futures
+            exec_file = FileLogger().exec_data_file
+            with concurrent.futures.ThreadPoolExecutor(max_workers=n_workers) as pool:
+                futures = [pool.submit(func, s, exec_file, benchs, main_exec_data) for s in states]
+                return [f.result() for f in futures]
 
         # Prepare states for submission
         states_count = len(states)

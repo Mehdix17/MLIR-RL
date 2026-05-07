@@ -2,10 +2,12 @@
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
 #SBATCH --mem=64G
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=28
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/train_%j.err
 #SBATCH --mail-type=END,FAIL
+set -e
+trap 'echo "TRAINING FAILED"' ERR
 #
 # Usage:
 #   sbatch scripts/train.sh                          # uses config/train1.json (default)
@@ -31,10 +33,18 @@ source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
-# Accept config path as first positional argument, default to train1.json
-CONFIG="${1:-$PROJECT_ROOT/config/train1.json}"
-if [[ "$CONFIG" != /* ]]; then
-    CONFIG="$PROJECT_ROOT/$CONFIG"
+# Accept config path as first positional argument, default to train1.json.
+# Array mode: if SLURM_ARRAY_TASK_ID is set and no explicit config given,
+# auto-select from the version list (task 0→v1, 1→v2, 2→v3, 3→v4).
+VERSIONS=(baseline v1 v2 v3 v4)
+if [[ -n "${SLURM_ARRAY_TASK_ID:-}" && -z "${1:-}" ]]; then
+    VERSION="${VERSIONS[$SLURM_ARRAY_TASK_ID]}"
+    CONFIG="$PROJECT_ROOT/config/${VERSION}.json"
+else
+    CONFIG="${1:-$PROJECT_ROOT/config/train1.json}"
+    if [[ "$CONFIG" != /* ]]; then
+        CONFIG="$PROJECT_ROOT/$CONFIG"
+    fi
 fi
 
 CONFIG_IMPL=$(python3 - <<PY

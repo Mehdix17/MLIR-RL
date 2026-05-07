@@ -4,7 +4,8 @@ from queue import Empty as QueueEmpty
 from typing import Callable, Optional, TypeVar
 
 T = TypeVar('T')
-ENABLED = True
+ENABLED = False
+T = TypeVar('T')
 
 
 class BindingsProcess:

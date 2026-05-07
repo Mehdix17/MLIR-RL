@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader, Sampler, RandomSampler
 from typing import Iterator, Optional
-from rl_autoschedular import device
+from rl_autoschedular_v4 import device
 from rl_autoschedular_v4.model import HiearchyModel as Model
 from time import time
 from utils.config import Config

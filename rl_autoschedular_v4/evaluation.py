@@ -13,7 +13,7 @@ from mlir.passmanager import PassManager
 
 from typing import Optional
 
-from rl_autoschedular import config as cfg
+from rl_autoschedular_v4 import config as cfg
 from utils.log import print_alert, print_error,stable_hash,open_cache_db
 
 def get_cached_execution_time(transformed_code: str) -> Optional[int]:

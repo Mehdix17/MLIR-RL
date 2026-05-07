@@ -3,9 +3,9 @@
 Measure PyTorch execution times (eager, torch.jit) for each
 benchmark in a directory of .mlir files.
 
-When called with --config, only the eval split (eval_json_file) is measured —
-pytorch times are only used for comparison against RL eval results, so measuring
-train benchmarks would waste time.
+When called with --config, only eval benchmarks (base_eval.json) are
+measured — PyTorch times are only used for comparison against RL eval results,
+so measuring train benchmarks would waste time.
 
 For each .mlir file the script:
   1. Parses the MLIR to extract operation type and tensor shapes.
@@ -38,8 +38,8 @@ from typing import Callable, Optional
 import torch
 import torch.nn.functional as F
 
-NUM_WARMUP = 10
-NUM_TRIALS = 20
+NUM_WARMUP = 3
+NUM_TRIALS = 10
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ def parse_main_args(code: str) -> list[tuple[int, ...]]:
         return []
     sig = m.group(1)
     shapes = []
-    for part in re.split(r'%arg\d+\s*:', sig):
+    for part in re.split(r'%[a-zA-Z_]\w*\s*:', sig):
         s = parse_tensor_shape(part)
         if s:
             shapes.append(s)
@@ -115,7 +115,7 @@ def build_pytorch_fns(
 ) -> tuple[Optional[dict[str, Callable]], Optional[str]]:
     """
     Parse an MLIR benchmark and return a dict of callables:
-        {"eager": fn, "compile": fn, "jit": fn}
+        {"eager": fn, "jit": fn}
     Returns (None, error_message) on failure.
     """
     op = get_linalg_op(mlir_code)
@@ -235,6 +235,170 @@ def build_pytorch_fns(
         jit_fn  = torch.jit.trace(_sum_for_trace, (inp,))
         jit_run = lambda: jit_fn(inp)
 
+    # -----------------------------------------------------------------------
+    # transpose
+    # -----------------------------------------------------------------------
+    elif op == 'transpose':
+        if len(args) < 1:
+            return None, "not enough args for transpose"
+        inp = torch.randn(*args[0])
+
+        def eager_fn():
+            return inp.T if inp.dim() == 2 else inp.transpose(-2, -1)
+
+        jit_fn  = torch.jit.trace(lambda x: x.transpose(-2, -1), (inp,))
+        jit_run = lambda: jit_fn(inp)
+
+    # -----------------------------------------------------------------------
+    # broadcast
+    # -----------------------------------------------------------------------
+    elif op == 'broadcast':
+        if len(args) < 2:
+            return None, "not enough args for broadcast"
+        inp = torch.randn(*args[0])
+        target_shape = args[-1]
+        # Expand to match target ndim, then broadcast_to
+        if inp.ndim < len(target_shape):
+            inp = inp.reshape(*inp.shape, *(1,) * (len(target_shape) - inp.ndim))
+
+        def eager_fn():
+            return inp.expand(*target_shape)
+
+        jit_fn  = torch.jit.trace(lambda x: x.expand(*target_shape), (inp,))
+        jit_run = lambda: jit_fn(inp)
+
+    # -----------------------------------------------------------------------
+    # add  (element-wise)
+    # -----------------------------------------------------------------------
+    elif op == 'add':
+        if len(args) < 2:
+            return None, "not enough args for add"
+        a = torch.randn(*args[0])
+        b = torch.randn(*args[1])
+
+        def eager_fn():
+            return a + b
+
+        jit_fn  = torch.jit.trace(lambda x, y: x + y, (a, b))
+        jit_run = lambda: jit_fn(a, b)
+
+    # -----------------------------------------------------------------------
+    # fill  (constant fill)
+    # -----------------------------------------------------------------------
+    elif op == 'fill':
+        if len(args) < 1:
+            return None, "not enough args for fill"
+        inp = torch.randn(*args[0])
+
+        def eager_fn():
+            return inp.fill_(1.0)
+
+        jit_fn  = torch.jit.trace(lambda x: x.fill_(1.0), (inp,))
+        jit_run = lambda: jit_fn(inp.clone())
+
+    # -----------------------------------------------------------------------
+    # reduce  (generic reduction)
+    # -----------------------------------------------------------------------
+    elif op == 'reduce':
+        if len(args) < 2:
+            return None, "not enough args for reduce"
+        in_shape  = args[0]
+        out_shape = args[-1]
+        inp = torch.randn(*in_shape)
+        reduce_dims = [i for i, (si, so) in enumerate(zip(in_shape, out_shape)) if so == 1]
+
+        def eager_fn():
+            return inp.sum(dim=reduce_dims or None, keepdim=bool(reduce_dims))
+
+        if reduce_dims:
+            jit_fn  = torch.jit.trace(lambda x: x.sum(dim=reduce_dims, keepdim=True), (inp,))
+        else:
+            jit_fn  = torch.jit.trace(lambda x: x.sum(), (inp,))
+        jit_run = lambda: jit_fn(inp)
+
+    # -----------------------------------------------------------------------
+    # depthwise_conv_2d_nchw_chw
+    # -----------------------------------------------------------------------
+    elif op == 'depthwise_conv_2d_nchw_chw':
+        if len(args) < 2:
+            return None, "not enough args for depthwise_conv2d"
+        inp    = torch.randn(*args[0])
+        weight_raw = torch.randn(*args[1])
+        _, in_c, _, _ = inp.shape
+        # MLIR weight is (C, kH, kW) — unsqueeze to (C, 1, kH, kW) for PyTorch
+        if weight_raw.ndim == 3:
+            weight = weight_raw.unsqueeze(1)
+        else:
+            weight = weight_raw
+        strides   = _parse_dense(mlir_code, 'strides')
+        dilations = _parse_dense(mlir_code, 'dilations')
+
+        def eager_fn():
+            return F.conv2d(inp, weight, stride=strides, dilation=dilations, groups=in_c)
+
+        def _conv_for_trace(x):
+            return F.conv2d(x, weight, stride=strides, dilation=dilations, groups=in_c)
+
+        jit_fn  = torch.jit.trace(_conv_for_trace, (inp,))
+        jit_run = lambda: jit_fn(inp)
+
+    # -----------------------------------------------------------------------
+    # conv_2d_nhwc_hwcf
+    # -----------------------------------------------------------------------
+    elif op == 'conv_2d_nhwc_hwcf':
+        if len(args) < 2:
+            return None, "not enough args for conv2d_nhwc"
+        inp    = torch.randn(*args[0])
+        weight_raw = torch.randn(*args[1])
+        # NHWC input (N,H,W,C) → NCHW (N,C,H,W)
+        inp = inp.permute(0, 3, 1, 2)
+        # HWCF weight (kH,kW,in_c,out_c) → OIHW (out_c,in_c,kH,kW)
+        weight = weight_raw.permute(3, 2, 0, 1)
+        strides   = _parse_dense(mlir_code, 'strides')
+        dilations = _parse_dense(mlir_code, 'dilations')
+
+        def eager_fn():
+            return F.conv2d(inp, weight, stride=strides, dilation=dilations)
+
+        def _conv_for_trace(x):
+            return F.conv2d(x, weight, stride=strides, dilation=dilations)
+
+        jit_fn  = torch.jit.trace(_conv_for_trace, (inp,))
+        jit_run = lambda: jit_fn(inp)
+
+    # -----------------------------------------------------------------------
+    # pooling_ncw_* / pooling_nwc_* / pooling_nhwc_* (1D/2D pooling variants)
+    # -----------------------------------------------------------------------
+    elif op in ('pooling_ncw_max', 'pooling_ncw_sum',
+                'pooling_nwc_max', 'pooling_nwc_sum',
+                'pooling_nhwc_max', 'pooling_nhwc_sum', 'pooling_nhwc_min'):
+        if len(args) < 2:
+            return None, "not enough args for pooling"
+        inp    = torch.randn(*args[0])
+        kernel = args[1]
+        strides = _parse_dense(mlir_code, 'strides')
+
+        is_max = 'max' in op
+        is_2d  = 'nhwc' in op
+
+        if is_2d:
+            pool_fn = F.max_pool2d if is_max else F.avg_pool2d
+            pool_kernel = kernel
+            pool_stride = strides
+        else:
+            pool_fn = F.max_pool1d if is_max else F.avg_pool1d
+            pool_kernel = kernel[0] if isinstance(kernel, tuple) else kernel
+            pool_stride = strides[0] if isinstance(strides, tuple) else strides
+
+        def eager_fn():
+            return pool_fn(inp, kernel_size=pool_kernel, stride=pool_stride)
+
+        def _pool_for_trace(x):
+            return pool_fn(x, kernel_size=pool_kernel, stride=pool_stride)
+
+        jit_fn  = torch.jit.trace(_pool_for_trace, (inp,))
+        jit_run = lambda: jit_fn(inp)
+
     else:
         return None, f"unsupported linalg op: {op}"
 
@@ -271,26 +435,21 @@ def main():
         with open(args.config) as _f:
             _cfg = json.load(_f)
         bench_dir   = Path(args.benchmarks_dir or _cfg["benchmarks_folder_path"])
-        output_path = Path(args.output) if args.output else \
-                      Path(_cfg["results_dir"]) / "exec_times" / "pytorch.json"
-        # Only measure eval benchmarks when eval_json_file is provided.
-        # Otherwise measure all benchmarks.
-        eval_json_str = _cfg.get("eval_json_file", "").strip()
-        if eval_json_str:
-            eval_json = Path(eval_json_str)
-            if eval_json.exists():
-                with open(eval_json) as _f:
-                    eval_names = set(json.load(_f).keys())
-            else:
-                eval_names = None
+        output_path = (Path(args.output) if args.output else \
+                      Path(_cfg["results_dir"]) / "exec_times" / "pytorch.json").resolve()
+        # Only measure eval benchmarks — PyTorch times are only compared against RL eval results.
+        eval_json = Path(_cfg["results_dir"]) / "exec_times" / "base_eval.json"
+        if eval_json.exists():
+            with open(eval_json) as _f:
+                eval_names = set(json.load(_f).keys())
         else:
             eval_names = None
     else:
         if not args.benchmarks_dir:
             parser.error("Provide --config or --benchmarks-dir")
         bench_dir = Path(args.benchmarks_dir)
-        output_path = Path(args.output) if args.output else \
-                      Path("results/my_experiment") / "exec_times" / "pytorch.json"
+        output_path = (Path(args.output) if args.output else \
+                      Path("results") / "exec_times" / "pytorch.json").resolve()
 
     if not bench_dir.is_dir():
         raise SystemExit(f"Not a directory: {bench_dir}")
@@ -312,18 +471,14 @@ def main():
         try:
             with open(output_path, 'r') as f:
                 results = json.load(f)
-            print(f"Resuming from existing output file. Found {len(results)} completed benchmarks.")
+            print(f"Resuming from existing output file ({len(results)} entries): {output_path}", flush=True)
         except Exception as e:
-            print(f"Failed to load existing {output_path}: {e}")
+            print(f"Failed to load existing {output_path}: {e}", flush=True)
 
     # Load base.json to filter out failures if requested
     base_successes = set()
     if args.require_base_success:
-        base_path = Path("results/my_experiment") / "exec_times" / "base.json"
-        if args.config:
-            with open(args.config) as cfgf:
-                cfg = json.load(cfgf)
-            base_path = Path(cfg["results_dir"]) / "exec_times" / "base.json"
+        base_path = Path(cfg["results_dir"]) / "exec_times" / "base.json"
         
         if base_path.exists():
             with open(base_path, 'r') as f:
@@ -351,7 +506,7 @@ def main():
         end_idx = start_idx + chunk_size if args.chunk_index < args.num_chunks - 1 else len(remaining_files)
         remaining_files = remaining_files[start_idx:end_idx]
         old_out = Path(output_path)
-        output_path = str(old_out.parent / f"{old_out.stem}_chunk{args.chunk_index}{old_out.suffix}")
+        output_path = old_out.parent / f"{old_out.stem}_chunk{args.chunk_index}{old_out.suffix}"
         print(f"-- Processing chunk {args.chunk_index + 1}/{args.num_chunks} -- Files {start_idx} to {end_idx - 1}")
 
     def _try_measure(fn, label):
@@ -382,49 +537,42 @@ def main():
 
     process_args = [(i, f) for i, f in enumerate(remaining_files)]
 
-    import concurrent.futures
-    num_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", 8))
-    # Use ThreadPoolExecutor to avoid pickle issues with nested process_file
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=num_cores)
+    # Process sequentially to avoid OOM from multiple large tensors
+    for arg in process_args:
+        i, f = arg
+        bench_name = f.stem
+        try:
+            _, _, entry, err = process_file(arg)
+        except Exception as e:
+            err = f"Uncaught Error: {e}"
+            entry = None
 
-    with executor:
-        futures = {executor.submit(process_file, arg): arg for arg in process_args}
-        for fut in concurrent.futures.as_completed(futures):
-            i, f = futures[fut]
-            bench_name = f.stem
-            try:
-                _, _, entry, err = fut.result()
-            except Exception as e:
-                err = f"Uncaught Error: {e}"
-                entry = None
+        if err:
+            print(f"[{i+1}/{len(remaining_files)}] SKIP {bench_name}: {err}", flush=True)
+            skipped += 1
+        else:
+            formatted_entry = {}
+            for k, v in entry.items():
+                if isinstance(v, int):
+                    formatted_entry[k] = v // 1000
+                else:
+                    formatted_entry[k] = "N/A"
+            results[bench_name] = formatted_entry
+            print(f"[{i+1}/{len(remaining_files)}] {bench_name}: "
+                  f"eager={formatted_entry.get('eager')}µs  "
+                  f"jit={formatted_entry.get('jit')}µs", flush=True)
 
-            if err:
-                print(f"[{i+1}/{len(remaining_files)}] SKIP {bench_name}: {err}")
-                skipped += 1
-            else:
-                formatted_entry = {}
-                for k, v in entry.items():
-                    if isinstance(v, int):
-                        formatted_entry[k] = v // 1000
-                    else:
-                        formatted_entry[k] = "N/A"
-                results[bench_name] = formatted_entry
-                print(f"[{i+1}/{len(remaining_files)}] {bench_name}: "
-                      f"eager={formatted_entry.get('eager')}µs  "
-                      f"jit={formatted_entry.get('jit')}µs")
-                
-                # Write intermediary
-                if (i+1) % 50 == 0:
-                    output_path.parent.mkdir(parents=True, exist_ok=True)
-                    with open(output_path, "w") as f_out:
-                        json.dump(results, f_out, indent=2)
+            if (i+1) % 10 == 0:
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(output_path, "w") as f_out:
+                    json.dump(results, f_out, indent=2)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\nDone. {len(results)} measured, {skipped} skipped.")
-    print(f"Output: {output_path}")
+    print(f"\nDone. {len(results)} measured, {skipped} skipped.", flush=True)
+    print(f"Output: {output_path}", flush=True)
 
 
 if __name__ == "__main__":

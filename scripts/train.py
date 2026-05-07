@@ -6,8 +6,14 @@ load_dotenv('.env.debug')
 
 import os
 import logging
+import signal
 import torch
 import json
+
+# Catch SIGABRT from MLIR native code — convert to Python exception
+def _sigabrt_handler(signum, frame):
+    raise RuntimeError("MLIR native code crashed (SIGABRT) — caught and continuing")
+signal.signal(signal.SIGABRT, _sigabrt_handler)
 from utils.log import print_info, print_success
 from utils.config import Config
 from utils.dask_manager import DaskManager
@@ -72,7 +78,7 @@ if cfg.main_exec_data_file:
 
 # Setup torch
 torch.set_grad_enabled(False)
-torch.set_num_threads(8)
+torch.set_num_threads(4)
 if cfg.debug:
     torch.autograd.set_detect_anomaly(True)
 
@@ -96,6 +102,8 @@ if models_list:
     start_step = latest_step + 1
     print_success(f"Resumed model from checkpoint {latest_model_file} (Start step: {start_step})")
 
+print_info(f"Training loop: start={start_step}, end={cfg.nb_iterations}, steps={cfg.nb_iterations - start_step}")
+
 # Start training
 old_trajectory: Optional[TrajectoryData] = None
 iter_time_dlt = 0
@@ -110,46 +118,46 @@ for step in range(start_step, cfg.nb_iterations):
         flush=True
     )
 
-    main_start = time()
+    try:
 
-    # Collect trajectory using the model
-    trajectory = collect_trajectory(train_data, model, step)
+        main_start = time()
 
-    # Extend trajectory with previous trajectory
-    if cfg.reuse_experience != 'none':
-        reuse_start = time()
-        if old_trajectory is not None:
-            trajectory = old_trajectory + trajectory
-        old_trajectory = trajectory.copy()
-        reuse_end = time()
-        reuse_time_ms = int((reuse_end - reuse_start) * 1000)
-        print_info(f"Reuse time: {reuse_time_ms}ms")
+        # Collect trajectory using the model
+        trajectory = collect_trajectory(train_data, model, step)
 
-    # Fit value model to trajectory rewards
-    if cfg.value_epochs > 0:
-        value_update(trajectory, model, optimizer)
+        # Extend trajectory with previous trajectory
+        if cfg.reuse_experience != 'none':
+            reuse_start = time()
+            if old_trajectory is not None:
+                trajectory = old_trajectory + trajectory
+            old_trajectory = trajectory.copy()
+            reuse_end = time()
+            reuse_time_ms = int((reuse_end - reuse_start) * 1000)
+            print_info(f"Reuse time: {reuse_time_ms}ms")
 
-    # Update policy model with PPO
-    ppo_update(trajectory, model, optimizer)
+        # Fit value model to trajectory rewards
+        if cfg.value_epochs > 0:
+            value_update(trajectory, model, optimizer)
 
-    # Save the model
-    if (step + 1) % 25 == 0:
+        # Update policy model with PPO
+        ppo_update(trajectory, model, optimizer)
+
+        # Save the model every iteration for crash resilience
         torch.save(
             model.state_dict(),
-            os.path.join(
-                fl.models_dir,
-                f'model_{step}.pt'
-            )
+            os.path.join(fl.models_dir, f'model_{step}.pt')
         )
 
+        main_end = time()
+        iter_time = main_end - main_start
+        elapsed = main_end - overall_start
+        eta = elapsed * (cfg.nb_iterations - step - 1) / (step + 1)
+        iter_time_dlt = timedelta(seconds=iter_time)
+        elapsed_dlt = timedelta(seconds=int(elapsed))
+        eta_dlt = timedelta(seconds=int(eta))
 
-
-    main_end = time()
-    iter_time = main_end - main_start
-    elapsed = main_end - overall_start
-    eta = elapsed * (cfg.nb_iterations - step - 1) / (step + 1)
-    iter_time_dlt = timedelta(seconds=iter_time)
-    elapsed_dlt = timedelta(seconds=int(elapsed))
-    eta_dlt = timedelta(seconds=int(eta))
+    except RuntimeError as e:
+        print_info(f"Iteration {step} crashed (MLIR SIGABRT): {e}", flush=True)
+        continue
 
 

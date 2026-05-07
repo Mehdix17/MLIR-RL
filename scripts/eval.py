@@ -7,8 +7,13 @@ load_dotenv('.env.debug')
 # Import modules
 import os
 import logging
+import signal
 import torch
 from typing import Optional
+
+def _sigabrt_handler(signum, frame):
+    raise RuntimeError("MLIR native code crashed (SIGABRT) — caught and continuing")
+signal.signal(signal.SIGABRT, _sigabrt_handler)
 from utils.dask_manager import DaskManager
 from utils.file_logger import FileLogger
 from utils.config import Config
@@ -61,7 +66,7 @@ print_success(f'Logging to: {fl.run_dir}')
 
 # Setup torch
 torch.set_grad_enabled(False)
-torch.set_num_threads(8)
+torch.set_num_threads(4)
 
 # Initiate model
 model = Model().to(device)

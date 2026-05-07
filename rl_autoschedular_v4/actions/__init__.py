@@ -6,9 +6,6 @@ from .tiled_parallelization import TiledParallelization
 from .tiled_fusion import TiledFusion
 from .interchange import Interchange
 from .vectorization import Vectorization
-from .pad import Pad
-from .pack import Pack
-from .unroll import Unroll
 from rl_autoschedular_v4.state import OperationState
 import torch
 from torch.distributions import Distribution, Categorical
@@ -24,10 +21,7 @@ class ActionSpace:
         TiledParallelization,
         TiledFusion,
         Interchange,
-        Vectorization,
-        Pad,
-        Pack,
-        Unroll
+        Vectorization
     ]
 
     @classmethod

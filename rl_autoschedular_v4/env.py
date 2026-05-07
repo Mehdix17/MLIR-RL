@@ -1,4 +1,4 @@
-from rl_autoschedular_v4.state import OperationState, BenchmarkFeatures
+from rl_autoschedular_v4.state import OperationState, BenchmarkFeatures, OperationFeatures, IteratorType
 from rl_autoschedular_v4.benchmarks import Benchmarks
 from typing import Optional
 from rl_autoschedular_v4.execution import Execution
@@ -54,7 +54,9 @@ class Env:
         # Update the state infos to reflect the transformation
         action_failed = False
         try:
+            old_operation_features = state.operation_features.copy()
             self.__update_state_infos(next_state, action)
+            action.extras['shaped_reward'] = self.__shaped_reward(old_operation_features, next_state.operation_features, action)
         except Exception as e:
             seq_str = '\n'.join([str(list(map(str, op_seq))) for op_seq in state.transformation_history])
             print_error(
@@ -66,6 +68,7 @@ class Env:
                 f"Transformations:\n{seq_str}"
             )
             action_failed = True
+            action.extras['shaped_reward'] = 0.0
 
         # Check if state is terminal
         next_state.terminal = action.terminal or action_failed or next_state.step_count == Config().truncate
@@ -116,7 +119,7 @@ class Env:
             cache_miss = True
 
         # The reward will take into consideration whether execution succeeded or not
-        rewards[-1] = self.__action_reward(True, exec_succeeded, new_exec_time, self.benchmark_data.root_exec_time)
+        rewards[-1] += self.__action_reward(True, exec_succeeded, new_exec_time, self.benchmark_data.root_exec_time)
         speedup = (self.benchmark_data.root_exec_time / new_exec_time) if new_exec_time is not None else 1.0
 
         return rewards, speedup, new_exec_time, cache_miss
@@ -295,6 +298,78 @@ class Env:
                 # Update transformed code
                 transformed_code = new_transformed_code
 
-                rewards.extend([0.0] * rewards_count)
+                shaped_reward = float(action.extras.get('shaped_reward', 0.0))
+                rewards.extend([shaped_reward] * rewards_count)
 
         return transformed_code, rewards
+
+    def __shaped_reward(self, old_features: OperationFeatures, new_features: OperationFeatures, action: Action) -> float:
+        """Compute intermediate shaped reward from static feature changes.
+
+        This reward is dense and local to each transformation. It complements,
+        but does not replace, the terminal execution-time speedup reward.
+        """
+        cfg = Config()
+        if not cfg.reward_shaping_enabled:
+            return 0.0
+
+        old_score = self.__static_efficiency_score(old_features)
+        new_score = self.__static_efficiency_score(new_features)
+        delta = (new_score - old_score) * cfg.reward_shaping_scale
+
+        # Encourage explicit vectorization decisions slightly, while keeping
+        # the shaping term bounded.
+        if action.symbol == 'V':
+            delta += cfg.reward_shaping_vectorization_bonus
+
+        return max(-cfg.reward_shaping_clip, min(cfg.reward_shaping_clip, delta))
+
+    def __static_efficiency_score(self, features: OperationFeatures) -> float:
+        cfg = Config()
+        ai = self.__estimate_arithmetic_intensity(features)
+        ai_score = math.log10(1.0 + ai)
+
+        loop_count = max(1, len(features.nested_loops))
+        parallel_loops = sum(loop.iterator_type == IteratorType.Parallel for loop in features.nested_loops)
+        parallel_ratio = parallel_loops / loop_count
+
+        vectorizable_score = 1.0 if features.vectorizable else 0.0
+
+        return (
+            cfg.reward_shaping_weight_ai * ai_score
+            + cfg.reward_shaping_weight_vectorizable * vectorizable_score
+            + cfg.reward_shaping_weight_parallel * parallel_ratio
+        )
+
+    def __estimate_arithmetic_intensity(self, features: OperationFeatures) -> float:
+        loop_extent = 1.0
+        index_upper_bounds = {}
+        for loop in features.nested_loops:
+            ub = max(1, int(loop.upper_bound))
+            loop_extent *= ub
+            index_upper_bounds[loop.arg] = ub
+
+        total_ops = sum(features.op_count.values())
+        flops = max(1.0, loop_extent * max(1, total_ops))
+
+        bytes_moved = self.__estimate_bytes_moved(features, index_upper_bounds)
+        return flops / max(1.0, bytes_moved)
+
+    def __estimate_bytes_moved(self, features: OperationFeatures, index_upper_bounds: dict[str, int]) -> float:
+        accesses = features.load_data + features.store_data
+        if not accesses:
+            return 1.0
+
+        total_elements = 0.0
+        for access in accesses:
+            access_elements = 1.0
+            for dim_expr in access:
+                dim_extent = 1.0
+                for index, ub in index_upper_bounds.items():
+                    if index in dim_expr:
+                        dim_extent *= ub
+                access_elements *= max(1.0, dim_extent)
+            total_elements += max(1.0, access_elements)
+
+        # Use 4 bytes as default scalar width for stable shaping.
+        return max(1.0, total_elements * 4.0)
