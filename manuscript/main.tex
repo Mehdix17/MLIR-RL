@@ -18,12 +18,40 @@
 \usepackage{tabularx}
 \usepackage{tikz}
 
-% --- Bibliography ---
-\usepackage[backend=bibtex,style=ieee]{biblatex}
-\addbibresource{references.bib}
-
 % --- Hyperlinks Configuration ---
 \usepackage{hyperref}
+
+% --- Bibliography ---
+\usepackage[backend=bibtex,style=ieee,sorting=nyt]{biblatex}
+\addbibresource{references.bib}
+
+% --- Acronyms ---
+\usepackage[acronym,toc]{glossaries}
+\makeglossaries
+
+\newacronym{mlir}{MLIR}{Multi-Level Intermediate Representation}
+\newacronym{rl}{RL}{Reinforcement Learning}
+\newacronym{drl}{Deep RL}{Deep Reinforcement Learning}
+\newacronym{ppo}{PPO}{Proximal Policy Optimization}
+\newacronym{lstm}{LSTM}{Long Short-Term Memory}
+\newacronym{ast}{AST}{Abstract Syntax Tree}
+\newacronym{ir}{IR}{Intermediate Representation}
+\newacronym{llvm}{LLVM}{Low Level Virtual Machine}
+\newacronym{simd}{SIMD}{Single Instruction Multiple Data}
+\newacronym{scf}{SCF}{Structured Control Flow}
+\newacronym{ssa}{SSA}{Static Single Assignment}
+\newacronym{cfg}{CFG}{Control-Flow Graph}
+\newacronym{mdp}{MDP}{Markov Decision Process}
+\newacronym{dqn}{DQN}{Deep Q-Network}
+\newacronym{gae}{GAE}{Generalized Advantage Estimation}
+\newacronym{sgd}{SGD}{Stochastic Gradient Descent}
+\newacronym{rnn}{RNN}{Recurrent Neural Network}
+\newacronym{td}{TD}{Temporal Difference}
+\newacronym{jit}{JIT}{Just-In-Time}
+\newacronym{relu}{ReLU}{Rectified Linear Unit}
+\newacronym{elu}{ELU}{Exponential Linear Unit}
+\newacronym{avx}{AVX}{Advanced Vector Extensions}
+\newacronym{ilp}{ILP}{Instruction-Level Parallelism}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -104,8 +132,8 @@
         \textbf{Supervised by:}\\
         Dr. Riyadh Baghdadi\\[0.8cm]
         \textbf{Jury Members:}\\
-        Prof. Malika Ioualalen\\
-        Prof. Faiza Khellaf
+        Prof. \\
+        Prof.
     \end{minipage}
     \hfill
     \begin{minipage}[t]{0.4\textwidth}
@@ -138,10 +166,15 @@ Contenu du résumé ici...
 
 % Table of Contents and Lists
 \newpage
-\pagestyle{plain} 
+\fancypagestyle{plain}{}
+\pagestyle{empty}
 \tableofcontents
+\newpage
 \listoftables
+\newpage
 \listoffigures
+\newpage
+\printglossary[type=\acronymtype,title={List of Acronyms}]
 
 % --- MAIN CONTENT ---
 \newpage
@@ -156,19 +189,19 @@ Contenu du résumé ici...
 \include{chapters/general_introduction}
 
 % Chapter 1 – Compiler and Code Optimization
-\include{chapters/code_optimization}
+\include{chapters/chapter1}
 
 % Chapter 2 – Reinforcement Learning Technology
-\include{chapters/reinforcement_learning}
+\include{chapters/chapter2}
 
 % Chapter 3 – Related Work on RL for Compiler Optimization
-\include{chapters/reinforcement_learning_for_automatic_code_optimization}
+\include{chapters/chapter3}
 
 % Chapter 4 – System Design and Implementation
-\include{chapters/design_and_implementation}
+\include{chapters/chapter4}
 
 % Chapter 5 – Experiments and Results
-\include{chapters/experiments_and_results}
+\include{chapters/chapter5}
 
 % General Conclusion (unnumbered chapter, added to TOC)
 \include{chapters/general_conclusion}
