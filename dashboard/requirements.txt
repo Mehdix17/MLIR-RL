@@ -1,0 +1,4 @@
+streamlit
+pandas
+plotly
+scipy  # optional - for Wilcoxon test in head-to-head comparison

@@ -1,0 +1,4 @@
+# Track config files by default. Keep only temporary editor files ignored.
+*.swp
+*.tmp
+*.bak
