@@ -5,7 +5,7 @@
 
 The application of reinforcement learning to compiler optimization sits at the intersection of two rich research traditions: decades of work on compiler transformation frameworks, and the more recent emergence of deep \gls{rl} as a practical tool for sequential decision-making. The previous two chapters provided the necessary background in each of these areas individually. This chapter surveys the works that combine them, specifically analyzing systems that use reinforcement learning to automate compiler optimization decisions.
 
-The landscape of \gls{rl}-based compiler optimization can be organized into three tiers. First, \gls{rl} has been integrated directly into existing compiler frameworks such as Halide and Tiramisu, where the learning agent replaces or augments hand-crafted scheduling heuristics. Second, general-purpose \gls{rl} environments for compiler optimization, such as CompilerGym and PolyGym, have been developed to provide standardized benchmarks and interfaces for research. Third, within the \gls{mlir} ecosystem specifically, work initiated by Bendib et al.~\cite{bendib2024reinforcement} and extended by the previous team in this project has established an \gls{rl}-based auto-scheduler for \gls{mlir} Linalg operations.
+The landscape of \gls{rl}-based compiler optimization can be organized into three tiers. First, \gls{rl} has been integrated directly into existing compiler frameworks such as Halide and Tiramisu, where the learning agent replaces or augments hand-crafted scheduling heuristics. Second, general-purpose \gls{rl} environments for compiler optimization, such as CompilerGym and PolyGym, have been developed to provide standardized benchmarks and interfaces for research. Third, within the \gls{mlir} ecosystem specifically, work initiated by Bendib et al.~\cite{bendib2024reinforcement} and extended by Tirichine et al.~\cite{tirichine2025reinforcement} has established an \gls{rl}-based auto-scheduler for \gls{mlir} Linalg operations.
 
 \section{Reinforcement Learning in Existing Compilers}
 
@@ -48,9 +48,9 @@ The PolyGym state representation encodes polyhedral features of the loop nest, i
 \begin{figure}[H]
     \centering
     % [PLACEHOLDER: Timeline or evolution diagram showing the progression of MLIR RL work:
-    %  Bendib et al. (2024) → Previous Team → Our V1 → V2 → V3 → V4
+    %  Bendib et al. (2024) → Tirichine et al. → Our V1 → V2 → V3 → V4
     %  With annotations of what each stage added (e.g., V1: +Hardware, V2: +Shaped Reward, V3: +Transformer, V4: Unified + Pad/Pack/Unroll)]
-    \fbox{\parbox{0.9\textwidth}{\centering\vspace{2cm} Evolution of \gls{rl}-based \gls{mlir} Optimization \\ (Bendib et al. $\rightarrow$ Previous Team $\rightarrow$ This Work: V1 $\rightarrow$ V2 $\rightarrow$ V3 $\rightarrow$ V4) \vspace{2cm}}}
+    \fbox{\parbox{0.9\textwidth}{\centering\vspace{2cm} Evolution of \gls{rl}-based \gls{mlir} Optimization \\ (Bendib et al. $\rightarrow$ Tirichine et al. $\rightarrow$ This Work: V1 $\rightarrow$ V2 $\rightarrow$ V3 $\rightarrow$ V4) \vspace{2cm}}}
     \caption{Progression of \gls{rl}-based optimization for \gls{mlir}, from the initial single-operation environment through to our unified V4 system.}
     \label{fig:mlir-rl-evolution}
 \end{figure}
@@ -67,11 +67,11 @@ The policy is an actor-critic network with a recursive \gls{lstm}-based embeddin
 
 \subsection{Extension to Full Neural Network Programs}
 
-The previous team in this project~\cite{PREVIOUS_TEAM} extended the Bendib et al. environment to support the optimization of full neural network computation graphs rather than isolated operations. Their key contributions include: (1) an abstract syntax tree (\gls{ast}) based state representation that encodes the hierarchical structure of consumer and producer operations through a recursive loop embedding; (2) a new Fusion action (\texttt{TiledFusion}) that merges producer-consumer operation pairs using \gls{mlir}'s tiling and fusion mechanisms; (3) a dataset generator that produces synthesized operation sequences and extracts blocks from convolutional neural network models (VGG, ResNet, MobileNet); and (4) an environment traversal strategy that processes operations from consumer to producer, allowing the agent to make fusion decisions with knowledge of how each operation's output is consumed.
+Tirichine et al.~\cite{tirichine2025reinforcement} extended the Bendib et al. environment to support the optimization of full neural network computation graphs rather than isolated operations. Their key contributions include: (1) an abstract syntax tree (\gls{ast}) based state representation that encodes the hierarchical structure of consumer and producer operations through a recursive loop embedding; (2) a new Fusion action (\texttt{TiledFusion}) that merges producer-consumer operation pairs using \gls{mlir}'s tiling and fusion mechanisms; (3) a dataset generator that produces synthesized operation sequences and extracts blocks from convolutional neural network models (VGG, ResNet, MobileNet); and (4) an environment traversal strategy that processes operations from consumer to producer, allowing the agent to make fusion decisions with knowledge of how each operation's output is consumed.
 
 Their evaluation on single operations (matrix multiplication, 2D convolution) and full neural network models showed that the agent could achieve competitive speedups. Notably, it achieved a $2.5\times$ improvement on MobileNetV2 compared to standard PyTorch execution, but underperformed on architectures with highly regular patterns (VGG, $1.09\times$) and on ResNet ($2.1\times$ vs.\ PyTorch's $4.25\times$).
 
-\textbf{Limitations.} Despite these advances, the previous team's system inherits several limitations from the Bendib et al. baseline that constrain its optimization capability. First, the observation remains hardware-agnostic: the agent must infer optimal tile sizes and parallelization strategies through trial and error rather than conditioning on known cache and core specifications. Second, the reward remains entirely sparse, with no intermediate signal guiding the agent toward promising intermediate states. Third, the recursive \gls{lstm} encoder, while effective for the \gls{ast} representation, may struggle with deeply nested loops where the relationship between distant levels (e.g., outermost and innermost) is not well captured by sequential processing. Fourth, the action space is limited to six transformations (Tiling, TiledParallelization, TiledFusion, Interchange, Vectorization, NoTransformation), missing transformations such as padding and unrolling that could improve memory alignment and instruction-level parallelism. These limitations form the motivation for the four improvements developed in this thesis, detailed in Chapter~4.
+\textbf{Limitations.} Despite these advances, Tirichine et al.'s system inherits several limitations from the Bendib et al. baseline that constrain its optimization capability. First, the observation remains hardware-agnostic: the agent must infer optimal tile sizes and parallelization strategies through trial and error rather than conditioning on known cache and core specifications. Second, the reward remains entirely sparse, with no intermediate signal guiding the agent toward promising intermediate states. Third, the recursive \gls{lstm} encoder, while effective for the \gls{ast} representation, may struggle with deeply nested loops where the relationship between distant levels (e.g., outermost and innermost) is not well captured by sequential processing. Fourth, the action space is limited to six transformations (Tiling, TiledParallelization, TiledFusion, Interchange, Vectorization, NoTransformation), missing transformations such as padding and unrolling that could improve memory alignment and instruction-level parallelism. These limitations form the motivation for the four improvements developed in this thesis, detailed in Chapter~4.
 
 \subsection{Other \gls{mlir}-Based \gls{rl} Efforts}
 
@@ -123,7 +123,7 @@ This section provides a comparative analysis of the systems surveyed in this cha
         & 6 actions: T, TP, I, V, NT (+ TF in extension)
         & Log-speedup (sparse) \\
         \addlinespace
-        Previous team~\cite{PREVIOUS_TEAM}
+        Tirichine et al.~\cite{tirichine2025reinforcement}
         & \gls{mlir} Linalg
         & \gls{ast} + recursive \gls{lstm} embedding
         & 6 actions including Fusion
@@ -160,9 +160,9 @@ Table~\ref{tab:related-work-synthesis} summarizes the key design dimensions of t
 
 \subsection{Common Approaches and Divergences}
 
-\textbf{State representation.} All surveyed systems extract numerical features from the program representation and feed them into a neural network policy. The features range from coarse (\gls{llvm} program features in CompilerGym) to fine-grained (access matrices and loop bounds in the \gls{mlir}-based systems). A notable trend is the increasing use of structured representations: the \gls{ast}-based approach of the previous team, and our transformer-based extension, move beyond flat feature vectors toward representations that preserve the hierarchical structure of the program.
+\textbf{State representation.} All surveyed systems extract numerical features from the program representation and feed them into a neural network policy. The features range from coarse (\gls{llvm} program features in CompilerGym) to fine-grained (access matrices and loop bounds in the \gls{mlir}-based systems). A notable trend is the increasing use of structured representations: the \gls{ast}-based approach of Tirichine et al., and our transformer-based extension, move beyond flat feature vectors toward representations that preserve the hierarchical structure of the program.
 
-\textbf{Action space.} The action spaces across systems reflect their target \gls{ir} and scope. Halide and Tiramisu offer scheduling directives specific to their respective frameworks. CompilerGym operates at the pass level, which is coarser than the per-operation transformations used in \gls{mlir}-based systems. Within the \gls{mlir} lineage, the action space has expanded from five actions (Bendib et al.) to six (previous team, adding Fusion) to nine in our V4 (adding Pad, Pack, and Unroll).
+\textbf{Action space.} The action spaces across systems reflect their target \gls{ir} and scope. Halide and Tiramisu offer scheduling directives specific to their respective frameworks. CompilerGym operates at the pass level, which is coarser than the per-operation transformations used in \gls{mlir}-based systems. Within the \gls{mlir} lineage, the action space has expanded from five actions (Bendib et al.) to six (Tirichine et al., adding Fusion) to nine in our V4 (adding Pad, Pack, and Unroll).
 
 \textbf{Reward design.} A striking commonality is the reliance on sparse terminal rewards based on execution time. Only our V2 and V4 introduce shaped rewards that provide intermediate feedback. This is a significant design choice with implications for learning efficiency: sparse rewards make credit assignment difficult (which actions in the sequence contributed to the final outcome?) and slow exploration (the agent must complete an entire episode before receiving any signal). Shaped rewards address this by providing feedback after each transformation step.
 
@@ -190,7 +190,7 @@ The contributions of this thesis (V1–V4, described in detail in Chapter~4) dir
     \centering
     % [PLACEHOLDER: Radar chart or gap-analysis diagram showing:
     %  Five axes: Hardware Awareness, Reward Density, Encoder Expressiveness, Action Diversity, Evaluation Rigor
-    %  Overlaid lines for: Halide DRL, CompilerGym, Bendib et al., Previous Team, Our V4
+    %  Overlaid lines for: Halide DRL, CompilerGym, Bendib et al., Tirichine et al., Our V4
     %  Our V4 should score highest across all axes, clearly showing the gaps we fill.]
     \fbox{\parbox{0.8\textwidth}{\centering\vspace{2.5cm} Gap Analysis: Coverage of Key Design Dimensions \\ (Hardware $\cdot$ Reward $\cdot$ Encoder $\cdot$ Actions $\cdot$ Evaluation) \vspace{2.5cm}}}
     \caption{Comparative coverage of key design dimensions across \gls{rl}-based compiler optimization systems. Our V4 fills gaps in hardware awareness, reward density, encoder expressiveness, action diversity, and evaluation rigor.}
@@ -199,7 +199,7 @@ The contributions of this thesis (V1–V4, described in detail in Chapter~4) dir
 
 \section{Conclusion}
 
-This chapter has surveyed the landscape of reinforcement learning applied to compiler optimization. We examined systems that integrate \gls{rl} into existing compilers (Halide, Tiramisu), general-purpose \gls{rl} environments for compiler research (CompilerGym, PolyGym), and the specific line of work on \gls{rl}-based optimization in \gls{mlir} (Bendib et al., the previous team, and other efforts).
+This chapter has surveyed the landscape of reinforcement learning applied to compiler optimization. We examined systems that integrate \gls{rl} into existing compilers (Halide, Tiramisu), general-purpose \gls{rl} environments for compiler research (CompilerGym, PolyGym), and the specific line of work on \gls{rl}-based optimization in \gls{mlir} (Bendib et al., Tirichine et al., and other efforts).
 
 The comparative synthesis revealed several common design patterns: structured state representations derived from program IRs, discrete action spaces of compiler transformations, and execution-time-based reward signals. It also revealed important gaps. The exclusive reliance on sparse terminal rewards, the absence of hardware awareness, the limitations of sequential \gls{lstm} encoders for hierarchical program structures, and the restricted action diversity of prior \gls{mlir}-based systems represent opportunities for improvement.
 

@@ -219,7 +219,7 @@ Fusion is legal when there are no backward dependencies between the loop bodies 
     \label{fig:fusion-after}
 \end{figure}
 
-Fusion is a key transformation in our system. However, as demonstrated by the case study of the previous team (described in the General Introduction), fusion is not always beneficial: fusing two operations can prevent the individual application of more impactful transformations (such as aggressive parallelization) to each operation. The agent must learn when fusion improves performance and when it hinders other optimizations.
+Fusion is a key transformation in our system. However, as demonstrated by the case study of Tirichine et al.~\cite{tirichine2025reinforcement} (described in the General Introduction), fusion is not always beneficial: fusing two operations can prevent the individual application of more impactful transformations (such as aggressive parallelization) to each operation. The agent must learn when fusion improves performance and when it hinders other optimizations.
 
 \subsection{Vectorization}
 
