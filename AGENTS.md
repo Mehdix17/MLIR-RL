@@ -73,6 +73,17 @@ For more detailed guides and architectural decisions, refer to the following doc
 - [Data Utils](data_utils/README.md) — Tools for generating synthetic MLIR datasets and extraction operations.
 - [Novelties](docs/NOVELTIES.md) and [Versions](docs/VERSIONS.md) — Changelog and upcoming version plans.
 
+## Manuscript & Paper Citations
+
+**CRITICAL REMINDER:** When writing or editing our current manuscript, **always cite the published or officially archived papers**. Do not cite the raw master's thesis manuscripts directly in the text.
+
+- **Baseline Environment (2024 Focus)**
+  - **Manuscript Path:** `manuscript/references/Bendib 2024.md`
+  - **Always Cite the Paper:** Use the citation `bendib2024reinforcement` (Master's thesis).
+- **Extended System / Our Contributions (2025 Focus)**
+  - **Manuscripts Paths:** `manuscript/references/Rafik & Djad 2025.md` and `manuscript/references/Nassim & Mohamed 2025.md`
+  - **Always Cite the Paper:** These converged into the arXiv preprint. Use the citation `tirichine2025reinforcement`.
+
 ## Config-Driven Workflow
 
 All scripts read `CONFIG_FILE_PATH` (env var) or accept a config path as `$1`. The config JSON selects the implementation:
