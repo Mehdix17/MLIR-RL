@@ -64,6 +64,7 @@ Each `vN` is a **full standalone copy** of the baseline with internal imports re
 
 For more detailed guides and architectural decisions, refer to the following documents:
 
+- [Main README config properties](README.md) — Exhaustive list of `CONFIG_FILE_PATH` fields.
 - [HPC Setup Guide](docs/HPC%20Setup.md) — Slurm cluster specific instructions.
 - [Training Guide](docs/TRAINING_GUIDE.md) — Comprehensive guide on training the RL agent.
 - [RL Agent Tutorial](docs/RL_AGENT_TUTORIAL.md) — Walkthrough of the RL framework and logic.
