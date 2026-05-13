@@ -12,6 +12,7 @@ set -a && source .env && set +a
 ```
 
 The `.env` file sets:
+
 - `PYTHONPATH` to the in-tree LLVM build’s MLIR Python bindings
 - `LD_LIBRARY_PATH` to the Conda env **and** a GCC-14 `libstdc++` (required on this cluster)
 - `LLVM_BUILD_PATH`, `MLIR_SHARED_LIBS`, `AST_DUMPER_BIN_PATH`, `VECTORIZER_BIN_PATH`
@@ -49,15 +50,27 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with “Permission denied” o
 
 ### Implementation Packages (Versioned Agents)
 
-| Package | Purpose |
-|---|---|
-| `rl_autoschedular` | Baseline — **must remain untouched** |
-| `rl_autoschedular_v1` | Hardware-aware observation |
-| `rl_autoschedular_v2` | Shaped reward |
-| `rl_autoschedular_v3` | Transformer loop-nest encoder |
-| `rl_autoschedular_v4`+ | Future novelties (one per version) |
+| Package                | Purpose                              |
+| ---------------------- | ------------------------------------ |
+| `rl_autoschedular`     | Baseline — **must remain untouched** |
+| `rl_autoschedular_v1`  | Hardware-aware observation           |
+| `rl_autoschedular_v2`  | Shaped reward                        |
+| `rl_autoschedular_v3`  | Transformer loop-nest encoder        |
+| `rl_autoschedular_v4`+ | Future novelties (one per version)   |
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
+
+## Documentation References
+
+For more detailed guides and architectural decisions, refer to the following documents:
+
+- [HPC Setup Guide](docs/HPC%20Setup.md) — Slurm cluster specific instructions.
+- [Training Guide](docs/TRAINING_GUIDE.md) — Comprehensive guide on training the RL agent.
+- [RL Agent Tutorial](docs/RL_AGENT_TUTORIAL.md) — Walkthrough of the RL framework and logic.
+- [Pipeline Orchestration](docs/PIPELINE.md) — Full lifecycle of MLIR baseline up to evaluation.
+- [Dashboard Guide](docs/dashboard.md) — Streamlit evaluation instructions.
+- [Data Utils](data_utils/README.md) — Tools for generating synthetic MLIR datasets and extraction operations.
+- [Novelties](docs/NOVELTIES.md) and [Versions](docs/VERSIONS.md) — Changelog and upcoming version plans.
 
 ## Config-Driven Workflow
 
@@ -72,6 +85,7 @@ All scripts read `CONFIG_FILE_PATH` (env var) or accept a config path as `$1`. T
 ```
 
 **Implementation resolution order** (from `utils/implementation.py`):
+
 1. `AUTOSCHEDULER_IMPL` env var
 2. Config file `"implementation"` field
 3. Default: `rl_autoschedular`
@@ -123,6 +137,7 @@ results/<experiment>/
 ```
 
 `<prefix>` is resolved by `utils/implementation.py`:
+
 - `rl_autoschedular` → `old`
 - `new_rl_autoschedular` → `new`
 - `rl_autoschedular_vN` → `vN`
@@ -144,6 +159,7 @@ These are referenced by env vars in `.env`.
 ## Testing & Validation
 
 There is **no pytest suite**. Validation is done via:
+
 - Python compile checks (`python -m py_compile`)
 - Import smoke tests (e.g. `python -c "import rl_autoschedular_v3.model"`)
 - End-to-end sanity runs on a single benchmark
