@@ -7,8 +7,6 @@ A compiler is a program that translates source code written in a high-level prog
 
 The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide \gls{simd} (Single Instruction Multiple Data) units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads—particularly in machine learning—have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
 
-This chapter provides the background on compiler code optimization necessary to understand the automated optimization approach developed in this thesis. Section~1.2 describes the phases of a compiler pipeline, from source code to executable. Section~1.3 surveys the main optimization paradigms and the analyses that support them. Section~1.4 presents in detail the loop nest transformations that form the action space of our reinforcement learning agent. Section~1.5 discusses the fundamental challenges that motivate the use of learned, rather than hand-crafted, optimization strategies. Section~1.6 introduces the \gls{mlir} compiler infrastructure, which serves as the platform for our work. Section~1.7 concludes the chapter and links it to the reinforcement learning background presented in the next chapter.
-
 \section{Phases of a Compiler: From Source Code to Executable}
 
 A compiler typically operates in three major phases: the \textit{front-end}, the \textit{middle-end}, and the \textit{back-end}~\cite{aho2006compilers}. Each phase transforms the program into a progressively lower-level representation.

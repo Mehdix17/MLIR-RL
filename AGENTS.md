@@ -14,7 +14,8 @@ set -a && source .env && set +a
 **Slurm scripts** (`train.sh`, `eval.sh`, `get_base.sh`, `get_pytorch_times.sh`) already handle this internally — they source `.env` and activate the conda env. You only need the steps above for running Python scripts directly or using `pipeline.sh`.
 
 The `.env` file sets:
-- `PYTHONPATH` to the in-tree LLVM build's MLIR Python bindings
+
+- `PYTHONPATH` to the in-tree LLVM build’s MLIR Python bindings
 - `LD_LIBRARY_PATH` to the Conda env **and** a GCC-14 `libstdc++` (required on this cluster)
 - `LLVM_BUILD_PATH`, `MLIR_SHARED_LIBS`, `AST_DUMPER_BIN_PATH`, `VECTORIZER_BIN_PATH`
 - Neptune credentials (`NEPTUNE_PROJECT`, `NEPTUNE_API_TOKEN`)
@@ -51,26 +52,40 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with "Permission denied" on br
 
 ## Implementation Packages (Versioned Agents)
 
-| Package | Purpose |
-|---|---|
-| `rl_autoschedular` | Baseline — **must remain untouched** |
-| `rl_autoschedular_v1` | Hardware-aware observation |
-| `rl_autoschedular_v2` | Shaped reward |
-| `rl_autoschedular_v3` | Transformer loop-nest encoder |
-| `rl_autoschedular_v4`+ | Future novelties (one per version) |
+| Package                | Purpose                              |
+| ---------------------- | ------------------------------------ |
+| `rl_autoschedular`     | Baseline — **must remain untouched** |
+| `rl_autoschedular_v1`  | Hardware-aware observation           |
+| `rl_autoschedular_v2`  | Shaped reward                        |
+| `rl_autoschedular_v3`  | Transformer loop-nest encoder        |
+| `rl_autoschedular_v4`+ | combination of V1 + V2 + V3          |
+| `rl_autoschedular_v5`+ | Future novelties (one per version)   |
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
 
-## Architecture & Entrypoints
+## Documentation References
 
-- **`scripts/train.py`** — Main training loop (PPO). Imports the selected implementation dynamically.
-- **`scripts/eval.py`** — Evaluates all `.pt` checkpoints in the latest `run_N/models/` for the selected implementation.
-- **`scripts/get_base.py`** — Measures unoptimized MLIR baseline execution times.
-- **`scripts/get_pytorch_times.py`** — Measures PyTorch eager / compile / JIT baselines.
-- **`scripts/split_json.py`** — Splits a baseline JSON into train/eval sets (accepts config path positional or `--config`).
-- **`scripts/pipeline.sh`** — One-shot full pipeline orchestration (runs locally, submits Slurm jobs for train/eval).
-- **`scripts/submit_and_monitor.sh`** — Submits a Slurm job and tails its output live.
-- **`dashboard/dashboard.py`** — Streamlit evaluation dashboard (multi-implementation comparison).
+For more detailed guides and architectural decisions, refer to the following documents:
+
+- [Main README config properties](README.md) — Exhaustive list of `CONFIG_FILE_PATH` fields.
+- [HPC Setup Guide](docs/HPC%20Setup.md) — Slurm cluster specific instructions.
+- [Training Guide](docs/TRAINING_GUIDE.md) — Comprehensive guide on training the RL agent.
+- [RL Agent Tutorial](docs/RL_AGENT_TUTORIAL.md) — Walkthrough of the RL framework and logic.
+- [Pipeline Orchestration](docs/PIPELINE.md) — Full lifecycle of MLIR baseline up to evaluation.
+- [Dashboard Guide](docs/dashboard.md) — Streamlit evaluation instructions.
+- [Data Utils](data_utils/README.md) — Tools for generating synthetic MLIR datasets and extraction operations.
+- [Novelties](docs/NOVELTIES.md) and [Versions](docs/VERSIONS.md) — Changelog and upcoming version plans.
+
+## Manuscript & Paper Citations
+
+**CRITICAL REMINDER:** When writing or editing our current manuscript, **always cite the published or officially archived papers**. Do not cite the raw master's thesis manuscripts directly in the text.
+
+- **Baseline Environment (2024 Focus)**
+  - **Manuscript Path:** `manuscript/references/Bendib 2024.md`
+  - **Always Cite the Paper:** Use the citation `bendib2024reinforcement` (Master's thesis).
+- **Extended System / Our Contributions (2025 Focus)**
+  - **Manuscripts Paths:** `manuscript/references/Rafik & Djad 2025.md` and `manuscript/references/Nassim & Mohamed 2025.md`
+  - **Always Cite the Paper:** These converged into the arXiv preprint. Use the citation `tirichine2025reinforcement`.
 
 ## Config-Driven Workflow
 
@@ -85,6 +100,7 @@ All scripts read `CONFIG_FILE_PATH` (env var) or accept a config path as `$1`. T
 ```
 
 **Implementation resolution order** (from `utils/implementation.py`):
+
 1. `AUTOSCHEDULER_IMPL` env var
 2. `--implementation` flag (where supported)
 3. Config file `"implementation"` field
