@@ -4,8 +4,7 @@ cd /scratch/mb10856/MLIR-RL
 
 # ---------- 1) One-time shell setup ----------
 
-source ~/envs/mlir/bin/activate
-set -a && source .env && set +a
+source ~/envs/mlir/bin/activate && set -a && source .env && set +a
 
 # Implementation is now selected from the config file via:
 #   "implementation": "rl_autoschedular" | "rl_autoschedular_v1" | "rl_autoschedular_v2" | ...

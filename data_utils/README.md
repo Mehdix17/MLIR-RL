@@ -21,9 +21,9 @@
 # The mlir conda env requires a newer libstdc++ on this cluster:
 export GCC14_LIB=/share/apps/NYUAD6/spack/spack-0.23.0/opt/spack/linux-rocky8-zen/gcc-8.5.0/gcc-14.2.0-wfwb3ds4a5thcsh5w5o23k6wq7ob5ok3/lib64
 export LD_LIBRARY_PATH="$GCC14_LIB:$LD_LIBRARY_PATH"
-export PATH="/home/tb3654/.conda/envs/mlir/bin:$PATH"
+export PATH="/home/mb10856/envs/mlir/bin:$PATH"
 # Project must be on PYTHONPATH for relative imports
-export PYTHONPATH="/scratch/tb3654/MLIR-RL:$PYTHONPATH"
+export PYTHONPATH="/scratch/mb10856/MLIR-RL:$PYTHONPATH"
 ```
 
 ---

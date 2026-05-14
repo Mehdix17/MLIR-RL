@@ -1,3 +1,5 @@
+import json
+import os
 from datetime import timedelta
 from statistics import mean
 import sys
@@ -10,7 +12,7 @@ from rl_autoschedular_v3.observation import Observation, NumLoops
 from rl_autoschedular_v3.actions import ActionSpace
 from rl_autoschedular_v3.benchmarks import Benchmarks
 from rl_autoschedular_v3.execution import Execution
-from rl_autoschedular_v3 import device
+from rl_autoschedular_v1 import device
 from utils.config import Config
 from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
@@ -126,6 +128,12 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
             new_cache_data[state.bench_name][cache_key] = exec_time
 
     tc = sum(tcs, TrajectoryCollector())
+    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
+    eval_json: dict[str, Optional[int]] = {}
+    for state, exec_time in zip(states, all_exec_times):
+        eval_json[state.bench_name] = exec_time
+    with open(os.path.join(fl.logs_dir, 'eval', 'eval_exec_times.json'), 'w') as f:
+        json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 
     traj_end = time()
@@ -350,11 +358,17 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
                 new_cache_data[state.bench_name] = {}
             new_cache_data[state.bench_name][cache_key] = exec_time
 
-        print_success("Bench:", state.bench_name, add_label=False)
-        print_info(state.transformation_history, add_label=False)
+        print_info("Bench: " + state.bench_name, add_label=False)
+        print_info(str(state.transformation_history), add_label=False)
 
     if len(all_speedups) > 0:
         fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
+    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
+    eval_json: dict[str, Optional[int]] = {}
+    for state, exec_time in zip(states, all_exec_times):
+        eval_json[state.bench_name] = exec_time
+    with open(os.path.join(fl.logs_dir, 'eval', 'eval_exec_times.json'), 'w') as f:
+        json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 
     eval_end = time()
@@ -365,10 +379,27 @@ def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchma
     print(f"Handling bench: {state.bench_name}...", end=' ', file=sys.stderr)
     worker_start = time()
 
+    # Check if this benchmark was already completed in a previous crashed run
+    import json as _json
+    marker_dir = os.path.join(os.path.dirname(exec_data_file), 'eval', 'markers')
+    os.makedirs(marker_dir, exist_ok=True)
+    marker_file = os.path.join(marker_dir, state.bench_name)
+    if os.path.exists(marker_file):
+        with open(marker_file) as f:
+            cached = _json.load(f)
+        print('Skipped (cached)', file=sys.stderr)
+        return cached['rewards'], cached['speedup'], cached['exec_time'], cached.get('cache_miss', True), time() - worker_start
+
     Execution(exec_data_file, main_exec_data)
     env = Env()
     env.reset(benchs, state.bench_idx)
     rewards, speedup, new_exec_time, cache_miss = env.apply_and_run_sequence(state.transformation_history)
+
+    # Save result atomically so crash-resilient
+    tmp_file = marker_file + '.tmp'
+    with open(tmp_file, 'w') as f:
+        _json.dump({'rewards': rewards, 'speedup': speedup, 'exec_time': new_exec_time, 'cache_miss': cache_miss}, f)
+    os.rename(tmp_file, marker_file)
 
     worker_end = time()
     worker_time = worker_end - worker_start

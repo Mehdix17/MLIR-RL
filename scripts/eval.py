@@ -109,12 +109,41 @@ eval_files = [f for f in os.listdir(eval_dir) if f.endswith('.pt')]
 # Order files
 eval_files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 
+# Filter to every 50th checkpoint, always include the last (most trained) model
+import re
+EVAL_LAST_ONLY = os.getenv("EVAL_LAST_ONLY", "").strip().lower() in ("1", "true", "yes")
+EVAL_STRIDE = 50
+filtered = [f for f in eval_files if int(re.search(r'model_(\d+)\.pt', f).group(1)) % EVAL_STRIDE == 0]
+if eval_files and eval_files[-1] not in filtered:
+    filtered.append(eval_files[-1])
+    filtered.sort(key=lambda x: int(re.search(r'model_(\d+)\.pt', x).group(1)))
+eval_files = filtered
+if EVAL_LAST_ONLY:
+    eval_files = [eval_files[-1]]
+    print_info(f"EVAL_LAST_ONLY: evaluating only {eval_files[0]}")
+else:
+    print_info(f"Checkpoints to evaluate: {len(eval_files)} (stride={EVAL_STRIDE})")
+
+# Resumption: track completed checkpoints in a state file
+eval_logs_dir = os.path.join(fl.logs_dir, 'eval')
+os.makedirs(eval_logs_dir, exist_ok=True)
+completed_file = os.path.join(eval_logs_dir, '_eval_checkpoint.txt')
+completed = set()
+if os.path.exists(completed_file):
+    with open(completed_file) as f:
+        completed = set(line.strip() for line in f if line.strip())
+    already = [f for f in eval_files if f in completed]
+    if already:
+        print_info(f"Resuming: {len(already)} checkpoints already evaluated, skipping")
+
+pending_files = [f for f in eval_files if f not in completed]
+
 iter_time_dlt = 0
 elapsed_dlt = 0
 eta_dlt = 0
 overall_start = time()
-models_count = len(eval_files)
-for step, model_file in enumerate(eval_files):
+models_count = len(pending_files)
+for step, model_file in enumerate(pending_files):
     print_info(
         f"- Evaluation {step + 1}/{models_count}"
         f" ({100 * (step + 1) / models_count:.2f}%)"
@@ -135,7 +164,11 @@ for step, model_file in enumerate(eval_files):
     main_end = time()
     iter_time = main_end - main_start
     elapsed = main_end - overall_start
-    eta = elapsed * (cfg.nb_iterations - step - 1) / (step + 1)
+    eta = elapsed * (models_count - step - 1) / (step + 1)
     iter_time_dlt = timedelta(seconds=iter_time)
     elapsed_dlt = timedelta(seconds=int(elapsed))
     eta_dlt = timedelta(seconds=int(eta))
+
+    # Mark checkpoint as completed for resumption
+    with open(completed_file, 'a') as f:
+        f.write(model_file + '\n')

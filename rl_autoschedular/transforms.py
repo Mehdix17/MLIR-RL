@@ -463,4 +463,4 @@ def __run_transform_code(code: str, transform_code: str):
 
         return str(module)
 
-    return BindingsProcess.call(transform_bind_call, timeout=60)
+    return BindingsProcess.call(transform_bind_call)

@@ -54,5 +54,4 @@
 - Use automatic figure numbering and reference management (via Word or LaTeX). Manual numbering is error-prone: any reordering, addition, or removal of figures will require manually updating all references throughout the manuscript.
 - When citing a paper, do not write "In [5] the system uses...". Instead, write "In Tiramisu [5], the authors use..." or "Baghdadi et al. [5] use...".
 - Write for clarity and accessibility. Your goal is to produce a document that students can understand easily. Explain things step by step, introduce every concept intuitively before going into low-level details, and explain every term in every formula. Think of yourself as a teacher guiding students through your work.
-- Use your NYU premium Overleaf account. Name your Overleaf project precisely and clearly so it can be identified easily among many documents. A name like "Master" is not acceptable.
 - Whenever you write anything (an outline, section, chapter, etc.), use LLMs to get feedback. If the feedback is actionable, implement it. LLMs are effective reviewers.

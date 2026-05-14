@@ -250,7 +250,7 @@ class TiledFusion(TiledParallelization):
         for dim_pos, dim_str in enumerate(prod_res_store):
             dim_str = dim_str.strip()
             if dim_str not in prod_args_dims:
-                raise Exception(f"Unsupported producer store [{prod_res_store}] at position {dim_pos}")
+                continue  # constant dimension, not a loop variable
             tile_sizes[prod_args_dims[dim_str]] = prod_res_tile_sizes[dim_pos]
 
         # 3. Add the tiling as a pre-action in the producer

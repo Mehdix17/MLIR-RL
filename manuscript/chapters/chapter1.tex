@@ -5,9 +5,9 @@
 
 A compiler is a program that translates source code written in a high-level programming language into machine code executable by a processor. This translation is not a straightforward one-to-one mapping: modern compilers perform extensive analysis and transformation of the program to produce code that executes faster, consumes less energy, or occupies less memory. These transformations are collectively referred to as \textit{code optimizations}.
 
-The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide SIMD (Single Instruction Multiple Data) units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads—particularly in machine learning—have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
+The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide \gls{simd} (Single Instruction Multiple Data) units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads—particularly in machine learning—have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
 
-This chapter provides the background on compiler code optimization necessary to understand the automated optimization approach developed in this thesis. Section~1.2 describes the phases of a compiler pipeline, from source code to executable. Section~1.3 surveys the main optimization paradigms and the analyses that support them. Section~1.4 presents in detail the loop nest transformations that form the action space of our reinforcement learning agent. Section~1.5 discusses the fundamental challenges that motivate the use of learned, rather than hand-crafted, optimization strategies. Section~1.6 introduces the MLIR compiler infrastructure, which serves as the platform for our work. Section~1.7 concludes the chapter and links it to the reinforcement learning background presented in the next chapter.
+This chapter provides the background on compiler code optimization necessary to understand the automated optimization approach developed in this thesis. Section~1.2 describes the phases of a compiler pipeline, from source code to executable. Section~1.3 surveys the main optimization paradigms and the analyses that support them. Section~1.4 presents in detail the loop nest transformations that form the action space of our reinforcement learning agent. Section~1.5 discusses the fundamental challenges that motivate the use of learned, rather than hand-crafted, optimization strategies. Section~1.6 introduces the \gls{mlir} compiler infrastructure, which serves as the platform for our work. Section~1.7 concludes the chapter and links it to the reinforcement learning background presented in the next chapter.
 
 \section{Phases of a Compiler: From Source Code to Executable}
 
@@ -26,19 +26,19 @@ A compiler typically operates in three major phases: the \textit{front-end}, the
 
 \subsection{Front-End}
 
-The front-end is responsible for reading the source code and converting it into an intermediate representation (IR). This process involves three sub-steps:
+The front-end is responsible for reading the source code and converting it into an intermediate representation (\gls{ir}). This process involves three sub-steps:
 
 \begin{itemize}
     \item \textbf{Lexical analysis} (scanning): The source text is broken into tokens—keywords, identifiers, literals, and operators. For instance, the expression \texttt{x = a + 2} is tokenized into \texttt{IDENT(x)}, \texttt{ASSIGN}, \texttt{IDENT(a)}, \texttt{PLUS}, \texttt{INT(2)}.
-    \item \textbf{Syntax analysis} (parsing): The sequence of tokens is organized into a parse tree or abstract syntax tree (AST) according to the grammar of the source language. This step verifies that the program is syntactically well-formed.
-    \item \textbf{Semantic analysis}: The compiler checks for semantic correctness—type compatibility, variable declarations before use, scope rules—and annotates the AST with type information and symbol table entries.
+    \item \textbf{Syntax analysis} (parsing): The sequence of tokens is organized into a parse tree or abstract syntax tree (\gls{ast}) according to the grammar of the source language. This step verifies that the program is syntactically well-formed.
+    \item \textbf{Semantic analysis}: The compiler checks for semantic correctness—type compatibility, variable declarations before use, scope rules—and annotates the \gls{ast} with type information and symbol table entries.
 \end{itemize}
 
-The output of the front-end is an IR, typically in a form such as three-address code or static single assignment (SSA) form. SSA is a representation where each variable is assigned exactly once, which simplifies many subsequent analyses and transformations.
+The output of the front-end is an \gls{ir}, typically in a form such as three-address code or static single assignment (\gls{ssa}) form. \gls{ssa} is a representation where each variable is assigned exactly once, which simplifies many subsequent analyses and transformations.
 
 \subsection{Middle-End}
 
-The middle-end operates on the IR and is where the majority of optimizations take place. Because the IR is independent of both the source language and the target machine, optimizations at this level are portable and can be shared across different language front-ends and hardware back-ends. Middle-end optimizations include:
+The middle-end operates on the \gls{ir} and is where the majority of optimizations take place. Because the \gls{ir} is independent of both the source language and the target machine, optimizations at this level are portable and can be shared across different language front-ends and hardware back-ends. Middle-end optimizations include:
 
 \begin{itemize}
     \item \textbf{Control-flow optimizations}: constant propagation, dead code elimination, loop-invariant code motion.
@@ -47,14 +47,14 @@ The middle-end operates on the IR and is where the majority of optimizations tak
     \item \textbf{Inter-procedural optimizations}: function inlining, inter-procedural constant propagation.
 \end{itemize}
 
-The transformations in our reinforcement learning agent operate at this middle-end level, specifically on the MLIR Linalg dialect, which represents structured linear algebra operations on buffers and tensors.
+The transformations in our reinforcement learning agent operate at this middle-end level, specifically on the \gls{mlir} Linalg dialect, which represents structured linear algebra operations on buffers and tensors.
 
 \subsection{Back-End}
 
-The back-end translates the optimized IR into machine code for a specific target architecture. This phase includes:
+The back-end translates the optimized \gls{ir} into machine code for a specific target architecture. This phase includes:
 
 \begin{itemize}
-    \item \textbf{Instruction selection}: mapping IR operations to target machine instructions, often using pattern-matching techniques on a tree representation of the IR.
+    \item \textbf{Instruction selection}: mapping \gls{ir} operations to target machine instructions, often using pattern-matching techniques on a tree representation of the \gls{ir}.
     \item \textbf{Instruction scheduling}: reordering instructions to exploit instruction-level parallelism and avoid pipeline stalls.
     \item \textbf{Register allocation}: assigning program variables to the limited set of physical registers, spilling to memory when necessary.
     \item \textbf{Code emission}: generating the final assembly or object code.
@@ -72,21 +72,21 @@ Optimizations are classified as \textit{machine-independent} when they improve t
 
 Machine-independent optimizations include constant folding (evaluating constant expressions at compile time), dead code elimination (removing computations whose results are never used), and common subexpression elimination (reusing previously computed values). These transformations are universally beneficial and apply regardless of the target architecture.
 
-Machine-dependent optimizations, by contrast, require knowledge of the target processor. Examples include selecting vector instructions matching the SIMD width of the CPU, choosing tile sizes that fit within a specific cache level, and scheduling instructions to match the pipeline depth of a particular micro-architecture. One of the contributions of this thesis (version V1, described in Chapter~4) is to make the RL agent hardware-aware by feeding processor specifications directly into its observation.
+Machine-dependent optimizations, by contrast, require knowledge of the target processor. Examples include selecting vector instructions matching the \gls{simd} width of the CPU, choosing tile sizes that fit within a specific cache level, and scheduling instructions to match the pipeline depth of a particular micro-architecture. One of the contributions of this thesis (version V1, described in Chapter~4) is to make the \gls{rl} agent hardware-aware by feeding processor specifications directly into its observation.
 
 \subsection{Static vs.\ Dynamic Optimization}
 
-Optimizations can also be classified by when they are applied. \textit{Static optimization} occurs at compile time, before the program executes. The compiler analyzes the source code or IR and applies transformations based on information available statically. Most traditional compiler optimizations fall into this category.
+Optimizations can also be classified by when they are applied. \textit{Static optimization} occurs at compile time, before the program executes. The compiler analyzes the source code or \gls{ir} and applies transformations based on information available statically. Most traditional compiler optimizations fall into this category.
 
-\textit{Dynamic optimization} occurs at runtime, during program execution. Just-In-Time (JIT) compilers, such as those in Java Virtual Machines or PyTorch's JIT backend, monitor program behavior and apply optimizations based on observed execution patterns. Dynamic optimization can exploit runtime information—such as branch frequencies, hot paths, and actual data values—that is unavailable at compile time. The trade-off is that the optimization itself consumes runtime resources.
+\textit{Dynamic optimization} occurs at runtime, during program execution. Just-In-Time (\gls{jit}) compilers, such as those in Java Virtual Machines or PyTorch's \gls{jit} backend, monitor program behavior and apply optimizations based on observed execution patterns. Dynamic optimization can exploit runtime information—such as branch frequencies, hot paths, and actual data values—that is unavailable at compile time. The trade-off is that the optimization itself consumes runtime resources.
 
-Our RL-based auto-scheduler operates as a static optimizer: it selects transformations before execution, guided by features extracted from the MLIR code. However, the execution-time feedback used during training provides a form of dynamic information that shapes the learned policy.
+Our \gls{rl}-based auto-scheduler operates as a static optimizer: it selects transformations before execution, guided by features extracted from the \gls{mlir} code. However, the execution-time feedback used during training provides a form of dynamic information that shapes the learned policy.
 
 \subsection{Control-Flow and Data-Flow Analysis}
 
 Before applying any transformation, the compiler must analyze the program to determine whether the transformation is legal (i.e., preserves the program's semantics) and to estimate whether it will be beneficial. Two families of analysis form the foundation of most compiler optimizations.
 
-\textbf{Control-flow analysis} constructs a representation of the possible execution paths through the program. The most common representation is the \textit{control-flow graph} (CFG), where nodes represent \textit{basic blocks}—maximal sequences of instructions with a single entry and a single exit—and edges represent possible transfers of control (branches, jumps, fall-through). The CFG enables the compiler to reason about dominance (which blocks must execute before others), loops (strongly connected components in the CFG with a single entry called the \textit{header}), and reachability.
+\textbf{Control-flow analysis} constructs a representation of the possible execution paths through the program. The most common representation is the \textit{control-flow graph} (\gls{cfg}), where nodes represent \textit{basic blocks}—maximal sequences of instructions with a single entry and a single exit—and edges represent possible transfers of control (branches, jumps, fall-through). The \gls{cfg} enables the compiler to reason about dominance (which blocks must execute before others), loops (strongly connected components in the \gls{cfg} with a single entry called the \textit{header}), and reachability.
 
 \begin{figure}[H]
     \centering
@@ -104,13 +104,13 @@ Before applying any transformation, the compiler must analyze the program to det
     \item \textbf{Available expressions}: Which expressions have already been computed and not invalidated? This supports global common subexpression elimination.
 \end{itemize}
 
-These analyses are typically formulated as iterative fixed-point computations over a lattice of data-flow facts. In the context of MLIR and our work, similar analyses—such as dependence analysis for loop transformations—are performed using the polyhedral model or by the MLIR analysis infrastructure.
+These analyses are typically formulated as iterative fixed-point computations over a lattice of data-flow facts. In the context of \gls{mlir} and our work, similar analyses—such as dependence analysis for loop transformations—are performed using the polyhedral model or by the \gls{mlir} analysis infrastructure.
 
 \section{Loop Nest Optimization}
 
 Loops account for the vast majority of execution time in compute-intensive programs, particularly in scientific computing and machine learning workloads. A \textit{loop nest} is a set of loops where one loop is contained within the body of another. For example, matrix multiplication involves three nested loops iterating over rows, columns, and the inner product dimension. Optimizing loop nests is therefore one of the most impactful activities a compiler can perform.
 
-This section describes the loop nest transformations that are relevant to our reinforcement learning agent. For each transformation, we explain its mechanism, the conditions under which it is legal and beneficial, and its role in the optimization of MLIR Linalg operations. The agent's ability to select and parameterize these transformations forms the core of its optimization capability.
+This section describes the loop nest transformations that are relevant to our reinforcement learning agent. For each transformation, we explain its mechanism, the conditions under which it is legal and beneficial, and its role in the optimization of \gls{mlir} Linalg operations. The agent's ability to select and parameterize these transformations forms the core of its optimization capability.
 
 \begin{table}[H]
     \centering
@@ -128,7 +128,7 @@ This section describes the loop nest transformations that are relevant to our re
         \addlinespace
         Fusion & Merge producer-consumer loops & Eliminate intermediate storage & No backward dependencies \\
         \addlinespace
-        Vectorization & Replace scalar ops with SIMD & Instruction-level parallelism & Contiguous access, no dependencies \\
+        Vectorization & Replace scalar ops with \gls{simd} & Instruction-level parallelism & Contiguous access, no dependencies \\
         \addlinespace
         Skewing & Transform iteration coordinates & Enable parallelization & Affine schedule exists \\
         \addlinespace
@@ -136,7 +136,7 @@ This section describes the loop nest transformations that are relevant to our re
         \addlinespace
         Inversion & Convert while to do-while & Reduce branch count & Loop executes at least once (or guard added) \\
         \addlinespace
-        Unrolling & Replicate loop body & Reduce loop overhead, expose ILP & Known trip count beneficial \\
+        Unrolling & Replicate loop body & Reduce loop overhead, expose \gls{ilp} & Known trip count beneficial \\
         \addlinespace
         Peeling & Extract boundary iterations & Enable alignment, remove guards & N/A (generally always legal) \\
         \bottomrule
@@ -147,9 +147,9 @@ This section describes the loop nest transformations that are relevant to our re
 
 Parallelization distributes the iterations of a loop across multiple processing units (cores or threads) so that they execute concurrently. A loop can be parallelized if its iterations are \textit{independent}—that is, no iteration reads from or writes to a memory location that is written by another iteration. Loops that carry no data dependencies across iterations are called \textit{parallel loops}, while those that carry dependencies are called \textit{sequential} or \textit{reduction} loops (the latter being parallelizable if the reduction operation is associative and commutative).
 
-In MLIR, parallelization is expressed through the \texttt{scf.forall} operation, which explicitly marks a loop as parallel and allows the compiler to map its iterations to hardware threads. A related concept is \textit{tiled parallelization}, which combines tiling with parallelization: the loop nest is first tiled, and the outer tile loops are marked as parallel while the inner loops remain sequential. This approach balances parallelism with cache locality.
+In \gls{mlir}, parallelization is expressed through the \texttt{scf.forall} operation, which explicitly marks a loop as parallel and allows the compiler to map its iterations to hardware threads. A related concept is \textit{tiled parallelization}, which combines tiling with parallelization: the loop nest is first tiled, and the outer tile loops are marked as parallel while the inner loops remain sequential. This approach balances parallelism with cache locality.
 
-For our RL agent, the \texttt{TiledParallelization} action (denoted \texttt{TP}) applies parallelization to non-reduction loops and tiling to reduction loops within a Linalg operation. If a fusion producer is also specified, the action becomes \texttt{TiledFusion} (\texttt{TPF}), which fuses the producer into the consumer's parallel loop.
+For our \gls{rl} agent, the \texttt{TiledParallelization} action (denoted \texttt{TP}) applies parallelization to non-reduction loops and tiling to reduction loops within a Linalg operation. If a fusion producer is also specified, the action becomes \texttt{TiledFusion} (\texttt{TPF}), which fuses the producer into the consumer's parallel loop.
 
 \subsection{Interchange (Permutation)}
 
@@ -159,7 +159,7 @@ Consider a matrix stored in row-major order, where elements of the same row are 
 
 Interchange is legal only when the data dependencies of the original loop nest are preserved under the new iteration order. This is verified by dependence analysis: if the direction vectors of all dependencies remain lexicographically non-negative after permutation, the interchange is valid.
 
-In our RL system, the \texttt{Interchange} action (denoted \texttt{I}) selects a permutation of the loop indices. The number of possible permutations grows factorially with the number of loops, so the agent must learn which reorderings are beneficial for a given operation. The action space supports three modes: pre-enumerated candidate permutations, pointer-based sequential selection, and continuous Lehmer-code decoding.
+In our \gls{rl} system, the \texttt{Interchange} action (denoted \texttt{I}) selects a permutation of the loop indices. The number of possible permutations grows factorially with the number of loops, so the agent must learn which reorderings are beneficial for a given operation. The action space supports three modes: pre-enumerated candidate permutations, pointer-based sequential selection, and continuous Lehmer-code decoding.
 
 \begin{figure}[H]
     \centering
@@ -196,7 +196,7 @@ In our system, the \texttt{Tiling} action (denoted \texttt{T}) selects, for each
 
 Loop fusion (also called \textit{loop jamming}) merges two or more loops that iterate over the same range into a single loop whose body contains the bodies of all the original loops. The primary benefit is the elimination of intermediate data: when a producer loop writes to a temporary array and a consumer loop reads from it, fusing them replaces the array with a scalar or register-level value, reducing memory traffic and improving locality.
 
-Fusion is legal when there are no backward dependencies between the loop bodies (i.e., the consumer does not depend on a value that the producer computes in a later iteration). In the context of MLIR, fusion is applied at the operation level: two Linalg operations that are connected by a producer-consumer relationship can be fused into a single operation with a combined loop nest.
+Fusion is legal when there are no backward dependencies between the loop bodies (i.e., the consumer does not depend on a value that the producer computes in a later iteration). In the context of \gls{mlir}, fusion is applied at the operation level: two Linalg operations that are connected by a producer-consumer relationship can be fused into a single operation with a combined loop nest.
 
 \begin{figure}[H]
     \centering
@@ -225,13 +225,13 @@ Fusion is a key transformation in our system. However, as demonstrated by the ca
 
 \subsection{Vectorization}
 
-Vectorization transforms a scalar loop that processes one data element per iteration into a vector loop that processes multiple elements simultaneously using SIMD instructions. Modern CPUs support SIMD instruction sets such as SSE (128-bit), AVX2 (256-bit), and AVX-512 (512-bit), which can operate on 2, 4, 8, or more data elements in a single instruction.
+Vectorization transforms a scalar loop that processes one data element per iteration into a vector loop that processes multiple elements simultaneously using \gls{simd} instructions. Modern CPUs support \gls{simd} instruction sets such as SSE (128-bit), AVX2 (256-bit), and \gls{avx}-512 (512-bit), which can operate on 2, 4, 8, or more data elements in a single instruction.
 
-For a loop to be vectorizable, its iterations must be independent (no loop-carried dependencies), the memory accesses must be contiguous (or at least strided with a compile-time-known stride), and the loop body must consist of operations supported by the target SIMD instruction set. Conditional branches within the loop body can be handled through predication, where both branches are executed and the results are masked, but this adds overhead.
+For a loop to be vectorizable, its iterations must be independent (no loop-carried dependencies), the memory accesses must be contiguous (or at least strided with a compile-time-known stride), and the loop body must consist of operations supported by the target \gls{simd} instruction set. Conditional branches within the loop body can be handled through predication, where both branches are executed and the results are masked, but this adds overhead.
 
-In the context of MLIR, vectorization is applied to Linalg operations through the vector dialect. The MLIR pipeline progressively lowers Linalg operations to vector operations, which are then converted to LLVM IR and ultimately to SIMD machine instructions. Additional preprocessing steps—such as transposition of convolution operations from NHWC to HWCF layout, and decomposition of large operations into tiles that fit the vector width—may be required for successful vectorization.
+In the context of \gls{mlir}, vectorization is applied to Linalg operations through the vector dialect. The \gls{mlir} pipeline progressively lowers Linalg operations to vector operations, which are then converted to \gls{llvm} \gls{ir} and ultimately to \gls{simd} machine instructions. Additional preprocessing steps—such as transposition of convolution operations from NHWC to HWCF layout, and decomposition of large operations into tiles that fit the vector width—may be required for successful vectorization.
 
-In our RL agent, the \texttt{Vectorization} action (denoted \texttt{V}) is a terminal action: once vectorization is applied to an operation, no further transformations can be applied to it, and the schedule for that operation is considered complete. The agent also supports automatic vectorization preprocessing for convolution and pooling operations.
+In our \gls{rl} agent, the \texttt{Vectorization} action (denoted \texttt{V}) is a terminal action: once vectorization is applied to an operation, no further transformations can be applied to it, and the schedule for that operation is considered complete. The agent also supports automatic vectorization preprocessing for convolution and pooling operations.
 
 \begin{figure}[H]
     \centering
@@ -239,8 +239,8 @@ In our RL agent, the \texttt{Vectorization} action (denoted \texttt{V}) is a ter
     %  Left: Scalar execution — one add per instruction, 8 instructions for 8 elements.
     %  Right: SIMD vector execution (e.g., AVX2 256-bit) — 4 adds per instruction, 2 instructions for 8 elements.
     %  Show registers and ALU lanes.]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2cm} Vectorization: Scalar vs.\ SIMD Execution \\ (e.g., 256-bit AVX2 processing 4 float32 elements per instruction) \vspace{2cm}}}
-    \caption{Scalar versus vectorized execution. SIMD instructions process multiple data elements in a single instruction, reducing the total number of instructions executed.}
+    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2cm} Vectorization: Scalar vs.\ \gls{simd} Execution \\ (e.g., 256-bit AVX2 processing 4 float32 elements per instruction) \vspace{2cm}}}
+    \caption{Scalar versus vectorized execution. \gls{simd} instructions process multiple data elements in a single instruction, reducing the total number of instructions executed.}
     \label{fig:vectorization}
 \end{figure}
 
@@ -286,7 +286,7 @@ For a concrete example, consider loop fusion and parallelization applied to a se
 
 The search space of possible transformation sequences is combinatorial in the number of transformations and their parameters. For a loop nest with $D$ loops, there are $D!$ possible interchange permutations, $\mathcal{O}(T^D)$ possible tiling configurations (where $T$ is the number of tile size options), and an exponential number of interleavings between different transformation types. Exhaustive search is infeasible, and heuristics often fail to capture the interaction effects between transformations.
 
-This problem is the primary motivation for using reinforcement learning: an RL agent can learn, through experience, which sequences of transformations are likely to be effective for a given program structure, without requiring a hand-crafted model of transformation interactions.
+This problem is the primary motivation for using reinforcement learning: an \gls{rl} agent can learn, through experience, which sequences of transformations are likely to be effective for a given program structure, without requiring a hand-crafted model of transformation interactions.
 
 \begin{figure}[H]
     \centering
@@ -317,33 +317,33 @@ The diversity and rapid evolution of hardware platforms add another dimension of
 
 Our hardware-aware observation (V1) is a step toward addressing this challenge: by providing the agent with processor specifications, the learned policy can adapt its optimization decisions to the target platform.
 
-\section{MLIR Compiler Infrastructure}
+\section{\gls{mlir} Compiler Infrastructure}
 
-The Multi-Level Intermediate Representation (MLIR) is a compiler infrastructure project within the LLVM ecosystem, introduced by Lattner et al.~\cite{lattner2021mlir}. MLIR addresses a key limitation of traditional compiler IRs: the assumption of a single, fixed level of abstraction. Traditional IRs operate at one level (e.g., LLVM IR operates close to machine code, while abstract syntax trees operate close to source code), making it difficult to express transformations that span multiple levels. MLIR instead supports a \textit{multi-level} IR, where different \textit{dialects} define operations, types, and attributes at different levels of abstraction, all coexisting within the same representation.
+The Multi-Level Intermediate Representation (\gls{mlir}) is a compiler infrastructure project within the \gls{llvm} ecosystem, introduced by Lattner et al.~\cite{lattner2021mlir}. \gls{mlir} addresses a key limitation of traditional compiler IRs: the assumption of a single, fixed level of abstraction. Traditional IRs operate at one level (e.g., \gls{llvm} \gls{ir} operates close to machine code, while abstract syntax trees operate close to source code), making it difficult to express transformations that span multiple levels. \gls{mlir} instead supports a \textit{multi-level} \gls{ir}, where different \textit{dialects} define operations, types, and attributes at different levels of abstraction, all coexisting within the same representation.
 
 \subsection{Dialects and Core Concepts}
 
-A dialect in MLIR is a self-contained namespace of operations, types, and attributes that model a specific domain or abstraction level. MLIR ships with a set of core dialects that cover common compiler tasks:
+A dialect in \gls{mlir} is a self-contained namespace of operations, types, and attributes that model a specific domain or abstraction level. \gls{mlir} ships with a set of core dialects that cover common compiler tasks:
 
 \begin{itemize}
     \item \textbf{Linalg} (Linear Algebra): Represents structured operations on buffers and tensors, such as matrix multiplication (\texttt{linalg.matmul}), convolution (\texttt{linalg.conv\_2d}), element-wise addition (\texttt{linalg.add}), and generic operations with user-specified indexing maps (\texttt{linalg.generic}). Linalg operations explicitly encode the loop structure, access patterns, and computation, making them amenable to systematic transformation. All benchmarks in our system are expressed in the Linalg dialect.
 
     \item \textbf{Affine}: Provides a restricted form of loop nests and memory accesses where loop bounds and array indices are affine (linear) functions of enclosing loop iterators and symbolic constants. The affine dialect enables precise dependence analysis and polyhedral loop transformations.
 
-    \item \textbf{SCF} (Structured Control Flow): Represents standard control flow constructs such as \texttt{scf.for}, \texttt{scf.while}, \texttt{scf.if}, and the parallel loop construct \texttt{scf.forall}. After Linalg operations are lowered to loop form, the resulting loops belong to the SCF dialect.
+    \item \textbf{SCF} (Structured Control Flow): Represents standard control flow constructs such as \texttt{scf.for}, \texttt{scf.while}, \texttt{scf.if}, and the parallel loop construct \texttt{scf.forall}. After Linalg operations are lowered to loop form, the resulting loops belong to the \gls{scf} dialect.
 
-    \item \textbf{Vector}: Represents SIMD operations on fixed-size vectors, providing a target for vectorization transformations.
+    \item \textbf{Vector}: Represents \gls{simd} operations on fixed-size vectors, providing a target for vectorization transformations.
 
     \item \textbf{MemRef}: Represents memory references—typed pointers to multi-dimensional arrays with optional layout maps. MemRef is the type used for buffer-based computations.
 
-    \item \textbf{LLVM}: A direct mapping of the LLVM IR into MLIR, enabling a seamless transition from high-level MLIR dialects to the LLVM back-end for code generation.
+    \item \textbf{LLVM}: A direct mapping of the \gls{llvm} \gls{ir} into \gls{mlir}, enabling a seamless transition from high-level \gls{mlir} dialects to the \gls{llvm} back-end for code generation.
 
-    \item \textbf{Transform}: A meta-dialect that encodes transformation schedules as operations. A \texttt{transform.named\_sequence} describes a sequence of transformations (e.g., match an operation, tile it, vectorize it) that are applied to a target IR module. The transform dialect is the mechanism through which our RL agent's chosen actions are applied to MLIR code.
+    \item \textbf{Transform}: A meta-dialect that encodes transformation schedules as operations. A \texttt{transform.named\_sequence} describes a sequence of transformations (e.g., match an operation, tile it, vectorize it) that are applied to a target \gls{ir} module. The transform dialect is the mechanism through which our \gls{rl} agent's chosen actions are applied to \gls{mlir} code.
 \end{itemize}
 
 \begin{table}[H]
     \centering
-    \caption{Summary of core MLIR dialects used in this work.}
+    \caption{Summary of core \gls{mlir} dialects used in this work.}
     \label{tab:mlir-dialects}
     \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{5cm} >{\raggedright\arraybackslash}p{5cm}}
         \toprule
@@ -353,50 +353,50 @@ A dialect in MLIR is a self-contained namespace of operations, types, and attrib
         \addlinespace
         Affine & Polyhedral loops with affine constraints & Intermediate lowering; dependence analysis \\
         \addlinespace
-        SCF & Structured control flow (for, if, forall) & Loop representation after lowering \\
+        \gls{scf} & Structured control flow (for, if, forall) & Loop representation after lowering \\
         \addlinespace
-        Vector & Fixed-size SIMD vector operations & Target for vectorization transformations \\
+        Vector & Fixed-size \gls{simd} vector operations & Target for vectorization transformations \\
         \addlinespace
         MemRef & Typed multi-dimensional memory references & Buffer type throughout the lowering pipeline \\
         \addlinespace
-        LLVM & Direct mapping of LLVM IR in MLIR & Final stage before JIT compilation \\
+        \gls{llvm} & Direct mapping of \gls{llvm} \gls{ir} in \gls{mlir} & Final stage before \gls{jit} compilation \\
         \addlinespace
         Transform & Transformation schedule encoding & Mechanism for applying agent-selected actions \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
-An MLIR module is a container for operations, which may themselves contain regions of nested operations. This hierarchical structure, combined with the dialect system, allows the same module to contain Linalg operations describing a neural network layer, vector operations representing the SIMD instructions generated for that layer, and LLVM operations ready for code generation—all within a single, coherent representation.
+An \gls{mlir} module is a container for operations, which may themselves contain regions of nested operations. This hierarchical structure, combined with the dialect system, allows the same module to contain Linalg operations describing a neural network layer, vector operations representing the \gls{simd} instructions generated for that layer, and \gls{llvm} operations ready for code generation—all within a single, coherent representation.
 
 \begin{figure}[H]
     \centering
     % [PLACEHOLDER: Vertical stack diagram showing progressive lowering through MLIR dialects:
     %  Linalg → Affine → SCF/OpenMP → Vector → LLVM
     %  With arrows between levels and annotation of what each lowering step accomplishes.]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{3cm} MLIR Dialect Stack \\ (Progressive Lowering: Linalg $\rightarrow$ Affine $\rightarrow$ SCF $\rightarrow$ Vector $\rightarrow$ LLVM) \vspace{3cm}}}
-    \caption{Progressive lowering through MLIR dialects. High-level Linalg operations are gradually lowered through successively more concrete dialects until reaching the LLVM dialect for code generation.}
+    \fbox{\parbox{0.7\textwidth}{\centering\vspace{3cm} \gls{mlir} Dialect Stack \\ (Progressive Lowering: Linalg $\rightarrow$ Affine $\rightarrow$ \gls{scf} $\rightarrow$ Vector $\rightarrow$ \gls{llvm}) \vspace{3cm}}}
+    \caption{Progressive lowering through \gls{mlir} dialects. High-level Linalg operations are gradually lowered through successively more concrete dialects until reaching the \gls{llvm} dialect for code generation.}
     \label{fig:mlir-dialect-stack}
 \end{figure}
 
-\subsection{MLIR and Automated Optimization}
+\subsection{\gls{mlir} and Automated Optimization}
 
-Several properties of MLIR make it well-suited for automated optimization via reinforcement learning:
+Several properties of \gls{mlir} make it well-suited for automated optimization via reinforcement learning:
 
 \begin{enumerate}
     \item \textbf{Explicit loop structure}: Linalg operations explicitly encode the loops, access patterns, and computations of an operation, providing the agent with a complete and structured description of the optimization target.
-    \item \textbf{Progressive lowering}: MLIR supports the gradual lowering of operations through the dialect stack. The agent can apply transformations at the Linalg level, then lower the result through progressively more concrete dialects (Affine, SCF, Vector, LLVM) to obtain executable code.
-    \item \textbf{Python bindings}: MLIR provides comprehensive Python bindings that allow the construction, manipulation, and execution of MLIR modules from Python, the language in which our RL agent is implemented. The bindings also expose the transform dialect interpreter, which applies transformation sequences to MLIR modules programmatically.
-    \item \textbf{Extensibility}: New dialects and transformations can be added to MLIR without modifying the core infrastructure. This allows our expanded action space (padding, packing, unrolling) to be implemented using existing MLIR transformation primitives without changes to the MLIR codebase.
+    \item \textbf{Progressive lowering}: \gls{mlir} supports the gradual lowering of operations through the dialect stack. The agent can apply transformations at the Linalg level, then lower the result through progressively more concrete dialects (Affine, \gls{scf}, Vector, \gls{llvm}) to obtain executable code.
+    \item \textbf{Python bindings}: \gls{mlir} provides comprehensive Python bindings that allow the construction, manipulation, and execution of \gls{mlir} modules from Python, the language in which our \gls{rl} agent is implemented. The bindings also expose the transform dialect interpreter, which applies transformation sequences to \gls{mlir} modules programmatically.
+    \item \textbf{Extensibility}: New dialects and transformations can be added to \gls{mlir} without modifying the core infrastructure. This allows our expanded action space (padding, packing, unrolling) to be implemented using existing \gls{mlir} transformation primitives without changes to the \gls{mlir} codebase.
 \end{enumerate}
 
 \subsection{Execution Pipeline}
 
-To measure the performance impact of a transformation sequence, our system compiles and executes the transformed MLIR code. The pipeline proceeds as follows:
+To measure the performance impact of a transformation sequence, our system compiles and executes the transformed \gls{mlir} code. The pipeline proceeds as follows:
 
 \begin{enumerate}
-    \item The transformed MLIR module (containing the sequence of Linalg transformations selected by the agent) is processed through a series of lowering passes: Linalg to loops, SCF to OpenMP, vectorization, buffer deallocation, and conversion to the LLVM dialect.
-    \item The resulting LLVM dialect module is translated to LLVM IR and JIT-compiled using MLIR's ExecutionEngine at optimization level \texttt{-O3}.
-    \item The compiled function is invoked through a timed wrapper that measures execution time in nanoseconds. The function operates on zero-initialized buffers to eliminate data-dependent variability, and a warm-up invocation precedes the timed invocation to amortize JIT compilation overhead.
+    \item The transformed \gls{mlir} module (containing the sequence of Linalg transformations selected by the agent) is processed through a series of lowering passes: Linalg to loops, \gls{scf} to OpenMP, vectorization, buffer deallocation, and conversion to the \gls{llvm} dialect.
+    \item The resulting \gls{llvm} dialect module is translated to \gls{llvm} \gls{ir} and \gls{jit}-compiled using \gls{mlir}'s ExecutionEngine at optimization level \texttt{-O3}.
+    \item The compiled function is invoked through a timed wrapper that measures execution time in nanoseconds. The function operates on zero-initialized buffers to eliminate data-dependent variability, and a warm-up invocation precedes the timed invocation to amortize \gls{jit} compilation overhead.
 \end{enumerate}
 
 This execution pipeline is the evaluation mechanism for the reward function discussed in Chapter~4.
@@ -409,6 +409,6 @@ The core of the chapter focused on loop nest optimization, detailing the transfo
 
 We then discussed the fundamental challenges that motivate the automation of compiler optimization: the phase ordering problem, the trade-offs between competing objectives, and the complexity introduced by diverse and evolving hardware platforms. These challenges explain why hand-crafted heuristics are insufficient and why a learning-based approach is attractive.
 
-Finally, we introduced MLIR, the compiler infrastructure on which our work is built. MLIR's multi-level IR, dialect system, explicit operation structure, and Python bindings make it uniquely suitable as a platform for RL-based optimization. The Linalg dialect, in particular, provides the structured representation of linear algebra operations that our agent observes and transforms, while the transform dialect provides the mechanism for applying those transformations.
+Finally, we introduced \gls{mlir}, the compiler infrastructure on which our work is built. \gls{mlir}'s multi-level \gls{ir}, dialect system, explicit operation structure, and Python bindings make it uniquely suitable as a platform for \gls{rl}-based optimization. The Linalg dialect, in particular, provides the structured representation of linear algebra operations that our agent observes and transforms, while the transform dialect provides the mechanism for applying those transformations.
 
 The optimization challenges described in this chapter—especially the phase ordering problem and the vast combinatorial search space of possible transformation sequences—motivate the use of reinforcement learning, which is capable of learning effective strategies through interaction with the environment rather than relying on pre-programmed rules. The next chapter introduces the concepts and algorithms of reinforcement learning that underpin our approach.
