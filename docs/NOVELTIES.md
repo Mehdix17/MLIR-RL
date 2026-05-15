@@ -40,15 +40,15 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 
 See [`docs/Novelties/v5_action_space_expansion.md`](Novelties/v5_action_space_expansion.md) for full planned implementation details.
 
-### Novelty 4: Guided Search Strategy (Beam Search / MCTS)
+### Novelty 4: Guided Search Strategy (Beam Search / MCTS) (Future Work - V6)
 
-**The Problem:** The RL agent currently makes a single "greedy" choice per step. If one choice is wrong, the entire schedule fails.
-**The Solution:** Implement a search layer during the inference/evaluation phase.
+**The Problem:** The RL agent currently suffers from "Greedy Brittleness" — it makes a single "greedy" choice per step. If one choice is wrong, the entire schedule fails because it cannot backtrack.
+**The Solution:** Implement a search layer during the inference/evaluation phase. _Note: This is currently not yet implemented and is planned for future work (e.g., `rl_autoschedular_v6`)._
 
 - **Beam Search:** Instead of picking the top action, keep the $K$ most likely transformation sequences and evaluate them all.
 - **Monte Carlo Tree Search (MCTS):** Use the RL policy as a "prior" to guide an MCTS exploration. This helps the agent find deep optimization sequences that a standard greedy policy would miss.
 
-### Novelty 5: Multi-Objective and Shaped Rewards
+### Novelty 5: Multi-Objective and Shaped Rewards (Future Work)
 
 **The Problem:** Speedup is a "sparse" reward (only known at the end of execution) and doesn't account for other factors like energy or memory.
 **The Solution:** _ **Reward Shaping:** Add intermediate rewards based on static analysis:
@@ -56,7 +56,7 @@ _ _Arithmetic Intensity:_ Ops/Byte ratio. \* _Vectorization Ratio:_ Percentage o
 
 - **Multi-Objective:** Create a weighted reward: $R = w_1(Speedup) + w_2(PeakMemoryUsage)$. This is critical for edge computing where memory is constrained.
 
-### Novelty 6: Meta-Learning for Fast Adaptation (MAML)
+### Novelty 6: Meta-Learning for Fast Adaptation (MAML) (Future Work)
 
 **The Problem:** Training an RL agent from scratch for every new dialect or hardware is expensive.
 **The Solution:** Use **Model-Agnostic Meta-Learning (MAML)**.
@@ -88,9 +88,9 @@ This roadmap is divided into four phases, moving from environment enhancements t
 - **Task 3.2:** Implement the tokenization logic for loop nests (converting loop features into sequence tokens).
 - **Task 3.3:** Retrain the model on the full dataset. This will be the most compute-intensive phase.
 
-### Phase 4: Advanced Search & Meta-Learning (Weeks 15-20)
+### Phase 4: Advanced Search & Meta-Learning (Future Work - V6)
 
-- **Task 4.1:** Implement **Beam Search** in the `evaluation.py` script. Compare "Greedy RL" vs "Beam Search RL."
+- **Task 4.1:** Implement **Beam Search** in the `evaluation.py` script. Compare "Greedy RL" vs "Beam Search RL." _(Planned for V6)_
 - **Task 4.2:** (Optional/Advanced) Implement the MAML outer loop in `ppo.py` to enable fast adaptation to new kernels.
 - **Task 4.3:** Final evaluation: Compare your final system against the previous student's baseline and standard MLIR `O3` optimizations.
 
@@ -101,4 +101,4 @@ This roadmap is divided into four phases, moving from environment enhancements t
 1.  **A more robust encoder:** Moving from LSTMs to Transformers for code structural analysis.
 2.  **Hardware-aware policies:** A single model capable of optimizing for different CPUs.
 3.  **Efficiency gains:** Through future Pad, Pack, and Unroll actions (V5) not present in the baseline, enabling finer-grained control over memory layout and instruction-level parallelism.
-4.  **Better Search:** Using Beam Search to find higher-performing schedules than greedy inference.
+4.  **Better Search (Planned for V6):** Using Beam Search to find higher-performing schedules than greedy inference (addressing greedy brittleness).

@@ -13,12 +13,8 @@ A compiler typically operates in three major phases: the \textit{front-end}, the
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Diagram showing the three-phase compiler pipeline:
-    %  Source Code → Front-End (Lexing, Parsing, Semantic Analysis) → IR
-    %  → Middle-End (Optimizations) → Optimized IR
-    %  → Back-End (Instruction Selection, Register Allocation, Code Emission) → Machine Code]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2.5cm} Compiler Pipeline Diagram \\ (Front-End $\rightarrow$ Middle-End $\rightarrow$ Back-End) \vspace{2.5cm}}}
-    \caption{The three phases of a compiler: front-end, middle-end, and back-end.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/compiler_phases.png}
+    \caption{The three phases of a compiler.}
     \label{fig:compiler-pipeline}
 \end{figure}
 
@@ -88,9 +84,8 @@ Before applying any transformation, the compiler must analyze the program to det
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Simple CFG example — e.g., an if-else statement showing basic blocks (B1: condition, B2: then-branch, B3: else-branch, B4: merge) with edges connecting them]
-    \fbox{\parbox{0.5\textwidth}{\centering\vspace{2cm} Control-Flow Graph Example \\ (Basic blocks and control-flow edges) \vspace{2cm}}}
-    \caption{Example of a control-flow graph for an if-else statement, showing basic blocks and control-flow edges.}
+    \includegraphics[width=0.7\textwidth]{ressources/chapter1/control_flow_graph.png}
+    \caption{Example of a control-flow graph for a nested loop structure}
     \label{fig:cfg-example}
 \end{figure}
 
@@ -161,12 +156,8 @@ In our \gls{rl} system, the \texttt{Interchange} action (denoted \texttt{I}) sel
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Two-panel figure showing memory access patterns for a 2D array:
-    %  Left: Row-major traversal (inner loop over columns) — contiguous accesses, good locality.
-    %  Right: Column-major traversal (inner loop over rows) — strided accesses, poor locality.
-    %  Arrows showing access order in memory layout.]
-    \fbox{\parbox{0.8\textwidth}{\centering\vspace{2cm} Loop Interchange: Memory Access Patterns \\ (Contiguous vs.\ Strided Access) \vspace{2cm}}}
-    \caption{Effect of loop interchange on memory access patterns. Row-major traversal yields contiguous accesses; column-major traversal causes strided accesses with poor spatial locality.}
+    \includegraphics[width=0.9\textwidth]{ressources/chapter1/memory_access_patterns.png}    
+    \caption{Effect of loop interchange on memory access patterns.}
     \label{fig:loop-interchange}
 \end{figure}
 
@@ -182,11 +173,8 @@ In our system, the \texttt{Tiling} action (denoted \texttt{T}) selects, for each
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Two-panel figure:
-    %  Left: Original iteration space (e.g., 8x8 grid) with arrows showing traversal order.
-    %  Right: Tiled iteration space (e.g., 4x4 tiles of size 2x2), with outer tile traversal and inner point traversal shown in different colors/arrows.]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2.5cm} Tiling Illustration \\ (Original vs.\ Tiled Iteration Space) \vspace{2.5cm}}}
-    \caption{Illustration of loop tiling. The original iteration space (left) is partitioned into smaller tiles (right), executed sequentially at the tile level and within each tile.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_tiling.png}
+    \caption{Loop tiling and cache performance optimization.}
     \label{fig:loop-tiling}
 \end{figure}
 
@@ -198,25 +186,9 @@ Fusion is legal when there are no backward dependencies between the loop bodies 
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[node distance=1.5cm, auto]
-        \node[draw, rounded corners] (prod) {Producer (e.g., \texttt{linalg.matmul})};
-        \node[draw, rounded corners, right=of prod] (tmp) {Temporary tensor};
-        \node[draw, rounded corners, right=of tmp] (cons) {Consumer (e.g., \texttt{linalg.add})};
-        \draw[->] (prod) -- (tmp);
-        \draw[->] (tmp) -- (cons);
-    \end{tikzpicture}
-    \caption{Before fusion: intermediate tensor stored in memory.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_fusion_comparison.png}
+    \caption{Loop fusion: eliminating intermediate storage by merging producer and consumer loops.}
     \label{fig:fusion-before}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \begin{tikzpicture}[node distance=1.5cm, auto]
-        \node[draw, rounded corners] (fused) {Fused operation (producer + consumer)};
-        \draw[->] (fused) -- ++(0,-0.8);
-    \end{tikzpicture}
-    \caption{After fusion: no intermediate storage; producer's output is consumed directly.}
-    \label{fig:fusion-after}
 \end{figure}
 
 Fusion is a key transformation in our system. However, as demonstrated by the case study of the previous team (described in the General Introduction), fusion is not always beneficial: fusing two operations can prevent the individual application of more impactful transformations (such as aggressive parallelization) to each operation. The agent must learn when fusion improves performance and when it hinders other optimizations.
@@ -233,12 +205,8 @@ In our \gls{rl} agent, the \texttt{Vectorization} action (denoted \texttt{V}) is
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Two-panel figure:
-    %  Left: Scalar execution — one add per instruction, 8 instructions for 8 elements.
-    %  Right: SIMD vector execution (e.g., AVX2 256-bit) — 4 adds per instruction, 2 instructions for 8 elements.
-    %  Show registers and ALU lanes.]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2cm} Vectorization: Scalar vs.\ \gls{simd} Execution \\ (e.g., 256-bit AVX2 processing 4 float32 elements per instruction) \vspace{2cm}}}
-    \caption{Scalar versus vectorized execution. \gls{simd} instructions process multiple data elements in a single instruction, reducing the total number of instructions executed.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/scalar_vs_SIMD_execution_comparison.png}
+    \caption{Scalar vs SIMD execution comparison.}
     \label{fig:vectorization}
 \end{figure}
 
@@ -250,15 +218,36 @@ As an example, consider a loop nest where an array \texttt{A[i][j]} depends on \
 
 Skewing is implemented through linear transformations on the iteration space, typically using the polyhedral model~\cite{bacon1993compiler}. While skewing is not currently part of our agent's action space, it is an example of the kind of transformation that a future expansion could incorporate.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_skewing.png}
+    \caption{Loop skewing.}
+    \label{fig:loop-skewing}
+\end{figure}
+
 \subsection{Loop Unswitching}
 
 Loop unswitching moves a loop-invariant conditional branch from inside a loop to outside, duplicating the loop body for each branch direction. The transformation eliminates the overhead of evaluating the condition in every iteration at the cost of code duplication.
 
 For example, if a loop contains a conditional \texttt{if (debug)} that does not depend on the loop iterator, unswitching produces two copies of the loop: one with the debug code included and one without, with the condition evaluated once before the loop. This optimization is particularly beneficial when the condition is rarely true, as it removes the branch misprediction penalty from the common path.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_unswitching.png}
+    \caption{Loop unswitching.}
+    \label{fig:loop-unswitching}
+\end{figure}
+
 \subsection{Inversion}
 
 Loop inversion transforms a \texttt{while} loop into a \texttt{do-while} loop by moving the loop condition to the end of the body and adding a guard before the loop for the case where the body should not execute at all. The \texttt{do-while} form reduces the number of branches per iteration from two (condition and back-edge) to one (condition only). This transformation is typically applied at the back-end level and is not part of our agent's action space.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_inversion.png}
+    \caption{Loop inversion.}
+    \label{fig:loop-inversion}
+\end{figure}
 
 \subsection{Unrolling}
 
@@ -268,9 +257,23 @@ Unrolling is beneficial when the loop body is small and the branch overhead is s
 
 In our system, loop unrolling is introduced as one of the expanded action space transformations in version V4 (denoted \texttt{U}). The agent selects an unroll factor from a set of powers of two. Because some operations lose their structured operation tag after unrolling (the operation is lowered to explicit loops that are then unrolled), unrolling is treated as a terminal action: no further transformations can be applied after it.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_unrolling.png}
+    \caption{Loop unrolling.}
+    \label{fig:loop-unrolling}
+\end{figure}
+
 \subsection{Loop Peeling}
 
 Loop peeling extracts a small number of iterations from the beginning or end of a loop to enable other optimizations. For instance, peeling the first iteration of a loop can remove a conditional branch that is only taken in the first iteration. Peeling can also align the loop body for more efficient vectorization by ensuring that memory accesses start at aligned addresses. While not currently in our action space, peeling complements the unrolling and padding transformations available in version V4.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_peeling.png}
+    \caption{Loop peeling.}
+    \label{fig:loop-peeling}
+\end{figure}
 
 \section{Challenges in Modern Compiler Optimization}
 
@@ -288,12 +291,8 @@ This problem is the primary motivation for using reinforcement learning: an \gls
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Diagram showing how the same two transformations (Fusion and Parallelization) applied in different orders to a MatMul+Add sequence produce different outcomes.
-    %  Path A: Fusion first → fused op → Parallelization → 12.3x speedup
-    %  Path B: Parallelization first on MatMul → no fusion possible → 17.3x speedup
-    %  Illustrating the non-commutativity of transformations.]
-    \fbox{\parbox{0.85\textwidth}{\centering\vspace{2cm} Phase Ordering Example \\ (Fusion $\circ$ Parallelization $\neq$ Parallelization $\circ$ Fusion) \vspace{2cm}}}
-    \caption{Illustration of the phase ordering problem. Applying fusion before parallelization (Path A) yields a different result than parallelization before fusion (Path B). The optimal order depends on the specific program and hardware.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/phase_ordering_problem.png}
+    \caption{Phase ordering problem example.}
     \label{fig:phase-ordering}
 \end{figure}
 
@@ -368,11 +367,8 @@ An \gls{mlir} module is a container for operations, which may themselves contain
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Vertical stack diagram showing progressive lowering through MLIR dialects:
-    %  Linalg → Affine → SCF/OpenMP → Vector → LLVM
-    %  With arrows between levels and annotation of what each lowering step accomplishes.]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{3cm} \gls{mlir} Dialect Stack \\ (Progressive Lowering: Linalg $\rightarrow$ Affine $\rightarrow$ \gls{scf} $\rightarrow$ Vector $\rightarrow$ \gls{llvm}) \vspace{3cm}}}
-    \caption{Progressive lowering through \gls{mlir} dialects. High-level Linalg operations are gradually lowered through successively more concrete dialects until reaching the \gls{llvm} dialect for code generation.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/progressive_lowering_MLIR.png}
+    \caption{Progressive lowering in MLIR flowchart.}
     \label{fig:mlir-dialect-stack}
 \end{figure}
 

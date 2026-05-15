@@ -1,41 +1,158 @@
 \chapter{System Design and Implementation}
 \label{ch:design-implementation}
 
-\section{Introduction}
-Building upon the foundational work established previously, we introduce a series of architectural enhancements designed to address the limitations of prior approaches. These contributions span the entire reinforcement learning pipeline: robust dataset generation and evaluation infrastructure, a hardware-aware state representation, intermediate shaped rewards, and a transformer-based loop-nest encoder.
+\section{Motivation}
+\label{sec:motivation}
+
+\subsection{The Baseline \gls{mlir}-\gls{rl} Architecture}
+This work systematically extends the foundational \gls{rl} system for the \gls{mlir} compiler initiated by Bendib~\cite{bendib2024reinforcement} and subsequently scaled by Tirichine et al.~\cite{tirichine2025reinforcement}. The initial architecture formulated code optimization as a \gls{mdp}, utilizing \gls{ppo} and \gls{lstm} networks to make discrete transformation decisions (such as tiling, parallelization, and vectorization) on isolated linear algebra operations. Building upon this, the 2025 intermediate framework expanded the environment's extraction mechanisms to handle larger workloads. Our current work continues this lineage by introducing profound architectural enhancements, driving the system to accommodate generalized, real-world deep learning graphs.
+
+\subsection{Limitations of the Baseline System}
+While the baseline architecture demonstrates the viability of automated compiler optimization, it exhibits several limitations that hinder its scalability and generalization:
+
+\begin{itemize}
+    \item \textbf{Training Data Sparsity:} Prior models rely on narrow or synthetically generated datasets. This lack of exposure to the structural complexity of true deep learning graph computations restricts the ability of the agent to generalize to modern, real-world tasks.
+    \item \textbf{Hardware-Agnostic Policies:} The baseline model learns rigid optimization schedules that do not account for the underlying hardware architecture. Consequently, policies trained on a specific machine fail to adapt to different CPU topologies, which limits cross-hardware portability.
+    \item \textbf{Sequential Representation Constraints:} The use of recursive \gls{lstm} networks to encode the program state introduces bottlenecks. These models struggle to capture the complex, long-range structural dependencies inherent in deeply nested loops.
+    \item \textbf{Sparse Reward Structures:} Using end-of-execution speedup as the sole reward provides delayed feedback to the agent, which decreases training convergence efficiency.
+\end{itemize}
+
+\subsection{Proposed Contributions}
+To address these limitations and expand the applicability of \gls{rl} in compiler optimization, we propose the following architectural contributions:
+
+\begin{itemize}
+    \item \textbf{Automated Dataset Generation Pipeline:} We developed an automated extraction infrastructure equipped with heuristic handlers for dynamic batch sizes. This pipeline successfully sources training graphs from over 20 diverse neural network architectures (including Vision, Transformers, and Graph Neural Networks) to solve the data sparsity issue.
+    \item \textbf{Hardware-Aware State Representation:} We augmented the observation space of the agent with direct hardware specifications (cache sizes, core counts, \gls{simd} widths) to enable adaptive and portable optimization policies.
+    \item \textbf{Transformer-Based Loop-Nest Encoding:} We transitioned the architecture to use a Transformer-based encoder. By treating loop levels as tokens and leveraging self-attention, the model accurately captures the hierarchical structure of full computation graphs.
+    \item \textbf{Shaped Multi-Objective Rewards:} We introduced intermediate static analysis feedback, such as arithmetic intensity, to provide the agent with denser, continuous learning signals throughout the optimization process.
+\end{itemize}
+
+The remainder of this chapter details the design and implementation of these contributions within the \gls{mlir} ecosystem.
 
 \section{Dataset Generation and Evaluation Infrastructure}
-To ensure our agent generalizes across modern workloads, we engineered a comprehensive dataset extraction pipeline that supports a diverse array of neural network architectures, including GPT-2, T5, RoBERTa, VGG, and LSTM models. 
+To ensure our agent generalizes across modern workloads, we engineered a comprehensive and automated dataset extraction pipeline. Previous approaches relied on manual extraction or heavily hard-coded synthetic generation, severely limiting the structural diversity of the training data. Our automated generation process supports extracting operations from more than 20 different neural network architectures (including vision models, transformer models, BERT variants, and graph neural networks), utilizing different routing mechanisms such as ONNX and \verb|torch-mlir|.
 
-\subsection{Neural Network Extraction}
-Instead of relying solely on isolated synthetic operations, the dataset encapsulates realistic computational graphs from prominent models. By extracting \gls{mlir} representations directly from these architectures, the agent learns to optimize complex producer-consumer operation chains. This provides a rigorous testing ground for the generalization capability of the learned policy across both computationally intensive convolutional networks and sequence-processing transformer models.
+\begin{figure}[H]
+    \centering    \includegraphics[width=0.8\textwidth]{ressources/chapter4/data_generation_pipeline.png}
+    \caption{The automated pipeline for dataset generation.}
+    \label{fig:automated_pipeline}
+\end{figure}
+
+\subsection{Pipeline Overview}
+The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} representations. It traverses the computation graph, isolates relevant operation sub-graphs, and compiles them to extract profiling baselines. This fully automated flow dynamically translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems.
+
+\subsection{Dynamic Batch Size Handling}
+During the extraction of operations from diverse neural network models, a major challenge arose concerning dynamic or unresolved batch sizes. Frameworks often export computation graphs with dynamic tensor dimensions, which prevents statically compiled \gls{mlir} benchmarks from successfully executing.
+
+To overcome this, we implemented an automatic dimension handler that resolves and replaces these dynamic batch sizes before compilation. To maximize compatibility, this handler supports multiple configurable strategies:
+\begin{itemize}
+    \item \textbf{Heuristic Mode:} Infers the optimal batch size based on the dimensions of neighboring tensors within the graph.
+    \item \textbf{Statistical Mode:} Assigns batch sizes derived from heavily observed or common execution patterns in the network.
+    \item \textbf{Random Mode:} Injects a valid, randomly selected batch size to ensure the extraction sequence completes without interruption.
+\end{itemize}
+
+\subsection{Semantic Extraction of Neural Network Blocks}
+In contrast to prior work that manually extracted models or utilized completely randomized sequences, our approach automatically extracts neural network blocks directly from real architectures. Critically, this extraction preserves the semantic data-flow relations between producer and consumer operations. 
+
+We imposed a structural limit of a maximum sequence length of 5 operations per benchmark to balance complexity with training feasibility. Furthermore, the pipeline extracts these operations using a sliding spatial shift window of 2. This shifting mechanism ensures an overlapping, dense coverage of the neural network graph, providing the reinforcement learning agent with rich, continuous chains of dependencies.
+
+\subsection{Dataset Composition}
+The ultimate dataset combines the legacy files used in the baseline environment with the vast array of newly generated, real-world neural network blocks. Table~\ref{tab:dataset_distribution} summarizes the types of operations and their total occurrences.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|}
+        \hline
+        \textbf{Program Type / Origin} & \textbf{Number of Occurrences} \\
+        \hline
+        Legacy Single Operations & 298 \\
+        Legacy Synthesized Programs & 7401 \\
+        Extracted Neural Network Blocks (Ours) & 10040 \\
+        \hline
+        \textbf{Total} & \textbf{17739} \\
+        \hline
+    \end{tabular}
+    \caption{Summary of dataset file types and their occurrences.}
+    \label{tab:dataset_distribution}
+\end{table}
 
 \subsection{Parallelized Evaluation Pipeline}
 To manage the computational overhead of generating baselines and evaluating learned policies on such an extensive dataset, we implemented a parallelized execution pipeline. The framework divides the dataset into smaller, independent chunks that are processed concurrently across the computing cluster. Once execution times and traces are collected for each chunk, a merging step aggregates the results into a unified dataset. This parallelization fundamentally accelerates the iterative research process.
 
-\section{Hardware-Aware State Representation}
-Prior systems operated without visibility into the underlying hardware, forcing the policy to implicitly memorize hardware-specific heuristics. This blindness limits cross-platform portability.
+\section{Hardware-Aware Observation}
+Prior systems operated without visibility into the underlying hardware, forcing the policy to implicitly memorize hardware-specific heuristics. This blindness critically limits cross-platform portability; a policy that has optimally learned scheduling permutations for a quad-core laptop processor will generate highly suboptimal execution paths when deployed on a 64-core enterprise server, primarily due to catastrophic cache miss rates and thread under-utilization.
 
-To resolve this bottleneck, we inject explicit hardware specifications directly into the observation vector. The augmented state representation includes L1, L2, and L3 cache sizes (measured in kilobytes), the number of physical and logical cores, the \gls{simd} vector width (such as 256 for AVX2 or 512 for AVX-512), and the processor's clock speed. By grounding the observation in architectural realities, the policy learns to dynamically adjust tile sizes and parallelization strategies based on available cache capacity and threading limits.
+To resolve this bottleneck, we inject explicit hardware specifications directly into the observation vector, establishing a hardware-aware state representation. The augmented structural state now natively perceives caching hierarchies, threading limits, and vector capabilities. Specifically, the observation is concatenated with normalizing values for:
+\begin{itemize}
+    \item \textbf{Cache Hierarchy:} The sizes of the L1, L2, and L3 caches (measured in kilobytes), dictating feasible upper bounds for loop tiling to maintain data locality.
+    \item \textbf{Computational Capacity:} The precise number of physical and logical processing cores available.
+    \item \textbf{Vector Instruction Potential:} The \gls{simd} vector width (e.g., 256 bits for AVX2, or 512 bits for \gls{avx}-512) alongside the processor's nominal clock speed.
+\end{itemize}
 
-\section{Transformer-Based Loop-Nest Encoder}
-The previous system processed loop features sequentially using a recursive \gls{lstm} encoder. While effective for simple local dependencies, recurrent networks struggle to model long-range interactions within deeply nested loop structures. 
+By grounding the observation in architectural realities, the policy learns to dynamically adjust tile sizes and parallelization strategies based on available cache capacity and threading limits. This effectively decouples the learned policy from the training hardware, promoting wide-ranging cross-hardware generalization.
 
-To overcome this, we designed a Transformer-based encoder to parse loop nests. Treating each loop level as a distinct token, the model leverages self-attention to simultaneously evaluate the strategic importance of the outermost loop (typically targeted for tiling) against the innermost loop (targeted for vectorization).
+\begin{figure}[H]
+    \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/hardware_specification_feature.png}
+    \caption{Integration of the hardware specification feature vector into the agent's observation space.}
+    \label{fig:hardware_aware}
+\end{figure}
+
+\section{Transformer Loop-Nest Encoder}
+The previous system processed loop features sequentially using a recursive \gls{lstm} encoder. While effective for simple local dependencies, recurrent sequential architectures fundamentally struggle to model multi-directional, long-range interactions within deeply nested loop structures and producer-consumer contexts. Such bottlenecks obscure the relationships between non-adjacent loops, hampering the model's ability to coordinate large-scale transformations.
+
+To overcome the sequential bottleneck, we engineered a Transformer encoder to parse loop nests. Treating each loop level as a distinct token, the model leverages multiple self-attention layers to simultaneously evaluate the strategic importance of the outermost loop (typically targeted for memory tiling) against the innermost loop (targeted for hardware vectorization).
 
 \subsection{Structured Tokenization}
-The observation is tokenized into specialized segments: a CLS token, a consumer summary token, a producer summary token, and per-loop tokens for both the consumer and producer operations. These per-loop tokens encapsulate local features such as loop upper bounds, iterator types, memory access coefficients, and arithmetic operation counts.
+For each observation sample, the encoder constructs an explicit token sequence. The observation is tokenized into specialized segments: a CLS token, a consumer summary token (a dense projection of the full consumer operation feature vector), a producer summary token, and per-loop tokens corresponding to both the consumer and producer operations. These per-loop tokens encapsulate granular, local features such as loop upper bounds, iterator types (e.g., parallel, reduction), load/store memory access coefficients, arithmetic operation counts, and operation-type contextual encodings.
 
 \subsection{Structural Embeddings}
-To maintain the hierarchical context of the loop nest, additive structural embeddings are applied to each token. These include a role embedding (distinguishing consumer from producer), a token-type embedding, and a depth embedding that explicitly denotes the loop's nesting depth. This structured mechanism replaces the sequential bottleneck of the \gls{lstm} with a highly parallelizable and expressive attention backbone.
+Transformers are permutation-invariant and do not inherently process sequence order. To maintain the rigorous hierarchical context of the loop nest and the computational data-flow, additive structural embeddings are applied to each token vector before the attention layers. These structural cues include:
+\begin{itemize}
+    \item \textbf{Role Embedding:} Dictates the specific origin space of the token (global context, consumer operation, or producer operation).
+    \item \textbf{Token-Type Embedding:} Delineates whether the token operates as a CLS metric, a summary node, a loop tier, or historical action context.
+    \item \textbf{Depth Embedding:} Explicitly denotes the depth index of the loop within the nest hierarchy, providing the physical positional coordinate to the attention heads.
+\end{itemize}
 
-\section{Reward System Enhancements}
-In initial iterations, the agent relied exclusively on a sparse terminal reward (speedup over the baseline) granted at the end of the episode. This sparsity hindered early training because random exploratory actions rarely sequence together to produce a faster program.
+This structured tokenization mechanism, guided by positional hierarchy, replaces the sequential limitations of the \gls{lstm} with a highly parallelizable, attention-driven backbone that fluidly perceives dependencies across arbitrary looping depths.
 
-We mitigate this by introducing dense, shaped rewards guided by a static efficiency score. The environment evaluates the intermediate quality of each applied transformation based on arithmetic intensity (the ratio of operations to bytes), the binary vectorizability of the operation, and the proportion of parallelizable loops. A shaped reward is computed as the difference in the efficiency score before and after the action. By blending this dense intermediate feedback with the terminal execution reward, the agent accurately discerns the localized impact of its decisions, leading to a faster and more stable convergence.
+\begin{figure}[H]
+    \centering    \includegraphics[width=0.8\textwidth]{ressources/chapter4/transformer_encoder_architecture.png}
+    \caption{Architecture of the Transformer loop-nest encoder}
+    \label{fig:transformer_encoder}
+\end{figure}
 
-\section{Implementation Infrastructure}
-Our system maintains modularity to ensure experimental integrity. The architecture is configured natively through \gls{mlir} Python bindings, managing execution through a high-performance cluster computing setup. Standardized configuration pipelines parse environment variables to orchestrate baselines, deep learning training loops via PyTorch, and parallel execution logic simultaneously. 
+\section{Shaped Reward}
+In initial iterations, the agent relied exclusively on a sparse, terminal reward structure---specifically, the execution speedup ratio over the unoptimized baseline, granted only at the completion of an entire transformation episode. This sparsity severely hindered early training. Because random exploratory actions rarely align sequentially to produce immediately faster code, the agent was subjected to high variance in gradient estimates, long plateaus before convergence, and inefficient sample utilization.
+
+We mitigate this by introducing dense, intermediate shaped rewards steered by an aggregated static efficiency score. Rather than waiting for a terminal execution pulse, the environment evaluates the localized heuristic quality of each transformation step immediately after it is applied. 
+
+\subsection{Static Efficiency Scoring}
+The static efficiency score is computed for every code state permutation by quantifying specific \gls{mlir} operational properties without requiring expensive ahead-of-time compilation. This score blends three pivotal heuristics:
+\begin{itemize}
+    \item \textbf{Arithmetic Intensity:} An estimation derived from the ratio of floating-point operations relative to the bytes of memory moved. Higher arithmetic intensity implies compute-boundedness, prioritizing parallelization or vectorization over memory tiling.
+    \item \textbf{Vectorizability Status:} A discrete signal determining if the structural requirements for successful vectorization are met (e.g., floating-point bounds with sufficient operand quantities).
+    \item \textbf{Parallel Loop Ratio:} The proportion of nesting depths that possess parallelizable iterator properties versus sequential reduction hierarchies.
+\end{itemize}
+
+\subsection{Interpolating Reward Feedback}
+A per-step shaped reward is calculated strictly as the delta (difference) in the static efficiency score before and after an action is applied. This delta evaluates if an action mathematically improved the code's inherent potential. By subsequently blending this continuous, localized intermediate feedback with the terminal ground-truth execution reward, the agent accurately discerns the localized impact of its individual decisions, leading to a markedly faster and more stable policy convergence.
+
+\begin{figure}[H]
+    \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/reward_blending.png}
+    \caption{Mechanism for computing and blending the shaped intermediate reward with the terminal speedup signal.}
+    \label{fig:shaped_reward}
+\end{figure}
+
+\section{Integrated Combined Architecture}
+Our final system formulation fuses the aforementioned modular enhancements into a singular, unified optimization engine. The isolated enhancements individually address distinct layers of the reinforcement learning paradigm: the Observation Space (Hardware Awareness), the Reinforcement Signal (Shaped Rewards), and the Deep Neural Architecture (Transformer Encoder). 
+
+Combining these modules yields potent synergistic properties. The highly expressive Transformer encoder is able to learn complex hierarchical program embeddings, which are then structurally bounded and guided by the injection of the hardware capability limits. Concurrently, the intermediate shaped reward pipeline provides the dense, step-by-step mathematical gradients that are rigorously required to stabilize and converge the heavily parameterized Transformer network from random state initialization. This integrated architecture forms a highly configurable pipeline accessible via native \gls{mlir} Python bindings, managing dataset orchestration and PyTorch learning loops seamlessly across slurm-managed high-performance computing clusters.
+
+\begin{figure}[H]
+    \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/system_architecture.png}
+    \caption{The integrated system architecture.}
+    \label{fig:combined_architecture}
+\end{figure} 
 
 \section{Conclusion}
-The architectural refinements detailed in this chapter successfully adapt reinforcement learning for the complexities of modern compiler construction. By leveraging parallel dataset extraction, integrating hardware specifications, deploying a transformer encoder, and refining the reward signal, the framework forms a robust foundation. These components work concertedly to explore the vast combinatorial search space of loop transformations, translating theoretical ML compiler concepts into automated, efficient execution strategies.
+The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a profoundly robust optimization foundation. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups—and detailing the rigorous evaluation protocols applied to benchmarking their true utility—is the primary focus of the succeeding chapter, \textit{Experiments and Results}.

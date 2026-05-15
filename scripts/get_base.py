@@ -133,7 +133,8 @@ for code_file in files_tqdm:
     try:
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(args.timeout)
-        et, _, _ = exec.execute_code(code, bench_name, [])
+        exec_results = exec.execute_code(code, bench_name, [])
+        et = exec_results[0]
         signal.alarm(0)
     except TimeoutError:
         files_tqdm.write(f"Failed to execute {bench_name}: timed out after {args.timeout}s")

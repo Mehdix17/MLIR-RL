@@ -111,9 +111,9 @@ class Env:
 
         # Evaluate the code (since the operation is done)
         try:
-            new_exec_time, exec_succeeded, cache_miss = Execution().execute_code(transformed_code, self.benchmark_data.bench_name, seq)
+            new_exec_time, exec_succeeded, cache_miss, error_msg = Execution().execute_code(transformed_code, self.benchmark_data.bench_name, seq)
             if not exec_succeeded:
-                raise Exception("Incorrect results")
+                raise Exception(error_msg or "Unknown execution failure")
         except Exception as e:
             seq_str = '\n'.join([str(list(map(str, op_seq))) for op_seq in seq])
             print_error(

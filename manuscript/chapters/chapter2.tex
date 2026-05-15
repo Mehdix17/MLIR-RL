@@ -80,9 +80,8 @@ LSTMs are used in the baseline version of our system (as well as in versions V1,
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: RNN / LSTM architecture diagram]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2.5cm} Recurrent Neural Network / LSTM Cell \\ (Insert corresponding diagram here) \vspace{2.5cm}}}
-    \caption{Architecture of a Recurrent Neural Network and internal structure of an LSTM cell.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter2/RNN_vs_LSTM.png}
+    \caption{Architecture of RNN and LSTM.}
     \label{fig:rnn-lstm}
 \end{figure}
 
@@ -108,8 +107,7 @@ A transformer layer consists of multi-head self-attention followed by a position
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Transformer architecture diagram]
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{2.5cm} Transformer Architecture \\ (Self-attention mechanism and multi-head attention) \vspace{2.5cm}}}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter2/transformer_encoder_and_attention_mechanism.png}
     \caption{The Transformer architecture detailing the multi-head self-attention mechanism.}
     \label{fig:transformer-arch}
 \end{figure}
@@ -147,12 +145,8 @@ This interaction loop, illustrated in Figure~\ref{fig:rl-loop}, continues until 
 
 \begin{figure}[H]
     \centering
-    % [PLACEHOLDER: Classic RL agent-environment interaction loop diagram.
-    %  Box "Agent" on left, Box "Environment" on right.
-    %  Arrow from Environment to Agent labeled "State s_t, Reward r_t"
-    %  Arrow from Agent to Environment labeled "Action a_t"]
-    \fbox{\parbox{0.8\textwidth}{\centering\vspace{2cm} Agent-Environment Interaction Loop \\ (Agent observes state $s_t$ and reward $r_t$, selects action $a_t$; \\ Environment transitions to $s_{t+1}$ and produces $r_{t+1}$) \vspace{2cm}}}
-    \caption{The reinforcement learning interaction loop. The agent observes the state and reward, selects an action, and the environment responds with a new state and reward.}
+    \includegraphics[width=1.0\textwidth]{ressources/chapter2/reinforcement_learning_feedback_loop.png}
+    \caption{The reinforcement learning feedback loop. \cite{sutton2018reinforcement}}
     \label{fig:rl-loop}
 \end{figure}
 

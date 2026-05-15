@@ -128,12 +128,7 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
             new_cache_data[state.bench_name][cache_key] = exec_time
 
     tc = sum(tcs, TrajectoryCollector())
-    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
-    eval_json: dict[str, Optional[int]] = {}
-    for state, exec_time in zip(states, all_exec_times):
-        eval_json[state.bench_name] = exec_time
-    with open(os.path.join(fl.logs_dir, 'eval', 'eval_exec_times.json'), 'w') as f:
-        json.dump(eval_json, f, indent=2)
+    # Metrics are already logged to fl['train/...'], no need to save eval_exec_times.json here
     exe.update_execution_cache(new_cache_data)
 
     traj_end = time()
@@ -153,6 +148,12 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         f", perfect speedup: {perfect_speedup:.2f}x"
         f", cache miss rate: {cache_miss_rate:.2f}%"
     ))
+
+    # Clear markers after successful iteration
+    import shutil
+    marker_dir = os.path.join(cfg.results_dir, 'global_markers')
+    if os.path.exists(marker_dir):
+        shutil.rmtree(marker_dir)
 
     return tc.to_trajectory()
 
@@ -305,6 +306,10 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
 
     # Prepare benchmarks to explore
     indices = range(len(data))
+    if os.getenv("EVAL_BENCH_LAST_ONLY", "").strip().lower() in ("1", "true", "yes"):
+        indices = [len(data) - 1]
+        print_info(f"EVAL_BENCH_LAST_ONLY: evaluating only benchmark {data[indices[0]].bench_name}")
+
     envs: list[Env] = []
     states: list[OperationState] = []
     observations: list[torch.Tensor] = []
@@ -363,16 +368,17 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
 
     if len(all_speedups) > 0:
         fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
-    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
-    eval_json: dict[str, Optional[int]] = {}
-    for state, exec_time in zip(states, all_exec_times):
-        eval_json[state.bench_name] = exec_time
-    with open(os.path.join(fl.logs_dir, 'eval', 'eval_exec_times.json'), 'w') as f:
-        json.dump(eval_json, f, indent=2)
+    # Metrics are already logged to fl['train/...'], no need to save eval_exec_times.json here
     exe.update_execution_cache(new_cache_data)
 
     eval_end = time()
     print_info(f"Evaluation time: {timedelta(seconds=eval_end - eval_start)}")
+
+    # Clear markers after successful evaluation
+    import shutil
+    marker_dir = os.path.join(Config().results_dir, 'global_markers')
+    if os.path.exists(marker_dir):
+        shutil.rmtree(marker_dir)
 
 
 def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchmarks, main_exec_data: Optional[dict[str, dict[str, int]]]):
@@ -381,7 +387,9 @@ def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchma
 
     # Check if this benchmark was already completed in a previous crashed run
     import json as _json
-    marker_dir = os.path.join(os.path.dirname(exec_data_file), 'eval', 'markers')
+    # Use a persistent marker directory across runs for the same experiment
+    cfg = Config()
+    marker_dir = os.path.join(cfg.results_dir, 'global_markers')
     os.makedirs(marker_dir, exist_ok=True)
     marker_file = os.path.join(marker_dir, state.bench_name)
     if os.path.exists(marker_file):
