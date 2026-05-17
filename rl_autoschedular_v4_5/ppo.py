@@ -128,6 +128,14 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
             new_cache_data[state.bench_name][cache_key] = exec_time
 
     tc = sum(tcs, TrajectoryCollector())
+    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
+    eval_json: dict[str, Optional[int]] = {}
+    for state, exec_time in zip(states, all_exec_times):
+        eval_json[state.bench_name] = exec_time
+    eval_dir = os.path.join(fl.logs_dir, 'eval')
+    os.makedirs(eval_dir, exist_ok=True)
+    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
+        json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 
     traj_end = time()

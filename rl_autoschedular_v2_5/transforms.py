@@ -455,12 +455,32 @@ def transform_pre_vec(code: str, operation_tag: str):
 
 
 def __run_transform_code(code: str, transform_code: str):
-    def transform_bind_call():
-        with Context():
-            module = Module.parse(code)
-            t_module = Module.parse(transform_code)
-        interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
+    import multiprocessing
 
-        return str(module)
+    def worker(code_str, transform_str, result_dict):
+        try:
+            with Context():
+                module = Module.parse(code_str)
+                t_module = Module.parse(transform_str)
+                interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
+                result_dict['code'] = str(module)
+                result_dict['success'] = True
+        except Exception as e:
+            result_dict['success'] = False
+            result_dict['error'] = str(e)
 
-    return BindingsProcess.call(transform_bind_call)
+    manager = multiprocessing.Manager()
+    result_dict = manager.dict()
+    process = multiprocessing.Process(target=worker, args=(code, transform_code, result_dict))
+    process.start()
+    process.join(timeout=300)
+
+    if process.is_alive():
+        process.terminate()
+        process.join()
+        raise RuntimeError("Transformation timed out or crashed (isolated, 300s)")
+
+    if result_dict.get('success'):
+        return result_dict['code']
+    else:
+        raise RuntimeError(f"Transformation failed: {result_dict.get('error', 'unknown error')}")
