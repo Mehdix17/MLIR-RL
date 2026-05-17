@@ -286,11 +286,15 @@ class Env:
         for op_seq in reversed(seq):
             op_seq_already_failed = False
             for action in op_seq:
-                # We need to assign the same reward to all sub actions
-                rewards_count = len(action.sub_actions) + 1
+                # Account for sub-actions (incomplete steps) which were independently recorded in the trajectory
+                for sub_action in action.sub_actions:
+                    if op_seq_already_failed:
+                        rewards.append(0.0)
+                    else:
+                        rewards.append(float(sub_action.extras.get('shaped_reward', 0.0)))
 
                 if op_seq_already_failed:
-                    rewards.extend([0.0] * rewards_count)
+                    rewards.append(0.0)
                     continue
 
                 # Attempt to apply the transformation to the code
@@ -306,7 +310,7 @@ class Env:
                         f"Benchmark: {self.benchmark_data.bench_name}\n"
                         f"Transformations:\n{seq_str}"
                     )
-                    rewards.extend([self.__action_reward(False)] * rewards_count)
+                    rewards.append(self.__action_reward(False))
                     op_seq_already_failed = True
                     continue
 
@@ -314,7 +318,7 @@ class Env:
                 transformed_code = new_transformed_code
 
                 shaped_reward = float(action.extras.get('shaped_reward', 0.0))
-                rewards.extend([shaped_reward] * rewards_count)
+                rewards.append(shaped_reward)
 
         return transformed_code, rewards
 

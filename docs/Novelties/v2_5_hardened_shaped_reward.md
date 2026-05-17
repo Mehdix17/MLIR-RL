@@ -30,7 +30,7 @@ Replaces the static 30s timeout with a profiling-based margin (10x baseline time
 
 ### 4. Stability Rails (Action Masking)
 Proactively masks out "risky" action patterns:
--   **Complexity:** Capped at 4 transformation steps.
+-   **Sequence Boundary:** The agent is restricted to terminal actions (`NT` or `V`) as it reaches the end of the predefined `order` sequence or approaches the environment's `truncate` limit.
 -   **Depth:** Vectorization is forbidden if the loop-nest depth is > 6.
 
 ## Comparison Table

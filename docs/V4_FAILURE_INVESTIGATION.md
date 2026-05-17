@@ -83,14 +83,12 @@ To achieve near-zero failures while maintaining V4's peak performance, the follo
     3.  This allows up to 10x slowdown margin for profiling, with a 5-minute hard cap.
 *   **Impact:** Prevents "false positive" failures where a valid optimization was simply slow to compile/run, while still killing infinite loops.
 
-### C. Constrained Action Masking (Stability Rails)
-*   **The Problem:** The agent often tries to apply vectorization to already deeply nested and fragmented loops, which is a known trigger for MLIR binding crashes.
-*   **V4.5 Implementation:**
-    1.  **Complexity Limit:** A stability safeguard is added to `ActionSpace.action_mask`. If the `step_count` exceeds 4, the agent is restricted to terminal actions (`NT` or `V`) to prevent runaway transformation complexity.
-    2.  **Depth Limit:** `Vectorization` is explicitly forbidden if the current loop nest depth is greater than 6, avoiding the most common cause of native MLIR assertion failures.
-*   **Impact:** Proactively prunes the search tree of optimization sequences that are statistically correlated with compiler crashes.
+### C. Physical Boundary Safeguards (Depth Limit)
+*   **The Problem:** The MLIR Python bindings have a known diagnostic buffer overflow bug that triggers a native SIGABRT when vectorizing loops nested deeper than 6 levels.
+*   **V4.5 Implementation:** `Vectorization` is explicitly forbidden in `ActionSpace.action_mask` if the current loop nest depth is greater than 6.
+*   **Impact:** Proactively avoids the most common cause of native interpreter crashes, allowing training to proceed without interruption on deep loop nests.
 
 ### D. Multi-Engine Fallback (CMD-Line Execution)
-*   **The Problem:** Sometimes the Python bindings crash for reasons unrelated to the optimization (e.g., diagnostic buffer issues).
+*   **The Problem:** Sometimes the Python bindings crash for reasons unrelated to the optimization.
 *   **V4.5 Implementation:** If the isolated Python execution fails, the engine automatically retries using the standalone `mlir-cpu-runner` binary.
-*   **Impact:** Ensures that execution failures are only reported if the MLIR code is truly unrunnable, not just because of a binding limitation.
+*   **Impact:** Ensures that execution failures are only reported if the MLIR code is truly unrunnable.

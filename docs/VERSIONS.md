@@ -314,7 +314,7 @@ Key code changes:
 - `rl_autoschedular_v4_5/env.py`:
 	- Implemented **Success-Contingent Reward Negation**: zeroes out ALL intermediate shaped rewards if final code fails to run.
 - `rl_autoschedular_v4_5/actions/__init__.py`:
-	- Implemented **Stability Rails**: Masks vectorization for depth > 6 and restricts sequence complexity to 4 steps.
+	- Implemented **Stability Rails**: Masks vectorization for depth > 6 and enforces terminal actions based on `order` and `truncate` limits.
 - `rl_autoschedular_v4_5/ppo.py`:
 	- Implemented **Resilient Markers**: Persistent global marker directory to ensure eval/train resumption after SIGABRT.
 

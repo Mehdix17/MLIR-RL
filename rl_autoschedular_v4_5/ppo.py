@@ -116,6 +116,14 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
     new_cache_data: dict[str, dict[str, int]] = {}
     for tc, state, rewards, speedup, exec_time in zip(tcs, states, all_rewards, all_speedups, all_exec_times):
         # Update trajectory
+        # Safety Check: ensure rewards list length matches trajectory steps exactly
+        if len(rewards) != len(tc.obs):
+            print_error(f"Reward length mismatch for {state.bench_name}: rewards={len(rewards)}, steps={len(tc.obs)}. Fixing...")
+            if len(rewards) > len(tc.obs):
+                rewards = rewards[:len(tc.obs)]
+            else:
+                rewards.extend([0.0] * (len(tc.obs) - len(rewards)))
+
         tc.rewards = rewards
         # Log metrics
         fl['train/reward'].extend(rewards)
@@ -156,11 +164,15 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         f", cache miss rate: {cache_miss_rate:.2f}%"
     ))
 
-    # Clear markers after successful iteration
-    import shutil
+    # Clear markers granularly after successful iteration to avoid race conditions
     marker_dir = os.path.join(cfg.results_dir, 'global_markers')
-    if os.path.exists(marker_dir):
-        shutil.rmtree(marker_dir)
+    for state in states:
+        marker_file = os.path.join(marker_dir, state.bench_name)
+        if os.path.exists(marker_file):
+            try:
+                os.remove(marker_file)
+            except OSError:
+                pass
 
     return tc.to_trajectory()
 
@@ -380,11 +392,15 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
     eval_end = time()
     print_info(f"Evaluation time: {timedelta(seconds=eval_end - eval_start)}")
 
-    # Clear markers after successful evaluation
-    import shutil
+    # Clear markers granularly after successful evaluation to avoid race conditions
     marker_dir = os.path.join(Config().results_dir, 'global_markers')
-    if os.path.exists(marker_dir):
-        shutil.rmtree(marker_dir)
+    for state in states:
+        marker_file = os.path.join(marker_dir, state.bench_name)
+        if os.path.exists(marker_file):
+            try:
+                os.remove(marker_file)
+            except OSError:
+                pass
 
 
 def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchmarks, main_exec_data: Optional[dict[str, dict[str, int]]]):
@@ -396,7 +412,13 @@ def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchma
     # Use a persistent marker directory across runs for the same experiment
     cfg = Config()
     marker_dir = os.path.join(cfg.results_dir, 'global_markers')
-    os.makedirs(marker_dir, exist_ok=True)
+    # Robust directory creation (handles race conditions)
+    if not os.path.exists(marker_dir):
+        try:
+            os.makedirs(marker_dir, exist_ok=True)
+        except OSError:
+            pass
+
     marker_file = os.path.join(marker_dir, state.bench_name)
     if os.path.exists(marker_file):
         with open(marker_file) as f:
@@ -411,6 +433,14 @@ def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchma
 
     # Save result atomically so crash-resilient
     tmp_file = marker_file + '.tmp'
+    # Ensure dir exists before writing tmp
+    tmp_dir = os.path.dirname(tmp_file)
+    if not os.path.exists(tmp_dir):
+        try:
+            os.makedirs(tmp_dir, exist_ok=True)
+        except OSError:
+            pass
+
     with open(tmp_file, 'w') as f:
         _json.dump({'rewards': rewards, 'speedup': speedup, 'exec_time': new_exec_time, 'cache_miss': cache_miss}, f)
     os.rename(tmp_file, marker_file)

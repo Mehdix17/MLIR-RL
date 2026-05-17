@@ -57,15 +57,14 @@ rewards.append(final_reward)
 V4.5 proactively prunes the action space to avoid sequences that are statistically correlated with compiler instability.
 
 **Key Constraints:**
--   **Complexity Limit:** If `step_count >= 4`, the agent is forced to choose `NoTransformation` or `Vectorization` to end the sequence.
+-   **Sequence Boundary:** The agent is restricted to terminal actions (`NT` or `V`) as it reaches the end of the predefined `order` sequence or approaches the environment's `truncate` limit. This prevents runaway transformation complexity while respecting the intended scheduling strategy.
 -   **Depth Limit:** `Vectorization` is masked out if the loop-nest depth is > 6, avoiding a known diagnostic buffer assertion in the bindings.
 
 ```python
 # rl_autoschedular_v4_5/actions/__init__.py
 if not state.terminal:
-    # Force termination on high complexity
-    force_terminal = state.step_count >= 4
-    if force_terminal:
+    # Force termination based on config boundaries
+    if state.step_count >= len(cfg.order) or state.step_count >= cfg.truncate - 1:
         allow_action(NoTransformation)
         
     # Forbid vectorization in deep nests
@@ -87,7 +86,7 @@ If the high-performance Python bindings fail to execute the code, the engine aut
 | **Incentive** | Partial credit for failures | All-or-nothing (Success-contingent) |
 | **Timeout** | Static 30s | **Dynamic (10x Baseline)** |
 | **Recovery** | Signal Handler (Partial) | Process Re-spawn (Full) |
-| **Complexity** | Unlimited | Capped at 4 steps |
+| **Complexity** | Unlimited | Respects Config Boundaries |
 
 ## Configuration
 

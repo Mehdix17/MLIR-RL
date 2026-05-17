@@ -310,6 +310,26 @@ def load_exec_time_folder(folder: Path) -> dict[str, list[float]]:
 
 
 @st.cache_data(show_spinner=False)
+def load_eval_exec_times_json(run_path: Path) -> dict[str, list[float]]:
+    """Load {prefix}_agent/run_N/logs/eval/eval_exec_times.json → {bench: [time_ns]}"""
+    path = run_path / "logs" / "eval" / "eval_exec_times.json"
+    if not path.exists():
+        return {}
+    data = load_json(path)
+    if not data:
+        return {}
+    return {k: [v] for k, v in data.items() if v is not None and v > 0}
+
+
+def load_agent_exec_times(run_path: Path) -> dict[str, list[float]]:
+    """Unified exec time loader: tries eval_exec_times.json first, falls back to per-benchmark folder."""
+    result = load_eval_exec_times_json(run_path)
+    if result:
+        return result
+    return load_exec_time_folder(run_path / "logs" / "eval" / "exec_time")
+
+
+@st.cache_data(show_spinner=False)
 def load_exec_data_json(run_path: Path) -> dict:
     """Load {prefix}_agent/run_N/exec_data.json"""
     path = run_path / "exec_data.json"
@@ -395,8 +415,10 @@ def build_main_df(
             for mode in ["eager", "compile", "jit"]:
                 pt_val = pt.get(mode)
                 if pt_val and rl_optimized:
-                    row[f"rl_{suffix}_vs_{mode}"] = round(pt_val / rl_optimized, 3)
-                    row[f"{mode}_vs_rl_{suffix}"] = round(rl_optimized / pt_val, 3)
+                    # PyTorch times are in µs, RL/MLIR times are in ns — convert
+                    pt_ns = pt_val * 1000
+                    row[f"rl_{suffix}_vs_{mode}"] = round(pt_ns / rl_optimized, 3)
+                    row[f"{mode}_vs_rl_{suffix}"] = round(rl_optimized / pt_ns, 3)
                     if mode == "eager":
                         rl_vs_eager_candidates.append(row[f"rl_{suffix}_vs_{mode}"])
                 else:
@@ -553,7 +575,7 @@ with st.sidebar:
     base_eval_by_impl = get_baselines_by_impl(experiment_root, selected_impl_tokens)
     pytorch_data = load_json(experiment_root / "exec_times" / "pytorch.json")
     exec_time_data_by_impl = {
-        impl: load_exec_time_folder(run_path / "logs" / "eval" / "exec_time")
+        impl: load_agent_exec_times(run_path)
         for impl, run_path in run_paths_by_impl.items()
     }
     df_full = build_main_df(
@@ -641,7 +663,6 @@ def impl_metrics(df_in: pd.DataFrame, suffix: str) -> dict:
 
     beats_all = df_in[
         (df_in[eager_col].fillna(0) > 1)
-        & (df_in[compile_col].fillna(0) > 1)
         & (df_in[jit_col].fillna(0) > 1)
     ].shape[0]
 
@@ -663,7 +684,7 @@ for token in active_impl_tokens:
                 if metrics["available"] and pd.notna(metrics["mean"])
                 else "N/A"
             ),
-            "Beats All PyTorch Modes": (
+            "Beats PyTorch (Eager+JIT)": (
                 f"{metrics['beats_all']} / {len(df)}"
                 if metrics["available"]
                 else "N/A"
@@ -688,6 +709,17 @@ speedup_per_bench_by_impl = {
     impl: load_speedup_folder(run_path / "logs" / "eval" / "speedup")
     for impl, run_path in run_paths_by_impl.items()
 }
+# For agents without speedup folder, generate from eval_exec_times.json + baseline
+for impl, run_path in run_paths_by_impl.items():
+    if not speedup_per_bench_by_impl.get(impl):
+        exec_times = load_eval_exec_times_json(run_path)
+        if exec_times:
+            baseline = base_eval_by_impl.get(impl, {})
+            speedup_per_bench_by_impl[impl] = {
+                bench: [baseline[bench] / times[0]]
+                for bench, times in exec_times.items()
+                if bench in baseline and baseline[bench] and baseline[bench] > 0
+            }
 avg_speedup_by_impl = {
     impl: load_plain_floats(run_path / "logs" / "eval" / "average_speedup")
     for impl, run_path in run_paths_by_impl.items()
@@ -699,9 +731,7 @@ exec_data_json_by_impl = {
 ckpt_data_by_impl: dict[str, dict] = {}
 for impl, run_path in run_paths_by_impl.items():
     ckpts = get_checkpoints(run_path)
-    exec_data_folder = load_exec_time_folder(
-        run_path / "logs" / "eval" / "exec_time"
-    )
+    exec_data_folder = load_agent_exec_times(run_path)
     if ckpts and exec_data_folder:
         ckpt_data_by_impl[impl] = {
             "run_path": run_path,
@@ -1069,140 +1099,6 @@ with tab2:
     elif df_sp.empty:
         st.info("No speedup values after filtering.")
     else:
-        # ── CDF Plot ──
-        st.markdown("#### Cumulative Distribution: Best Speedup per Benchmark")
-        st.caption(
-            "Shows what fraction of benchmarks achieve \u2265 a given speedup. "
-            "Curves farther right = better."
-        )
-        fig_cdf = go.Figure()
-        for impl in active_impl_tokens:
-            impl_label = token_display(impl)
-            impl_sp = df_sp[df_sp["implementation"] == impl]
-            if impl_sp.empty:
-                continue
-            vals = sorted(impl_sp["speedup"].tolist())
-            n = len(vals)
-            y = [i / n for i in range(n)]
-            fig_cdf.add_trace(
-                go.Scatter(
-                    x=vals,
-                    y=y,
-                    mode="lines",
-                    name=impl_label,
-                    line=dict(width=2),
-                )
-            )
-        fig_cdf.add_vline(
-            x=1, line_dash="dash", line_color="#888", annotation_text="1\u00d7"
-        )
-        fig_cdf.update_layout(
-            **PLOTLY_THEME,
-            xaxis_title="Speedup (\u00d7)",
-            yaxis_title="Fraction of Benchmarks \u2265 Speedup",
-            margin=dict(l=0, r=0, t=20, b=40),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02),
-        )
-        st.plotly_chart(fig_cdf, use_container_width=True)
-
-        # ── Speedup Heatmap: Model Family \u00d7 Op Type ──
-        st.markdown("#### Speedup Heatmap: Model Family \u00d7 Op Type")
-        st.caption(
-            "Average best speedup per combination. Color intensity = speedup magnitude."
-        )
-        df_heat = df_sp.groupby(
-            ["model_family", "op_type", "impl_display"], as_index=False
-        )["speedup"].mean()
-
-        for impl_label in sorted(df_heat["impl_display"].unique()):
-            impl_heat = df_heat[df_heat["impl_display"] == impl_label]
-            pivot = impl_heat.pivot_table(
-                index="model_family", columns="op_type", values="speedup", aggfunc="mean"
-            )
-            if pivot.empty:
-                continue
-            fig_heat = go.Figure(
-                go.Heatmap(
-                    z=pivot.values,
-                    x=pivot.columns,
-                    y=pivot.index,
-                    colorscale="RdYlGn",
-                    zmin=0.5,
-                    zmid=1.5,
-                    zmax=max(5, pivot.max().max()),
-                    text=[  # noqa: FURB136
-                        [f"{v:.1f}\u00d7" if pd.notna(v) else "" for v in row]
-                        for row in pivot.values
-                    ],
-                    texttemplate="%{text}",
-                    textfont={"size": 10},
-                    hoverongaps=False,
-                )
-            )
-            fig_heat.update_layout(
-                **PLOTLY_THEME,
-                title=f"{impl_label}",
-                title_font_size=13,
-                xaxis_tickangle=-30,
-                margin=dict(l=0, r=0, t=40, b=60),
-                height=350 + 15 * len(pivot.index),
-            )
-            st.plotly_chart(fig_heat, use_container_width=True)
-
-        # ── All-benchmarks speedup heatmap ──
-        st.markdown("#### All Benchmarks Speedup Heatmap over Eval Steps")
-        st.caption(
-            "Each row = one benchmark, each column = eval step. "
-            "Benchmarks sorted by best speedup."
-        )
-        all_bench_names = sorted(
-            {b for spb in speedup_per_bench_by_impl.values() for b in spb}
-        )
-        if all_bench_names:
-            # Pick one implementation for the heatmap (first active)
-            ref_impl = active_impl_tokens[0]
-            ref_data = speedup_per_bench_by_impl.get(ref_impl, {})
-            # Determine common min length
-            lengths = [len(v) for v in ref_data.values() if v]
-            if lengths:
-                min_len = min(lengths)
-                # Build matrix
-                bench_best = {
-                    b: max(ref_data[b])
-                    for b in ref_data
-                    if len(ref_data[b]) >= min_len
-                }
-                sorted_benches = sorted(bench_best.keys(), key=lambda b: bench_best[b])
-                matrix = []
-                row_labels = []
-                for b in sorted_benches:
-                    vals = ref_data[b][:min_len]
-                    matrix.append(vals)
-                    row_labels.append(b)
-
-                if matrix:
-                    fig_all_heat = go.Figure(
-                        go.Heatmap(
-                            z=matrix,
-                            x=list(range(min_len)),
-                            y=row_labels,
-                            colorscale="RdYlGn",
-                            zmin=0.5,
-                            zmid=2,
-                            zmax=max(5, max(max(r) for r in matrix)),
-                            colorbar_title="Speedup (\u00d7)",
-                        )
-                    )
-                    fig_all_heat.update_layout(
-                        **PLOTLY_THEME,
-                        title=f"Speedup per Benchmark over Eval Steps ({token_display(ref_impl)})",
-                        xaxis_title="Eval Step",
-                        yaxis_title="Benchmark",
-                        height=max(400, 10 * len(row_labels)),
-                        margin=dict(l=0, r=0, t=40, b=40),
-                    )
-                    st.plotly_chart(fig_all_heat, use_container_width=True)
-
         # ── Best-so-far Convergence ──
         st.markdown("#### Best-So-Far Speedup Convergence")
         st.caption(
@@ -1364,42 +1260,76 @@ with tab2:
                 )
                 st.plotly_chart(fig4, use_container_width=True)
 
-        # ── Error bars on per-family speedup ──
-        st.markdown("#### Speedup by Model Family with Variability")
-        st.caption("Mean \u00b1 std per model family across all operation types.")
-        df_sp_family = df_sp.groupby(
-            ["model_family", "impl_display"], as_index=False
-        ).agg(mean=("speedup", "mean"), std=("speedup", "std"))
-        all_ml_families = sorted(df_sp_family["model_family"].unique())
+        # ── RL vs PyTorch (Eager & JIT) per Model Family ──
+        st.markdown("#### RL vs PyTorch (Eager & JIT) per Model Family")
+        st.caption("Speedup of RL over PyTorch Eager/JIT (>1 = RL faster).")
 
-        fig_fam_err = go.Figure()
-        for impl_label in sorted(df_sp_family["impl_display"].unique()):
-            subset = df_sp_family[df_sp_family["impl_display"] == impl_label]
-            fig_fam_err.add_trace(
-                go.Bar(
-                    x=subset["model_family"],
-                    y=subset["mean"],
-                    name=impl_label,
-                    error_y=dict(
-                        type="data", array=subset["std"].tolist(), visible=True, thickness=1.5
-                    ),
-                    marker_line_width=0,
+        # Build comparison dataframe from df
+        cmp_rows = []
+        for token in active_impl_tokens:
+            suffix = token_col(token)
+            opt_col = f"rl_{suffix}_optimized_us"
+            eager_col = f"rl_{suffix}_vs_eager"
+            jit_col = f"rl_{suffix}_vs_jit"
+            if opt_col not in df.columns:
+                continue
+            for _, row in df[df[opt_col].notna()].iterrows():
+                family = row.get("model_family", "unknown")
+                eager_val = row.get(eager_col)
+                jit_val = row.get(jit_col)
+                if eager_val is not None and jit_val is not None:
+                    cmp_rows.append({
+                        "model_family": family,
+                        "implementation": token_display(token),
+                        "vs_eager": eager_val,
+                        "vs_jit": jit_val,
+                    })
+
+        df_cmp = pd.DataFrame(cmp_rows)
+        if not df_cmp.empty:
+            # Aggregate by model family
+            df_cmp_agg = df_cmp.groupby(
+                ["model_family", "implementation"], as_index=False
+            )[["vs_eager", "vs_jit"]].mean()
+
+            fig_cmp = go.Figure()
+            families_sorted = sorted(df_cmp_agg["model_family"].unique())
+            for impl_label in sorted(df_cmp_agg["implementation"].unique()):
+                sub = df_cmp_agg[df_cmp_agg["implementation"] == impl_label]
+                # Reindex to ensure all families present
+                sub_idx = sub.set_index("model_family").reindex(families_sorted)
+                fig_cmp.add_trace(
+                    go.Bar(
+                        x=families_sorted,
+                        y=sub_idx["vs_eager"].tolist(),
+                        name=f"{impl_label} vs Eager",
+                        marker_line_width=0,
+                    )
                 )
+                fig_cmp.add_trace(
+                    go.Bar(
+                        x=families_sorted,
+                        y=sub_idx["vs_jit"].tolist(),
+                        name=f"{impl_label} vs JIT",
+                        marker_line_width=0,
+                    )
+                )
+            fig_cmp.add_hline(
+                y=1.0, line_dash="dash", line_color="#888",
+                annotation_text="Equal to PyTorch", annotation_position="top right",
             )
-        fig_fam_err.add_hline(y=1.0, line_dash="dash", line_color="#888")
-        fig_fam_err.update_layout(
-            barmode="group",
-            **PLOTLY_THEME,
-            xaxis_tickangle=-20,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02),
-            margin=dict(l=0, r=0, t=40, b=60),
-            xaxis_title="Model Family",
-            yaxis_title="Avg Best Speedup (\u00d7)",
-        )
-        st.plotly_chart(fig_fam_err, use_container_width=True)
+            fig_cmp.update_layout(
+                barmode="group",
+                **PLOTLY_THEME,
+                xaxis_tickangle=-20,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02),
+                margin=dict(l=0, r=0, t=40, b=60),
+                xaxis_title="Model Family",
+                yaxis_title="Speedup vs PyTorch (\u00d7)",
+            )
+            st.plotly_chart(fig_cmp, use_container_width=True)
 
         # Export
-        st.markdown("#### Export")
         sp_csv = pd.DataFrame(
             [
                 {

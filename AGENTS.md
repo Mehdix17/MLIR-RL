@@ -64,6 +64,30 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with "Permission denied" on br
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
 
+## Architecture: AST & Feature Pipeline
+
+The RL agent does **not** parse MLIR directly. A **C++ AST dumper** (`tools/ast_dumper/`, env var `AST_DUMPER_BIN_PATH`) serves as the bridge between raw MLIR and the Python observation tensor:
+
+```
+.mlir file  →  C++ AST dumper  →  structured text (operations, loops, graph)  →  state.py  →  BenchmarkFeatures  →  observation.py  →  torch.Tensor
+```
+
+**What the AST dumper outputs** (parsed by `state.py::__extract_bench_features_from_ast_result()`):
+- `#START_OPERATION` blocks — each linalg op with its tag, name, type
+- `#START_NESTED_LOOPS` — loop bounds, steps, iterator types (parallel/reduction)
+- `#START_LOAD_DATA` / `#START_STORE_DATA` — memory access patterns per loop dimension
+- `#START_OP_COUNT` — arithmetic op counts (mul, add, etc.)
+- `#BEGIN_GRAPH` — producer→consumer edges between operations
+
+**What the observation tensor contains** (built by `observation.py::Observation.from_state()`):
+1. **OpFeatures** — operation type one-hot, loop upper bounds, iterator types, load/store access matrices, arithmetic counts
+2. **ProducerOpFeatures** — same features for the producing operation (or zeros)
+3. **ActionHistory** — multi-hot encoding of previously applied transformations
+4. **NumLoops** — current loop nest depth
+5. **ActionMask** — bitmask of currently legal actions
+
+**Key files:** `rl_autoschedular/state.py` (feature extraction + `BenchmarkFeatures` dataclass), `rl_autoschedular/observation.py` (tensor construction), `rl_autoschedular/benchmarks.py` (bulk loading).
+
 ## Safety & Hardened Reliability (V4.5+)
 
 Starting with V4.5, the system includes proactive safeguards against MLIR instability:

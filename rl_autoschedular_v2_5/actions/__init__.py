@@ -94,10 +94,6 @@ class ActionSpace:
 
         # If state is terminal don't allow any further actions
         if not state.terminal:
-            # Stability Safeguard: If we've reached a high complexity (too many transforms),
-            # force the agent to finish or vectorize to avoid native crashes.
-            force_terminal = state.step_count >= 4
-
             if Interchange.incomplete_interchange(state):
                 # Special case where interchange isn't complete yet
                 mask[cls.action_number(Interchange)] = True
@@ -106,11 +102,6 @@ class ActionSpace:
                     f"Unhandled incomplete action {state.latest_action}"
                     ", can't move on to another step"
                 )
-            elif force_terminal:
-                # Force ending the sequence to maintain stability
-                allow_action(NoTransformation)
-                if Vectorization.is_allowed(state):
-                    allow_action(Vectorization)
             elif cfg.order:
                 # Enforce order if provided
                 if state.step_count >= len(cfg.order):
@@ -131,8 +122,8 @@ class ActionSpace:
                 # If none of the above applies, allow everything
                 allow_all()
 
-            # Stability Safeguard: Forbid Vectorization if nesting is too deep (>6) 
-            # to avoid known MLIR binding assertion failures.
+            # Physical Boundary Safeguard: Forbid Vectorization if nesting is too deep (>6) 
+            # to avoid known MLIR C++ binding assertion failures (diagnostic buffer bug).
             if len(state.operation_features.nested_loops) > 6:
                 forbid_action(Vectorization)
 
