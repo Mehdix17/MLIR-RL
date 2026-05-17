@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -q c2
 #SBATCH --job-name=mlir-eval
-#SBATCH --partition=condo
+#SBATCH -p condo
+#SBATCH -q c2
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=28
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/eval_%j.out
@@ -28,6 +28,7 @@ fi
 export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 
 source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
+PYTHON_BIN="/home/mb10856/envs/mlir/bin/python3"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
@@ -50,7 +51,7 @@ if [[ "$CONFIG" != /* ]]; then
 fi
 
 if [[ ${#VERSIONS[@]} -eq 0 ]]; then
-    CONFIG_IMPL=$(python3 - <<PY
+    CONFIG_IMPL=$($PYTHON_BIN - <<PY
 import json
 try:
     with open("$CONFIG", "r") as f:
@@ -78,7 +79,7 @@ for VERSION in "${VERSIONS[@]}"; do
     echo "=========================================="
 
     # Derive EVAL_DIR: latest run_N/models that contains .pt files
-    mapfile -t EVAL_META < <(python3 - <<PY
+    mapfile -t EVAL_META < <($PYTHON_BIN - <<PY
 import json
 from utils.implementation import get_agent_subdir
 cfg = json.load(open("$CONFIG"))
@@ -89,7 +90,7 @@ PY
     RESULTS_DIR="${EVAL_META[0]}"
     AGENT_SUBDIR="${EVAL_META[1]}"
     AGENT_ROOT="$RESULTS_DIR/$AGENT_SUBDIR"
-    LATEST_MODELS=$(python3 -c "
+    LATEST_MODELS=$($PYTHON_BIN -c "
 import os
 r = '$AGENT_ROOT'
 if not os.path.isdir(r):
@@ -102,8 +103,7 @@ print(candidates[-1]) if candidates else exit(1)
     export EVAL_DIR="$LATEST_MODELS"
 
     cd "$PROJECT_ROOT"
-    export EVAL_LAST_ONLY=1
-    python scripts/eval.py
+    $PYTHON_BIN scripts/eval.py
 
     echo "Evaluation completed at $(date)"
     echo ""

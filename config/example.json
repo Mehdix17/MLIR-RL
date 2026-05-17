@@ -46,5 +46,5 @@
     "transformer_pooling": "cls",
     "transformer_use_action_history_token": false,
     "main_exec_data_file": "",
-    "results_dir": "results/new_experiment"
+    "results_dir": "results/experiment3"
 }

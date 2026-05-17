@@ -17,16 +17,16 @@
                   │
     ┌─────────────┼─────────────┬─────────────┬─────────────┐
     ▼             ▼             ▼             ▼             ▼
-┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐
-│baseline│  │  v1    │  │  v2    │  │  v3    │  │  v4    │
-│ LSTM   │  │ +HW obs│  │+shaped │  │+transf.│  │+Pad/Pk │
-│6 action│  │ 6 act  │  │ reward │  │ encoder│  │ 9 act  │
-└───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘
-    │  train    │  train    │  train    │  train    │  train
-    │  eval     │  eval     │  eval     │  eval     │  eval
-    └─────┬─────┴─────┬─────┴─────┬─────┴─────┬─────┘
-          │           │           │           │
-          ▼           ▼           ▼           ▼
+┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐
+│baseline│  │  v1    │  │  v2    │  │  v3    │  │  v4    │  │  v4.5  │
+│ LSTM   │  │ +HW obs│  │+shaped │  │+transf.│  │+Pad/Pk │  │+Robust │
+│6 action│  │ 6 act  │  │ reward │  │ encoder│  │ 9 act  │  │ Isolation
+└───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘
+    │  train    │  train    │  train    │  train    │  train    │  train
+    │  eval     │  eval     │  eval     │  eval     │  eval     │  eval
+    └─────┬─────┴─────┬─────┴─────┬─────┴─────┬─────┴─────┬─────┘
+          │           │           │           │           │
+          ▼           ▼           ▼           ▼           ▼
     ┌─────────────────────────────────────────────────┐
     │  dashboard.py        → interactive viz          │
     │  (Head-to-Head tab compares all implementations) │
@@ -37,13 +37,30 @@
 
 ## Implementation Versions
 
-| Package | Agent Dir | Key Feature | Actions | Reward | Encoder |
-|---|---|---|---|---|---|
-| `rl_autoschedular` | `old_agent` | Baseline | 6 | Sparse terminal | LSTM |
-| `rl_autoschedular_v1` | `v1_agent` | Hardware-aware observation | 6 | Sparse terminal | LSTM + HW concat |
-| `rl_autoschedular_v2` | `v2_agent` | Shaped intermediate reward | 6 | Dense shaped + sparse terminal | LSTM |
-| `rl_autoschedular_v3` | `v3_agent` | Transformer loop-nest encoder | 6 | Sparse terminal | Transformer |
-| `rl_autoschedular_v4` | `v4_agent` | Extended action space | 9 | Sparse terminal | LSTM |
+| Package | Agent Dir | Key Feature | Actions | Reward | Encoder | Reliability |
+|---|---|---|---|---|---|---|
+| `rl_autoschedular` | `old_agent` | Baseline | 6 | Sparse terminal | LSTM | In-process |
+| `rl_autoschedular_v1` | `v1_agent` | Hardware-aware observation | 6 | Sparse terminal | LSTM + HW concat | In-process |
+| `rl_autoschedular_v2` | `v2_agent` | Shaped intermediate reward | 6 | Dense shaped + sparse terminal | LSTM | In-process |
+| `rl_autoschedular_v3` | `v3_agent` | Transformer loop-nest encoder | 6 | Sparse terminal | Transformer | In-process |
+| `rl_autoschedular_v4` | `v4_agent` | Extended action space | 9 | Sparse terminal | LSTM | In-process |
+| `rl_autoschedular_v4_5`| `v4_5_agent`| Robust Integration | 9 | Success-Contingent | Transformer | Isolated Process |
+
+---
+
+## Active Experiment: experiment3
+
+All current development and V4.5 training targets **`results/experiment3`**. 
+
+Standard Config for V4.5:
+```json
+{
+  "implementation": "rl_autoschedular_v4_5",
+  "results_dir": "results/experiment3",
+  "benchmarks_folder_path": "data/all",
+  ...
+}
+```
 
 **Important:** Each version is a standalone fork. Features do NOT accumulate — v2 does not include v1's hardware, v3 does not include v2's reward, etc.
 

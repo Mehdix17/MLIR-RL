@@ -298,3 +298,38 @@ Notes/limitations:
 - `Unroll` is terminal because `convert_to_loops` destroys the structured-op tag.
 - Pack access-pattern tracking is approximate in `update_features` (loop bounds only).
 - New config fields have backward-compatible defaults; existing configs work without modification.
+
+### V4.5 - Hardened Robust Integration
+- Status: in progress
+- Date completed: 2026-05-17
+- Novelty scope: Stability, Reliability, and Safety (Success-Contingent RL)
+- Package: `rl_autoschedular_v4_5`
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+
+Key code changes:
+- `rl_autoschedular_v4_5/execution.py`:
+	- Implemented **Process Isolation** for JIT compilation and profiling using `multiprocessing.Process`.
+	- Implemented **Dynamic Timeouts** based on unoptimized execution time (10x baseline, max 300s).
+	- Implemented **mlir-cpu-runner Fallback** for failed Python binding executions.
+- `rl_autoschedular_v4_5/env.py`:
+	- Implemented **Success-Contingent Reward Negation**: zeroes out ALL intermediate shaped rewards if final code fails to run.
+- `rl_autoschedular_v4_5/actions/__init__.py`:
+	- Implemented **Stability Rails**: Masks vectorization for depth > 6 and restricts sequence complexity to 4 steps.
+- `rl_autoschedular_v4_5/ppo.py`:
+	- Implemented **Resilient Markers**: Persistent global marker directory to ensure eval/train resumption after SIGABRT.
+
+How to run:
+1. Set in config:
+	 - `"implementation": "rl_autoschedular_v4_5"`
+	 - `"results_dir": "results/experiment3"`
+2. Run pipeline:
+	 - `sbatch scripts/train_condo.sh config/v4_5.json`
+
+Validation:
+- [X] Verified 4-value return from isolated `execute_code`.
+- [X] Verified reward negation logic with synthetic failures.
+- [X] Verified stability rails mask correct actions in deep nests.
+
+Notes/limitations:
+- Focus is strictly on eliminating the 50% failure rate observed in V4.
+- Success-Contingent rewards may initially slow down learning but ensure the final policy is 100% runnable.

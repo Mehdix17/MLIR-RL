@@ -50,5 +50,5 @@
     "debug": false,
     "hardware_auto_detect": true,
     "main_exec_data_file": "",
-    "results_dir": "results/new_experiment"
+    "results_dir": "results/experiment3"
 }

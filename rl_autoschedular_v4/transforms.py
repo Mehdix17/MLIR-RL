@@ -113,6 +113,93 @@ def transform_interchange(code: str, operation_tag: str, interchange_list: list[
     return __run_transform_code(code, transform_code)
 
 
+def transform_pad(code: str, operation_tag: str, pad_multiples: list[int]):
+    """Apply the padding transformation to the specified operation in the given code.
+
+    Args:
+        code (str): The code to apply the transformation to.
+        operation_tag (str): The tag of the operation to apply the transformation to.
+        pad_multiples (list[int]): The padding multiples per dimension.
+
+    Returns:
+        str: The code after applying the transformation.
+    """
+    if all([m == 0 for m in pad_multiples]):
+        return code
+
+    transform_code = f"""
+    module attributes {{transform.with_named_sequence}} {{
+        transform.named_sequence @__transform_main(%arg1: !transform.any_op {{transform.readonly}}) {{
+            %op = transform.structured.match attributes{{tag = "{operation_tag}"}} in %arg1 : (!transform.any_op) -> !transform.any_op
+            %padded, %pad, %copy = transform.structured.pad %op pad_to_multiple_of {str(pad_multiples)} : (!transform.any_op) -> (!transform.any_op, !transform.any_op, !transform.any_op)
+            %padded_tag = transform.param.constant "{operation_tag}" -> !transform.any_param
+            transform.annotate %padded "tag" = %padded_tag : !transform.any_op, !transform.any_param
+            transform.yield
+        }}
+    }}"""
+
+    return __run_transform_code(code, transform_code)
+
+
+def transform_pack(code: str, operation_tag: str, packed_sizes: list[int]):
+    """Apply the packing transformation to the specified operation in the given code.
+
+    Args:
+        code (str): The code to apply the transformation to.
+        operation_tag (str): The tag of the operation to apply the transformation to.
+        packed_sizes (list[int]): The packing sizes per dimension.
+
+    Returns:
+        str: The code after applying the transformation.
+    """
+    if all([s == 0 for s in packed_sizes]):
+        return code
+
+    transform_code = f"""
+    module attributes {{transform.with_named_sequence}} {{
+        transform.named_sequence @__transform_main(%arg1: !transform.any_op {{transform.readonly}}) {{
+            %op = transform.structured.match attributes{{tag = "{operation_tag}"}} in %arg1 : (!transform.any_op) -> !transform.any_op
+            %packed = transform.structured.pack %op packed_sizes = {str(packed_sizes)} : (!transform.any_op) -> !transform.any_op
+            %packed_tag = transform.param.constant "{operation_tag}" -> !transform.any_param
+            transform.annotate %packed "tag" = %packed_tag : !transform.any_op, !transform.any_param
+            transform.yield
+        }}
+    }}"""
+
+    return __run_transform_code(code, transform_code)
+
+
+def transform_unroll(code: str, operation_tag: str, tile_sizes: list[int], factor: int):
+    """Apply the unroll transformation to the specified operation in the given code.
+
+    Args:
+        code (str): The code to apply the transformation to.
+        operation_tag (str): The tag of the operation to apply the transformation to.
+        tile_sizes (list[int]): The tile sizes to apply before unrolling.
+        factor (int): The unroll factor.
+
+    Returns:
+        str: The code after applying the transformation.
+    """
+    n_loops = sum([s != 0 for s in tile_sizes])
+    r = ', '.join(['!transform.any_op'] * n_loops)
+
+    transform_code = f"""
+    module attributes {{transform.with_named_sequence}} {{
+        transform.named_sequence @__transform_main(%arg1: !transform.any_op {{transform.readonly}}) {{
+            %op = transform.structured.match attributes{{tag = "{operation_tag}"}} in %arg1 : (!transform.any_op) -> !transform.any_op
+            %tiled, %loops:{n_loops} = transform.structured.tile_using_for %op tile_sizes {str(tile_sizes)} : (!transform.any_op) -> (!transform.any_op, {r})
+            
+            // Unroll each loop handle in reverse order (innermost first)
+            {" ".join([f"transform.loop.unroll %loops:{i} {{ factor = {factor} }} : !transform.any_op" for i in reversed(range(n_loops))])}
+            
+            transform.yield
+        }}
+    }}"""
+
+    return __run_transform_code(code, transform_code)
+
+
 def transform_vectorize_img2col(code: str, operation_tag: str):
     """Apply the vectorization transformation with img2col to the specified operation in the given code.
 
@@ -455,32 +542,12 @@ def transform_pre_vec(code: str, operation_tag: str):
 
 
 def __run_transform_code(code: str, transform_code: str):
-    import multiprocessing
+    def transform_bind_call():
+        with Context():
+            module = Module.parse(code)
+            t_module = Module.parse(transform_code)
+        interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
 
-    def worker(code_str, transform_str, result_dict):
-        try:
-            with Context():
-                module = Module.parse(code_str)
-                t_module = Module.parse(transform_str)
-                interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
-                result_dict['code'] = str(module)
-                result_dict['success'] = True
-        except Exception as e:
-            result_dict['success'] = False
-            result_dict['error'] = str(e)
+        return str(module)
 
-    manager = multiprocessing.Manager()
-    result_dict = manager.dict()
-    process = multiprocessing.Process(target=worker, args=(code, transform_code, result_dict))
-    process.start()
-    process.join(timeout=30)
-
-    if process.is_alive():
-        process.terminate()
-        process.join()
-        raise RuntimeError("Transformation timed out or crashed (isolated)")
-
-    if result_dict.get('success'):
-        return result_dict['code']
-    else:
-        raise RuntimeError(f"Transformation failed: {result_dict.get('error', 'unknown error')}")
+    return BindingsProcess.call(transform_bind_call)

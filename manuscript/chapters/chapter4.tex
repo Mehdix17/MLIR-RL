@@ -57,23 +57,65 @@ In contrast to prior work that manually extracted models or utilized completely 
 We imposed a structural limit of a maximum sequence length of 5 operations per benchmark to balance complexity with training feasibility. Furthermore, the pipeline extracts these operations using a sliding spatial shift window of 2. This shifting mechanism ensures an overlapping, dense coverage of the neural network graph, providing the reinforcement learning agent with rich, continuous chains of dependencies.
 
 \subsection{Dataset Composition}
-The ultimate dataset combines the legacy files used in the baseline environment with the vast array of newly generated, real-world neural network blocks. Table~\ref{tab:dataset_distribution} summarizes the types of operations and their total occurrences.
+ The ultimate dataset combines the legacy files used in the baseline environment with the vast array of newly generated, real-world neural network blocks. Table~\ref{tab:dataset_distribution} provides a detailed breakdown of the dataset composition, grouped by model family and architecture.
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|}
-        \hline
-        \textbf{Program Type / Origin} & \textbf{Number of Occurrences} \\
-        \hline
-        Legacy Single Operations & 298 \\
-        Legacy Synthesized Programs & 7401 \\
-        Extracted Neural Network Blocks (Ours) & 10040 \\
-        \hline
-        \textbf{Total} & \textbf{17739} \\
-        \hline
-    \end{tabular}
-    \caption{Summary of dataset file types and their occurrences.}
+    \caption{Distribution of benchmarks grouped by model family.}
     \label{tab:dataset_distribution}
+    \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{5.5cm} r}
+        \toprule
+        \textbf{Family} & \textbf{Models} & \textbf{Count} \\
+        \midrule
+        \multirow{6}{*}[-4pt]{BERT (encoder-only)} & BERT & 1{,}142 \\
+        & ALBERT & 1{,}329 \\
+        & RoBERTa & 43 \\
+        & DistilBERT & 591 \\
+        & DeBERTa & 1{,}200 \\
+        & ELECTRA & 34 \\
+        \hline
+        \textbf{BERT total} & & \textbf{4{,}339} \\
+        \hline
+        \multirow{2}{*}[-2pt]{Decoder-only} & GPT-2 & 548 \\
+        & BART & 602 \\
+        \hline
+        \textbf{Decoder-only total} & & \textbf{1{,}150} \\
+        \hline
+        Encoder-decoder & T5 & 515 \\
+        \hline
+        Vision Transformer & ViT-B/16 & 897 \\
+        \hline
+        \multirow{8}{*}[-4pt]{Convolutional (CNN)} & ResNet-50 & 505 \\
+        & ResNet-18 & 63 \\
+        & ResNeXt-50 & 455 \\
+        & MobileNetV3-Small & 548 \\
+        & EfficientNet-B0 & 747 \\
+        & ConvNeXt-Tiny & 477 \\
+        & DenseNet-121 & 227 \\
+        & VGG-11 & 33 \\
+        \hline
+        \textbf{CNN total} & & \textbf{3{,}055} \\
+        \hline
+        \multirow{4}{*}[-2pt]{Graph Neural Networks} & GAT & 31 \\
+        & GCN & 14 \\
+        & GIN & 11 \\
+        & GraphSAGE & 7 \\
+        \hline
+        \textbf{GNN total} & & \textbf{63} \\
+        \hline
+        \multirow{2}{*}[-2pt]{Recurrent (RNN)} & GRU & 12 \\
+        & BiLSTM & 9 \\
+        \hline
+        \textbf{RNN total} & & \textbf{21} \\
+        \hline
+        \multirow{2}{*}[-2pt]{Synthesized / legacy} & Synthesized programs & 7{,}401 \\
+        & Single operations & 298 \\
+        \hline
+        \textbf{Legacy total} & & \textbf{7{,}699} \\
+        \hline
+        \textbf{Grand total} & & \textbf{17{,}739} \\
+    \bottomrule
+    \end{tabularx}
 \end{table}
 
 \subsection{Parallelized Evaluation Pipeline}
@@ -154,5 +196,60 @@ Combining these modules yields potent synergistic properties. The highly express
     \label{fig:combined_architecture}
 \end{figure} 
 
+\section{Implementation}
+\label{sec:implementation}
+
+This section describes the technical tools, software frameworks, and computing resources that underpin the development, training, and evaluation of our reinforcement learning agent.
+
+\subsection{Tools and Frameworks}
+
+The implementation of our system relies on a stack of open-source tools and libraries that span deep learning, compiler infrastructure, experiment tracking, and job orchestration. \\ 
+
+\textbf{Python} \\ 
+Python is the primary implementation language of our framework. Its extensive ecosystem of scientific computing and machine learning libraries, combined with its accessibility and rapid prototyping capabilities, makes it well suited for reinforcement learning research. All agent logic, environment interaction, training loops, and evaluation pipelines are implemented in Python~3.11. \\ 
+
+\textbf{PyTorch} \\
+PyTorch~\cite{paszke2019pytorch} is the deep learning framework used to construct and train all neural network components of our system, including the policy and value networks of the \gls{ppo} agent and the \gls{lstm} and Transformer encoders. PyTorch provides dynamic computation graphs, automatic differentiation via its autograd engine, and GPU acceleration. In our work, all training and inference runs on CPU nodes, as the primary computational bottleneck is the compilation and execution of \gls{mlir} code rather than neural network forward and backward passes. \\ 
+
+\textbf{MLIR} \\
+The \gls{mlir} compiler infrastructure~\cite{lattner2021mlir} is the foundation on which our optimization environment operates. The \gls{mlir} framework provides the Linalg dialect for representing structured linear algebra operations, the transform dialect for encoding transformation schedules, and the progressive lowering pipeline that translates high-level operations into executable machine code. The \gls{mlir} tree used in this work is built from source at the \texttt{release/19.x} branch, enabling direct access to the latest compiler passes and Python bindings. \\ 
+
+\textbf{ONNX} \\
+The Open Neural Network Exchange (ONNX)\footnote{\url{https://onnx.ai}} is an open format for representing machine learning models. We use ONNX as one of the routing mechanisms in our dataset generation pipeline (Section~4.2) to export neural network architectures from PyTorch into a standardized graph representation before lowering them to \gls{mlir}. The ONNX intermediate representation preserves the computational graph structure and operator semantics, enabling systematic extraction of operation sub-graphs across diverse model families. \\ 
+
+\textbf{Streamlit} \\
+Streamlit\footnote{\url{https://streamlit.io}} is an open-source Python framework for building interactive data applications. We developed a custom evaluation dashboard using Streamlit that visualizes the performance of our \gls{rl} agents against multiple baselines. The dashboard loads evaluation results from the standard results directory structure, parses benchmark metadata (model family, operation type, batch size), and renders interactive charts using Plotly. Key views include execution time comparisons across implementations and PyTorch baselines (eager, compile, and \gls{jit} modes), cumulative speedup distribution curves, per-model-family speedup heatmaps, training convergence plots, transformation schedule inspection, head-to-head statistical comparisons with standard deviation error bars, and correlation analysis. The dashboard supports filtering by benchmark category, model family, operation type, and batch size, enabling rapid qualitative assessment across the four agent versions and the baseline. Results can be exported in CSV and JSON formats for further analysis. \\ 
+
+\textbf{SLURM} \\
+The Simple Linux Utility for Resource Management (SLURM)~\cite{yoo2003slurm} is the workload manager that orchestrates job submission, scheduling, and execution on the computing cluster. Training and evaluation jobs are submitted as SLURM batch scripts that handle environment activation (Conda environment, \texttt{.env} variable sourcing), dataset splitting, model checkpointing, and log management. SLURM array jobs enable parallel execution of multiple implementation versions within a single submission. \\ 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=1.5cm]{ressources/chapter4/logos/python_logo.png}\hspace{0.6cm}
+    \includegraphics[height=1.5cm]{ressources/chapter4/logos/Pytorch_logo.png}\hspace{0.6cm}
+    \includegraphics[height=1.5cm]{ressources/chapter4/logos/MLIR_logo.png}\hspace{0.6cm}
+    \includegraphics[height=1.5cm]{ressources/chapter4/logos/ONNX_logo.png}\hspace{0.6cm}
+    \includegraphics[height=1.5cm]{ressources/chapter4/logos/streamlit_logo.png}\hspace{0.6cm}
+    \includegraphics[height=1.5cm]{ressources/chapter4/logos/slurm_logo.png}
+    \caption{Logos of the main tools and frameworks used in the implementation (from left to right: Python, PyTorch, MLIR, ONNX, Streamlit, SLURM).}
+    \label{fig:tools-logos}
+\end{figure}
+
+\subsection{MLIR Python Bindings}
+
+A critical component of our implementation is the bridge between Python and the \gls{mlir} C++ compiler infrastructure. The \gls{mlir} project provides comprehensive Python bindings~\cite{lattner2021mlir} that expose the full \gls{mlir} API to Python code. These bindings are generated from the C++ API using a combination of SWIG and pybind11-style wrappers, and they ship as part of the in-tree \gls{mlir} build.
+
+In our workflow, the Python bindings serve three essential functions. First, they enable the construction and manipulation of \gls{mlir} modules from Python: the agent loads benchmark programs as \gls{mlir} text, parses them into in-memory \gls{mlir} modules, and progressively applies transformations using the transform dialect interpreter. Second, they provide the execution engine: the \texttt{mlir.execution\_engine} module \gls{jit}-compiles the lowered \gls{llvm} dialect code to native machine code and exposes a callable function that operates on input and output memory buffers. Third, they expose the C++ diagnostic infrastructure, allowing Python code to catch and handle compilation errors gracefully---an essential capability given that the agent may attempt transformation sequences that are semantically invalid or crash during lowering.
+
+The bindings are accessed by setting \texttt{PYTHONPATH} to the build directory of the compiled \gls{mlir} tree. This path, along with the \texttt{LD\_LIBRARY\_PATH} to the Conda environment and a GCC-14 \texttt{libstdc++} required by the cluster, is configured through a \texttt{.env} file sourced before any script runs.
+
+\subsection{Computing Infrastructure}
+
+All experiments in this work were conducted on the Jubail High-Performance Computing (HPC) cluster at New York University Abu Dhabi (NYUAD). Jubail is a medium-scale Linux-based HPC system launched in March 2022 and hosted at the NYUAD Data Center. The cluster comprises 269 CPU nodes totaling approximately 33,984 CPU cores, interconnected via a high-speed InfiniBand network.
+
+Each CPU node is equipped with two AMD EPYC 7742 processors (64 cores each, 2.25 GHz base clock), providing 128 physical cores and 512 GB of RAM per node. The EPYC 7742 features a 256 KB L1 cache per core, 512 KB L2 cache per core, and a shared 256 MB L3 cache per socket. All training and evaluation in our work was performed on individual CPU nodes allocated exclusively to each job, ensuring no interference from co-located workloads on execution time measurements.
+
+Jobs are submitted to the cluster via the SLURM workload manager. The Conda environment located at \texttt{\textasciitilde/envs/mlir} provides Python~3.11 and all required dependencies, including PyTorch, NumPy, Plotly, and Streamlit. The \texttt{.env} file configures the paths to the \gls{mlir} build artifacts, shared libraries, and external C++ tools (AST dumper, vectorizer) used during dataset generation and baseline extraction.
+
 \section{Conclusion}
-The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a profoundly robust optimization foundation. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups—and detailing the rigorous evaluation protocols applied to benchmarking their true utility—is the primary focus of the succeeding chapter, \textit{Experiments and Results}.
+The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a robust optimization foundation. We also described the implementation details---the tools and frameworks (PyTorch, \gls{mlir}, Streamlit, SLURM), the \gls{mlir} Python bindings that bridge high-level agent logic with low-level compilation,the Jubail HPC computing infrastructures---that make the system practical at scale. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups---and detailing the rigorous evaluation protocols applied to benchmarking their true utility---is the primary focus of the succeeding chapter, \textit{Experiments and Results}.

@@ -90,7 +90,8 @@ The following list describes every required setting in a configuration file.
 - `logging (bool)`: Flag to enable logging to neptune.
 
 Additional fields for versioned agents:
-- `implementation (str)`: Autoscheduler package to run (for example `rl_autoschedular`, `rl_autoschedular_v1`, `rl_autoschedular_v2`).
+- `implementation (str)`: Autoscheduler package to run (for example `rl_autoschedular`, `rl_autoschedular_v1`, `rl_autoschedular_v2`, `rl_autoschedular_v4_5`).
+- `results_dir (str)`: Root directory for all experiment outputs (e.g., `results/experiment3`).
 - `hardware_auto_detect (bool)`: If true, hardware features are auto-detected from the current machine (recommended for single-HPC training/eval).
 - `hardware_l1_kb`, `hardware_l2_kb`, `hardware_l3_kb`, `hardware_physical_cores`, `hardware_logical_cores`, `hardware_simd_width`, `hardware_clock_mhz`: Optional manual overrides for advanced cross-hardware experiments. For single-machine runs, leave these unset to avoid host/override mismatch.
 - `reward_shaping_enabled (bool)`: Enables dense intermediate reward shaping for shaped-reward agents.
@@ -163,6 +164,19 @@ Verify the fix with:
 
 ```sh
 python -c "from mlir.ir import Context; print('OK')"
+```
+
+### Problem 4: V4 Reliability and "experiment3" Transition
+
+V4 (Integrated) initially suffered from high failure rates due to aggressive incentives. **V4.5 (Robust Integration)** fixes this with:
+- **Process Isolation:** Mandatory subprocess execution for transforms and execution.
+- **Success-Contingent Rewards:** Negating shaped rewards on final failure.
+- **experiment3:** Standardized results directory to avoid mixing legacy artifacts.
+
+Verify V4.5 functionality:
+```bash
+export CONFIG_FILE_PATH=config/v4_5.json
+python -c "from rl_autoschedular_v4_5.execution import execute_code; print('V4.5 Load OK')"
 ```
 
 ### Generating base execution times

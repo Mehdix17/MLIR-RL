@@ -83,7 +83,7 @@ class Execution(metaclass=Singleton):
         self.exec_data_file = exec_data_file
         self.main_exec_data = main_exec_data
 
-    def execute_code(self, code: str, bench_name: str, seq: list[list['Action']]) -> tuple[int, bool, bool, Optional[str]]:
+    def execute_code(self, code: str, bench_name: str, seq: list[list['Action']]) -> tuple[int, bool, bool]:
         """Evaluates the given MLIR code with a timeout.
 
         Args:
@@ -91,16 +91,16 @@ class Execution(metaclass=Singleton):
             tmp_exec_data_file (str): The path to the temporary execution data file.
 
         Returns:
-            tuple[int,bool,bool,Optional[str]]: (execution time in nanoseconds, assertion result, cache miss flag, error message)
+            tuple[int,bool,bool]: (execution time in nanoseconds, assertion result, cache miss flag)
         """
         code_cache_key = self.get_code_cache_key(seq)
         cache_exec_time = self.__check_execution_cache(bench_name, code_cache_key)
         if cache_exec_time is not None:
-            return cache_exec_time, True, False, None
+            return cache_exec_time, True, False
 
         bufferized_code = transform_bufferize_and_lower_v(code)
-        real_exec_time, success, error_msg = self.__execute_bufferized_code(bufferized_code)
-        return real_exec_time, success, True, error_msg
+        real_exec_time, success = self.__execute_bufferized_code(bufferized_code)
+        return real_exec_time, success, True
 
     def update_execution_cache(self, new_data: dict[str, dict[str, int]]):
         """Update the temp execution cache with the new data.
@@ -140,7 +140,7 @@ class Execution(metaclass=Singleton):
 
         return '|'.join(ops_codes)
 
-    def __execute_bufferized_code(self, code: str) -> tuple[int, bool, Optional[str]]:
+    def __execute_bufferized_code(self, code: str) -> tuple[int, bool]:
         """Lowers and runs the given MLIR code using Python bindings, then returns the execution time and assertion
         result (if the executed code returns the correct result).
 
@@ -150,12 +150,9 @@ class Execution(metaclass=Singleton):
         Returns:
             Optional[float]: the execution time in seconds.
             bool: the assertion result.
-            Optional[str]: error message if failed.
         """
 
-        import multiprocessing
-        
-        def worker(code_str, result_dict):
+        def execute_bind_call():
             pass_pipeline = """builtin.module(
                 canonicalize,
                 buffer-deallocation-pipeline,
@@ -185,47 +182,33 @@ class Execution(metaclass=Singleton):
 
             try:
                 with Context():
-                    module = Module.parse(code_str)
+                    module = Module.parse(code)
                     pm = PassManager.parse(pass_pipeline)
 
-                    inputs, outs_struct = self.__create_params(module)
-                    args = self.__convert_to_args(inputs, outs_struct)
+                inputs, outs_struct = self.__create_params(module)
+                args = self.__convert_to_args(inputs, outs_struct)
 
-                    pm.run(module.operation)
-                    execution_engine = ExecutionEngine(
-                        module,
-                        opt_level=3,
-                        shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
-                    )
+                pm.run(module.operation)
+                execution_engine = ExecutionEngine(
+                    module,
+                    opt_level=3,
+                    shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
+                )
 
-                    try:
-                        for _ in range(2):
-                            execution_engine.invoke("main", *args)
-                            outs_struct.free_outputs()
-                    finally:
+                try:
+                    for _ in range(2):
+                        execution_engine.invoke("main", *args)
                         outs_struct.free_outputs()
+                finally:
+                    outs_struct.free_outputs()
 
-                    result_dict['delta'] = outs_struct.delta
-                    result_dict['success'] = True
-            except Exception as e:
-                result_dict['success'] = False
-                result_dict['error'] = str(e)
+                return outs_struct.delta, True
+            except StopIteration:
+                raise Exception("No main function found in MLIR module")
+            except AssertionError as e:
+                raise Exception(f"Type assertion failed: {e}")
 
-        manager = multiprocessing.Manager()
-        result_dict = manager.dict()
-        process = multiprocessing.Process(target=worker, args=(code, result_dict))
-        process.start()
-        process.join(timeout=30)  # Per-benchmark timeout
-
-        if process.is_alive():
-            process.terminate()
-            process.join()
-            return -1, False, "Execution timed out (isolated)"
-        
-        if result_dict.get('success'):
-            return result_dict['delta'], True, None
-        
-        return -1, False, result_dict.get('error', 'Unknown execution error')
+        return BindingsProcess.call(execute_bind_call)
 
     def __check_execution_cache(self, bench_name: str, cache_key: str) -> Optional[int]:
         """Check the execution cache for the given operation state.

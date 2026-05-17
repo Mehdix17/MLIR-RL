@@ -20,14 +20,20 @@ The project uses a versioned package structure. Each `vN` is a standalone copy:
 - `rl_autoschedular_v1`: Hardware-aware observation.
 - `rl_autoschedular_v2`: Shaped reward.
 - `rl_autoschedular_v3`: Transformer loop-nest encoder.
-- `rl_autoschedular_v4+`: Future novelties.
+- `rl_autoschedular_v4`: Integrated V1+V2+V3.
+- `rl_autoschedular_v4_5`: **Robust Integration** (V4 + Process Isolation + Success-Contingent Rewards + Stability Rails).
 
 **Import Rule:** Do NOT mix imports between packages (e.g., `v3` must only import from `v3`).
 
-## Eval & Crash Resilience
-- MLIR crashes (`SIGABRT`) are caught by a signal handler in `scripts/eval.py`.
-- Eval results are saved incrementally in `markers/` files.
-- To resume a crashed eval, just restart it; it will skip already evaluated benchmarks.
+## Reliability & Safety (V4.5 Standard)
+- **Process Isolation:** All MLIR transformations and executions run in isolated `multiprocessing.Process` workers to prevent native SIGABRT crashes from killing the main loop.
+- **Dynamic Timeouts:** Execution timeouts are now profiling-based (e.g., `10x` unoptimized time) to allow complex kernels to finish while killing infinite loops.
+- **Multi-Engine Fallback:** If Python bindings fail, the engine automatically retries using the standalone `mlir-cpu-runner`.
+- **Success-Contingent Rewards:** Intermediate shaped rewards are zeroed out if the final optimization fails to run, enforcing a "Safety-First" policy.
+
+## Results & Experimentation
+- **Active Results Directory:** `results/experiment3` (standardized across all configs).
+- **Crash Resilience:** Iteration-level results are saved in `results/<exp>/global_markers/` for seamless resumption.
 
 ## LLVM/MLIR Bindings
 - Python bindings are in `llvm-project/build/tools/mlir/python_packages/mlir_core`.

@@ -58,10 +58,20 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with "Permission denied" on br
 | `rl_autoschedular_v1`  | Hardware-aware observation           |
 | `rl_autoschedular_v2`  | Shaped reward                        |
 | `rl_autoschedular_v3`  | Transformer loop-nest encoder        |
-| `rl_autoschedular_v4`+ | combination of V1 + V2 + V3          |
+| `rl_autoschedular_v4`  | Integrated V1 + V2 + V3              |
+| `rl_autoschedular_v4_5`| **Robust Integrated** (Integration + Hardened Reliability) |
 | `rl_autoschedular_v5`+ | Future novelties (one per version)   |
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
+
+## Safety & Hardened Reliability (V4.5+)
+
+Starting with V4.5, the system includes proactive safeguards against MLIR instability:
+
+1. **Process Isolation:** All JIT transformations and execution profiling run in independent subprocesses. If a transformation sequence causes a native crash (e.g., LLVM assertion failure), the worker process dies, but the main RL training/evaluation loop remains unaffected.
+2. **Success-Contingent Rewards:** To prevent the agent from learning "risky" behavior (e.g., aggressive tiling that causes timeouts), shaped rewards are only granted if the final code executes successfully. If it fails, all intermediate rewards are zeroed, and a total failure penalty is applied.
+3. **Stability Rails:** The action space now masks out transformations that are statistically correlated with instability, such as vectorizing deeply nested loops (>6) or exceeding a transformation complexity threshold (>4 steps).
+4. **Resilient Markers:** Progress is saved incrementally in `results/experiment3/global_markers/`. If a job is interrupted, it will automatically resume from the last completed benchmark.
 
 ## Documentation References
 

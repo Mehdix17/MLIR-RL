@@ -73,7 +73,8 @@ def _implementation_token(implementation: str) -> str:
     # Canonical names for versioned agents:
     #   rl_autoschedular_v1 -> v1
     #   rl_autoschedular_v2 -> v2
-    version_match = re.fullmatch(r"rl_autoschedular_v(\d+)", implementation)
+    #   rl_autoschedular_v2_5 -> v2_5
+    version_match = re.fullmatch(r"rl_autoschedular_v([\d_]+)", implementation)
     if version_match:
         return f"v{version_match.group(1)}"
 

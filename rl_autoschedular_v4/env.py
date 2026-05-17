@@ -35,16 +35,6 @@ class Env:
 
         return self.__init_op_state(-1)
 
-        # If benchmark has no AST-parsed operations, skip it
-        if state is None:
-            bench_idx = (bench_idx if bench_idx is not None else 0) + 1
-            if bench_idx >= len(benchs):
-                bench_idx = 0
-            self.bench_idx = bench_idx
-            self.benchmark_data = benchs[bench_idx].copy()
-            return self.__init_op_state(-1)
-        return state
-
     def step(self, state: OperationState, action: Action) -> OperationState:
         """Take a step in the environment.
 
@@ -111,9 +101,9 @@ class Env:
 
         # Evaluate the code (since the operation is done)
         try:
-            new_exec_time, exec_succeeded, cache_miss, error_msg = Execution().execute_code(transformed_code, self.benchmark_data.bench_name, seq)
+            new_exec_time, exec_succeeded, cache_miss = Execution().execute_code(transformed_code, self.benchmark_data.bench_name, seq)
             if not exec_succeeded:
-                raise Exception(error_msg or "Unknown execution failure")
+                raise Exception("Incorrect results")
         except Exception as e:
             seq_str = '\n'.join([str(list(map(str, op_seq))) for op_seq in seq])
             print_error(
@@ -149,8 +139,6 @@ class Env:
             OperationState: The new operation state.
             torch.Tensor: The observation vector of the new operation state.
         """
-        if not self.benchmark_data.operation_tags:
-            return None
         operation_tag = self.benchmark_data.operation_tags[operation_idx]
         operation_features = self.benchmark_data.operations[operation_tag].copy()
 
@@ -281,14 +269,9 @@ class Env:
         rewards: list[float] = []
         transformed_code = self.benchmark_data.code
         for op_seq in reversed(seq):
-            op_seq_already_failed = False
             for action in op_seq:
                 # We need to assign the same reward to all sub actions
                 rewards_count = len(action.sub_actions) + 1
-
-                if op_seq_already_failed:
-                    rewards.extend([0.0] * rewards_count)
-                    continue
 
                 # Attempt to apply the transformation to the code
                 # - If the transformation fails: punish the agent, reset the code, and mark the operation as done
@@ -304,8 +287,7 @@ class Env:
                         f"Transformations:\n{seq_str}"
                     )
                     rewards.extend([self.__action_reward(False)] * rewards_count)
-                    op_seq_already_failed = True
-                    continue
+                    return transformed_code, rewards
 
                 # Update transformed code
                 transformed_code = new_transformed_code
