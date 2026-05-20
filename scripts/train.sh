@@ -61,6 +61,11 @@ IMPLEMENTATION="${2:-${CONFIG_IMPL:-${AUTOSCHEDULER_IMPL:-rl_autoschedular}}}"
 export AUTOSCHEDULER_IMPL="$IMPLEMENTATION"
 export CONFIG_FILE_PATH="$CONFIG"
 
+# Optional run ID for resumption
+if [[ -n "${3:-}" ]]; then
+    export FORCE_RUN_ID="$3"
+fi
+
 cd "$PROJECT_ROOT"
 
 echo "=========================================="

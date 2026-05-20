@@ -185,6 +185,92 @@ bash scripts/pipeline.sh config/baseline.json
 bash scripts/pipeline.sh config/baseline.json "rl_autoschedular_v1,rl_autoschedular_v3"
 ```
 
+### Benchmark Format Requirements
+
+The RL agent works on **extracted operation blocks**, NOT full model `.mlir` files. Every `.mlir` file in `benchmarks_folder_path` must have:
+
+- **`{tag = "operation_NNN"}`** annotations on each linalg op — required by the AST dumper for feature extraction
+- **`@nanoTime()` timing calls** — measures block execution time
+- **Weights passed as function arguments** (not inlined constants) — keeps files small and self-contained
+- **A `func.func @main`** entry point returning `(output_tensor, i64)` (tensor + execution delta)
+
+Example block-ready format (`data/all/albert_block_301.mlir`, 29 lines):
+```
+func.func @main(%arg_0_in_0: tensor<...>, ..., %arg_0_out_0: tensor<...>, ...) -> (tensor<...>, i64) {
+  %t0 = call @nanoTime() : () -> i64
+  %v0 = linalg.batch_matmul {tag = "operation_211"} ins(...) outs(...) -> ...
+  %v1 = linalg.generic {tag = "operation_212"} ... -> ...
+  %t1 = call @nanoTime() : () -> i64
+  %delta = arith.subi %t1, %t0 : i64
+  return %v4, %delta : tensor<...>, i64
+}
+```
+
+**Full model `.mlir` files are NOT directly usable** — including those in `data/nn/raw_bench/` (e.g. `albert_linalg.mlir`, `resnet18_torch.mlir`). These lack operation tags, timing wrappers, and contain thousands of lines with inlined weight constants. They must be processed into blocks first (see below).
+
+The `json_file` and `eval_json_file` config fields map benchmark **names** to baseline execution times (ns). Each name must match a `.mlir` file in `benchmarks_folder_path` (e.g. `"albert_block_0": 12345` → loads `benchmarks_folder_path/albert_block_0.mlir`).
+
+### Data Pipeline: Raw Model → RL-Ready Blocks
+
+To convert full model `.mlir` files into block-level benchmarks:
+
+**Step 1 — Extract blocks from a linalg model file:**
+```bash
+# From data/nn/raw_bench/ (linalg dialect, already lowered)
+python data_utils/extract_blocks.py \
+    --input data/nn/raw_bench/albert_linalg.mlir \
+    --output-dir data/nn/extracted_blocks/albert/
+
+# Batch-process all linalg models
+for f in data/nn/raw_bench/*_linalg.mlir; do
+  python data_utils/extract_blocks.py --input "$f" --output-dir data/nn/extracted_blocks/
+done
+```
+
+`extract_blocks.py` uses the AST dumper to build an operation graph, then windows consumer→producer paths into fixed-size blocks (default: 5 ops, stride 3). Output: `{model}_block_{i}.mlir` files ready for RL.
+
+Alternative: `extract_ops.py` extracts single operations (one op per file) instead of multi-op sequences.
+
+**Step 2 — Get baseline execution times for the new blocks:**
+```bash
+python scripts/get_base.py \
+    --config config/v1.json \
+    --benchmarks-dir data/nn/extracted_blocks/ \
+    --output results/experiment3/exec_times/custom_base.json
+```
+
+**Step 3 — Split into train/eval (or use 100% for eval-only):**
+```bash
+python scripts/split_json.py \
+    --input results/experiment3/exec_times/custom_base.json \
+    --eval-ratio 1.0   # all → eval for inference-only use
+```
+
+**Step 4 — Update config to point at the new data:**
+```json
+{
+  "benchmarks_folder_path": "data/nn/extracted_blocks",
+  "eval_json_file": "results/experiment3/exec_times/custom_base_eval.json"
+}
+```
+
+Alternatively, to benchmark a full model end-to-end (no RL scheduling), use `wrap_mlir.py` to add a timed `@main` wrapper, then run the resulting `.mlir` through the `Execution` class directly. There is no built-in script for full-model RL evaluation since the agent schedules per-operation-block.
+
+### Evaluating a Trained Model on New Benchmarks
+
+To evaluate an already-trained agent on blocks extracted from a different model set:
+
+1. Extract blocks and get base times (steps 1-3 above)
+2. Point `eval_json_file` in config to the new eval JSON, or set the file explicitly:
+   ```bash
+   export AUTOSCHEDULER_IMPL=rl_autoschedular_v1
+   export CONFIG_FILE_PATH=config/v1.json
+   export EVAL_DIR=results/experiment3/v1_agent/run_0/models
+   ```
+   Then run `python scripts/eval.py`. The eval script loads `Benchmarks(is_training=False)`, which uses `eval_json_file` from the config. If the config's `eval_json_file` is empty, it auto-derives from `results_dir` + implementation. Override by setting it in the config or by passing a custom data path.
+
+3. If you only want the final checkpoint's results: `EVAL_LAST_ONLY=1 python scripts/eval.py`
+
 ## Results Directory Layout
 
 ```
@@ -291,11 +377,11 @@ The user's Slurm interactive session (`squeue` shows as "interactive") is the se
 
 ## C++ Tools
 
-- `tools/ast_dumper/` — CMake project; build artifacts in `tools/ast_dumper/build/`
-- `tools/vectorizer/` — CMake project; build artifacts in `tools/vectorizer/build/`
-- `tools/pre_vec/` — Pre-vectorizer (no build dir checked in)
+- `tools/ast_dumper/` — **Critical bridge**: parses `.mlir` files into structured text consumed by `state.py`. Without it, the RL agent cannot extract features from MLIR. Build artifacts in `tools/ast_dumper/build/`. Env var: `AST_DUMPER_BIN_PATH`.
+- `tools/vectorizer/` — Auto-vectorization analysis tool. Env var: `VECTORIZER_BIN_PATH`.
+- `tools/pre_vec/` — Pre-vectorizer analysis (no build dir checked in).
 
-Referenced by env vars in `.env`.
+Referenced by env vars in `.env`. These C++ tools are called as subprocesses from Python (not linked as libraries).
 
 ## Testing & Validation
 
