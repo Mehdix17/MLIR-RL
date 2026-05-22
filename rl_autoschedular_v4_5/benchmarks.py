@@ -68,6 +68,9 @@ class Benchmarks:
                 except Exception as e:
                     print(f"Warning: Could not extract features from transformed code for {bench_name}: {e}")
                     pass
+            if not benchmark_data.operation_tags:
+                print(f"Warning: No operations found for {bench_name}, skipping")
+                continue
             self.data.append(benchmark_data)
 
     def __len__(self):

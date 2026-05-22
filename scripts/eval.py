@@ -109,20 +109,49 @@ eval_files = [f for f in os.listdir(eval_dir) if f.endswith('.pt')]
 # Order files
 eval_files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 
-# Filter to every 50th checkpoint, always include the last (most trained) model
+# Filter and sort checkpoints
 import re
 EVAL_LAST_ONLY = os.getenv("EVAL_LAST_ONLY", "").strip().lower() in ("1", "true", "yes")
-EVAL_STRIDE = 50
-filtered = [f for f in eval_files if int(re.search(r'model_(\d+)\.pt', f).group(1)) % EVAL_STRIDE == 0]
-if eval_files and eval_files[-1] not in filtered:
-    filtered.append(eval_files[-1])
-    filtered.sort(key=lambda x: int(re.search(r'model_(\d+)\.pt', x).group(1)))
+EVAL_STRIDE = 100
+EVAL_START = int(os.getenv("EVAL_START", "0"))
+EVAL_END = int(os.getenv("EVAL_END", "999999"))
+
+def get_model_step(f):
+    match = re.search(r'model_(\d+)\.pt', f)
+    return int(match.group(1)) if match else -1
+
+# 1. Get all valid models with their steps
+all_models = []
+for f in os.listdir(eval_dir):
+    if f.endswith('.pt'):
+        step = get_model_step(f)
+        if step >= 0:
+            all_models.append((f, step))
+
+# 2. Sort by step
+all_models.sort(key=lambda x: x[1])
+
+# 3. Apply range and stride
+filtered = [
+    f for f, step in all_models 
+    if EVAL_START <= step <= EVAL_END and step % EVAL_STRIDE == 0
+]
+
+# 4. Always include the absolute last model if within range
+if all_models:
+    last_f, last_step = all_models[-1]
+    if EVAL_START <= last_step <= EVAL_END and last_f not in filtered:
+        filtered.append(last_f)
+    # Re-sort after potentially adding last
+    filtered.sort(key=lambda f: get_model_step(f))
+
 eval_files = filtered
 if EVAL_LAST_ONLY:
-    eval_files = [eval_files[-1]]
-    print_info(f"EVAL_LAST_ONLY: evaluating only {eval_files[0]}")
+    eval_files = [eval_files[-1]] if eval_files else []
+    if eval_files:
+        print_info(f"EVAL_LAST_ONLY: evaluating only {eval_files[0]}")
 else:
-    print_info(f"Checkpoints to evaluate: {len(eval_files)} (stride={EVAL_STRIDE})")
+    print_info(f"Checkpoints to evaluate: {len(eval_files)} (stride={EVAL_STRIDE}, range=[{EVAL_START}, {EVAL_END}])")
 
 # Resumption: track completed checkpoints in a state file
 eval_logs_dir = os.path.join(fl.logs_dir, 'eval')

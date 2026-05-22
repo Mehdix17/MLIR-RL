@@ -286,17 +286,357 @@ def infer_greedy_schedule(
 # ---------------------------------------------------------------------------
 
 def apply_schedules_to_code(code: str, schedules: dict[str, list]) -> str:
-    """Apply per-operation action sequences to the full model code."""
-    transformed = code
+    """Apply all schedules via a single batched in-process MLIR transform.
+
+    Builds ONE combined transform dialect script for all actions, runs it
+    in-process (no subprocess). Falls back to per-op batching if the combined
+    script fails (e.g. fragile vectorization for some ops).
+    """
+    # Step 1: Handle vectorization preprocessing (modifies code string)
     for op_tag, actions in schedules.items():
         for action in actions:
-            action.operation_tag = op_tag
-            try:
-                transformed = action.apply(transformed)
-            except Exception as e:
-                print(f"      WARNING: action {action} failed on {op_tag}: {e}")
-                break
-    return transformed
+            if type(action).__name__ == 'Vectorization':
+                for pre_fn in getattr(action, 'preprocessing', []):
+                    try:
+                        code = pre_fn(code)
+                    except Exception:
+                        pass
+
+    # Step 2: Build combined transform script
+    body = _build_combined_transform(schedules)
+    if not body:
+        return code
+
+    from mlir.ir import Context, Module
+    from mlir.dialects.transform import interpreter
+
+    full_transform = (
+        '\nmodule attributes {transform.with_named_sequence} {\n'
+        '  transform.named_sequence @__transform_main'
+        '(%arg1: !transform.any_op {transform.readonly}) {\n'
+        + '\n'.join('    ' + l for l in body) + '\n'
+        '    transform.yield\n'
+        '  }\n'
+        '}\n'
+    )
+
+    try:
+        with Context():
+            m = Module.parse(code)
+            t = Module.parse(full_transform)
+            interpreter.apply_named_sequence(
+                m, t.body.operations[0], t
+            )
+            return str(m)
+    except Exception as batch_err:
+        print(f"    Batched transform failed ({batch_err}), falling back to per-op ...")
+        return _apply_schedules_per_op(code, schedules)
+
+
+def _build_combined_transform(schedules: dict[str, list]) -> list[str]:
+    """Build a single combined transform dialect body from all schedules.
+    Returns list of transform dialect operation lines."""
+    body = []
+    step_counter = [0]  # mutable counter for unique SSA names
+
+    def _next_id() -> str:
+        sid = f"s{step_counter[0]}"
+        step_counter[0] += 1
+        return sid
+
+    for op_tag, actions in schedules.items():
+        for action in actions:
+            cls_name = type(action).__name__
+
+            if cls_name == 'NoTransformation':
+                continue
+
+            elif cls_name == 'Tiling':
+                sizes = action.parameters
+                nz = [s for s in sizes if s != 0]
+                if not nz:
+                    continue
+                sid = _next_id()
+                n = len(nz)
+                r = ', '.join(['!transform.any_op'] * n)
+                body.append(
+                    f'%op{sid} = transform.structured.match '
+                    f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%t{sid}, %l{sid}:{n} = '
+                    f'transform.structured.tile_using_for %op{sid} '
+                    f'tile_sizes {list(sizes)} : (!transform.any_op) -> '
+                    f'(!transform.any_op, {r})'
+                )
+
+            elif cls_name == 'Interchange':
+                perm = action.parameters
+                if perm == list(range(len(perm))):
+                    continue
+                sid = _next_id()
+                body.append(
+                    f'%op{sid} = transform.structured.match '
+                    f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%g{sid} = transform.structured.generalize '
+                    f'%op{sid} : (!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%i{sid} = transform.structured.interchange '
+                    f'%g{sid} iterator_interchange = {list(perm)} : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%n{sid} = transform.param.constant '
+                    f'"{op_tag}" -> !transform.any_param'
+                )
+                body.append(
+                    f'transform.annotate %i{sid} "tag" = %n{sid} : '
+                    f'!transform.any_op, !transform.any_param'
+                )
+
+            elif cls_name == 'Vectorization':
+                sid = _next_id()
+                body.append(
+                    f'%op{sid} = transform.structured.match '
+                    f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'transform.structured.vectorize %op{sid} : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+
+            elif cls_name == 'TiledParallelization':
+                sid = _next_id()
+                sizes = action.parameters
+                body.append(
+                    f'%op{sid} = transform.structured.match '
+                    f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%tp{sid}, %f{sid} = '
+                    f'transform.structured.tile_using_forall %op{sid} '
+                    f'tile_sizes {list(sizes)} : (!transform.any_op) -> '
+                    f'(!transform.any_op, !transform.any_op)'
+                )
+
+            elif cls_name == 'TiledFusion':
+                consumer = op_tag
+                producer = getattr(action, 'producer_tag', None)
+                if not producer:
+                    continue
+                new_producer = getattr(action, 'new_producer_tag',
+                                        f'{producer}_{consumer}')
+                sid = _next_id()
+                body.append(
+                    f'%op_c{sid} = transform.structured.match '
+                    f'attributes{{tag = "{consumer}"}} in %arg1 : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%tc{sid}, %fc{sid} = '
+                    f'transform.structured.tile_using_forall %op_c{sid} '
+                    f'tile_sizes {list(action.parameters)} : '
+                    f'(!transform.any_op) -> '
+                    f'(!transform.any_op, !transform.any_op)'
+                )
+                body.append(
+                    f'%op_p{sid} = transform.structured.match '
+                    f'attributes{{tag = "{producer}"}} in %arg1 : '
+                    f'(!transform.any_op) -> !transform.any_op'
+                )
+                body.append(
+                    f'%fu{sid}, %co{sid} = '
+                    f'transform.structured.fuse_into_containing_op '
+                    f'%op_p{sid} into %fc{sid} : '
+                    f'(!transform.any_op, !transform.any_op) -> '
+                    f'(!transform.any_op, !transform.any_op)'
+                )
+                body.append(
+                    f'%ft{sid} = transform.param.constant '
+                    f'"{new_producer}" -> !transform.any_param'
+                )
+                body.append(
+                    f'transform.annotate %fu{sid} "tag" = %ft{sid} : '
+                    f'!transform.any_op, !transform.any_param'
+                )
+
+    return body
+
+
+def _apply_schedules_per_op(code: str, schedules: dict[str, list]) -> str:
+    """Fallback: apply schedules per-op (actions batched per operation)."""
+    from mlir.ir import Context, Module
+    from mlir.dialects.transform import interpreter
+
+    for op_tag, actions in schedules.items():
+        body = _build_op_body(op_tag, actions)
+        if not body:
+            continue
+
+        transform_str = (
+            '\nmodule attributes {transform.with_named_sequence} {\n'
+            '  transform.named_sequence @__transform_main'
+            '(%arg1: !transform.any_op {transform.readonly}) {\n'
+            + '\n'.join('    ' + l for l in body) + '\n'
+            '    transform.yield\n'
+            '  }\n'
+            '}\n'
+        )
+
+        try:
+            with Context():
+                m = Module.parse(code)
+                t = Module.parse(transform_str)
+                interpreter.apply_named_sequence(
+                    m, t.body.operations[0], t
+                )
+                code = str(m)
+        except Exception as e:
+            print(f"      WARNING: actions for {op_tag} failed: {e}")
+    return code
+
+
+def _build_op_body(op_tag: str, actions: list) -> list[str]:
+    """Build transform body for a single operation's action sequence."""
+    body = []
+    step_counter = [0]
+
+    def _next_id() -> str:
+        sid = f"{op_tag}_{step_counter[0]}"
+        step_counter[0] += 1
+        return sid
+
+    for action in actions:
+        cls_name = type(action).__name__
+
+        if cls_name == 'NoTransformation':
+            continue
+
+        elif cls_name == 'Tiling':
+            sizes = action.parameters
+            nz = [s for s in sizes if s != 0]
+            if not nz:
+                continue
+            sid = _next_id()
+            n = len(nz)
+            r = ', '.join(['!transform.any_op'] * n)
+            body.append(
+                f'%op{sid} = transform.structured.match '
+                f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%t{sid}, %l{sid}:{n} = '
+                f'transform.structured.tile_using_for %op{sid} '
+                f'tile_sizes {list(sizes)} : (!transform.any_op) -> '
+                f'(!transform.any_op, {r})'
+            )
+
+        elif cls_name == 'Interchange':
+            perm = action.parameters
+            if perm == list(range(len(perm))):
+                continue
+            sid = _next_id()
+            body.append(
+                f'%op{sid} = transform.structured.match '
+                f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%g{sid} = transform.structured.generalize '
+                f'%op{sid} : (!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%i{sid} = transform.structured.interchange '
+                f'%g{sid} iterator_interchange = {list(perm)} : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%n{sid} = transform.param.constant '
+                f'"{op_tag}" -> !transform.any_param'
+            )
+            body.append(
+                f'transform.annotate %i{sid} "tag" = %n{sid} : '
+                f'!transform.any_op, !transform.any_param'
+            )
+
+        elif cls_name == 'Vectorization':
+            sid = _next_id()
+            body.append(
+                f'%op{sid} = transform.structured.match '
+                f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'transform.structured.vectorize %op{sid} : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+
+        elif cls_name == 'TiledParallelization':
+            sid = _next_id()
+            sizes = action.parameters
+            body.append(
+                f'%op{sid} = transform.structured.match '
+                f'attributes{{tag = "{op_tag}"}} in %arg1 : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%tp{sid}, %f{sid} = '
+                f'transform.structured.tile_using_forall %op{sid} '
+                f'tile_sizes {list(sizes)} : (!transform.any_op) -> '
+                f'(!transform.any_op, !transform.any_op)'
+            )
+
+        elif cls_name == 'TiledFusion':
+            consumer = op_tag
+            producer = getattr(action, 'producer_tag', None)
+            if not producer:
+                continue
+            new_producer = getattr(
+                action, 'new_producer_tag', f'{producer}_{consumer}'
+            )
+            sid = _next_id()
+            body.append(
+                f'%op_c{sid} = transform.structured.match '
+                f'attributes{{tag = "{consumer}"}} in %arg1 : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%tc{sid}, %fc{sid} = '
+                f'transform.structured.tile_using_forall %op_c{sid} '
+                f'tile_sizes {list(action.parameters)} : '
+                f'(!transform.any_op) -> '
+                f'(!transform.any_op, !transform.any_op)'
+            )
+            body.append(
+                f'%op_p{sid} = transform.structured.match '
+                f'attributes{{tag = "{producer}"}} in %arg1 : '
+                f'(!transform.any_op) -> !transform.any_op'
+            )
+            body.append(
+                f'%fu{sid}, %co{sid} = '
+                f'transform.structured.fuse_into_containing_op '
+                f'%op_p{sid} into %fc{sid} : '
+                f'(!transform.any_op, !transform.any_op) -> '
+                f'(!transform.any_op, !transform.any_op)'
+            )
+            body.append(
+                f'%ft{sid} = transform.param.constant '
+                f'"{new_producer}" -> !transform.any_param'
+            )
+            body.append(
+                f'transform.annotate %fu{sid} "tag" = %ft{sid} : '
+                f'!transform.any_op, !transform.any_param'
+            )
+
+    return body
 
 
 # ---------------------------------------------------------------------------
@@ -329,7 +669,7 @@ def measure_exec_time(exec_instance, code: str, bench_name: str) -> tuple[int, b
 
 def _measure_with_cmd_fallback(code: str, bench_name: str) -> tuple[int, bool]:
     """Execute MLIR code in an isolated multiprocessing subprocess with a
-    generous timeout. Runs transform-dialect bufferization + LLVM lowering +
+    generous timeout. Runs mlir-opt (one-shot-bufferize) + LLVM lowering +
     JIT all inside the worker (so the full timeout applies to everything).
     Uses EXEC_TIMEOUT_CMD (default 7200s)."""
     import multiprocessing
@@ -337,9 +677,12 @@ def _measure_with_cmd_fallback(code: str, bench_name: str) -> tuple[int, bool]:
     import ctypes.util
 
     timeout_s = int(os.environ.get("EXEC_TIMEOUT_CMD", 7200))
+    llvm_build = os.getenv("LLVM_BUILD_PATH", "")
 
     def worker(code_str: str, result_dict: dict) -> None:
         try:
+            import tempfile, subprocess
+            import numpy as np
             from mlir.ir import Context, Module, MemRefType, IntegerType, F64Type, F32Type
             from mlir.execution_engine import ExecutionEngine
             from mlir.runtime import (
@@ -348,12 +691,31 @@ def _measure_with_cmd_fallback(code: str, bench_name: str) -> tuple[int, bool]:
             )
             from mlir.passmanager import PassManager
             from mlir.dialects.func import FuncOp
-            from rl_autoschedular_v4_5.transforms import transform_bufferize_and_lower_v
 
-            # Step 1: transform-dialect bufferization
-            bufferized = transform_bufferize_and_lower_v(code_str)
+            # Step 1: mlir-opt one-shot-bufferize (stop before LLVM lowering)
+            buf_pipeline = (
+                f"{llvm_build}/bin/mlir-opt "
+                f"-loop-invariant-code-motion -canonicalize "
+                f"-eliminate-empty-tensors -empty-tensor-to-alloc-tensor "
+                f"-one-shot-bufferize='bufferize-function-boundaries "
+                f"function-boundary-type-conversion=identity-layout-map' "
+            )
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".mlir", delete=False) as tf:
+                tf.write(code_str)
+                tmp_path = tf.name
+            buf_path = tmp_path.replace(".mlir", "_buf.mlir")
+            buf_cmd = f"{buf_pipeline} {tmp_path} -o {buf_path}"
+            buf_proc = subprocess.run(buf_cmd, shell=True, capture_output=True, text=True, timeout=7200)
+            os.remove(tmp_path)
+            if buf_proc.returncode != 0:
+                result_dict["success"] = False
+                result_dict["error"] = f"mlir-opt bufferize failed: {buf_proc.stderr[:300]}"
+                return
+            with open(buf_path) as f:
+                bufferized = f.read()
+            os.remove(buf_path)
 
-            # Step 2: LLVM lowering + JIT
+            # Step 2: LLVM lowering + JIT via PassManager + ExecutionEngine
             pass_pipeline = """builtin.module(
                 canonicalize,
                 convert-linalg-to-loops,
@@ -437,12 +799,10 @@ def _measure_with_cmd_fallback(code: str, bench_name: str) -> tuple[int, bool]:
                         if al and ctypes.cast(al, ctypes.c_void_p).value:
                             libc.free(ctypes.cast(al, ctypes.c_void_p))
 
-                try:
-                    for _ in range(2):
-                        engine.invoke("main", *args)
-                        _free_outputs()
-                finally:
-                    _free_outputs()
+                engine.invoke("main", *args)  # warmup
+                _free_outputs()
+                engine.invoke("main", *args)  # measured run
+                _free_outputs()
 
                 result_dict["delta"] = outs.delta
                 result_dict["success"] = True
@@ -512,7 +872,13 @@ def _measure_with_cmd_pipeline(code: str, bench_name: str) -> tuple[int, bool]:
         )
         os.environ["OMP_NUM_THREADS"] = "8"
 
-        full_cmd = f"{command_1} {tmp_path} | {command_2} /dev/stdin"
+        opt_path = tmp_path.replace(".mlir", "_opt.mlir")
+        opt_cmd = f"{command_1} {tmp_path} -o {opt_path}"
+        opt_proc = subprocess.run(opt_cmd, shell=True, capture_output=True, text=True, timeout=timeout_s)
+        if opt_proc.returncode != 0:
+            print(f"      CMD pipeline mlir-opt failed: {opt_proc.stderr[:300]}")
+            return 0, False
+        full_cmd = f"{command_2} {opt_path}"
         proc = subprocess.Popen(
             full_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, preexec_fn=os.setpgrp,
@@ -539,6 +905,9 @@ def _measure_with_cmd_pipeline(code: str, bench_name: str) -> tuple[int, bool]:
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+        opt_path = tmp_path.replace(".mlir", "_opt.mlir")
+        if os.path.exists(opt_path):
+            os.remove(opt_path)
 
 
 def _save_results(output_path: str, results: dict) -> None:

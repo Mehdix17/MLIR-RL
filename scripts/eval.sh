@@ -69,6 +69,11 @@ for VERSION in "${VERSIONS[@]}"; do
     export AUTOSCHEDULER_IMPL="$IMPLEMENTATION"
     export CONFIG_FILE_PATH="$CONFIG"
 
+    # Optional run ID for logging (resumption of run_0)
+    if [[ -n "${FORCE_RUN_ID:-}" ]]; then
+        export FORCE_RUN_ID="$FORCE_RUN_ID"
+    fi
+
     echo "=========================================="
     echo "Evaluation started at $(date)"
     echo "Version:  $VERSION ($IMPLEMENTATION)"
@@ -76,8 +81,9 @@ for VERSION in "${VERSIONS[@]}"; do
     echo "Node:     $(hostname)"
     echo "=========================================="
 
-    # Derive EVAL_DIR: latest run_N/models that contains .pt files
-    mapfile -t EVAL_META < <(python3 - <<PY
+    # Derive EVAL_DIR: ONLY if not already set by environment
+    if [[ -z "${EVAL_DIR:-}" ]]; then
+        mapfile -t EVAL_META < <(python3 - <<PY
 import json
 from utils.implementation import get_agent_subdir
 cfg = json.load(open("$CONFIG"))
@@ -85,10 +91,10 @@ print(cfg["results_dir"])
 print(get_agent_subdir("$IMPLEMENTATION"))
 PY
 )
-    RESULTS_DIR="${EVAL_META[0]}"
-    AGENT_SUBDIR="${EVAL_META[1]}"
-    AGENT_ROOT="$RESULTS_DIR/$AGENT_SUBDIR"
-    LATEST_MODELS=$(python3 -c "
+        RESULTS_DIR="${EVAL_META[0]}"
+        AGENT_SUBDIR="${EVAL_META[1]}"
+        AGENT_ROOT="$RESULTS_DIR/$AGENT_SUBDIR"
+        LATEST_MODELS=$(python3 -c "
 import os
 r = '$AGENT_ROOT'
 if not os.path.isdir(r):
@@ -98,7 +104,9 @@ candidates = [os.path.join(r, d, 'models') for d in runs]
 candidates = [p for p in candidates if os.path.isdir(p) and any(f.endswith('.pt') for f in os.listdir(p))]
 print(candidates[-1]) if candidates else exit(1)
 ")
-    export EVAL_DIR="$LATEST_MODELS"
+        export EVAL_DIR="$LATEST_MODELS"
+    fi
+    echo "EVAL_DIR: $EVAL_DIR"
 
     cd "$PROJECT_ROOT"
     python scripts/eval.py

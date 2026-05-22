@@ -55,14 +55,66 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with "Permission denied" on br
 | Package                | Purpose                              |
 | ---------------------- | ------------------------------------ |
 | `rl_autoschedular`     | Baseline — **must remain untouched** |
-| `rl_autoschedular_v1`  | Hardware-aware observation           |
+| `rl_autoschedular_v1`  | **Hardware-aware observation** (our contribution) |
 | `rl_autoschedular_v2`  | Shaped reward                        |
 | `rl_autoschedular_v3`  | Transformer loop-nest encoder        |
 | `rl_autoschedular_v4`  | Integrated V1 + V2 + V3              |
 | `rl_autoschedular_v4_5`| **Robust Integrated** (Integration + Hardened Reliability) |
+| `rl_autoschedular_v45_no_hw`     | Ablation: hardware-awareness disabled |
+| `rl_autoschedular_v45_no_shaped_reward` | Ablation: no reward shaping |
+| `rl_autoschedular_v45_no_transformer` | Ablation: baseline policy (no transformer) |
 | `rl_autoschedular_v5`+ | Future novelties (one per version)   |
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
+
+## Hardware-Aware Observation (V1 — Our Contribution)
+
+V1 adds a 7-element hardware feature vector to every observation, auto-detected at module import from the running machine:
+
+- **L1 cache** (KB, normalized /256), **L2 cache** (/4096), **L3 cache** (/65536)
+- **Physical cores** (/256), **Logical cores** (/512)
+- **SIMD width** (/1024), **Clock MHz** (/6000)
+
+Detection reads `/sys/devices/system/cpu/cpu0/cache/` and `/proc/cpuinfo`. Controlled by config fields:
+- `hardware_auto_detect: true` → auto-detect (recommended for single-machine runs)
+- `hardware_l1_kb`, `hardware_l2_kb`, ... → manual overrides for cross-hardware experiments
+
+The hardware vector is concatenated to the LSTM output in `model.py` forward pass. Policy and value networks now consume `[op_lstm, producer_lstm, hardware_features]`, allowing them to condition decisions on hardware properties.
+
+**Key files:** `rl_autoschedular_v1/observation.py` (HardwareFeatures class), `rl_autoschedular_v1/model.py` (LSTMEmbedding integration).
+
+**Verification:**
+```bash
+python -c "from rl_autoschedular_v1.observation import HARDWARE_VECTOR; print(HARDWARE_VECTOR)"
+```
+
+## Multi-Cluster Evaluation Mission
+
+**Goal:** Evaluate the already-trained V4.5 agent on 3 clusters with different CPUs to validate that hardware-aware observation enables cross-hardware generalization.
+
+**Training hardware:** V4.5 was trained on **Dalma** (Intel Xeon E5-2680 v4, 28 cores, 112 GB RAM).
+
+**Dataset:** `data/all` (~17K `.mlir` block files from Albert, Bart, and synthetic benchmarks).
+
+### Cluster Specs
+
+| Cluster | Slurm constraint | CPUs/node | CPU model | RAM/node |
+|---------|-----------------|-----------|-----------|----------|
+| Dalma (trained on) | `--constraint=dalma` | 28 | Intel Xeon E5-2680 v4 (Broadwell) | 112 GB |
+| Jubail | `-C jubail` | 128 | AMD EPYC 7742 (Zen 2) | 480 GB |
+| Bergamo | `-C bergamo` | 256 | AMD EPYC 9754 (Zen 4) | 1 TB |
+
+### Evaluation Commands
+
+```bash
+sbatch scripts/dalma_eval.sh config/v4_5.json     # training hardware (baseline)
+sbatch scripts/jubail_eval.sh config/v4_5.json    # different AMD Zen 2
+sbatch scripts/bergamo_eval.sh config/v4_5.json   # different AMD Zen 4, 256 cores
+```
+
+All scripts set `EVAL_LAST_ONLY=1` internally (evaluates only the last checkpoint, `model_1999.pt`).
+
+**Hypothesis:** The hardware-aware agent should adapt scheduling decisions (tile sizes, vectorization, parallelism) to each cluster's CPU characteristics, producing competitive speedups across all three architectures despite training on only one.
 
 ## Architecture: AST & Feature Pipeline
 
@@ -96,6 +148,101 @@ Starting with V4.5, the system includes proactive safeguards against MLIR instab
 2. **Success-Contingent Rewards:** To prevent the agent from learning "risky" behavior (e.g., aggressive tiling that causes timeouts), shaped rewards are only granted if the final code executes successfully. If it fails, all intermediate rewards are zeroed, and a total failure penalty is applied.
 3. **Stability Rails:** The action space now masks out transformations that are statistically correlated with instability, such as vectorizing deeply nested loops (>6) or exceeding a transformation complexity threshold (>4 steps).
 4. **Resilient Markers:** Progress is saved incrementally in `results/experiment3/global_markers/`. If a job is interrupted, it will automatically resume from the last completed benchmark.
+
+## Model Benchmarking & Results Organization
+
+The system evaluates learned policies on collections of MLIR operations across three domains:
+
+### **Benchmark Datasets**
+
+- **Vision Operations** (`data/nn/vision_operations.json`, `conv_2d_vision_operations.json`) — Conv2D, pooling, ReLU; commonly used to debug scheduling
+- **Full Neural Net** (`data/nn/train_operations.json`) — MatMul, Conv2D, Add, pooling mixed workloads
+- **Synthetic / Domain-Specific** (`data/linalg/`, `data/gnn/`) — Pure linalg, graph neural net ops
+
+Each benchmark JSON contains:
+```json
+{
+  "operation_name_1": 5.2,     // baseline execution time (ms), unoptimized
+  "operation_name_2": 12.1,
+  ...
+}
+```
+
+### **Results Directory Structure**
+
+```
+results/
+  ├─ experiment3/              # Primary active experiment
+  │  ├─ exec_times/            # Cached baseline timings (don't edit)
+  │  │  ├─ v4_5_base.json      # Unoptimized times for v4_5 agent
+  │  │  ├─ v4_base.json
+  │  │  ├─ ...
+  │  │  └─ pytorch_times.json  # PyTorch reference times
+  │  │
+  │  ├─ rl_autoschedular_v4_5_agent/  # Per-implementation results
+  │  │  ├─ checkpoint_1000.pt   # Policy weights (if training)
+  │  │  ├─ eval_results_train.json
+  │  │  └─ eval_results_eval.json
+  │  │
+  │  ├─ v4_agent/, v2_5_agent/, ...  # Comparative runs
+  │  └─ global_markers/         # V4.5+ resilience: iteration-level checkpoints
+  │
+  ├─ ablation_no_hw/            # Ablation study: hardware-awareness removed
+  ├─ ablation_no_shaped_reward/  # Ablation: no reward shaping
+  ├─ ablation_no_transformer/    # Ablation: baseline policy
+  └─ full_model/                # Full benchmark runs
+```
+
+### **Evaluation Metrics**
+
+After training, `eval.sh` produces per-benchmark performance gains:
+
+```
+eval_results_eval.json:
+{
+  "operation_name_1": {
+    "baseline_ms": 5.2,
+    "scheduled_ms": 2.1,
+    "speedup": 2.47
+  },
+  ...
+  "average_speedup": 1.85
+}
+```
+
+### **Workflow: From Data to Benchmarking**
+
+1. **Collect Benchmarks** — Generate MLIR code + baseline times (vision2mlir, tf2mlir, gnn2mlir in `data_utils/`)
+2. **Split for Training** — `split_json.py` divides into train/eval (e.g., 70%/30%)
+3. **Train Agent** — `train.sh` runs PPO on train split, outputs checkpoints + loss curves to Neptune
+4. **Evaluate** — `eval.sh` loads best checkpoint, optimizes eval split, logs speedups to `eval_results_eval.json`
+5. **Compare** — Dashboard aggregates speedups across all versions and ablations for comparative analysis
+
+### **Benchmark Analysis Quick Start**
+
+**View averaged speedups** (across all test benchmarks):
+```bash
+python -c "
+import json
+with open('results/experiment3/rl_autoschedular_v4_5_agent/eval_results_eval.json') as f:
+    d = json.load(f)
+    print(f\"Mean speedup: {d['average_speedup']:.2f}x\")
+"
+```
+
+**Compare two agents**:
+```bash
+python -c "
+import json
+with open('results/experiment3/rl_autoschedular_v4_5_agent/eval_results_eval.json') as f:
+    v45 = json.load(f)
+with open('results/experiment3/v4_agent/eval_results_eval.json') as f:
+    v4 = json.load(f)
+print(f\"V4.5 avg: {v45['average_speedup']:.2f}x, V4 avg: {v4['average_speedup']:.2f}x\")
+"
+```
+
+**Monitor training via Neptune** — Link set in `.env` (`NEPTUNE_PROJECT`) — view loss, reward, PPO metrics live during training runs.
 
 ## Documentation References
 
@@ -210,66 +357,13 @@ func.func @main(%arg_0_in_0: tensor<...>, ..., %arg_0_out_0: tensor<...>, ...) -
 
 The `json_file` and `eval_json_file` config fields map benchmark **names** to baseline execution times (ns). Each name must match a `.mlir` file in `benchmarks_folder_path` (e.g. `"albert_block_0": 12345` → loads `benchmarks_folder_path/albert_block_0.mlir`).
 
-### Data Pipeline: Raw Model → RL-Ready Blocks
+### Extract Blocks from Raw Model
 
-To convert full model `.mlir` files into block-level benchmarks:
-
-**Step 1 — Extract blocks from a linalg model file:**
 ```bash
-# From data/nn/raw_bench/ (linalg dialect, already lowered)
-python data_utils/extract_blocks.py \
-    --input data/nn/raw_bench/albert_linalg.mlir \
-    --output-dir data/nn/extracted_blocks/albert/
-
-# Batch-process all linalg models
-for f in data/nn/raw_bench/*_linalg.mlir; do
-  python data_utils/extract_blocks.py --input "$f" --output-dir data/nn/extracted_blocks/
-done
+python data_utils/extract_blocks.py --input data/nn/raw_bench/albert_linalg.mlir --output-dir data/nn/extracted_blocks/
 ```
 
-`extract_blocks.py` uses the AST dumper to build an operation graph, then windows consumer→producer paths into fixed-size blocks (default: 5 ops, stride 3). Output: `{model}_block_{i}.mlir` files ready for RL.
-
-Alternative: `extract_ops.py` extracts single operations (one op per file) instead of multi-op sequences.
-
-**Step 2 — Get baseline execution times for the new blocks:**
-```bash
-python scripts/get_base.py \
-    --config config/v1.json \
-    --benchmarks-dir data/nn/extracted_blocks/ \
-    --output results/experiment3/exec_times/custom_base.json
-```
-
-**Step 3 — Split into train/eval (or use 100% for eval-only):**
-```bash
-python scripts/split_json.py \
-    --input results/experiment3/exec_times/custom_base.json \
-    --eval-ratio 1.0   # all → eval for inference-only use
-```
-
-**Step 4 — Update config to point at the new data:**
-```json
-{
-  "benchmarks_folder_path": "data/nn/extracted_blocks",
-  "eval_json_file": "results/experiment3/exec_times/custom_base_eval.json"
-}
-```
-
-Alternatively, to benchmark a full model end-to-end (no RL scheduling), use `wrap_mlir.py` to add a timed `@main` wrapper, then run the resulting `.mlir` through the `Execution` class directly. There is no built-in script for full-model RL evaluation since the agent schedules per-operation-block.
-
-### Evaluating a Trained Model on New Benchmarks
-
-To evaluate an already-trained agent on blocks extracted from a different model set:
-
-1. Extract blocks and get base times (steps 1-3 above)
-2. Point `eval_json_file` in config to the new eval JSON, or set the file explicitly:
-   ```bash
-   export AUTOSCHEDULER_IMPL=rl_autoschedular_v1
-   export CONFIG_FILE_PATH=config/v1.json
-   export EVAL_DIR=results/experiment3/v1_agent/run_0/models
-   ```
-   Then run `python scripts/eval.py`. The eval script loads `Benchmarks(is_training=False)`, which uses `eval_json_file` from the config. If the config's `eval_json_file` is empty, it auto-derives from `results_dir` + implementation. Override by setting it in the config or by passing a custom data path.
-
-3. If you only want the final checkpoint's results: `EVAL_LAST_ONLY=1 python scripts/eval.py`
+`extract_blocks.py` windows consumer→producer paths into fixed-size blocks (default: 5 ops, stride 3). Alternative: `extract_ops.py` for single-operation files. Then run `scripts/get_base.py` for baseline times and `scripts/split_json.py` for train/eval split.
 
 ## Results Directory Layout
 
