@@ -2,32 +2,30 @@
 \label{ch:design-implementation}
 
 \section{Motivation}
-\label{sec:motivation}
+\label{sec:problem-statement-contributions}
 
-\subsection{The Baseline \gls{mlir}-\gls{rl} Architecture}
-This work systematically extends the foundational \gls{rl} system for the \gls{mlir} compiler initiated by Bendib~\cite{bendib2024reinforcement} and subsequently scaled by Tirichine et al.~\cite{tirichine2025reinforcement}. The initial architecture formulated code optimization as a \gls{mdp}, utilizing \gls{ppo} and \gls{lstm} networks to make discrete transformation decisions (such as tiling, parallelization, and vectorization) on isolated linear algebra operations. Building upon this, the 2025 intermediate framework expanded the environment's extraction mechanisms to handle larger workloads. Our current work continues this lineage by introducing profound architectural enhancements, driving the system to accommodate generalized, real-world deep learning graphs.
+\subsection{Overview of the Problem Statement}
+Modern compilers rely on rigid, hand-crafted heuristics to optimize code, which often fail to unlock the full computational potential of underlying hardware for complex deep learning workloads. While formulating code optimization as a Markov Decision Process (MDP) and leveraging deep reinforcement learning (DRL)---as initiated in early baseline models (Bendib~\cite{bendib2024reinforcement}, Tirichine et al.~\cite{tirichine2025reinforcement})---has demonstrated significant promise, scaling these initial proofs-of-concept into robust, generalized mechanisms reveals critical bottlenecks. 
 
-\subsection{Limitations of the Baseline System}
-While the baseline architecture demonstrates the viability of automated compiler optimization, it exhibits several limitations that hinder its scalability and generalization:
-
+For readers reviewing this chapter independently, the core problem addressed in this thesis is how to scale RL-based compiler optimization so that it can generalize across wildly different algorithmic computation graphs and underlying hardware topologies. Specifically, prior systems are critically crippled by four major limitations:
 \begin{itemize}
-    \item \textbf{Training Data Sparsity:} Prior models rely on narrow or synthetically generated datasets. This lack of exposure to the structural complexity of true deep learning graph computations restricts the ability of the agent to generalize to modern, real-world tasks.
-    \item \textbf{Hardware-Agnostic Policies:} The baseline model learns rigid optimization schedules that do not account for the underlying hardware architecture. Consequently, policies trained on a specific machine fail to adapt to different CPU topologies, which limits cross-hardware portability.
-    \item \textbf{Sequential Representation Constraints:} The use of recursive \gls{lstm} networks to encode the program state introduces bottlenecks. These models struggle to capture the complex, long-range structural dependencies inherent in deeply nested loops.
-    \item \textbf{Sparse Reward Structures:} Using end-of-execution speedup as the sole reward provides delayed feedback to the agent, which decreases training convergence efficiency.
+    \item \textbf{Training Data Sparsity:} Prior agents are trained on narrow, synthetic datasets. They lack exposure to the structural complexity of true deep learning graphs, heavily restricting their ability to optimize realistic, modern tasks.
+    \item \textbf{Hardware-Agnostic Policies:} Current agents learn rigid optimization schedules that are completely blind to the underlying hardware architecture. A policy optimized for a lightweight quad-core laptop will aggressively fail when executed on a 256-core HPC node, eliminating cross-hardware portability.
+    \item \textbf{Sequential Representation Constraints:} The standard use of recursive \gls{lstm} networks to encode the program state introduces severe informational bottlenecks. LSTMs struggle to maintain context over long-range dependencies inherent in deeply nested loops and broad computation sub-graphs.
+    \item \textbf{Sparse Reward Structures:} Extracting a reward only at the end of execution (terminal speedup) yields excessively delayed feedback, causing high variance, slow training convergence, and inefficient exploration spaces.
 \end{itemize}
 
 \subsection{Proposed Contributions}
-To address these limitations and expand the applicability of \gls{rl} in compiler optimization, we propose the following architectural contributions:
+To tackle these fundamental bottlenecks, we propose a completely redesigned, robust RL auto-scheduler capable of generalizing across both complex neural network workloads and diverse CPU platforms. Our primary contributions are:
 
 \begin{itemize}
-    \item \textbf{Automated Dataset Generation Pipeline:} We developed an automated extraction infrastructure equipped with heuristic handlers for dynamic batch sizes. This pipeline successfully sources training graphs from over 20 diverse neural network architectures (including Vision, Transformers, and Graph Neural Networks) to solve the data sparsity issue.
-    \item \textbf{Hardware-Aware State Representation:} We augmented the observation space of the agent with direct hardware specifications (cache sizes, core counts, \gls{simd} widths) to enable adaptive and portable optimization policies.
-    \item \textbf{Transformer-Based Loop-Nest Encoding:} We transitioned the architecture to use a Transformer-based encoder. By treating loop levels as tokens and leveraging self-attention, the model accurately captures the hierarchical structure of full computation graphs.
-    \item \textbf{Shaped Multi-Objective Rewards:} We introduced intermediate static analysis feedback, such as arithmetic intensity, to provide the agent with denser, continuous learning signals throughout the optimization process.
+    \item \textbf{Automated Dataset Generation Pipeline:} We engineered an automated extraction infrastructure with heuristic handlers for dynamic batch sizes. This pipeline successfully sources training sub-graphs from over 20 diverse neural network architectures (including CNNs, Transformers, and GNNs), solving the data sparsity constraint.
+    \item \textbf{Hardware-Aware State Representation:} We augmented the agent's observation space with explicit hardware specifications (L1/L2/L3 cache sizes, core counts, and \gls{simd} widths) to enable dynamic, hardware-portable optimization policies.
+    \item \textbf{Transformer-Based Loop-Nest Encoding:} We replaced the legacy LSTM networks with a modern Transformer-based encoder. By processing loop levels as tokens and leveraging self-attention, the model accurately untangles the hierarchical dependencies of complex computation graphs.
+    \item \textbf{Shaped Multi-Objective Rewards:} We introduced dense, intermediate reward signals driven by static analysis (e.g., arithmetic intensity and vectorizability), drastically accelerating agent convergence by evaluating the mathematical viability of every single transformation step.
 \end{itemize}
 
-The remainder of this chapter details the design and implementation of these contributions within the \gls{mlir} ecosystem.
+The remainder of this chapter details the systemic design, theoretical formulation, and practical implementation of these contributions within the \gls{mlir} ecosystem.
 
 \section{Dataset Generation and Evaluation Infrastructure}
 To ensure our agent generalizes across modern workloads, we engineered a comprehensive and automated dataset extraction pipeline. Previous approaches relied on manual extraction or heavily hard-coded synthetic generation, severely limiting the structural diversity of the training data. Our automated generation process supports extracting operations from more than 20 different neural network architectures (including vision models, transformer models, BERT variants, and graph neural networks), utilizing different routing mechanisms such as ONNX and \verb|torch-mlir|.

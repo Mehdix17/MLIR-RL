@@ -309,21 +309,21 @@ To formalize this, algorithm~\ref{alg:ppo} details the exact procedure by which 
 \textbf{Input:} clipping threshold $\epsilon$, policy learning rate $\alpha$, value learning rate $\beta$, entropy coefficient $c_2$, value loss coefficient $c_1$. \\
 \textbf{Output:} Optimized policy $\pi_\theta(a \mid s)$
 \begin{algorithmic}
-\STATE Initialize policy $\pi_\theta$ and value function $V_\phi$
-\FOR{each iteration}
-    \STATE Collect trajectory $\{s_t, a_t, r_t\}_{t=0}^T$ using current policy $\pi_\theta$
-    \STATE Compute the advantage estimates $\hat{A}_t$ using GAE (and targets $V_t^{\text{target}}$)
-    \FOR{each epoch}
-        \FOR{each minibatch}
-            \STATE Compute ratio: $r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}$
-            \STATE Clipped surrogate objective: $\mathcal{L}^{\text{CLIP}}(\theta) = \hat{\mathbb{E}} \left[ \min\left( r_t(\theta) \hat{A}_t, \, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon)\hat{A}_t \right) \right]$
-            \STATE Value function loss: $\mathcal{L}^{\text{VF}}(\phi) = \hat{\mathbb{E}} \left[ \left(V_\phi(s_t) - V_t^{\text{target}}\right)^2 \right]$
-            \STATE Entropy loss: $\mathcal{L}^{\text{Entropy}}(\theta) = - \sum_a \pi_\theta(a \mid s_t)\log(\pi_\theta(a \mid s_t))$
-            \STATE Total loss: $\mathcal{L} = \mathcal{L}^{\text{CLIP}}(\theta) - c_1 \mathcal{L}^{\text{VF}}(\phi) + c_2 \mathcal{L}^{\text{Entropy}}(\theta)$
-            \STATE Update $\theta, \phi$ using stochastic gradient optimization on $\mathcal{L}$
-        \ENDFOR
-    \ENDFOR
-\ENDFOR
+\State Initialize policy $\pi_\theta$ and value function $V_\phi$
+\For{each iteration}
+    \State Collect trajectory $\{s_t, a_t, r_t\}_{t=0}^T$ using current policy $\pi_\theta$
+    \State Compute the advantage estimates $\hat{A}_t$ using GAE (and targets $V_t^{\text{target}}$)
+    \For{each epoch}
+        \For{each minibatch}
+            \State Compute ratio: $r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}$
+            \State Clipped surrogate objective: $\mathcal{L}^{\text{CLIP}}(\theta) = \hat{\mathbb{E}} \left[ \min\left( r_t(\theta) \hat{A}_t, \, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon)\hat{A}_t \right) \right]$
+            \State Value function loss: $\mathcal{L}^{\text{VF}}(\phi) = \hat{\mathbb{E}} \left[ \left(V_\phi(s_t) - V_t^{\text{target}}\right)^2 \right]$
+            \State Entropy loss: $\mathcal{L}^{\text{Entropy}}(\theta) = - \sum_a \pi_\theta(a \mid s_t)\log(\pi_\theta(a \mid s_t))$
+            \State Total loss: $\mathcal{L} = \mathcal{L}^{\text{CLIP}}(\theta) - c_1 \mathcal{L}^{\text{VF}}(\phi) + c_2 \mathcal{L}^{\text{Entropy}}(\theta)$
+            \State Update $\theta, \phi$ using stochastic gradient optimization on $\mathcal{L}$
+        \EndFor
+    \EndFor
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
