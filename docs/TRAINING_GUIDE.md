@@ -15,7 +15,7 @@ Each implementation version has a dedicated config in `config/`:
 
 | Config | Implementation | Key Feature |
 |---|---|---|
-| `config/baseline.json` | `rl_autoschedular` | LSTM encoder, 6 actions, sparse reward |
+| `config/baseline.json` | `rl_autoschedular_v0` | LSTM encoder, 6 actions, sparse reward |
 | `config/v1.json` | `rl_autoschedular_v1` | Hardware-aware observation (cache sizes, cores, SIMD) |
 | `config/v2.json` | `rl_autoschedular_v2` | Shaped reward (arithmetic intensity, vectorizability, parallelism) |
 | `config/v3.json` | `rl_autoschedular_v3` | Transformer loop-nest encoder |
@@ -42,8 +42,8 @@ export AUTOSCHEDULER_IMPL=rl_autoschedular_v3
 For Slurm wrappers, pass implementation as the second argument:
 
 ```bash
-sbatch scripts/train.sh config/v3.json rl_autoschedular_v3
-sbatch scripts/eval.sh config/v3.json rl_autoschedular_v3
+sbatch scripts/train/train.sh config/v3.json rl_autoschedular_v3
+sbatch scripts/eval/eval.sh config/v3.json rl_autoschedular_v3
 ```
 
 ---
@@ -54,7 +54,7 @@ sbatch scripts/eval.sh config/v3.json rl_autoschedular_v3
 
 ```bash
 bash scripts/pipeline.sh config/baseline.json
-bash scripts/pipeline.sh config/baseline.json "rl_autoschedular,rl_autoschedular_v1,rl_autoschedular_v3"
+bash scripts/pipeline.sh config/baseline.json "rl_autoschedular_v0,rl_autoschedular_v1,rl_autoschedular_v3"
 ```
 
 This submits all steps to Slurm with proper dependencies. Progress is tracked in `pipeline_logs/pipeline_<timestamp>.log` and `pipeline_logs/pipeline_<timestamp>.status`.
@@ -63,7 +63,7 @@ This submits all steps to Slurm with proper dependencies. Progress is tracked in
 
 | Implementation | Derived Config |
 |---|---|
-| `rl_autoschedular` | `config/baseline.json` |
+| `rl_autoschedular_v0` | `config/baseline.json` |
 | `rl_autoschedular_v1` | `config/v1.json` |
 | `rl_autoschedular_v3` | `config/v3.json` |
 | unknown/custom | fallback to base config |
@@ -80,7 +80,7 @@ Runs each `.mlir` file unoptimized and records execution time to `exec_times/bas
 
 ```bash
 # Slurm:
-sbatch scripts/get_base.sh config/baseline.json
+sbatch scripts/baseline/get_base.sh config/baseline.json
 
 # Local:
 python scripts/get_base.py --config config/baseline.json
@@ -111,9 +111,9 @@ python scripts/split_json.py --config config/baseline.json
 
 ```bash
 # Slurm:
-sbatch scripts/train.sh config/baseline.json           # baseline
-sbatch scripts/train.sh config/v1.json rl_autoschedular_v1
-sbatch scripts/train.sh config/v3.json rl_autoschedular_v3
+sbatch scripts/train/train.sh config/baseline.json           # baseline
+sbatch scripts/train/train.sh config/v1.json rl_autoschedular_v1
+sbatch scripts/train/train.sh config/v3.json rl_autoschedular_v3
 
 # Local:
 export CONFIG_FILE_PATH=config/v3.json
@@ -130,8 +130,8 @@ Checkpoints saved every 5 iterations to:
 
 ```bash
 # Slurm — auto-detects latest run_N with checkpoints:
-sbatch scripts/eval.sh config/baseline.json
-sbatch scripts/eval.sh config/v1.json rl_autoschedular_v1
+sbatch scripts/eval/eval.sh config/baseline.json
+sbatch scripts/eval/eval.sh config/v1.json rl_autoschedular_v1
 
 # Local:
 export CONFIG_FILE_PATH=config/v3.json

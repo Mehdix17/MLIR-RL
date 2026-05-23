@@ -96,7 +96,7 @@ for gpt2 (765 ops × ~4 actions). Each action took ~30s → ~25 hours total.
 3. `optimize_model_via_blocks.py`: per-action subprocess bottleneck. Fixed: batched in-process transforms.
 
 ### v13: PyTorch Baselines & Block-Based Final Results
-- Measured PyTorch eager + JIT for all 20 models (19/20 eager, 17/20 JIT)
+- Measured PyTorch eager + JIT for all 22 models (22/22 eager, 18/22 JIT)
 - All 10 bufferization-crash models optimized at checkpoint 1999 with compute-heavy filter
 - Checkpoint 1999 re-eval of 9 full-model successes: all failed (schedules too aggressive)
 
@@ -120,42 +120,47 @@ for gpt2 (765 ops × ~4 actions). Each action took ~30s → ~25 hours total.
 
 **Average speedup: 2.67x**.
 
-### 3.2 Block-Based Baselines (All 19 models)
+### 3.2 Block-Based Baselines (All 20 models)
 
-Block-based baselines measured for all models that can be decomposed into operation blocks.
-Extraction via `data_utils/extract_blocks.py` (window=5, stride=3; lstm uses window=2, stride=1).
-Per-block times are summed for aggregate baseline.
+Block-based baselines measured via `get_base.py` for all models decomposed into operation
+blocks at `data/nn/blocks/`. Extraction via `data_utils/extract_blocks.py`
+(window=5, stride=3). Failed blocks (MLIR parse/execution errors) moved to
+`data/nn/failed_blocks/`. Per-block baselines aggregated in `results/full_model/baselines/all_blocks_baselines.json`.
 
-| Model | Blocks | Baseline (ns) | Baseline (ms) | Notes |
-|-------|--------|---------------|---------------|-------|
-| vit_b_16 | 989 | 498,228,025,117 | 498,228.0 | compute-heavy filter (402 heavy) |
-| resnext50 | 375 | 38,502,493,446 | 38,502.5 | |
-| albert | 1,279 | 46,198,535,687 | 46,198.5 | compute-heavy filter (652 heavy) |
-| bert | 1,102 | 36,076,868,252 | 36,076.9 | compute-heavy filter (504 heavy) |
-| deberta | 1,151 | 35,935,460,605 | 35,935.5 | compute-heavy filter (501 heavy) |
-| t5 | 458 | 28,862,846,895 | 28,862.8 | 20 blocks failed |
-| resnet50 | 407 | 26,348,506,194 | 26,348.5 | |
-| bart | 566 | 18,039,680,557 | 18,039.7 | compute-heavy filter (252 heavy) |
-| distilbert | 554 | 18,777,800,229 | 18,777.8 | compute-heavy filter (252 heavy) |
-| efficientnet_b0 | 632 | 7,138,036,211 | 7,138.0 | |
-| vgg11 | 9 | 7,012,934,552 | 7,012.9 | shallow graph (max depth 9) |
-| mobilenet_v3_small | 398 | 817,651,203 | 817.7 | |
-| convnext_tiny | 392 | 2,145,732,867 | 2,145.7 | compute-heavy filter (113 heavy) |
-| resnet18 | 38 | 2,744,520,457 | 2,744.5 | |
-| lstm | 17 | 1,578,938,845 | 1,578.9 | window=2 (max depth 4) |
-| gcn | 10 | 89,890,843 | 89.9 | |
-| densenet121 | 23 | 1,784,811,960 | 1,784.8 | compute-heavy filter (20 heavy) |
-| gat | 8 | 4,404,586 | 4.4 | compute-heavy filter (2 heavy) |
-| gpt2 | — | — | — | no compute-heavy blocks |
+| Model | Valid | Disk | Coverage | Baseline Sum (ns) | Heavy Blocks |
+|-------|-------|------|----------|--------------------|-------------|
+| albert | 1,158 | 1,279 | 91% | 46,607,771,042 | 652 |
+| bart | 505 | 566 | 89% | 19,872,725,480 | 252 |
+| bert | 981 | 1,102 | 89% | 39,066,486,106 | 504 |
+| convnext_tiny | 392 | 392 | 100% | 2,163,175,580 | 113 |
+| deberta | 971 | 1,151 | 84% | 39,567,604,210 | 501 |
+| densenet121 | 23 | 23 | 100% | 1,774,655,873 | 20 |
+| distilbert | 493 | 554 | 89% | 20,023,879,448 | 252 |
+| efficientnet_b0 | 632 | 632 | 100% | 3,426,002,949 | — |
+| gat | 8 | 8 | 100% | 4,291,550 | 2 |
+| gcn | 10 | 10 | 100% | 61,268,904 | — |
+| gpt2 | 405 | 513 | 79% | 22,745,961 | 0 |
+| gpt2-large | 1,221 | 1,545 | 79% | 133,825,361 | 109 |
+| gpt2-medium | 1,029 | 1,029 | 100% | — (pending) | 73 |
+| lstm | 17 | 17 | 100% | 596,613,142 | — |
+| mobilenet_v3_small | 398 | 398 | 100% | 579,051,209 | — |
+| resnet18 | 38 | 38 | 100% | 2,544,169,014 | — |
+| resnet50 | 407 | 407 | 100% | 18,513,267,765 | — |
+| resnext50 | 375 | 375 | 100% | 26,153,993,404 | — |
+| t5 | 458 | 478 | 96% | 3,779,019,472 | — |
+| vgg11 | 9 | 9 | 100% | 3,664,933,930 | — |
+| vit_b_16 | 989 | 989 | 100% | 485,718,218,708 | 402 |
 
-**Note**: Block-based baselines are higher than full-model baselines because each block incurs
-its own bufferization + JIT compilation overhead (N blocks × N compilations vs 1 full model).
+**Note**: Block-based baselines are typically higher than full-model baselines because each
+block incurs its own bufferization + JIT compilation overhead (N blocks × N compilations vs
+1 full model). Failed blocks (672 total, 7.5%) are structural — missing SSA values or
+resources from the original full model — and are excluded from evaluation.
 
 ### 3.3 Block-Based RL Speedups (10 models, checkpoint 1999)
 
-Models that can't be bufferized end-to-end are decomposed into blocks via
-`data_utils/extract_blocks.py` (window=5, stride=3), filtered to compute-heavy
-(matmul/conv) ops only. Per-block times are weighted by baseline time for aggregate speedup.
+Models that can't be bufferized end-to-end are decomposed into blocks extracted
+from `data/nn/blocks/` (window=5, stride=3), filtered to compute-heavy
+(matmul/conv) ops only. RL optimization via `optimize_model_via_blocks.py`.
 
 | Model | Total Blocks | Heavy Blocks | Honest Speedup | Heavy Speedup |
 |-------|-------------|-------------|---------------|---------------|
@@ -170,33 +175,54 @@ Models that can't be bufferized end-to-end are decomposed into blocks via
 | densenet121 | 23 | 20 | 1.016x | 1.016x |
 | gpt2 | 513 | 0 | — | — (no compute-heavy) |
 
+**Pending evaluation**: gpt2-large (109 heavy blocks), gpt2-medium (73 heavy blocks) —
+both have `linalg.generic` with reduction iterators (lowered matmuls) and are RL-optimizable.
+
 **Average honest speedup: 1.046x** (excluding gpt2).
 
-### 3.4 PyTorch Baselines (20 models)
+### 3.4 PyTorch Baselines (22 models)
 
-| Model | Eager (ns) | JIT (ns) | JIT Status |
-|-------|-----------|---------|------------|
-| albert | 86,775,077 | 82,429,870 | OK |
-| bart | 98,878,867 | 93,021,431 | OK |
-| bert | 85,636,690 | 80,748,370 | OK |
-| convnext_tiny | 171,250,205 | 176,803,765 | OK |
-| densenet121 | 126,791,635 | 121,381,476 | OK |
-| distilbert | 42,080,150 | 39,794,461 | OK |
-| efficientnet_b0 | 35,247,168 | 31,813,552 | OK |
-| gat | 4,642,704 | 4,846,155 | OK |
-| gcn | 351,202 | 340,202 | OK |
-| gpt2 | 96,733,418 | — | **FAILED** (trace: `unordered_map::at`, script: keyword-only args) |
-| lstm | 122,822,950 | 122,405,243 | OK |
-| mobilenet_v3_small | 8,906,990 | 7,276,375 | OK |
-| resnet18 | 66,941,054 | 65,553,926 | OK |
-| resnet50 | 155,061,144 | 152,976,902 | OK |
-| resnext50 | 172,576,113 | 169,292,948 | OK |
-| roberta | 84,874,811 | 79,949,825 | OK |
-| t5 | 21,530,028 | 18,689,525 | OK |
-| vgg11 | 264,923,421 | 264,227,431 | OK |
-| vit_b_16 | 607,651,448 | — | **FAILED** (trace: graph diff, script: internal ops) |
+Measured via `scripts/get_pytorch_baselines.py` with model registry in
+`results/full_model/pytorch_models.json`.
+Timing: 10 warmup + 20 measure iterations → median (ns), CPU.
 
-**19/20** have eager times. **17/20** have JIT times.
+| Model | Eager (ns) | JIT (ns) | Status |
+|-------|-----------|---------|--------|
+| albert | 34,148,463 | 29,260,266 | OK |
+| bart | 43,070,450 | 36,319,387 | OK |
+| bert | 34,591,382 | 28,956,086 | OK |
+| convnext_tiny | 60,130,248 | 70,121,442 | OK |
+| deberta | 54,451,340 | 45,798,158 | OK |
+| densenet121 | 79,972,008 | 69,988,120 | OK |
+| distilbert | 17,411,188 | 14,875,993 | OK |
+| efficientnet_b0 | 31,629,826 | 26,480,685 | OK |
+| gat | 2,529,318 | 2,265,546 | OK |
+| gcn | 289,106 | 249,257 | OK |
+| gpt2 | 63,513,017 | — | **JIT FAILED** |
+| gpt2-large | 354,129,152 | — | **JIT FAILED** |
+| gpt2-medium | 242,336,169 | — | **JIT FAILED** |
+| lstm | 55,524,384 | 55,118,547 | OK |
+| mobilenet_v3_small | 12,657,170 | 9,431,092 | OK |
+| resnet18 | 27,306,841 | 25,511,461 | OK |
+| resnet50 | 65,693,896 | 60,415,456 | OK |
+| resnext50 | 72,405,738 | 68,416,627 | OK |
+| roberta | 34,629,279 | 29,367,095 | OK |
+| t5 | 11,732,134 | 8,947,628 | OK |
+| vgg11 | 89,191,525 | 87,878,142 | OK |
+| vit_b_16 | 171,981,226 | — | **JIT FAILED** |
+
+**22/22** have eager times. **18/22** have JIT times.
+
+#### JIT Failure Details
+
+| Model | Trace Error | Script Error | Root Cause |
+|-------|------------|--------------|------------|
+| gpt2 | `'Tensor' has no attribute 'get_seq_length'` | `Compiled functions can't take variable number of arguments or use keyword-only arguments with defaults` | `GPT2Config.__init__` uses `**kwargs`, HuggingFace library incompatible with `torch.jit.script` |
+| gpt2-large | same | same | Same HuggingFace bug, all GPT2 variants affected |
+| gpt2-medium | same | same | Same |
+| vit_b_16 | `Graphs differed across invocations` — ViT attention produces different graphs per run | `'Tensor' has no attribute 'logits'` in wrapped model | ViT dynamic attention paths incompatible with trace; internal ops incompatible with script |
+
+These are **upstream library incompatibilities** (HuggingFace + torchvision), not fixable in our pipeline. Eager times available for all four.
 
 ### 3.5 Checkpoint Comparison (Final)
 
@@ -220,7 +246,9 @@ Models that can't be bufferized end-to-end are decomposed into blocks via
 | gat | 8 | 2 | — | 1.013x | 4.4 | block-based |
 | convnext_tiny | 392 | 113 | — | 1.023x | 2,145.7 | block-based |
 | densenet121 | 23 | 20 | — | 1.016x | 1,784.8 | block-based |
-| gpt2 | 513 | 0 | — | — | — | skipped |
+| gpt2 | 513 | 0 | — | — | — | skipped (no heavy) |
+| gpt2-large | 1,545 | 109 | — | pending | — | pending (109 contractions) |
+| gpt2-medium | 1,029 | 73 | — | pending | — | pending (73 contractions) |
 | roberta | — | — | — | — | — | AST dumper failure |
 
 ---
@@ -254,9 +282,9 @@ but not crash models — `one-shot-bufferize` also fails on the same linalg patt
 | `scripts/add_timing_wrapper.py` | Wraps `@main` with `@nanoTime()` calls, returns `(tensor, i64)` |
 | `scripts/merge_full_model_results.sh` | Post-hoc merger: chunk files → merged JSON + CSV |
 | `docs/FUTURE_WORKS_RL_FULL_MODEL_SUPPORT.md` | Long-term full-model RL design (GNN, hierarchical actions, PPO) |
-| `results/full_model/baselines/full_model.json` | MLIR baselines |
-| `results/full_model/baselines/blocks_baseline.json` | Block-based baselines (19 models) |
-| `results/full_model/baselines/full_baselines.csv` | Combined baselines (MLIR full, MLIR block, PyTorch eager+JIT) |
+| `results/full_model/baselines/all_blocks_baselines.json` | Per-block baselines for all 20 models (8,269 valid entries from `get_base.py`) |
+| `results/full_model/baselines/blocks_baseline.json` | Per-model aggregated block baseline sums |
+| `results/full_model/baselines/full_baselines.csv` | Combined baselines (MLIR block, PyTorch eager+JIT) |
 | `results/full_model/summary/results.json` | Unified results |
 
 ### Files Modified (Infrastructure Fixes)
@@ -319,16 +347,18 @@ bash scripts/merge_full_model_results.sh
 
 | Index | Model | Index | Model |
 |-------|-------|-------|-------|
-| 0 | albert | 10 | gpt2 |
-| 1 | bart | 11 | lstm |
-| 2 | bert | 12 | mobilenet_v3_small |
-| 3 | convnext_tiny | 13 | resnet18 |
-| 4 | deberta | 14 | resnet50 |
-| 5 | densenet121 | 15 | resnext50 |
-| 6 | distilbert | 16 | roberta |
-| 7 | efficientnet_b0 | 17 | t5 |
-| 8 | gat | 18 | vgg11 |
-| 9 | gcn | 19 | vit_b_16 |
+| 0 | albert | 11 | lstm |
+| 1 | bart | 12 | mobilenet_v3_small |
+| 2 | bert | 13 | resnet18 |
+| 3 | convnext_tiny | 14 | resnet50 |
+| 4 | deberta | 15 | resnext50 |
+| 5 | densenet121 | 16 | roberta |
+| 6 | distilbert | 17 | t5 |
+| 7 | efficientnet_b0 | 18 | vgg11 |
+| 8 | gat | 19 | vit_b_16 |
+| 9 | gcn | 20 | gpt2 |
+| 10 | gpt2 | 21 | gpt2-large |
+| — | — | 22 | gpt2-medium |
 
 ---
 
@@ -372,10 +402,11 @@ bash scripts/merge_full_model_results.sh
   not pipeline bugs. Block-based estimation is the workaround.
 - **Memory**: Models with >1GB tagged files (deberta, gpt2) may OOM during compilation.
   Consider increasing Slurm `--mem` above 32G for these.
-- **JIT incompatibility**: gpt2 and vit_b_16 cannot be JIT-compiled by PyTorch.
-  gpt2: transformers uses keyword-only args with defaults incompatible with trace/script.
-  vit_b_16: ViT has dynamic control flow producing different graphs per run (can't trace),
-  and internal ops unsupported by script. Eager times available for both.
+- **JIT incompatibility**: gpt2, gpt2-large, gpt2-medium, and vit_b_16 cannot be JIT-compiled by PyTorch.
+  GPT2 variants: HuggingFace `GPT2Config.__init__` uses `**kwargs` — fundamentally incompatible
+  with `torch.jit.script`. Trace fails on `'Tensor' has no attribute 'get_seq_length'`.
+  vit_b_16: ViT dynamic attention paths produce different graphs per invocation — trace fails.
+  Script fails on internal ops (`_native_multi_head_attention` wrapping). Eager times available for all four.
 - **AST dumper dialect**: roberta requires `tm_tensor` dialect support — needs C++ rebuild.
 
 ---

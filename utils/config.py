@@ -78,7 +78,7 @@ class Config(metaclass=Singleton):
     """Path to the file containing the execution data"""
     results_dir: str
     """Path to the results directory"""
-    implementation: str = "rl_autoschedular"
+    implementation: str = "rl_autoschedular_v0"
     """Autoscheduler package implementation to use (e.g., rl_autoschedular, rl_autoschedular_v1)."""
     hardware_auto_detect: bool = True
     """If true, hardware features are auto-detected when a value is not explicitly provided."""

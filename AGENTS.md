@@ -57,15 +57,28 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with "Permission denied" on br
 | `rl_autoschedular`     | Baseline — **must remain untouched** |
 | `rl_autoschedular_v1`  | **Hardware-aware observation** (our contribution) |
 | `rl_autoschedular_v2`  | Shaped reward                        |
+| `rl_autoschedular_v2_5`| Hardened shaped reward (fixes V2)    |
 | `rl_autoschedular_v3`  | Transformer loop-nest encoder        |
 | `rl_autoschedular_v4`  | Integrated V1 + V2 + V3              |
-| `rl_autoschedular_v4_5`| **Robust Integrated** (Integration + Hardened Reliability) |
+| `rl_autoschedular_v4_5`| **Robust Integrated** (Integration + Hardened Reliability, trained) |
 | `rl_autoschedular_v45_no_hw`     | Ablation: hardware-awareness disabled |
 | `rl_autoschedular_v45_no_shaped_reward` | Ablation: no reward shaping |
 | `rl_autoschedular_v45_no_transformer` | Ablation: baseline policy (no transformer) |
 | `rl_autoschedular_v5`+ | Future novelties (one per version)   |
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
+
+### Ablation Study Structure
+
+Three ablation implementations remove exactly one novelty from V4.5:
+
+| Ablation | Disabled Feature | Impl Package | Results Dir |
+|----------|-----------------|--------------|-------------|
+| No HW | `hardware_auto_detect: false`, all HW overrides = 0 | `rl_autoschedular_v45_no_hw` | `results/ablation_no_hw/` |
+| No Shaped Reward | `reward_shaping_enabled: false` | `rl_autoschedular_v45_no_shaped_reward` | `results/ablation_no_shaped_reward/` |
+| No Transformer | Uses LSTM instead of Transformer | `rl_autoschedular_v45_no_transformer` | `results/ablation_no_transformer/` |
+
+Each uses `scripts/ablation_eval.py` (nearly identical to `eval.py` but requires `EVAL_DIR`). Configs: use `v45_no_*_blocks.json` for block-based eval, `v45_no_*_full_model.json` for full-model eval. Current status: no_hw and no_transformer already evaluated; no_shaped_reward currently evaluating in 2 jobs (`rew-eval-low`, `rew-eval-high`).
 
 ## Hardware-Aware Observation (V1 — Our Contribution)
 
@@ -94,7 +107,7 @@ python -c "from rl_autoschedular_v1.observation import HARDWARE_VECTOR; print(HA
 
 **Training hardware:** V4.5 was trained on **Dalma** (Intel Xeon E5-2680 v4, 28 cores, 112 GB RAM).
 
-**Dataset:** `data/all` (~17K `.mlir` block files from Albert, Bart, and synthetic benchmarks).
+**Eval set:** `results/experiment3/exec_times/base_eval.json` (3015 benchmarks from the flat `data/all/` directory). Multi-hardware scripts hardcode `EVAL_DIR=results/experiment3/v4_5_agent/run_0/models` and use `EVAL_LAST_ONLY=1` (evaluates only `model_1999.pt`).
 
 ### Cluster Specs
 
@@ -179,43 +192,46 @@ results/
   │  │  ├─ ...
   │  │  └─ pytorch_times.json  # PyTorch reference times
   │  │
-  │  ├─ rl_autoschedular_v4_5_agent/  # Per-implementation results
-  │  │  ├─ checkpoint_1000.pt   # Policy weights (if training)
-  │  │  ├─ eval_results_train.json
-  │  │  └─ eval_results_eval.json
+  │  ├─ v4_5_agent/             # Canonical agent dir (from implementation.py)
+  │  │  ├─ run_0/
+  │  │  │  ├─ models/           # model_0.pt .. model_1999.pt
+  │  │  │  ├─ logs/train/       # reward, entropy, final_speedup (per epoch)
+  │  │  │  ├─ logs/train_ppo/   # PPO loss metrics
+  │  │  │  ├─ logs/eval/        # eval_exec_times.json, speedup files
+  │  │  │  ├─ exec_data.json    # schedule→execution-time mapping
+  │  │  │  └─ tags              # metadata tags
+  │  │  └─ run_N/               # repeated runs (same structure)
   │  │
-  │  ├─ v4_agent/, v2_5_agent/, ...  # Comparative runs
+  │  ├─ v4_agent/, v2_5_agent/, ...  # Same structure, older versions
   │  └─ global_markers/         # V4.5+ resilience: iteration-level checkpoints
   │
   ├─ ablation_no_hw/            # Ablation study: hardware-awareness removed
-  ├─ ablation_no_shaped_reward/  # Ablation: no reward shaping
+  │  ├─ exec_times/              # base.json, base_eval.json, pytorch.json
+  │  └─ rl_autoschedular_v45_no_hw_agent/
+  ├─ ablation_no_shaped_reward/  # Ablation: no reward shaping (currently running)
+  │  ├─ exec_times/
+  │  └─ rl_autoschedular_v45_no_shaped_reward_agent/
   ├─ ablation_no_transformer/    # Ablation: baseline policy
+  │  ├─ exec_times/
+  │  └─ rl_autoschedular_v45_no_transformer_agent/
   └─ full_model/                # Full benchmark runs
+     ├─ baselines/              # full_baselines.csv, blocks_baseline.json
+     ├─ blocks/                 # per-block detail for block-based models
+     ├─ eval/                   # honest_blocks.json
+     ├─ scan/                   # checkpoint scan results
+     └─ summary/                # merged results (final_merged.csv)
 ```
 
-### **Evaluation Metrics**
+### **Evaluation Results**
 
-After training, `eval.sh` produces per-benchmark performance gains:
-
-```
-eval_results_eval.json:
-{
-  "operation_name_1": {
-    "baseline_ms": 5.2,
-    "scheduled_ms": 2.1,
-    "speedup": 2.47
-  },
-  ...
-  "average_speedup": 1.85
-}
-```
+Eval saves results in `<agent>/run_0/logs/eval/eval_exec_times.json` as `{bench_name: optimized_time_ns}` (same format as `exec_times/base_eval.json`). Speedup per checkpoint in `logs/eval/final_speedup`, average in `logs/eval/average_speedup`.
 
 ### **Workflow: From Data to Benchmarking**
 
 1. **Collect Benchmarks** — Generate MLIR code + baseline times (vision2mlir, tf2mlir, gnn2mlir in `data_utils/`)
 2. **Split for Training** — `split_json.py` divides into train/eval (e.g., 70%/30%)
 3. **Train Agent** — `train.sh` runs PPO on train split, outputs checkpoints + loss curves to Neptune
-4. **Evaluate** — `eval.sh` loads best checkpoint, optimizes eval split, logs speedups to `eval_results_eval.json`
+4. **Evaluate** — `eval.sh` loads best checkpoint, optimizes eval split, logs results to `logs/eval/eval_exec_times.json`
 5. **Compare** — Dashboard aggregates speedups across all versions and ablations for comparative analysis
 
 ### **Benchmark Analysis Quick Start**
@@ -224,9 +240,9 @@ eval_results_eval.json:
 ```bash
 python -c "
 import json
-with open('results/experiment3/rl_autoschedular_v4_5_agent/eval_results_eval.json') as f:
+with open('results/experiment3/v4_5_agent/run_0/logs/eval/eval_exec_times.json') as f:
     d = json.load(f)
-    print(f\"Mean speedup: {d['average_speedup']:.2f}x\")
+    print(f\"Optimized {len(d)} benches\")
 "
 ```
 
@@ -234,15 +250,59 @@ with open('results/experiment3/rl_autoschedular_v4_5_agent/eval_results_eval.jso
 ```bash
 python -c "
 import json
-with open('results/experiment3/rl_autoschedular_v4_5_agent/eval_results_eval.json') as f:
+with open('results/experiment3/v4_5_agent/run_0/logs/eval/eval_exec_times.json') as f:
     v45 = json.load(f)
-with open('results/experiment3/v4_agent/eval_results_eval.json') as f:
+with open('results/experiment3/v4_agent/run_0/logs/eval/eval_exec_times.json') as f:
     v4 = json.load(f)
-print(f\"V4.5 avg: {v45['average_speedup']:.2f}x, V4 avg: {v4['average_speedup']:.2f}x\")
+print(f\"V4.5 optimized {len(v45)} benches, V4 optimized {len(v4)} benches\")
 "
 ```
 
 **Monitor training via Neptune** — Link set in `.env` (`NEPTUNE_PROJECT`) — view loss, reward, PPO metrics live during training runs.
+
+## Full-Model End-to-End Optimization: Architecture & Challenges
+
+### Overview
+
+Full-model optimization applies the trained RL agent (v4.5, checkpoint 715) to complete `.mlir` model files, producing end-to-end execution time improvements. Success rate: **9/19 models** with average speedup **2.67x** (t5: 10.07x, lstm: 4.53x). Remaining 10 models use block-based fallback (average 1.046x due to missing context).
+
+**Key challenges**:
+1. **MLIR Bufferization** — Transform-dialect pass crashes on certain linalg patterns (10 models affected)
+2. **PyTorch JIT** — 4 models (gpt2/vit_b_16) fail JIT tracing due to HuggingFace library design (detailed in [PYTORCH_JIT_DEBUGGING.md](docs/PYTORCH_JIT_DEBUGGING.md))
+3. **AST Dumper Robustness** — Timeout handling and worker crash recovery required for large models (fixed in v4.5+)
+4. **Schedule Application Bottleneck** — Old per-action subprocess approach took ~25h for gpt2 (950MB file); now batched in-process transforms: ~2–3 min
+
+### PyTorch JIT Failures: Root Cause & Workarounds
+
+| Model | Issue | Root Cause | Current Workaround |
+|-------|-------|-----------|------------------|
+| gpt2, gpt2-large, gpt2-medium | Trace fails | `'Tensor' has no attribute 'get_seq_length'` | Use eager times only |
+| gpt2 (all variants) | Script fails | `GPT2Config.__init__` uses `**kwargs` — incompatible with `torch.jit.script()` | Same |
+| vit_b_16 | Trace fails | Dynamic attention paths produce different graphs per invocation | Use eager times only |
+| vit_b_16 | Script fails | `'Tensor' has no attribute 'logits'` — internal ops not in TorchScript scope | Same |
+
+**Impact**: 4/22 models (18%) have empty PyTorch JIT columns in baselines CSV. All 4 still execute in eager mode (valid benchmark) and participate in full-model RL optimization.
+
+**Future Fixes** (in priority order):
+1. **Model Surgery** (2–4h) — Extract & freeze model components, trace only forward path
+2. **Custom TorchScript Ops** (8–16h) — Implement custom CUDA kernels for attention/ops
+3. **ONNX Intermediate** (1–2h) — Trace via ONNX Runtime (not applicable for CPU-only benchmarking)
+
+See [PYTORCH_JIT_DEBUGGING.md](docs/PYTORCH_JIT_DEBUGGING.md) for detailed analysis, reproduction steps, and implementation roadmap.
+
+### MLIR Bufferization Crashes: Workarounds
+
+**Problem**: 10 models fail MLIR `one-shot-bufferize` transform-dialect pass with `op was not bufferized`. These are MLIR compiler bugs, not pipeline bugs. Affected: albert, bert, distilbert, bart, deberta, convnext_tiny, densenet121, gat, gpt2, vit_b_16.
+
+**Current Approach**:
+1. **Full-model** (checkpoint 715): Succeeds for 9 models (t5, lstm, vgg11, resnet18/50, resnext50, gcn, efficientnet_b0, mobilenet_v3_small)
+2. **Block-based fallback** (checkpoint 1999): Decompose into extracted operation blocks (window=5, stride=3), optimize each block independently
+3. **Three-level execution pipeline**:
+   - v4_5 bindings execution (300s cap)
+   - Multiprocess bindings (7200s timeout)
+   - `mlir-opt -one-shot-bufferize` subprocess + `mlir-cpu-runner` JIT (7200s timeout for large models)
+
+See [FULL_MODEL.md § 4](docs/FULL_MODEL.md#4-root-cause-analysis-mlir-baseline-failures) for technical details.
 
 ## Documentation References
 
@@ -253,6 +313,8 @@ For more detailed guides and architectural decisions, refer to the following doc
 - [Training Guide](docs/TRAINING_GUIDE.md) — Comprehensive guide on training the RL agent.
 - [RL Agent Tutorial](docs/RL_AGENT_TUTORIAL.md) — Walkthrough of the RL framework and logic.
 - [Pipeline Orchestration](docs/PIPELINE.md) — Full lifecycle of MLIR baseline up to evaluation.
+- [Full-Model End-to-End Optimization](docs/FULL_MODEL.md) — Complete architecture, bug fixes, results, and known limitations for full-model RL optimization.
+- [PyTorch JIT Debugging](docs/PYTORCH_JIT_DEBUGGING.md) — Root cause analysis of gpt2/vit_b_16 JIT failures and proposed workarounds (model surgery, custom ops, ONNX).
 - [Dashboard Guide](docs/dashboard.md) — Streamlit evaluation instructions.
 - [Data Utils](data_utils/README.md) — Tools for generating synthetic MLIR datasets and extraction operations.
 - [Novelties](docs/NOVELTIES.md) and [Versions](docs/VERSIONS.md) — Changelog and upcoming version plans.
@@ -365,6 +427,52 @@ python data_utils/extract_blocks.py --input data/nn/raw_bench/albert_linalg.mlir
 
 `extract_blocks.py` windows consumer→producer paths into fixed-size blocks (default: 5 ops, stride 3). Alternative: `extract_ops.py` for single-operation files. Then run `scripts/get_base.py` for baseline times and `scripts/split_json.py` for train/eval split.
 
+### Blocks (`data/nn/blocks/`)
+
+Per-model block directories (20 models), extracted from full model `.mlir` files via `extract_blocks.py` (window=5 stride=3). Failed blocks moved to `data/nn/failed_blocks/`. Models: `albert/`, `bart/`, `bert/`, `convnext_tiny/`, `densenet121/`, `deberta/`, `distilbert/`, `efficientnet_b0/`, `gat/`, `gcn/`, `gpt2/`, `gpt2-large/`, `gpt2-medium/`, `lstm/`, `mobilenet_v3_small/`, `resnet18/`, `resnet50/`, `resnext50/`, `t5/`, `vgg11/`, `vit_b_16/`.
+
+**Important:** `benchmarks.py` does `os.path.join(benchmarks_folder_path, bench_name + ".mlir")` — no subdirectory recursion. To evaluate a model, point `benchmarks_folder_path` directly at the model subdir (e.g., `data/nn/blocks/albert`). The flat `data/all/` (~17K files) is what V4.5 was trained on.
+
+### Full-Model End-to-End Evaluation
+
+For models that bufferize end-to-end, the pipeline does not decompose into blocks. 9/19 models succeed; the rest fail MLIR's `one-shot-bufferize` pass and use block-based estimation instead.
+
+**Pipeline:**
+```
+Full .mlir → AST dumper (preprocess_model.py) → tagged code with {tag = "operation_NNN"}
+  → RL agent greedy inference per op (optimize_full_model.py) → apply schedules in-place
+  → add @nanoTime() wrapper (add_timing_wrapper.py) → execute → optimized time
+```
+
+**Key scripts:**
+- `scripts/optimize_full_model.py` — Main orchestrator: tagging, baseline, RL inference, schedule application (batched in-process transforms — parse once, not per-action), execution
+- `scripts/optimize_full_model.sh` — Slurm array job wrapper (tasks 0–19, one per model)
+- `scripts/preprocess_model.py` — Runs C++ AST dumper to tag linalg ops
+- `scripts/add_timing_wrapper.py` — Wraps `@main` with `@nanoTime()`, returns `(tensor, i64)`
+- `scripts/measure_full_model_baselines.py` — PyTorch eager + JIT timing for all models
+- `scripts/merge_full_model_results.sh` — Merges chunk files into unified JSON + CSV
+
+**Checkpoints:** Full-model uses `model_715.pt` (iteration 715, less aggressive). Block-based eval uses `model_1999.pt` (final checkpoint).
+
+**Three-level execution pipeline** (increasing robustness):
+1. V4.5 bindings execution (300s cap)
+2. Multiprocess bindings with 7200s timeout
+3. `mlir-opt -one-shot-bufferize` subprocess + `mlir-cpu-runner` JIT with 7200s timeout
+
+**Key known issues:**
+- 10 models fail bufferization (albert, bart, bert, convnext_tiny, deberta, densenet121, distilbert, gat, gpt2, vit_b_16) → use block-based estimation
+- roberta: AST dumper fails (`tm_tensor` dialect not found)
+- See `docs/FULL_MODEL.md` for full details (395-line guide with bug fixes, edge cases, results)
+
+### Canonical Results Table
+
+`results/full_model/baselines/full_baselines.csv` is the master comparison table:
+```
+model,mlir_baseline_ns,pytorch_eager_ns,pytorch_jit_ns,mlir_rl_opt_ns
+```
+
+Visit `results/full_model/summary/final_merged.csv` for the unified per-model summary (full-model for 9 models, block-based for 10).
+
 ## Results Directory Layout
 
 ```
@@ -404,6 +512,7 @@ The config fields `json_file` and `eval_json_file` default to `""` — when empt
 - **DaskManager is disabled by default** (`ENABLED = False` in `utils/dask_manager.py`). Distributed execution across Slurm workers only activates if you set `ENABLED = True` and `DASK_NODES` env var. All execution runs single-process on the Slurm node otherwise.
 - **SIGABRT handler** — `train.py` and `eval.py` install a signal handler that catches native MLIR crashes (`SIGABRT`) and converts them to Python exceptions so training can continue past a bad schedule.
 - **`submit_and_monitor.sh`** — Submits a Slurm script, waits for the job to start, then tails its output (`scripts/submit_and_monitor.sh scripts/train.sh config/train1.json`).
+- **Check running jobs before submitting** — `squeue -u mb10856`. Two reward-eval jobs currently use 2 nodes (`rew-eval-low`, `rew-eval-high`). Submitting eval with `--cpus-per-task=4` avoids `AssocGrpCpuLimit`.
 
 ### Critical: BindingsProcess.ENABLED Must Stay False
 

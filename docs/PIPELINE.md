@@ -39,7 +39,7 @@
 
 | Package | Agent Dir | Key Feature | Actions | Reward | Encoder | Reliability |
 |---|---|---|---|---|---|---|
-| `rl_autoschedular` | `old_agent` | Baseline | 6 | Sparse terminal | LSTM | In-process |
+| `rl_autoschedular_v0` | `old_agent` | Baseline | 6 | Sparse terminal | LSTM | In-process |
 | `rl_autoschedular_v1` | `v1_agent` | Hardware-aware observation | 6 | Sparse terminal | LSTM + HW concat | In-process |
 | `rl_autoschedular_v2` | `v2_agent` | Shaped intermediate reward | 6 | Dense shaped + sparse terminal | LSTM | In-process |
 | `rl_autoschedular_v3` | `v3_agent` | Transformer loop-nest encoder | 6 | Sparse terminal | Transformer | In-process |
@@ -72,7 +72,7 @@ The recommended way to run everything:
 
 ```bash
 bash scripts/pipeline.sh config/baseline.json
-bash scripts/pipeline.sh config/baseline.json "rl_autoschedular,rl_autoschedular_v1,rl_autoschedular_v3"
+bash scripts/pipeline.sh config/baseline.json "rl_autoschedular_v0,rl_autoschedular_v1,rl_autoschedular_v3"
 ```
 
 ### Config Derivation
@@ -81,7 +81,7 @@ The first argument is the **base config** used for shared steps. For per-impleme
 
 | Implementation | → Config |
 |---|---|
-| `rl_autoschedular` | `config/baseline.json` |
+| `rl_autoschedular_v0` | `config/baseline.json` |
 | `rl_autoschedular_v1` | `config/v1.json` |
 | `rl_autoschedular_v3` | `config/v3.json` |
 | unknown / custom | fallback to base config |
@@ -96,11 +96,11 @@ If any implementation's train or eval submission fails, the pipeline continues w
 
 ### Steps executed:
 
-1. `get_base.sh` (Slurm) — shared MLIR baseline
+1. `baseline/get_base.sh` (Slurm) — shared MLIR baseline
 2. `get_pytorch_times.py` (local) — PyTorch baselines
 3. `split_json.py` (local) — stratified train/eval split
-4. `train.sh` (Slurm) × N implementations (parallel, each with its own config)
-5. `eval.sh` (Slurm) × N (dependent on train)
+4. `train/train.sh` (Slurm) × N implementations (parallel, each with its own config)
+5. `eval/eval.sh` (Slurm) × N (dependent on train)
 
 ---
 
@@ -150,7 +150,7 @@ results/<experiment>/
 │   ├── base_eval.json                  #   Eval split
 │   └── pytorch.json                    #   PyTorch eager/compile/jit
 │
-├── old_agent/                          # rl_autoschedular (baseline)
+├── old_agent/                          # rl_autoschedular_v0 (baseline)
 │   └── run_0/
 │       ├── models/model_*.pt           # Checkpoints
 │       ├── exec_data.json              # Schedule→exec_time cache
@@ -234,15 +234,15 @@ streamlit run dashboard.py
 source ~/envs/mlir/bin/activate && set -a && source .env && set +a
 
 # Shared baselines (once)
-sbatch scripts/get_base.sh config/baseline.json
+sbatch scripts/baseline/get_base.sh config/baseline.json
 python scripts/get_pytorch_times.py --config config/baseline.json
 python scripts/split_json.py --config config/baseline.json
 
 # Train + eval per version (each with its own config)
-sbatch scripts/train.sh config/baseline.json
-sbatch scripts/train.sh config/v3.json rl_autoschedular_v3
-sbatch scripts/eval.sh config/baseline.json
-sbatch scripts/eval.sh config/v3.json rl_autoschedular_v3
+sbatch scripts/train/train.sh config/baseline.json
+sbatch scripts/train/train.sh config/v3.json rl_autoschedular_v3
+sbatch scripts/eval/eval.sh config/baseline.json
+sbatch scripts/eval/eval.sh config/v3.json rl_autoschedular_v3
 
 # One-shot pipeline (all versions, with auto-derived configs)
 bash scripts/pipeline.sh config/baseline.json

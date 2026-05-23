@@ -1,5 +1,5 @@
 {
-    "implementation": "rl_autoschedular",
+    "implementation": "rl_autoschedular_v0",
     "benchmarks_folder_path": "data/all",
     "results_dir": "results/experiment3",
     "max_num_stores_loads": 7,

@@ -1,5 +1,5 @@
 {
-    "implementation": "rl_autoschedular",
+    "implementation": "rl_autoschedular_v0",
     "max_num_stores_loads": 7,
     "max_num_loops": 7,
     "max_num_load_store_dim": 7,

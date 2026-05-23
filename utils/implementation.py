@@ -6,11 +6,11 @@ import re
 from pathlib import Path
 from typing import Optional
 
-DEFAULT_IMPLEMENTATION = "rl_autoschedular"
+DEFAULT_IMPLEMENTATION = "rl_autoschedular_v0"
 
 # Preserve legacy naming for already-produced results.
 LEGACY_IMPLEMENTATION_META = {
-    "rl_autoschedular": {
+    "rl_autoschedular_v0": {
         "agent_dir": "old_agent",
         "base_prefix": "old",
         "display_name": "Baseline RL",

@@ -17,12 +17,12 @@ export CONFIG_FILE_PATH="$CONFIG"
 
 # ---------- 2) Generate MLIR baseline times ----------
 
-sbatch scripts/get_base.sh "$CONFIG"
+sbatch scripts/baseline/get_base.sh "$CONFIG"
 # Writes: results/<experiment>/exec_times/<impl_prefix>_base.json
 
 # ---------- 3) Generate PyTorch baselines ----------
 
-sbatch scripts/get_pytorch_times.sh "$CONFIG"
+sbatch scripts/baseline/get_pytorch_times.sh "$CONFIG"
 
 # ---------- 4) Split implementation baseline into train/eval ----------
 
@@ -33,11 +33,11 @@ python scripts/split_json.py "$CONFIG"
 
 # ---------- 5) Train ----------
 
-sbatch --time=48:00:00 --array=0-3 scripts/train.sh
+sbatch --time=48:00:00 --array=0-3 scripts/train/train.sh
 
 # ---------- 6) Evaluate checkpoints ----------
 
-sbatch scripts/eval.sh "$CONFIG"
+sbatch scripts/eval/eval.sh "$CONFIG"
 
 # ---------- 7) Compare in Dashboard ----------
 
@@ -46,9 +46,9 @@ streamlit run dashboard.py --server.fileWatcherType none
 
 # ---------- Submit + Monitor ----------
 
-scripts/submit_and_monitor.sh scripts/train.sh "$CONFIG"
+scripts/utils/submit_and_monitor.sh scripts/train/train.sh "$CONFIG"
 
-scripts/submit_and_monitor.sh scripts/eval.sh "$CONFIG"
+scripts/utils/submit_and_monitor.sh scripts/eval/eval.sh "$CONFIG"
 
 # ---------- Fast Copy/Paste ----------
 

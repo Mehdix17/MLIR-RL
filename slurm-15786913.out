@@ -1,0 +1,24 @@
+Submitting 18 jobs, one per model...
+Checkpoints: 14
+
+  albert → job 15786946
+  bart → job 15786949
+  bert → job 15786952
+  convnext_tiny → job 15786955
+  deberta → job 15786961
+  densenet121 → job 15786963
+  distilbert → job 15786965
+  efficientnet_b0 → job 15786970
+  gat → job 15786972
+  gcn → job 15786976
+  lstm → job 15786982
+  mobilenet_v3_small → job 15786984
+  resnet18 → job 15786990
+  resnet50 → job 15786993
+  resnext50 → job 15786996
+  t5 → job 15786999
+  vgg11 → job 15787003
+  vit_b_16 → job 15787007
+
+All jobs submitted. Monitor with: squeue -u $USER
+Check individual logs in: /scratch/mb10856/MLIR-RL/results/full_model/scan/*.log

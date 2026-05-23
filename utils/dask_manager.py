@@ -12,9 +12,9 @@ from .log import print_alert, print_error, print_info, print_success
 import os
 
 if TYPE_CHECKING:
-    from rl_autoschedular.benchmarks import Benchmarks
+    from rl_autoschedular_v0.benchmarks import Benchmarks
     from dask_jobqueue.slurm import SLURMJob
-    from rl_autoschedular.state import OperationState
+    from rl_autoschedular_v0.state import OperationState
 
 ENABLED = False
 T = TypeVar('T')

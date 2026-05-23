@@ -30,14 +30,14 @@ from tqdm import tqdm
 _USE_BINDINGS = False
 
 try:
-    from rl_autoschedular.evaluation import evaluate_code_with_bindings_and_timeout
-    from rl_autoschedular.observation import main_wrapper as _wrap_bindings
+    from rl_autoschedular_v0.evaluation import evaluate_code_with_bindings_and_timeout
+    from rl_autoschedular_v0.observation import main_wrapper as _wrap_bindings
     _USE_BINDINGS = True
 except Exception:
     pass  # bindings not available — will use cmd
 
-from rl_autoschedular.evaluation import evaluate_code_with_cmd_and_timeout
-from rl_autoschedular.observation import (
+from rl_autoschedular_v0.evaluation import evaluate_code_with_cmd_and_timeout
+from rl_autoschedular_v0.observation import (
     transform_wrapper as _wrap_cmd,
     __inline,
     extract_op_features_from_affine_code,
@@ -92,7 +92,7 @@ def _extract_function_safe(code: str, name: str):
     """Safe wrapper around extract_function that returns (fn, (start, None)) or
     (None, (None, None)) when the function is not found."""
     try:
-        from rl_autoschedular.observation import extract_function
+        from rl_autoschedular_v0.observation import extract_function
         return extract_function(code, name)
     except Exception:
         return None, (None, None)

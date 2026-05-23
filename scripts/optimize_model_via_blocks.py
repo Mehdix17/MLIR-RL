@@ -55,10 +55,16 @@ COMPUTE_HEAVY_OPS = {"matmul", "batch_matmul", "conv_2d", "conv_1d", "conv_3d",
                      "matmul_transpose_a", "matmul_transpose_b",
                      "batch_reduce_matmul", "depthwise_conv_2d"}
 
+import re
 
 def _has_compute_heavy(code: str) -> bool:
     for op in COMPUTE_HEAVY_OPS:
         if f"linalg.{op}" in code:
+            return True
+    # Also detect linalg.generic with reduction iterator (lowered matmul/contraction)
+    if "linalg.generic" in code:
+        match = re.search(r'iterator_types\s*=\s*\[([^\]]+)\]', code)
+        if match and '"reduction"' in match.group(1):
             return True
     return False
 
@@ -91,7 +97,10 @@ def infer_greedy_schedule(model, bench_features, operation_tag):
         transformation_history=[[]], terminal=False,
     )
 
-    while not state.terminal:
+    max_steps = _config.truncate
+    steps = 0
+    while not state.terminal and steps < max_steps:
+        steps += 1
         obs = Observation.from_state(state).to(DEVICE)
         with torch.no_grad():
             actions_index, _, _ = model.sample(obs, greedy=True)
@@ -108,19 +117,19 @@ def infer_greedy_schedule(model, bench_features, operation_tag):
                 action.update_producer_features(state, bench_features)
             except Exception:
                 pass
-        state.operation_features = action.update_features(state.operation_features)
+        try:
+            state.operation_features = action.update_features(state.operation_features)
+        except Exception:
+            break
         state.terminal = action.terminal or state.step_count >= _config.truncate
 
     return state.transformation_history[0]
 
 
-def apply_actions_to_code(code, actions, op_tag):
+def apply_actions_to_code(code, actions, op_tag, timeout=30):
     _body = _build_block_action_body(op_tag, actions)
     if not _body:
         return code
-
-    from mlir.ir import Context, Module
-    from mlir.dialects.transform import interpreter
 
     _transform_str = (
         '\nmodule attributes {transform.with_named_sequence} {\n'
@@ -132,14 +141,44 @@ def apply_actions_to_code(code, actions, op_tag):
         '}\n'
     )
 
+    import tempfile, pickle, subprocess, sys, os as _os
+    tmp = tempfile.NamedTemporaryFile(suffix='.pkl', delete=False)
+    pickle.dump((code, _transform_str), tmp)
+    tmp.close()
+
+    _out_path = f"{tmp.name}.out"
+    worker = (
+        'import pickle, sys;'
+        'from mlir.ir import Context, Module;'
+        'from mlir.dialects.transform import interpreter;'
+        f'code, ts = pickle.load(open("{tmp.name}", "rb"));'
+        'try:'
+        '  with Context():'
+        '    m = Module.parse(code);'
+        '    t = Module.parse(ts);'
+        '    interpreter.apply_named_sequence(m, t.body.operations[0], t);'
+        f'    pickle.dump(str(m), open("{_out_path}", "wb"));'
+        'except:'
+        f'  pickle.dump(None, open("{_out_path}", "wb"));'
+    )
+
     try:
-        with Context():
-            m = Module.parse(code)
-            t = Module.parse(_transform_str)
-            interpreter.apply_named_sequence(m, t.body.operations[0], t)
-            return str(m)
+        subprocess.run([sys.executable, '-c', worker],
+            timeout=timeout, capture_output=True,
+            env={**_os.environ, 'PYTHONUNBUFFERED': '1'})
+        if _os.path.exists(f"{tmp.name}.out"):
+            with open(f"{tmp.name}.out", "rb") as f:
+                result = pickle.load(f)
+            return result if result is not None else code
+        return code
+    except subprocess.TimeoutExpired:
+        return code
     except Exception:
         return code
+    finally:
+        for p in [tmp.name, f"{tmp.name}.out"]:
+            if _os.path.exists(p):
+                _os.unlink(p)
 
 
 def _build_block_action_body(op_tag: str, actions: list) -> list[str]:
@@ -505,6 +544,7 @@ def process_model(model_name: str, checkpoint_paths: List[str], blocks_dir_base:
             model.eval()
 
             total_optimized = 0
+            total_transformations = 0
             errors = 0
 
             for i, block_name in enumerate(valid_blocks):
@@ -526,7 +566,7 @@ def process_model(model_name: str, checkpoint_paths: List[str], blocks_dir_base:
                     continue
 
                 schedules = {}
-                for tag in bench_features.operation_tags:
+                for tag in list(bench_features.operation_tags):
                     try:
                         actions = infer_greedy_schedule(model, bench_features, tag)
                         schedules[tag] = actions
@@ -537,7 +577,13 @@ def process_model(model_name: str, checkpoint_paths: List[str], blocks_dir_base:
                 for tag, actions in schedules.items():
                     opt_code = apply_actions_to_code(opt_code, actions, tag)
 
-                opt_ns = 0
+                total_transformations += sum(
+                    1 for actions in schedules.values()
+                    for a in actions
+                    if type(a).__name__ != 'NoTransformation'
+                )
+
+                opt_ns = baseline
                 try:
                     exec_engine = Execution("")
                     r = exec_engine.execute_code(opt_code, f"{model_name}_{block_name}_{ckpt_name}_opt", [])
@@ -545,18 +591,17 @@ def process_model(model_name: str, checkpoint_paths: List[str], blocks_dir_base:
                         opt_ns = r[0]
                 except Exception:
                     pass
-                if opt_ns <= 0:
-                    opt_ns = baseline
                 total_optimized += opt_ns
 
                 if (i + 1) % 100 == 0:
                     current = total_baseline / (total_optimized if total_optimized > 0 else 1)
-                    print(f"    [{i+1}/{len(valid_blocks)}] partial speedup={current:.4f}x ({errors} err)")
+                    print(f"    [{i+1}/{len(valid_blocks)}] partial sp={current:.4f}x tf={total_transformations} ({errors} err)")
 
             checkpoint_results[ckpt_name]["optimized_ns"] = total_optimized
             checkpoint_results[ckpt_name]["errors"] = errors
+            checkpoint_results[ckpt_name]["transformations"] = total_transformations
             speedup = total_baseline / total_optimized if total_optimized > 0 else 1.0
-            print(f"    FINAL: {total_baseline:,} -> {total_optimized:,} = {speedup:.4f}x")
+            print(f"    FINAL: {total_baseline:,} -> {total_optimized:,} = {speedup:.4f}x ({total_transformations} tf)")
 
     for ckpt_name in checkpoint_results:
         cr = checkpoint_results[ckpt_name]
@@ -577,17 +622,26 @@ def process_model(model_name: str, checkpoint_paths: List[str], blocks_dir_base:
 
 def main():
     parser = argparse.ArgumentParser(description="Block-based model optimization — multi-checkpoint compare.")
-    parser.add_argument("--checkpoints", nargs="+", required=True, help="Checkpoint .pt files to compare")
+    parser.add_argument("--checkpoints", nargs="+", default=None, help="Checkpoint .pt files to compare")
+    parser.add_argument("--single-checkpoint", default=None, help="Single checkpoint .pt file (trigger per-block output + resume)")
     parser.add_argument("--model", required=True, help="Model name (stem without _linalg)")
     parser.add_argument("--models-dir", default="data/nn/raw_bench")
-    parser.add_argument("--blocks-dir", default="data/nn/blocks_v10")
+    parser.add_argument("--blocks-dir", default="data/nn/blocks")
     parser.add_argument("--output", required=True, help="Results JSON path")
+    parser.add_argument("--markers-dir", default=None, help="Markers directory for resume (single-ckpt mode)")
     parser.add_argument("--window-size", type=int, default=5)
     parser.add_argument("--stride", type=int, default=3)
     parser.add_argument("--skip-extraction", action="store_true", help="Skip block extraction if blocks already exist")
     parser.add_argument("--workers", type=int, default=1, help="Number of parallel workers (default: 1 = sequential)")
     parser.add_argument("--baselines-json", default=None, help="Pre-measured baselines JSON (skips baseline measurement)")
     args = parser.parse_args()
+
+    if args.single_checkpoint:
+        _run_single_checkpoint(args)
+        return
+
+    if not args.checkpoints:
+        parser.error("Either --checkpoints or --single-checkpoint required")
 
     print(f"Model: {args.model}")
     print(f"Checkpoints: {len(args.checkpoints)}")
@@ -617,11 +671,185 @@ def main():
     print(f"\nSaved → {args.output}")
 
     if "checkpoints" in result:
-        print(f"\n{'Checkpoint':<20} {'Baseline':>16} {'Optimized':>16} {'Speedup':>10} {'Blocks':>8} {'Errors':>8}")
-        print("-" * 80)
+        print(f"\n{'Checkpoint':<20} {'Baseline':>16} {'Optimized':>16} {'Speedup':>10} {'TF':>6} {'Blocks':>8} {'Errors':>8}")
+        print("-" * 86)
         for ckpt_name, cr in result["checkpoints"].items():
             print(f"{ckpt_name:<20} {cr['baseline_ns']:>16,} {cr['optimized_ns']:>16,} "
-                  f"{cr['speedup']:>10.4f}x {cr['blocks_used']:>8} {cr['errors']:>8}")
+                  f"{cr['speedup']:>10.4f}x {cr.get('transformations', 0):>6} {cr['blocks_used']:>8} {cr['errors']:>8}")
+
+
+# ===========================================================================
+# Single-checkpoint mode — per-block output, resume with markers
+# ===========================================================================
+
+def _run_single_checkpoint(args):
+    ckpt_path = Path(args.single_checkpoint)
+    blocks_dir = Path(args.blocks_dir) / args.model
+    block_files = sorted(blocks_dir.glob("*.mlir"))
+    if not block_files:
+        print(f"No blocks found in {blocks_dir}")
+        return
+
+    # Load all per-block baselines
+    if not args.baselines_json:
+        print("ERROR: --baselines-json required in single-ckpt mode")
+        sys.exit(1)
+    with open(args.baselines_json) as f:
+        all_baselines = json.load(f)
+
+    # Load existing output (resume)
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output = {}
+    if output_path.exists():
+        try:
+            output = json.loads(output_path.read_text())
+        except Exception:
+            output = {}
+
+    # Markers dir for per-block resume
+    markers_dir = Path(args.markers_dir or str(output_path.parent / "markers"))
+    model_markers = markers_dir / args.model
+    model_markers.mkdir(parents=True, exist_ok=True)
+
+    # Determine pending blocks
+    pending = []
+    skipped_cached = 0
+    for bf in block_files:
+        bn = bf.stem
+        marker = model_markers / f"{bn}.json"
+        if bn in output or marker.exists():
+            # Load from marker if not in output yet
+            if bn not in output and marker.exists():
+                try:
+                    output[bn] = json.loads(marker.read_text())
+                except Exception:
+                    pending.append(bf)
+                    continue
+            skipped_cached += 1
+            continue
+        pending.append(bf)
+
+    total = len(block_files)
+    print(f"Model: {args.model}")
+    print(f"Blocks: {total} total, {skipped_cached} cached, {len(pending)} pending")
+    print(f"Checkpoint: {ckpt_path.name}")
+    print(f"Output: {output_path}")
+    print(f"Markers: {model_markers}")
+    print()
+
+    if not pending:
+        print("All blocks already evaluated. Done.")
+        return
+
+    # Load RL model once
+    _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    rl_model = HiearchyModel().to(_device)
+    ckpt = torch.load(str(ckpt_path), map_location=_device, weights_only=False)
+    rl_model.load_state_dict(ckpt)
+    rl_model.eval()
+
+    exec_engine = Execution("")
+
+    heavy_count = 0
+    generic_count = 0
+    error_count = 0
+
+    def _save_atomic(obj, path):
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp.write_text(json.dumps(obj, indent=2) + "\n")
+        tmp.rename(path)
+
+    for i, bf in enumerate(pending):
+        bn = bf.stem
+        with open(bf) as f:
+            code = f.read()
+
+        baseline_ns = all_baselines.get(bn, 0)
+        if baseline_ns <= 0:
+            print(f"  [{i+1}/{len(pending)}] {bn}: no baseline → skip")
+            result = {"baseline_ns": 0, "optimized_ns": -1, "error": "no baseline"}
+            output[bn] = result
+            _save_atomic(result, model_markers / f"{bn}.json")
+            _save_atomic(output, output_path)
+            error_count += 1
+            continue
+
+        if _has_compute_heavy(code):
+            # --- RL optimization ---
+            try:
+                bench_features = extract_bench_features_from_code(
+                    bench_name=f"{args.model}_{bn}", code=code,
+                    root_execution_time=baseline_ns,
+                )
+            except Exception:
+                print(f"  [{i+1}/{len(pending)}] {bn}: AST dumper fail → baseline")
+                result = {"baseline_ns": baseline_ns, "optimized_ns": baseline_ns}
+                output[bn] = result
+                _save_atomic(result, model_markers / f"{bn}.json")
+                _save_atomic(output, output_path)
+                error_count += 1
+                continue
+
+            if not bench_features.operation_tags:
+                print(f"  [{i+1}/{len(pending)}] {bn}: no ops → baseline")
+                result = {"baseline_ns": baseline_ns, "optimized_ns": baseline_ns}
+                output[bn] = result
+                _save_atomic(result, model_markers / f"{bn}.json")
+                _save_atomic(output, output_path)
+                continue
+
+            schedules = {}
+            for tag in list(bench_features.operation_tags):
+                try:
+                    actions = infer_greedy_schedule(rl_model, bench_features, tag)
+                    schedules[tag] = actions
+                except Exception:
+                    schedules[tag] = []
+
+            opt_code = code
+            tf_count = 0
+            for tag, actions in schedules.items():
+                try:
+                    opt_code = apply_actions_to_code(opt_code, actions, tag)
+                    tf_count += sum(1 for a in actions if type(a).__name__ != 'NoTransformation')
+                except Exception:
+                    pass
+
+            # Execute
+            opt_ns = baseline_ns
+            try:
+                r = exec_engine.execute_code(opt_code, f"{args.model}_{bn}_opt", [])
+                if r[1] and r[0] > 0:
+                    opt_ns = r[0]
+            except Exception:
+                pass
+
+            result = {"baseline_ns": baseline_ns, "optimized_ns": opt_ns}
+            sp = baseline_ns/opt_ns if opt_ns > 0 else 1.0
+            marker = "++" if sp > 1.01 else ("--" if sp < 0.99 else " =")
+            print(f"  [{i+1}/{len(pending)}] {bn}: heavy  {baseline_ns:>12,} → {opt_ns:>12,} ns  ({tf_count} tf)  {sp:.3f}x {marker}")
+            heavy_count += 1
+        else:
+            # Non-heavy: speedup = 1.0
+            result = {"baseline_ns": baseline_ns, "optimized_ns": baseline_ns}
+            generic_count += 1
+
+        output[bn] = result
+        _save_atomic(result, model_markers / f"{bn}.json")
+        _save_atomic(output, output_path)
+
+    # Final save
+    _save_atomic(output, output_path)
+
+    # Summary
+    total_baseline = sum(v["baseline_ns"] for v in output.values() if v.get("baseline_ns", 0) > 0)
+    total_optimized = sum(v["optimized_ns"] for v in output.values() if v.get("optimized_ns", 0) > 0)
+    speedup = total_baseline / total_optimized if total_optimized > 0 else 1.0
+    print(f"\n  Summary: {heavy_count} heavy, {generic_count} generic, {error_count} errors")
+    print(f"  Total: {total_baseline:,} → {total_optimized:,} = {speedup:.4f}x")
+    print(f"  Saved → {output_path}")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 This document tracks the evolution of versioned RL agents.
 
 Rules used in this repository:
-- `rl_autoschedular` is the baseline and must remain untouched.
+- `rl_autoschedular_v0` is the baseline (renamed from `rl_autoschedular`).
 - Each version folder (`rl_autoschedular_v1`, `rl_autoschedular_v2`, ...) implements exactly one novelty.
 - Every completed version must add one section here with implementation details and validation notes.
 
