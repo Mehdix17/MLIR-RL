@@ -255,8 +255,6 @@ Loop unrolling replicates the body of a loop multiple times, adjusting the strid
 
 Unrolling is beneficial when the loop body is small and the branch overhead is significant relative to the useful computation. However, excessive unrolling increases code size, which can pressure the instruction cache and cause performance degradation.
 
-In our system, loop unrolling is introduced as one of the expanded action space transformations in version V4 (denoted \texttt{U}). The agent selects an unroll factor from a set of powers of two. Because some operations lose their structured operation tag after unrolling (the operation is lowered to explicit loops that are then unrolled), unrolling is treated as a terminal action: no further transformations can be applied after it.
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_unrolling.png}
@@ -266,7 +264,7 @@ In our system, loop unrolling is introduced as one of the expanded action space 
 
 \subsection{Loop Peeling}
 
-Loop peeling extracts a small number of iterations from the beginning or end of a loop to enable other optimizations. For instance, peeling the first iteration of a loop can remove a conditional branch that is only taken in the first iteration. Peeling can also align the loop body for more efficient vectorization by ensuring that memory accesses start at aligned addresses. While not currently in our action space, peeling complements the unrolling and padding transformations available in version V4.
+Loop peeling extracts a small number of iterations from the beginning or end of a loop to enable other optimizations. For instance, peeling the first iteration of a loop can remove a conditional branch that is only taken in the first iteration. Peeling can also align the loop body for more efficient vectorization by ensuring that memory accesses start at aligned addresses.
 
 \begin{figure}[H]
     \centering
@@ -380,7 +378,7 @@ Several properties of \gls{mlir} make it well-suited for automated optimization 
     \item \textbf{Explicit loop structure}: Linalg operations explicitly encode the loops, access patterns, and computations of an operation, providing the agent with a complete and structured description of the optimization target.
     \item \textbf{Progressive lowering}: \gls{mlir} supports the gradual lowering of operations through the dialect stack. The agent can apply transformations at the Linalg level, then lower the result through progressively more concrete dialects (Affine, \gls{scf}, Vector, \gls{llvm}) to obtain executable code.
     \item \textbf{Python bindings}: \gls{mlir} provides comprehensive Python bindings that allow the construction, manipulation, and execution of \gls{mlir} modules from Python, the language in which our \gls{rl} agent is implemented. The bindings also expose the transform dialect interpreter, which applies transformation sequences to \gls{mlir} modules programmatically.
-    \item \textbf{Extensibility}: New dialects and transformations can be added to \gls{mlir} without modifying the core infrastructure. This allows our expanded action space (padding, packing, unrolling) to be implemented using existing \gls{mlir} transformation primitives without changes to the \gls{mlir} codebase.
+    \item \textbf{Extensibility}: New dialects and transformations can be added to \gls{mlir} without modifying the core infrastructure.
 \end{enumerate}
 
 \subsection{Execution Pipeline}
@@ -399,7 +397,7 @@ This execution pipeline is the evaluation mechanism for the reward function disc
 
 This chapter has introduced the fundamentals of compiler code optimization that form the technical foundation of this thesis. We described the three-phase compiler pipeline (front-end, middle-end, back-end), surveyed the classification of optimizations (machine-dependent vs.\ independent, static vs.\ dynamic), and introduced the control-flow and data-flow analyses that enable safe and informed transformations.
 
-The core of the chapter focused on loop nest optimization, detailing the transformations that constitute the action space of our reinforcement learning agent: parallelization, interchange, tiling, fusion, vectorization, and the additional transformations (unrolling, padding, packing, skewing, unswitching, inversion, peeling) that extend the scope of compiler optimization. For each transformation, we explained its mechanism, legality conditions, and performance implications.
+The core of the chapter focused on loop nest optimization, detailing the transformations commonly used in compilation: parallelization, interchange, tiling, fusion, vectorization, and the additional transformations (unrolling, padding, packing, skewing, unswitching, inversion, peeling) that extend the scope of compiler optimization. For each transformation, we explained its mechanism, legality conditions, and performance implications.
 
 We then discussed the fundamental challenges that motivate the automation of compiler optimization: the phase ordering problem, the trade-offs between competing objectives, and the complexity introduced by diverse and evolving hardware platforms. These challenges explain why hand-crafted heuristics are insufficient and why a learning-based approach is attractive.
 

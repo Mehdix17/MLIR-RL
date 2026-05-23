@@ -3,25 +3,39 @@
 
 \section{Introduction}
 
-The previous chapter described the design of our proposed RL auto-scheduler, detailing the architectural enhancements over the prior \gls{rl} agent (Tirichine et al.~\cite{tirichine2025reinforcement}): the hardware-aware observation space, shaped rewards, transformer-based loop nest encoder, and expanded action spaces. This chapter evaluates the proposed system experimentally to quantify the impact of these contributions.
+The previous chapter described the design of our proposed RL auto-scheduler. This chapter empirically evaluates the proposed \gls{rl} auto-scheduler to quantify the impact of its architectural enhancements: hardware-aware observations, shaped rewards, and the transformer-based encoder. We benchmark the system against standard MLIR heuristics and the prior MLIR-RL agent~\cite{tirichine2025reinforcement}, and validate individual components via rigorous ablation studies.
 
-The evaluation relies on a set of controlled comparisons. First, we establish the overall performance of the proposed agent against both the standard compiler heuristics (MLIR-Base) and the prior \gls{rl} agent (MLIR-RL). second, we conduct a rigorous ablation study. For each novel feature, the proposed agent is compared directly against a variant where that specific feature is disabled (e.g., No-HW-aware, No-Reward-Shaping, No-Transformer) using identical training protocols and hyperparameter configurations. This isolates and validates the contribution of each individual design choice.
-
-The chapter is organized as follows. Section~5.2 describes the experimental setup, covering the hardware platform, software stack, training protocol, and evaluation metrics. Section~5.3 presents the overall system performance on both isolated operations and full neural network graphs. Section~5.4 details the ablation studies, isolating the impact of each architectural component. Section~5.5 provides a discussion of the findings, and Section~5.6 concludes the chapter.
+The chapter is organized as follows: Section~5.2 details the experimental setup. Section~5.3 presents the overall system performance, followed by ablation studies in Section~5.4. Section~5.5 discusses the findings, and Section~5.6 concludes the chapter.
 
 \section{Experimental Setup}
 
 \subsection{Hardware and Software Environment}
 
-All experiments are conducted on a Slurm-based HPC system featuring three distinct clusters:
-\begin{itemize}
-    \item \textbf{Dalma:} The primary training environment equipped with Intel Xeon processors (Broadwell/Skylake), featuring 28 to 40 cores per node and 112~GB of RAM.
-    \item \textbf{Jubail:} Standard compute nodes equipped with AMD EPYC 7742 (Zen 2) processors offering 128 physical cores and 480~GB of RAM per node.
-    \item \textbf{Bergamo:} High-memory compute nodes powered by AMD EPYC 9754 (Zen 4) processors with 256 physical cores and 1~TB of RAM per node.
-\end{itemize}
+All experiments are conducted on a Slurm-based HPC system featuring three distinct clusters, summarized in Table~\ref{tab:hardware-specs}.
+
+\begin{table}[H]
+    \centering
+    \caption{Hardware specifications of the compute clusters.}
+    \label{tab:hardware-specs}
+    \begin{tabularx}{\textwidth}{l X c c}
+        \toprule
+        \textbf{Cluster} & \textbf{Processor} & \textbf{Cores/Node} & \textbf{RAM/Node} \\
+        \midrule
+        Dalma & Intel Xeon (Broadwell/Skylake) & 28 -- 40 & 112~GB \\
+        Jubail & AMD EPYC 7742 (Zen 2) & 128 & 480~GB \\
+        Bergamo & AMD EPYC 9754 (Zen 4) & 256 & 1~TB \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
 By training the RL agent on Dalma and evaluating it across Jubail and Bergamo, we comprehensively test the agent's capability to adapt dynamically to wildly different core counts and cache topographies.
 
-The software stack consists of Python~3.11, PyTorch~2.0~\cite{paszke2019pytorch}, MLIR built from the LLVM~19.x release branch, and the \gls{mlir} Python bindings. All \gls{mlir} benchmarks are compiled through the progressive lowering pipeline (Linalg to Affine to \gls{scf} to Vector to \gls{llvm}) and \gls{jit}-compiled at optimization level \texttt{-O3} using the MLIR ExecutionEngine. Execution time measurements are performed on zero-initialized buffers to eliminate data-dependent variability, with a warm-up invocation preceding each timed invocation.
+The software stack consists of the following components and configurations:
+\begin{itemize}
+    \item Python~3.11 and PyTorch~2.0~\cite{paszke2019pytorch}.
+    \item MLIR built from the LLVM~19.x release branch with \gls{mlir} Python bindings.
+    \item \gls{mlir} benchmarks compiled via progressive lowering (Linalg to Affine to \gls{scf} to Vector to \gls{llvm}) and \gls{jit}-compiled with optimization level \texttt{-O3} using the MLIR ExecutionEngine.
+    \item Execution time measurements are performed on zero-initialized buffers to eliminate data-dependent variability, with a warm-up invocation preceding each timed invocation.
+\end{itemize}
 
 \subsection{Training Protocol and Hyperparameters}
 
@@ -50,8 +64,6 @@ The proposed system and all its ablation variants share a common training protoc
         \bottomrule
     \end{tabularx}
 \end{table}
-
-The transformer encoder in the proposed agent employs a model with $d_\text{model} = 256$, $h = 8$ attention heads, $N = 3$ encoder layers, feedforward dimension $d_\text{ff} = 1024$, dropout of $0.1$, and GELU activation. The expanded action space supports three tile sizes per dimension, three pad multiples (powers of two), and three unroll factors (powers of two). The shaped reward uses weights of $1.0$ for arithmetic intensity, $0.1$ for vectorizability, and $0.1$ for parallel-loop ratio, with a global shaping scale of $1.0$ and clipping at $\pm 2.0$. Specific components are disabled as dictated by the ablation configurations (detailed in Section~\ref{sec:ablation-studies}).
 
 \subsection{Evaluation Metrics}
 
@@ -181,7 +193,7 @@ We evaluate this variant explicitly across benchmarks stratified by their loop n
 The ablation studies solidify the rationale behind the proposed architectural changes. The hardware-aware features successfully untether the learned policies from the training platform's specific architectural quirks. Dense, shaped rewards solve the credit assignment problem during the fragile early stages of training, leading to faster and more reliable convergence. Finally, the Transformer encoder natively absorbs the complex topological dependencies in loop-nests, decisively outperforming the legacy LSTM implementations on intricate neural network sub-graphs involving four or more cascading loops. 
 
 \subsection{Limitations}
-Despite significant advances, the proposed auto-scheduler retains some limitations. The system relies entirely on predefined heuristic handlers and rigid transformation definitions; while pad, pack, and unroll expand the action space powerfully, they also broaden the combinatorial complexity. Furthermore, JIT-compiling every candidate sequence within the reinforcement learning loop remains a massive computational bottleneck, preventing the agent from being deployed for entirely on-the-fly, real-time optimization in production compilers.
+Despite significant advances, the proposed auto-scheduler retains some limitations. The system relies entirely on predefined heuristic handlers and rigid transformation definitions. Furthermore, JIT-compiling every candidate sequence within the reinforcement learning loop remains a massive computational bottleneck, preventing the agent from being deployed for entirely on-the-fly, real-time optimization in production compilers.
 
 \subsection{Comparison with Prior Work}
 Our approach marks a substantial departure from the prior MLIR-RL agent and foundational systems like Halide and Tiramisu. While PolyGym tackled polyhedral transformations via MDPs, it remained confined to highly regular static domains. The proposed system effectively bridges these domains into unstructured deep learning ecosystems by actively managing dynamic configurations, injecting hardware realities directly into the policy state, and fortifying the structural analysis via modern Transformer layouts.
