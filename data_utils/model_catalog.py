@@ -32,7 +32,7 @@ TRANSFORMER_HF_REPOS = {
     "distilbert": "distilbert-base-uncased",
     "roberta": "roberta-base",
     "albert": "albert-base-v2",
-    "gpt2": "gpt2",
+    "gpt2": "gpt2-medium",
     "t5": "t5-small",
     "bart": "facebook/bart-base",
     "deberta": "microsoft/deberta-v3-base",
