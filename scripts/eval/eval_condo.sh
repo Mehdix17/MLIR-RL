@@ -10,9 +10,9 @@
 #
 # Usage:
 #   sbatch scripts/eval.sh                           # array mode: auto-picks version
-#   sbatch scripts/eval.sh config/baseline.json       # single version from config
-#   sbatch scripts/eval.sh config/baseline.json v1    # explicit version
-#   sbatch scripts/eval.sh config/baseline.json v1 v2 v3  # space-separated versions
+#   sbatch scripts/eval.sh config/train/baseline.json       # single version from config
+#   sbatch scripts/eval.sh config/train/baseline.json v1    # explicit version
+#   sbatch scripts/eval.sh config/train/baseline.json v1 v2 v3  # space-separated versions
 #
 # Array mode: sbatch --array=0-2 scripts/eval.sh     # v1, v2, v3
 
@@ -41,11 +41,11 @@ elif [[ $# -ge 2 ]]; then
     shift
     VERSIONS=("$@")
 else
-    CONFIG_FILE="${1:-$PROJECT_ROOT/config/baseline.json}"
+    CONFIG_FILE="${1:-$PROJECT_ROOT/config/train/baseline.json}"
     VERSIONS=()
 fi
 
-CONFIG="${CONFIG_FILE:-$PROJECT_ROOT/config/baseline.json}"
+CONFIG="${CONFIG_FILE:-$PROJECT_ROOT/config/train/baseline.json}"
 if [[ "$CONFIG" != /* ]]; then
     CONFIG="$PROJECT_ROOT/$CONFIG"
 fi
@@ -101,7 +101,7 @@ print(candidates[-1]) if candidates else exit(1)
     export EVAL_DIR="$LATEST_MODELS"
 
     cd "$PROJECT_ROOT"
-    $PYTHON_BIN scripts/eval.py
+    $PYTHON_BIN scripts/eval/eval.py
 
     echo "Evaluation completed at $(date)"
     echo ""

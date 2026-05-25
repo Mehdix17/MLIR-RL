@@ -35,9 +35,11 @@ echo "Output:   results/full_model_1/pytorch_times.json"
 echo "Node:     $(hostname)"
 echo "=========================================="
 
-python scripts/get_pytorch_baselines.py \
+python scripts/baseline/get_pytorch_baselines.py \
     --config results/full_model_1/pytorch_models.json \
-    --output results/full_model_1/pytorch_times.json
+    --output results/full_model_1/pytorch_times.json \
+    --csv-output results/full_model_1/full_baselines.csv \
+    --mlir-baselines results/full_model_1/baselines/full_model.json
 
 echo ""
 echo "Completed at $(date)"

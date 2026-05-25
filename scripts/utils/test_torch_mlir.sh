@@ -16,6 +16,6 @@ PY
 
 echo
 echo "== Functional compile test =="
-python scripts/test_torch_mlir_compile.py && echo "Compile test PASS" || { echo "Compile test FAIL"; exit 1; }
+python scripts/utils/test_torch_mlir_compile.py && echo "Compile test PASS" || { echo "Compile test FAIL"; exit 1; }
 
 echo "All torch-mlir checks passed."

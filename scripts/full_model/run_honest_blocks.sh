@@ -22,7 +22,7 @@ source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
-export CONFIG_FILE_PATH="$PROJECT_ROOT/config/full_model_optim.json"
+export CONFIG_FILE_PATH="$PROJECT_ROOT/config/full_model/full_model_optim.json"
 export AUTOSCHEDULER_IMPL="rl_autoschedular_v4_5"
 export EXEC_TIMEOUT=300
 export EXEC_TIMEOUT_CMD=7200
@@ -32,7 +32,7 @@ cd "$PROJECT_ROOT"
 echo "Honest block speedup — $(date)"
 echo "Models: albert bart bert convnext_tiny deberta densenet121 distilbert gat gpt2 vit_b_16"
 
-python scripts/honest_blocks_speedup.py \
+python scripts/data/honest_blocks_speedup.py \
     --models albert bart bert convnext_tiny deberta densenet121 distilbert gat gpt2 vit_b_16 \
     --output results/full_model/honest_blocks.json
 

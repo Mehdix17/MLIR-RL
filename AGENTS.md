@@ -11,7 +11,7 @@ source ~/envs/mlir/bin/activate
 set -a && source .env && set +a
 ```
 
-**Slurm scripts** (`train.sh`, `eval.sh`, `get_base.sh`, `get_pytorch_times.sh`) already handle this internally — they source `.env` and activate the conda env. You only need the steps above for running Python scripts directly or using `pipeline.sh`.
+**Slurm scripts** (`train.sh`, `eval.sh`, `get_base.sh`, `scripts/baseline/get_pytorch_times.sh`) already handle this internally — they source `.env` and activate the conda env. You only need the steps above for running Python scripts directly or using `pipeline.sh`.
 
 The `.env` file sets:
 
@@ -27,7 +27,7 @@ The `.env` file sets:
 `utils.config.Config` is a **singleton** that reads `CONFIG_FILE_PATH` **at first import**. Any Python script that touches `Config` (directly or transitively) will fail if `CONFIG_FILE_PATH` is not set before the import.
 
 ```bash
-export CONFIG_FILE_PATH=config/train1.json
+export CONFIG_FILE_PATH=config/train/train1.json
 ```
 
 The Slurm scripts set this automatically. For custom scripts, always import `dotenv` and load `.env` first, then set `CONFIG_FILE_PATH`.
@@ -78,7 +78,7 @@ Three ablation implementations remove exactly one novelty from V4.5:
 | No Shaped Reward | `reward_shaping_enabled: false` | `rl_autoschedular_v45_no_shaped_reward` | `results/ablation_no_shaped_reward/` |
 | No Transformer | Uses LSTM instead of Transformer | `rl_autoschedular_v45_no_transformer` | `results/ablation_no_transformer/` |
 
-Each uses `scripts/ablation_eval.py` (nearly identical to `eval.py` but requires `EVAL_DIR`). Configs: use `v45_no_*_blocks.json` for block-based eval, `v45_no_*_full_model.json` for full-model eval. Current status: no_hw and no_transformer already evaluated; no_shaped_reward currently evaluating in 2 jobs (`rew-eval-low`, `rew-eval-high`).
+Each uses `scripts/eval/ablation_eval.py` (nearly identical to `eval.py` but requires `EVAL_DIR`). Configs: use `v45_no_*_blocks.json` for block-based eval, `v45_no_*_full_model.json` for full-model eval. Current status: no_hw and no_transformer already evaluated; no_shaped_reward currently evaluating in 2 jobs (`rew-eval-low`, `rew-eval-high`).
 
 ## Hardware-Aware Observation (V1 — Our Contribution)
 
@@ -120,9 +120,9 @@ python -c "from rl_autoschedular_v1.observation import HARDWARE_VECTOR; print(HA
 ### Evaluation Commands
 
 ```bash
-sbatch scripts/dalma_eval.sh config/v4_5.json     # training hardware (baseline)
-sbatch scripts/jubail_eval.sh config/v4_5.json    # different AMD Zen 2
-sbatch scripts/bergamo_eval.sh config/v4_5.json   # different AMD Zen 4, 256 cores
+sbatch scripts/eval/dalma_eval.sh config/train/v4_5.json     # training hardware (baseline)
+sbatch scripts/eval/jubail_eval.sh config/train/v4_5.json    # different AMD Zen 2
+sbatch scripts/eval/bergamo_eval.sh config/train/v4_5.json   # different AMD Zen 4, 256 cores
 ```
 
 All scripts set `EVAL_LAST_ONLY=1` internally (evaluates only the last checkpoint, `model_1999.pt`).
@@ -276,19 +276,18 @@ Full-model optimization applies the trained RL agent (v4.5, checkpoint 715) to c
 
 | Model | Issue | Root Cause | Current Workaround |
 |-------|-------|-----------|------------------|
-| gpt2, gpt2-large, gpt2-medium | Trace fails | `'Tensor' has no attribute 'get_seq_length'` | Use eager times only |
-| gpt2 (all variants) | Script fails | `GPT2Config.__init__` uses `**kwargs` — incompatible with `torch.jit.script()` | Same |
-| vit_b_16 | Trace fails | Dynamic attention paths produce different graphs per invocation | Use eager times only |
-| vit_b_16 | Script fails | `'Tensor' has no attribute 'logits'` — internal ops not in TorchScript scope | Same |
+| gpt2, gpt2-medium, gpt2-large | Trace fails | `'Tensor' has no attribute 'get_seq_length'` | **Fixed**: `utils/gpt2_jit_compat.py` creates JIT-traceable wrapper |
+| gpt2 (all variants) | Script fails | `GPT2Config.__init__` uses `**kwargs` — incompatible with `torch.jit.script()` | **Fixed**: wrapper bypasses GPT2Model entirely |
+| vit_b_16 | Trace fails | SDPA dispatch divergence (`check_trace` default) | **Fixed**: `check_trace=False` in `_time_jit()` |
+| vit_b_16 | Script fails | `_VitWrapper` `hasattr(out, 'logits')` not TorchScript-compatible | **Fixed**: wrapper removed; raw ViT returns Tensor natively |
 
-**Impact**: 4/22 models (18%) have empty PyTorch JIT columns in baselines CSV. All 4 still execute in eager mode (valid benchmark) and participate in full-model RL optimization.
+**Impact**: 0/22 models (0%) have empty PyTorch JIT columns — all models now produce valid JIT times.
 
-**Future Fixes** (in priority order):
-1. **Model Surgery** (2–4h) — Extract & freeze model components, trace only forward path
-2. **Custom TorchScript Ops** (8–16h) — Implement custom CUDA kernels for attention/ops
-3. **ONNX Intermediate** (1–2h) — Trace via ONNX Runtime (not applicable for CPU-only benchmarking)
+**Fix #1 implemented**: `utils/gpt2_jit_compat.py` provides `GPT2JITCompat` — a JIT-traceable wrapper that bypasses `GPT2Model.forward()`, using only extracted submodules and a manual causal mask. `scripts/baseline/get_pytorch_baselines.py` automatically uses it for gpt2, gpt2-medium, and gpt2-large. Expected ~5-10% JIT speedup vs eager.
 
-See [PYTORCH_JIT_DEBUGGING.md](docs/PYTORCH_JIT_DEBUGGING.md) for detailed analysis, reproduction steps, and implementation roadmap.
+**Tested & Rejected Fix**: Fix #3 (ONNX Intermediate) — **ONNX Runtime CPU is 29× slower** than PyTorch eager (354ms vs 10,275ms for gpt2-large). Do NOT use.
+
+See [PYTORCH_JIT_DEBUGGING.md](docs/PYTORCH_JIT_DEBUGGING.md) for detailed analysis, reproduction steps, and all four proposed solutions. [FIX1_MODEL_SURGERY.md](docs/FIX1_MODEL_SURGERY.md) has the implementation guide.
 
 ### MLIR Bufferization Crashes: Workarounds
 
@@ -314,7 +313,8 @@ For more detailed guides and architectural decisions, refer to the following doc
 - [RL Agent Tutorial](docs/RL_AGENT_TUTORIAL.md) — Walkthrough of the RL framework and logic.
 - [Pipeline Orchestration](docs/PIPELINE.md) — Full lifecycle of MLIR baseline up to evaluation.
 - [Full-Model End-to-End Optimization](docs/FULL_MODEL.md) — Complete architecture, bug fixes, results, and known limitations for full-model RL optimization.
-- [PyTorch JIT Debugging](docs/PYTORCH_JIT_DEBUGGING.md) — Root cause analysis of gpt2/vit_b_16 JIT failures and proposed workarounds (model surgery, custom ops, ONNX).
+- [PyTorch JIT Debugging](docs/PYTORCH_JIT_DEBUGGING.md) — Root cause analysis of gpt2/vit_b_16 JIT failures. **Tested finding: Fix #3 (ONNX) is 29× slower; Fix #1 (Model Surgery) is recommended.**
+- [Fix #1: Model Surgery Implementation Guide](docs/FIX1_MODEL_SURGERY.md) — Step-by-step walkthrough for making gpt2 JIT-traceable (2–4h effort, 5–10% speedup).
 - [Dashboard Guide](docs/dashboard.md) — Streamlit evaluation instructions.
 - [Data Utils](data_utils/README.md) — Tools for generating synthetic MLIR datasets and extraction operations.
 - [Novelties](docs/NOVELTIES.md) and [Versions](docs/VERSIONS.md) — Changelog and upcoming version plans.
@@ -352,7 +352,7 @@ All scripts read `CONFIG_FILE_PATH` (env var) or accept a config path as `$1`. T
 Train/eval Slurm scripts derive the implementation from the config. Override with a second positional arg:
 
 ```bash
-sbatch scripts/train.sh config/my_config.json rl_autoschedular_v2
+sbatch scripts/train/train.sh config/train/my_config.json rl_autoschedular_v2
 ```
 
 ### Slurm Array Job Mode
@@ -360,29 +360,29 @@ sbatch scripts/train.sh config/my_config.json rl_autoschedular_v2
 `train.sh` and `eval.sh` support Slurm array jobs to run multiple versions:
 
 ```bash
-sbatch --array=0-3 scripts/train.sh    # task 0→baseline, 1→v1, 2→v2, 3→v3
-sbatch --array=0-2 scripts/eval.sh     # same mapping
+sbatch --array=0-3 scripts/train/train.sh    # task 0→baseline, 1→v1, 2→v2, 3→v3
+sbatch --array=0-2 scripts/eval/eval.sh     # same mapping
 ```
 
-When `SLURM_ARRAY_TASK_ID` is set and no config is provided, the script auto-selects `config/<version>.json`.
+When `SLURM_ARRAY_TASK_ID` is set and no config is provided, the script auto-selects `config/train/<version>.json`.
 
 ### Standard Pipeline Order
 
 ```bash
 # 1. MLIR baseline (Slurm)
-sbatch scripts/get_base.sh config/my_config.json
+sbatch scripts/baseline/get_base.sh config/train/my_config.json
 
 # 2. PyTorch baseline (Slurm or local)
-sbatch scripts/get_pytorch_times.sh config/my_config.json
+sbatch scripts/baseline/get_pytorch_times.sh config/train/my_config.json
 
 # 3. Split into train / eval
-python scripts/split_json.py config/my_config.json
+python scripts/data/split_json.py config/train/my_config.json
 
 # 4. Train (Slurm)
-sbatch scripts/train.sh config/my_config.json
+sbatch scripts/train/train.sh config/train/my_config.json
 
 # 5. Evaluate checkpoints (Slurm)
-sbatch scripts/eval.sh config/my_config.json
+sbatch scripts/eval/eval.sh config/train/my_config.json
 
 # 6. Compare in dashboard
 cd dashboard && streamlit run dashboard.py --server.fileWatcherType none
@@ -390,8 +390,8 @@ cd dashboard && streamlit run dashboard.py --server.fileWatcherType none
 
 Or use the one-shot pipeline:
 ```bash
-bash scripts/pipeline.sh config/baseline.json
-bash scripts/pipeline.sh config/baseline.json "rl_autoschedular_v1,rl_autoschedular_v3"
+bash scripts/pipeline/pipeline.sh config/train/baseline.json
+bash scripts/pipeline/pipeline.sh config/train/baseline.json "rl_autoschedular_v1,rl_autoschedular_v3"
 ```
 
 ### Benchmark Format Requirements
@@ -425,7 +425,7 @@ The `json_file` and `eval_json_file` config fields map benchmark **names** to ba
 python data_utils/extract_blocks.py --input data/nn/raw_bench/albert_linalg.mlir --output-dir data/nn/extracted_blocks/
 ```
 
-`extract_blocks.py` windows consumer→producer paths into fixed-size blocks (default: 5 ops, stride 3). Alternative: `extract_ops.py` for single-operation files. Then run `scripts/get_base.py` for baseline times and `scripts/split_json.py` for train/eval split.
+`extract_blocks.py` windows consumer→producer paths into fixed-size blocks (default: 5 ops, stride 3). Alternative: `extract_ops.py` for single-operation files. Then run `scripts/baseline/get_base.py` for baseline times and `scripts/data/split_json.py` for train/eval split.
 
 ### Blocks (`data/nn/blocks/`)
 
@@ -445,11 +445,12 @@ Full .mlir → AST dumper (preprocess_model.py) → tagged code with {tag = "ope
 ```
 
 **Key scripts:**
-- `scripts/optimize_full_model.py` — Main orchestrator: tagging, baseline, RL inference, schedule application (batched in-process transforms — parse once, not per-action), execution
+- `scripts/full_model/optimize_full_model.py` — Main orchestrator: tagging, baseline, RL inference, schedule application (batched in-process transforms — parse once, not per-action), execution
 - `scripts/optimize_full_model.sh` — Slurm array job wrapper (tasks 0–19, one per model)
-- `scripts/preprocess_model.py` — Runs C++ AST dumper to tag linalg ops
-- `scripts/add_timing_wrapper.py` — Wraps `@main` with `@nanoTime()`, returns `(tensor, i64)`
-- `scripts/measure_full_model_baselines.py` — PyTorch eager + JIT timing for all models
+- `scripts/full_model/preprocess_model.py` — Runs C++ AST dumper to tag linalg ops
+- `scripts/full_model/add_timing_wrapper.py` — Wraps `@main` with `@nanoTime()`, returns `(tensor, i64)`
+- `scripts/baseline/get_pytorch_baselines.py` — **Canonical** PyTorch eager + JIT timing for all 22 models. Driven by `pytorch_models.json` config. Outputs JSON (primary, incremental) + optional CSV. Uses `utils/gpt2_jit_compat.py` for gpt2 variants. Supersedes `measure_full_model_baselines.py` (deprecated).
+- `scripts/baseline/get_pytorch_times.py` — **Block-level** PyTorch timing: parses `.mlir` files, builds equivalent PyTorch ops, measures eager+JIT per operation. Used for block-based benchmarks, not full models.
 - `scripts/merge_full_model_results.sh` — Merges chunk files into unified JSON + CSV
 
 **Checkpoints:** Full-model uses `model_715.pt` (iteration 715, less aggressive). Block-based eval uses `model_1999.pt` (final checkpoint).
@@ -466,12 +467,14 @@ Full .mlir → AST dumper (preprocess_model.py) → tagged code with {tag = "ope
 
 ### Canonical Results Table
 
-`results/full_model/baselines/full_baselines.csv` is the master comparison table:
+`results/full_model_0/full_baselines.csv` (from `measure_full_model_baselines.py`) is the master comparison table:
 ```
-model,mlir_baseline_ns,pytorch_eager_ns,pytorch_jit_ns,mlir_rl_opt_ns
+model,mlir_baseline_ns,pytorch_eager_ns,pytorch_jit_ns,mlir_rl_ns
 ```
 
-Visit `results/full_model/summary/final_merged.csv` for the unified per-model summary (full-model for 9 models, block-based for 10).
+`results/full_model_0/`, `results/full_model_1/`, `results/full_model_dalma/` — per-cluster copies of full-model results. Each contains `pytorch_times.json`, `full_baselines.csv`, `pytorch_models.json` (22-model registry), and per-checkpoint RL optimization directories (`rl_opt_700/` through `rl_opt_1999/`). `full_model_0` is Jubail (128-core AMD EPYC 7742), `full_model_1` is second Jubail run with checkpoint scanning, `full_model_dalma` is Intel Xeon E5-2680 v4.
+
+`pytorch_models.json` (e.g. `results/full_model_0/pytorch_models.json`) is the canonical model registry defining all 22 models across 4 categories (vision, transformer, lstm, gnn). Used by `get_pytorch_baselines.py` for dispatch.
 
 ## Results Directory Layout
 
@@ -505,13 +508,13 @@ The config fields `json_file` and `eval_json_file` default to `""` — when empt
 
 `utils.config.Config` and `utils.dask_manager.DaskManager` are **singletons**. `Config` reads `CONFIG_FILE_PATH` at first import. Importing `utils.config` before setting `CONFIG_FILE_PATH` will fail.
 
-`scripts/train.py` and `scripts/eval.py` load `.env` and `.env.debug` via `python-dotenv` at the very top. `.env.debug` is optional (typically absent). Custom scripts should follow the same pattern.
+`scripts/train/train.py` and `scripts/eval/eval.py` load `.env` and `.env.debug` via `python-dotenv` at the very top. `.env.debug` is optional (typically absent). Custom scripts should follow the same pattern.
 
 ## Operational Gotchas
 
 - **DaskManager is disabled by default** (`ENABLED = False` in `utils/dask_manager.py`). Distributed execution across Slurm workers only activates if you set `ENABLED = True` and `DASK_NODES` env var. All execution runs single-process on the Slurm node otherwise.
 - **SIGABRT handler** — `train.py` and `eval.py` install a signal handler that catches native MLIR crashes (`SIGABRT`) and converts them to Python exceptions so training can continue past a bad schedule.
-- **`submit_and_monitor.sh`** — Submits a Slurm script, waits for the job to start, then tails its output (`scripts/submit_and_monitor.sh scripts/train.sh config/train1.json`).
+- **`submit_and_monitor.sh`** — Submits a Slurm script, waits for the job to start, then tails its output (`scripts/utils/submit_and_monitor.sh scripts/train/train.sh config/train/train1.json`).
 - **Check running jobs before submitting** — `squeue -u mb10856`. Two reward-eval jobs currently use 2 nodes (`rew-eval-low`, `rew-eval-high`). Submitting eval with `--cpus-per-task=4` avoids `AssocGrpCpuLimit`.
 
 ### Critical: BindingsProcess.ENABLED Must Stay False
@@ -536,16 +539,16 @@ The eval saves per-benchmark results incrementally via **marker files** at `<age
 **To resume a crashed eval:**
 ```bash
 source ~/envs/mlir/bin/activate && set -a && source .env && set +a
-export AUTOSCHEDULER_IMPL=rl_autoschedular_v1 CONFIG_FILE_PATH=config/v1.json
+export AUTOSCHEDULER_IMPL=rl_autoschedular_v1 CONFIG_FILE_PATH=config/train/v1.json
 export EVAL_LAST_ONLY=1 EVAL_DIR=results/new_experiment/v1_agent/run_0/models
 # Markers survive crashes — restart auto-skips completed benchmarks
-python scripts/eval.py
+python scripts/eval/eval.py
 ```
 
 **To launch eval safely** (survives terminal closure):
 ```python
 import subprocess, os
-p = subprocess.Popen(['python', 'scripts/eval.py'],
+p = subprocess.Popen(['python', 'scripts/eval/eval.py'],
     stdout=open('logs/eval_myrun.out','w'), stderr=open('logs/eval_myrun.err','w'),
     env={**os.environ, 'PYTHONUNBUFFERED': '1'},
     preexec_fn=os.setpgrp)
@@ -594,7 +597,7 @@ There is **no pytest suite**. Validation is done via:
 - End-to-end sanity runs on a single benchmark
 - Slurm job logs in `logs/`
 
-The only test scripts are `scripts/test_torch_mlir.sh` and `scripts/test_torch_mlir_compile.py` (torch-mlir sanity checks).
+The only test scripts are `scripts/utils/test_torch_mlir.sh` and `scripts/utils/test_torch_mlir_compile.py` (torch-mlir sanity checks).
 
 ## Code Style
 

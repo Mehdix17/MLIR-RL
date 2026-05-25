@@ -28,7 +28,7 @@ source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
-export CONFIG_FILE_PATH="$PROJECT_ROOT/config/full_model_optim.json"
+export CONFIG_FILE_PATH="$PROJECT_ROOT/config/full_model/full_model_optim.json"
 export AUTOSCHEDULER_IMPL="rl_autoschedular_v4_5"
 export EXEC_TIMEOUT=300
 export EXEC_TIMEOUT_CMD=7200
@@ -56,7 +56,7 @@ echo "=========================================="
 
 cd "$PROJECT_ROOT"
 
-python scripts/optimize_model_via_blocks.py \
+python scripts/full_model/optimize_model_via_blocks.py \
     --checkpoints "${CKPTS[@]}" \
     --model "$MODEL" \
     --output "$OUTPUT" \

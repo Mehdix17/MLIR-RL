@@ -184,5 +184,5 @@ python -c "from rl_autoschedular_v4_5.execution import execute_code; print('V4.5
 Once the environment is set up, generate base execution times for training:
 
 ```sh
-python scripts/get_base.py --benchmarks-dir data/nn/code_files --output data/nn/base_exec_times.json
+python scripts/baseline/get_base.py --benchmarks-dir data/nn/code_files --output data/nn/base_exec_times.json
 ```

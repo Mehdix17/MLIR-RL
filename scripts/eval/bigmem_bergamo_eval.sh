@@ -14,7 +14,7 @@
 set -e
 
 # Usage:
-#   EVAL_START=400 EVAL_END=1100 FORCE_RUN_ID=1 sbatch scripts/bigmem_bergamo_eval.sh config/v45_no_reward_blocks.json
+#   EVAL_START=400 EVAL_END=1100 FORCE_RUN_ID=1 sbatch scripts/bigmem_bergamo_eval.sh config/ablation/v45_no_reward_blocks.json
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${SLURM_SUBMIT_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
@@ -31,7 +31,7 @@ source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
-CONFIG="${1:-$PROJECT_ROOT/config/v45_no_reward_blocks.json}"
+CONFIG="${1:-$PROJECT_ROOT/config/ablation/v45_no_reward_blocks.json}"
 if [[ "$CONFIG" != /* ]]; then
     CONFIG="$PROJECT_ROOT/$CONFIG"
 fi
@@ -66,5 +66,5 @@ echo "Node:           $(hostname)"
 echo "=========================================="
 
 cd "$PROJECT_ROOT"
-python scripts/eval.py
+python scripts/eval/eval.py
 echo "Evaluation completed at $(date)"

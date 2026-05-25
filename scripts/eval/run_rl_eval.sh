@@ -68,9 +68,9 @@ echo "Node:     $(hostname)"
 echo "=========================================="
 
 export AUTOSCHEDULER_IMPL=rl_autoschedular_v4_5
-export CONFIG_FILE_PATH="$PROJECT_ROOT/config/baseline.json"
+export CONFIG_FILE_PATH="$PROJECT_ROOT/config/train/baseline.json"
 
-python scripts/optimize_model_via_blocks.py \
+python scripts/full_model/optimize_model_via_blocks.py \
     --model "$MODEL" \
     --single-checkpoint "$CKPT" \
     --baselines "$BASELINES" \

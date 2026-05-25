@@ -11,4 +11,4 @@ cd /scratch/mb10856/MLIR-RL
 source ~/envs/mlir/bin/activate
 set -a && source .env && set +a
 
-python scripts/measure_full_model_baselines.py --models gpt2 vit_b_16
+python scripts/baseline/get_pytorch_baselines.py --models gpt2 gpt2-medium gpt2-large vit_b_16

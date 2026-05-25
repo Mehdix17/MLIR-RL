@@ -56,7 +56,7 @@ echo "=========================================="
 
 cd "$PROJECT_ROOT"
 
-python scripts/get_base.py \
+python scripts/baseline/get_base.py \
     --benchmarks-dir "$BLOCKS_DIR" \
     --output "$OUTPUT" \
     --implementation rl_autoschedular_v4_5 \

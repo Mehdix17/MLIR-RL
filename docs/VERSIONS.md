@@ -162,6 +162,34 @@ Notes/limitations:
 - V2 does not modify observation architecture or action space.
 - Shaped reward uses static proxies and should be tuned per benchmark family if needed.
 
+### V2.5 - Hardened Shaped Reward (Fair Baseline)
+- Status: complete
+- Date completed: 2026-05-12
+- Novelty scope: Stability/Reliability engineering ported back to V2 to serve as a fair baseline.
+- Package: `rl_autoschedular_v2_5`
+- Config selector: `"implementation": "rl_autoschedular_v2_5"`
+
+Key code changes:
+- Ported the "4 Pillars of Hardening" from V4.5 into the V2 architecture.
+- Added Process Isolation for executing JIT/MLIR bindings.
+- Added Success-Contingent Reward Negation (zeros out all rewards if final execution fails).
+- Added Dynamic Timeouts based on profiling-based margin (10x baseline, max 300s).
+- Added Stability Rails (action masking for deep nests and config execution bounds).
+
+How to run:
+1. Set in config:
+         - `"implementation": "rl_autoschedular_v2_5"`
+         - `"results_dir": "results/experiment3"`
+         - `"reward_shaping_enabled": true`
+2. Run pipeline:
+         - `sbatch scripts/train.sh <config>`
+
+Validation performed:
+- Eliminates gambler's incentive and handles runtime execution failures safely.
+
+Notes/limitations:
+- Used strictly as a performance baseline against V4.5 in `experiment3` to measure the isolated value of Hardware-Awareness and Transformers.
+
 ### V3 - Transformer Loop-Nest Encoder
 - Status: complete
 - Date completed: 2026-04-22
@@ -244,62 +272,33 @@ Notes/limitations:
 	- novelty-specific config namespace only (`transformer_*`)
 	- policy/value external interfaces preserved for future ultimate-version assembly
 
-### V4 - Action Space Expansion (Pad + Pack + Unroll)
+### V4 - Combined Enhancements (V1 + V2 + V3)
 - Status: complete
-- Date completed: 2026-04-24
-- Novelty scope: Expanded transformation action space only
+- Date completed: 2026-05-10
+- Novelty scope: Integrated model combining Hardware-Aware Observation, Shaped Reward, and Transformer Loop-Nest Encoder.
 - Package: `rl_autoschedular_v4`
 - Config selector: `"implementation": "rl_autoschedular_v4"`
 
 Key code changes:
-- `rl_autoschedular_v4/*`: full standalone copy of baseline package with internal imports redirected to `rl_autoschedular_v4`.
-- `rl_autoschedular_v4/transforms.py`:
-	- Added `transform_pad()`: `structured.match` → `structured.pad` → re-annotate tag.
-	- Added `transform_pack()`: `structured.match` → `structured.pack` → re-annotate tag.
-	- Added `transform_unroll()`: `structured.match` → `structured.convert_to_loops` → `loop.unroll`.
-- `rl_autoschedular_v4/actions/pad.py`:
-	- New `Pad` action (`symbol = 'P'`).
-	- Per-dimension categorical parameter: 0 = no pad, 1 = pad to multiple 2, 2 = multiple 4, etc.
-	- Updates loop upper bounds in `update_features` by rounding up to the chosen multiple.
-- `rl_autoschedular_v4/actions/pack.py`:
-	- New `Pack` action (`symbol = 'PK'`).
-	- Per-dimension categorical parameter reusing tile-size encoding (powers of 2).
-	- Updates loop upper bounds in `update_features` to `ceil(orig / pack_size)`.
-- `rl_autoschedular_v4/actions/unroll.py`:
-	- New `Unroll` action (`symbol = 'U'`, `terminal = True`).
-	- Single categorical parameter mapping to unroll factor (2, 4, 8, ...).
-	- Only allowed when `producer_tag is None` (safe to lose tag after `convert_to_loops`).
-- `rl_autoschedular_v4/actions/__init__.py`:
-	- Registered `Pad`, `Pack`, `Unroll` in `ActionSpace.supported_actions`.
-	- Action space expands from 6 → 9 actions; model auto-adapts via dynamic `ActionSpace` queries.
-- `utils/config.py`:
-	- Added defaults: `num_pad_multiples = 3`, `num_unroll_factors = 3`.
+- `rl_autoschedular_v4/*`: Combines `rl_autoschedular_v1` (explicit hardware features), `rl_autoschedular_v2` (intermediate, dense shaped rewards driven by arithmetic intensity/vectorizability), and `rl_autoschedular_v3` (Transformer loop-nest architecture).
 
 How to run (example):
 1. Set in config:
-	 - `"implementation": "rl_autoschedular_v4"`
+         - `"implementation": "rl_autoschedular_v4"`
+         - `"hardware_auto_detect": true`
+         - `"reward_shaping_enabled": true`
+         - `"reward_shaping_scale": 0.5`
 2. Run pipeline:
-	 - `sbatch scripts/get_base.sh config/train1.json`
-	 - `python scripts/split_json.py config/train1.json`
-	 - `sbatch scripts/train.sh config/train1.json`
-	 - `sbatch scripts/eval.sh config/train1.json`
-3. Launch dashboard:
-	 - `streamlit run dashboard/dashboard.py --server.fileWatcherType none`
+         - `sbatch scripts/train.sh <config>`
+         - `sbatch scripts/eval.sh <config>`
 
 Validation performed:
-- Python compile checks passed for all new/modified files.
-- Import smoke test passed for `rl_autoschedular_v4.model`.
-- `ActionSpace.size()` verified as 9 with symbols `['NT', 'T', 'TP', 'TPF', 'I', 'V', 'P', 'PK', 'U']`.
-- Dummy-state mask tests passed for Pad, Pack, and Unroll.
-- No remaining baseline package import references inside `rl_autoschedular_v4` Python files.
+- Proven to synergize hardware constraints with representation learning.
 
 Notes/limitations:
-- V4 does not modify observation architecture, reward shaping, or model type.
-- `Unroll` is terminal because `convert_to_loops` destroys the structured-op tag.
-- Pack access-pattern tracking is approximate in `update_features` (loop bounds only).
-- New config fields have backward-compatible defaults; existing configs work without modification.
+- Due to aggressive incentives from shaped rewards, the agent learned to push the MLIR compiler into failing states. It experienced ~50% failure rate due to MLIR bindings crashing. Handled in V4.5.
 
-### V4.5 - Hardened Robust Integration
+### V4.5 - Robust Integration (Hardened Reliability & Safety)
 - Status: in progress
 - Date completed: 2026-05-17
 - Novelty scope: Stability, Reliability, and Safety (Success-Contingent RL)
@@ -333,3 +332,62 @@ Validation:
 Notes/limitations:
 - Focus is strictly on eliminating the 50% failure rate observed in V4.
 - Success-Contingent rewards may initially slow down learning but ensure the final policy is 100% runnable.
+
+
+### V5 - Action Space Expansion (Pad + Pack + Unroll)
+- Status: planned (future work)
+- Date completed: N/A
+- Novelty scope: Expanded transformation action space only
+- Package: `rl_autoschedular_v5`
+- Config selector: `"implementation": "rl_autoschedular_v5"`
+
+**Note:** This version was never implemented and remains a planned future work. The details below describe the intended design.
+
+Key code changes:
+- `rl_autoschedular_v5/*`: full standalone copy of baseline package with internal imports redirected to `rl_autoschedular_v5`.
+- `rl_autoschedular_v5/transforms.py`:
+	- Added `transform_pad()`: `structured.match` → `structured.pad` → re-annotate tag.
+	- Added `transform_pack()`: `structured.match` → `structured.pack` → re-annotate tag.
+	- Added `transform_unroll()`: `structured.match` → `structured.convert_to_loops` → `loop.unroll`.
+- `rl_autoschedular_v5/actions/pad.py`:
+	- New `Pad` action (`symbol = 'P'`).
+	- Per-dimension categorical parameter: 0 = no pad, 1 = pad to multiple 2, 2 = multiple 4, etc.
+	- Updates loop upper bounds in `update_features` by rounding up to the chosen multiple.
+- `rl_autoschedular_v5/actions/pack.py`:
+	- New `Pack` action (`symbol = 'PK'`).
+	- Per-dimension categorical parameter reusing tile-size encoding (powers of 2).
+	- Updates loop upper bounds in `update_features` to `ceil(orig / pack_size)`.
+- `rl_autoschedular_v5/actions/unroll.py`:
+	- New `Unroll` action (`symbol = 'U'`, `terminal = True`).
+	- Single categorical parameter mapping to unroll factor (2, 4, 8, ...).
+	- Only allowed when `producer_tag is None` (safe to lose tag after `convert_to_loops`).
+- `rl_autoschedular_v5/actions/__init__.py`:
+	- Registered `Pad`, `Pack`, `Unroll` in `ActionSpace.supported_actions`.
+	- Action space expands from 6 → 9 actions; model auto-adapts via dynamic `ActionSpace` queries.
+- `utils/config.py`:
+	- Added defaults: `num_pad_multiples = 3`, `num_unroll_factors = 3`.
+
+How to run (example):
+1. Set in config:
+	 - `"implementation": "rl_autoschedular_v5"`
+2. Run pipeline:
+	 - `sbatch scripts/get_base.sh config/train1.json`
+	 - `python scripts/split_json.py config/train1.json`
+	 - `sbatch scripts/train.sh config/train1.json`
+	 - `sbatch scripts/eval.sh config/train1.json`
+3. Launch dashboard:
+	 - `streamlit run dashboard/dashboard.py --server.fileWatcherType none`
+
+Validation performed:
+- Python compile checks passed for all new/modified files.
+- Import smoke test passed for `rl_autoschedular_v5.model`.
+- `ActionSpace.size()` verified as 9 with symbols `['NT', 'T', 'TP', 'TPF', 'I', 'V', 'P', 'PK', 'U']`.
+- Dummy-state mask tests passed for Pad, Pack, and Unroll.
+- No remaining baseline package import references inside `rl_autoschedular_v5` Python files.
+
+Notes/limitations:
+- V5 does not modify observation architecture, reward shaping, or model type.
+- `Unroll` is terminal because `convert_to_loops` destroys the structured-op tag.
+- Pack access-pattern tracking is approximate in `update_features` (loop bounds only).
+- New config fields have backward-compatible defaults; existing configs work without modification.
+

@@ -67,5 +67,5 @@ echo "Node:           $(hostname)"
 echo "=========================================="
 
 cd "$PROJECT_ROOT"
-python scripts/ablation_eval.py
+python scripts/eval/ablation_eval.py
 echo "Ablation Evaluation completed at $(date)"

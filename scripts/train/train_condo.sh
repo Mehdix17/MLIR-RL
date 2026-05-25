@@ -12,7 +12,7 @@ set -e
 trap 'echo "TRAINING FAILED"' ERR
 #
 # Usage:
-#   sbatch scripts/train.sh                          # uses config/train1.json (default)
+#   sbatch scripts/train.sh                          # uses config/train/train1.json (default)
 #   sbatch scripts/train.sh config/my_config.json   # uses a custom config
 #   sbatch scripts/train.sh config/my_config.json rl_autoschedular_v1
 #   scripts/submit_and_monitor.sh scripts/train.sh config/my_config.json
@@ -41,9 +41,9 @@ export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJEC
 VERSIONS=(baseline v1 v2 v3 v4)
 if [[ -n "${SLURM_ARRAY_TASK_ID:-}" && -z "${1:-}" ]]; then
     VERSION="${VERSIONS[$SLURM_ARRAY_TASK_ID]}"
-    CONFIG="$PROJECT_ROOT/config/${VERSION}.json"
+    CONFIG="$PROJECT_ROOT/config/train/${VERSION}.json"
 else
-    CONFIG="${1:-$PROJECT_ROOT/config/train1.json}"
+    CONFIG="${1:-$PROJECT_ROOT/config/train/train1.json}"
     if [[ "$CONFIG" != /* ]]; then
         CONFIG="$PROJECT_ROOT/$CONFIG"
     fi
@@ -72,6 +72,6 @@ echo "Implementation: $AUTOSCHEDULER_IMPL"
 echo "Node: $(hostname)"
 echo "=========================================="
 
-python scripts/train.py
+python scripts/train/train.py
 
 echo "Training completed at $(date)"

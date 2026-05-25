@@ -150,31 +150,40 @@ torch.ops.gpt2_compat.attention(q, k)  # ← JIT-traceable
 
 ---
 
-### 🔧 Potential Fix #3: ONNX Intermediate
+### ❌ Fix #3: ONNX Intermediate (NOT VIABLE)
 
-Convert to ONNX, then trace via `onnx-simplifier` + `onnxruntime`:
+**Status**: Tested & rejected. ONNX Runtime CPU is **~29x slower** than PyTorch eager.
 
-```bash
-python -c "
-import torch
-from transformers import GPT2Model
-model = GPT2Model.from_pretrained('gpt2').eval()
-dummy_input = torch.randn(1, 16)
-torch.onnx.export(model, dummy_input, 'gpt2.onnx', ...)
-"
+Attempted to convert gpt2-large to ONNX and measure ONNX Runtime inference:
+
+```python
+# ONNX model specs:
+# - Opset: 18, IR version: 10
+# - Inputs: input_ids [1,16], attention_mask [1,16]
+# - Outputs: last_hidden_state [1,16,1024]
+# - Nodes: 1045
+
+import onnxruntime as ort
+sess = ort.InferenceSession('gpt2.onnx', providers=['CPUExecutionProvider'])
+# Result: 10,275 ms median time (5 runs)
 ```
 
-**Pros**:
-- Cross-framework (works on ONNX Runtime, TVM, TensorRT)
-- Often JIT-compiles via ONNX backend
-- Standard format
+**Performance Comparison**:
+- PyTorch eager: **354 ms**
+- ONNX Runtime CPU: **10,275 ms** (29× slower! 🔴)
 
-**Cons**:
-- Extra serialization overhead
-- ONNX Runtime may not be faster than PyTorch eager on CPU
-- Adds dependency chain
+**Why ONNX Runtime is slow on CPU**:
+1. Affinity warnings (`pthread_setaffinity_np failed`) indicate thread binding issues on the Slurm cluster
+2. ONNX Runtime's CPU backend is not optimized for large transformer models
+3. Missing architecture-specific optimizations (AVX-512, matmul kernels) vs PyTorch's fused ops
+4. Extra serialization & deserialization overhead
 
-**Effort**: 1–2 hours. Worth evaluating for production deployment, not useful for current CPU benchmarking.
+**Conclusion**: **Do NOT use ONNX Intermediate** for this CPU benchmarking setup. The conversion destroys performance rather than improving it. This approach is only viable if:
+- GPU inference (ONNX TensorRT backend can be faster)
+- Smaller models where serialization overhead matters less
+- Different hardware with better ONNX Runtime tuning
+
+**Recommendation**: Skip Fix #3 entirely. Focus on **Fix #1 (Model Surgery)** instead.
 
 ---
 
@@ -212,18 +221,24 @@ Use KL-divergence loss to match teacher outputs.
 
 ## Recommendation
 
-**Keep current approach** (eager-only for gpt2/vit_b_16):
+**Fix #1 (Model Surgery) is the ONLY viable approach** for this CPU-based system.
 
-1. ✅ Eager times are valid benchmarks (real model, full precision)
-2. ✅ Graceful failure in CSV (empty JIT columns)
-3. ✅ System remains stable (no crashes)
-4. ✅ 18/22 models have JIT times (81% coverage)
+1. ✅ Can achieve 5–10% JIT speedup vs eager
+2. ✅ Low effort: 2–4 hours per model
+3. ✅ Reusable pattern across all transformer models
+4. ❌ Fix #2 requires CUDA/C++ expertise (8–16h, not practical)
+5. ❌ Fix #3 is **29× slower** on CPU (tested: ONNX Runtime = 10.3s vs PyTorch eager = 354ms)
+6. ❌ Fix #4 changes the model (not applicable)
 
-**Future work**: If production deployment needs JIT speedup, invest in **Fix #1 (Model Surgery)** or **Fix #2 (Custom Ops)** in priority order.
+**Action if JIT speedup is needed**: Start with Fix #1. See [Model Surgery](#-potential-fix-1-model-surgery-experimental) for the approach.
+
+**For current benchmarking**: Eager times are sufficient and valid (18/22 models have JIT). The 4 models without JIT (gpt2, gpt2-large, gpt2-medium, vit_b_16) can remain eager-only.
 
 ---
 
 ## Testing & Validation
+
+### Reproducing JIT Failures
 
 To reproduce the failures locally:
 
@@ -258,6 +273,27 @@ Trace failed: RuntimeError: 'Tensor' has no attribute 'get_seq_length'
 Attempting script...
 Script failed: RuntimeError: Compiled functions can't take variable number of arguments or use keyword-only arguments with defaults
 ```
+
+### ONNX Runtime Performance Test Results
+
+**Date**: May 24, 2026  
+**Model**: gpt2-large (1,045 ops, 2.95 GB weights)  
+**Setup**: CPU-only, ONNX Runtime 1.22.2, 128 physical cores
+
+```
+✓ ONNX Runtime session created successfully
+  Providers: ['CPUExecutionProvider']
+  
+  Output shape: (1, 16, 1024) ✓
+  Median inference time: 10,275 ms (10.3 seconds)
+  
+  Comparison:
+    PyTorch eager: 354 ms
+    ONNX Runtime: 10,275 ms
+    Slowdown: 29.0x ✗
+```
+
+**Conclusion**: ONNX Runtime CPU backend is unsuitable for transformer inference on this hardware. Avoid Fix #3.
 
 ---
 

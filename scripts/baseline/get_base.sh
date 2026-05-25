@@ -12,7 +12,7 @@
 #   sbatch scripts/get_base.sh <config> [implementation]
 #
 # Examples:
-#   sbatch scripts/get_base.sh config/train1.json
+#   sbatch scripts/get_base.sh config/train/train1.json
 #
 # All paths (benchmarks dir, output JSON) are derived from the config file.
 # Override individual paths with --benchmarks-dir / --output if needed.
@@ -63,7 +63,7 @@ echo "=========================================="
 CHUNK_IDX=${SLURM_ARRAY_TASK_ID:-0}
 NUM_CHUNKS=${SLURM_ARRAY_TASK_COUNT:-1}
 
-python scripts/get_base.py --config "$CONFIG" --implementation "$AUTOSCHEDULER_IMPL" --timeout 15 --chunk-index $CHUNK_IDX --num-chunks $NUM_CHUNKS
+python scripts/baseline/get_base.py --config "$CONFIG" --implementation "$AUTOSCHEDULER_IMPL" --timeout 15 --chunk-index $CHUNK_IDX --num-chunks $NUM_CHUNKS
 
 echo "=========================================="
 echo "get_base.py completed at $(date)"

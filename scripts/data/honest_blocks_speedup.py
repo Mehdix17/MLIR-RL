@@ -9,7 +9,7 @@ Measures baseline for ALL blocks (heavy + generic), reports:
 Usage:
   source ~/envs/mlir/bin/activate && set -a && source .env && set +a
   export AUTOSCHEDULER_IMPL=rl_autoschedular_v4_5 CONFIG_FILE_PATH=config/full_model_optim.json
-  python scripts/honest_blocks_speedup.py --models albert bert --output results/full_model/honest_blocks.json
+  python scripts/data/honest_blocks_speedup.py --models albert bert --output results/full_model/honest_blocks.json
 """
 
 import os
