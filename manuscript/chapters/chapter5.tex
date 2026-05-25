@@ -73,10 +73,10 @@ The primary evaluation metric is the execution-time speedup, defined as the rati
     \text{Speedup} = \frac{T_\text{MLIR-Base}}{T_\text{optimized}}
 \end{equation}
 
-A speedup greater than $1.0$ indicates an improvement over the standard compiler heuristics. For aggregated comparisons across multiple benchmarks, we report the geometric mean of the per-benchmark speedups, which correctly balances multiplicative ratio values:
+A speedup greater than $1.0$ indicates an improvement over the standard compiler heuristics. For aggregated comparisons across multiple benchmarks, we report the arithmetic mean of the per-benchmark speedups:
 
 \begin{equation}
-    \text{Geometric Mean Speedup} = \left( \prod_{i=1}^{n} \text{Speedup}_i \right)^{1/n}
+    \text{Mean Speedup} = \frac{1}{n} \sum_{i=1}^{n} \text{Speedup}_i
 \end{equation}
 
 \section{Overall System Performance}
@@ -90,7 +90,7 @@ We first evaluate the agents on localized linear algebra operations and sequence
 
 \begin{table}[H]
     \centering
-    \caption{Geometric mean speedups of the prior MLIR-RL and the Proposed Agent against MLIR-Base. Higher is better.}
+    \caption{Arithmetic mean speedups of the prior MLIR-RL and the Proposed Agent against MLIR-Base. Higher is better.}
     \label{tab:overall-performance}
     \begin{tabularx}{\textwidth}{l c c c}
         \toprule
@@ -101,7 +101,7 @@ We first evaluate the agents on localized linear algebra operations and sequence
         Element-wise operations & 8 & -- & -- \\
         Operation sequences (2--5 ops) & 15 & -- & -- \\
         \midrule
-        \textbf{Overall Geometric Mean} & 45 & -- & -- \\
+        \textbf{Overall Mean} & 45 & -- & -- \\
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -153,13 +153,13 @@ Beyond final execution speedup, the impact of reward shaping is most evident in 
 
 \begin{table}[H]
     \centering
-    \caption{Final geometric mean speedups on the evaluation set, comparing the full agent against the No-Reward-Shaping ablation.}
+    \caption{Final arithmetic mean speedups on the evaluation set, comparing the full agent against the No-Reward-Shaping ablation.}
     \label{tab:ablation-reward}
     \begin{tabularx}{\textwidth}{l c c}
         \toprule
         \textbf{Benchmark Category} & \textbf{No-Reward-Shaping} & \textbf{Proposed Agent (Full)} \\
         \midrule
-        Overall Geometric Mean & -- & -- \\
+        Overall Mean & -- & -- \\
         \bottomrule
     \end{tabularx}
 \end{table}
