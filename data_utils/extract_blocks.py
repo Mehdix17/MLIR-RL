@@ -45,6 +45,7 @@ from data_utils.extract_ops import (  # pylint: disable=import-error
     _get_needed_constants,
     _has_elided_tensor,
     _normalized_op_signature,
+    _count_reduction_loops,
 )
 
 
@@ -72,6 +73,25 @@ class BlockBuildSkip(RuntimeError):
     def __init__(self, reason: str):
         super().__init__(reason)
         self.reason = reason
+
+
+_HEAVY_OP_PATTERNS = re.compile(
+    r"linalg\.(matmul|batch_matmul|conv_2d|pooling_)",
+)
+
+
+def _block_has_heavy_op(op_texts: list[str]) -> bool:
+    """Return True if any op in *op_texts* is a non-trivial scheduling target.
+    
+    Heavy: matmul, batch_matmul, conv_2d, pooling, or generic with reduction loops.
+    Light: element-wise linalg.generic (zero reduction loops).
+    """
+    for text in op_texts:
+        if _HEAVY_OP_PATTERNS.search(text):
+            return True
+        if "linalg.generic" in text and _count_reduction_loops(text) > 0:
+            return True
+    return False
 
 
 def _find_closing_paren(text: str, start: int) -> int:
@@ -356,6 +376,7 @@ def _build_block_benchmark(
     selected_batch: int,
     model_name: str,
     block_index: int,
+    skip_pure_elementwise: bool = False,
 ) -> tuple[str, dict]:
     """Build one block benchmark MLIR and return (mlir_text, metadata)."""
     # Producer->consumer execution order.
@@ -484,6 +505,9 @@ def _build_block_benchmark(
     if previous_result_ssa is None or previous_result_type is None:
         raise BlockBuildSkip("missing_final_result")
 
+    if skip_pure_elementwise and not _block_has_heavy_op(op_texts_patched):
+        raise BlockBuildSkip("pure_elementwise")
+
     signature_blob = "|".join([
         model_name,
         ",".join(ordered_tags),
@@ -554,6 +578,7 @@ def extract_blocks_from_file(
     batch_candidates: list[int],
     batch_fallback: Optional[str],
     manifest_path: Optional[str],
+    skip_pure_elementwise: bool = False,
 ) -> tuple[int, int]:
     """Extract blocks from one MLIR file. Returns (written, skipped)."""
     os.makedirs(output_dir, exist_ok=True)
@@ -607,6 +632,7 @@ def extract_blocks_from_file(
                 selected_batch=selected_batch,
                 model_name=model_name,
                 block_index=i,
+                skip_pure_elementwise=skip_pure_elementwise,
             )
         except BlockBuildSkip as exc:
             skipped += 1
@@ -690,6 +716,11 @@ def main() -> None:
     parser.add_argument("--batch-policy", choices=["heuristic"], default="heuristic")
     parser.add_argument("--batch-candidates", type=int, nargs="+", default=[1, 2, 4, 8, 16, 32, 64])
     parser.add_argument("--batch-fallback", choices=["mean"], default=None)
+    parser.add_argument(
+        "--skip-pure-elementwise", action="store_true", default=False,
+        help="Skip blocks where every op is an element-wise linalg.generic "
+             "(no matmul, conv2d, pooling, or reduction generic)."
+    )
 
     parser.add_argument("--manifest-dir", default=None)
 
@@ -718,6 +749,7 @@ def main() -> None:
             batch_candidates=args.batch_candidates,
             batch_fallback=args.batch_fallback,
             manifest_path=manifest,
+            skip_pure_elementwise=args.skip_pure_elementwise,
         )
         print(f"written={written} skipped={skipped}")
         return
@@ -752,6 +784,7 @@ def main() -> None:
             batch_candidates=args.batch_candidates,
             batch_fallback=args.batch_fallback,
             manifest_path=manifest,
+            skip_pure_elementwise=args.skip_pure_elementwise,
         )
 
         total_written += written

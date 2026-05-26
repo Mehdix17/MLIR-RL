@@ -5,7 +5,7 @@
 
 A compiler is a program that translates source code written in a high-level programming language into machine code executable by a processor. This translation is not a straightforward one-to-one mapping: modern compilers perform extensive analysis and transformation of the program to produce code that executes faster, consumes less energy, or occupies less memory. These transformations are collectively referred to as \textit{code optimizations}.
 
-The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide \gls{simd} (Single Instruction Multiple Data) units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads—particularly in machine learning—have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
+The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide \gls{simd} units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads—particularly in machine learning—have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
 
 \section{Phases of a Compiler: From Source Code to Executable}
 
@@ -123,15 +123,7 @@ This section describes the loop nest transformations that are relevant to our re
         \addlinespace
         Vectorization & Replace scalar ops with \gls{simd} & Instruction-level parallelism & Contiguous access, no dependencies \\
         \addlinespace
-        Skewing & Transform iteration coordinates & Enable parallelization & Affine schedule exists \\
-        \addlinespace
-        Unswitching & Hoist loop-invariant conditionals & Reduce branch overhead & Condition is loop-invariant \\
-        \addlinespace
-        Inversion & Convert while to do-while & Reduce branch count & Loop executes at least once (or guard added) \\
-        \addlinespace
         Unrolling & Replicate loop body & Reduce loop overhead, expose \gls{ilp} & Known trip count beneficial \\
-        \addlinespace
-        Peeling & Extract boundary iterations & Enable alignment, remove guards & N/A (generally always legal) \\
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -146,11 +138,7 @@ For our \gls{rl} agent, the \texttt{TiledParallelization} action (denoted \textt
 
 \subsection{Interchange (Permutation)}
 
-Loop interchange swaps the order of two nested loops, changing which loop is outermost and which is innermost. The primary motivation for interchange is to improve memory access patterns. When a program traverses a multi-dimensional array, the order of loops determines whether memory accesses are \textit{strided} (accessing distant elements in each iteration) or \textit{contiguous} (accessing adjacent elements).
-
-Consider a matrix stored in row-major order, where elements of the same row are adjacent in memory. If the outer loop iterates over rows and the inner loop iterates over columns, each inner loop iteration accesses \texttt{A[i][j]}, \texttt{A[i][j+1]}, and so on—all adjacent in memory, resulting in good spatial locality. If the loops are interchanged, the inner loop accesses \texttt{A[i][j]}, \texttt{A[i+1][j]}, crossing row boundaries and causing poor cache utilization.
-
-Interchange is legal only when the data dependencies of the original loop nest are preserved under the new iteration order. This is verified by dependence analysis: if the direction vectors of all dependencies remain lexicographically non-negative after permutation, the interchange is valid.
+Loop interchange swaps the order of two nested loops, changing which loop is outermost and which is innermost. The primary motivation for interchange is to improve memory access patterns. When a matrix is stored in row-major order, an outer loop over rows and inner loop over columns yields contiguous memory accesses and good spatial locality; interchanging them causes strided accesses and poor cache utilization (illustrated in Figure~\ref{fig:loop-interchange}). Interchange is legal only when the data dependencies of the original loop nest are preserved under the new iteration order, verified through dependence analysis.
 
 In our \gls{rl} system, the \texttt{Interchange} action (denoted \texttt{I}) selects a permutation of the loop indices. The number of possible permutations grows factorially with the number of loops, so the agent must learn which reorderings are beneficial for a given operation. The action space supports three modes: pre-enumerated candidate permutations, pointer-based sequential selection, and continuous Lehmer-code decoding.
 
@@ -163,13 +151,11 @@ In our \gls{rl} system, the \texttt{Interchange} action (denoted \texttt{I}) sel
 
 \subsection{Tiling}
 
-Tiling (also called \textit{blocking}) partitions the iteration space of a loop nest into smaller blocks or \textit{tiles}, which are then executed sequentially, with the iterations within each tile executed as before. The primary purpose of tiling is to improve cache utilization: by choosing tile sizes that fit within a cache level, the working set of a tile remains in cache throughout its execution, reducing expensive main memory accesses.
-
-Formally, a loop that iterates over the range $[0, N)$ with step $1$ is tiled into two loops: an outer loop that iterates over tiles with step $T$ (the tile size), and an inner loop that iterates over the elements within the current tile with step $1$. The outer loop iterates $\lceil N/T \rceil$ times. For a nest of $D$ loops, tiling produces $2D$ loops, each of the original $D$ loops contributing an outer tile loop and an inner point loop.
+Tiling (also called \textit{blocking}) partitions the iteration space of a loop nest into smaller blocks or \textit{tiles}, which are then executed sequentially, with the iterations within each tile executed as before. The primary purpose is to improve cache utilization: by choosing tile sizes that fit within a cache level, the working set of a tile remains in cache throughout its execution. For a nest of $D$ loops, tiling produces $2D$ loops: each of the original $D$ loops contributes an outer tile loop and an inner point loop.
 
 The choice of tile size is critical: tiles that are too large do not fit in cache and provide no benefit; tiles that are too small incur excessive loop overhead and underutilize cache lines. The optimal tile size depends on the cache capacity, the size of the data elements, and the number of arrays accessed in the loop body. In our hardware-aware observation (V1), the agent receives cache size information to inform this choice.
 
-In our system, the \texttt{Tiling} action (denoted \texttt{T}) selects, for each loop in the nest, a tile size from a set of powers of two. A tile size of zero indicates that the loop should not be tiled. The tile size must divide the loop's upper bound for the transformation to be valid.
+In our system, the \texttt{Tiling} action (denoted \texttt{T}) selects, for each loop in the nest, a tile size from a set of powers of two. A tile size of zero indicates that the loop should not be tiled. While tiling in general does not require the tile size to divide the loop bound (remainder iterations can be handled by an epilogue loop), the current MLIR RL implementation requires this divisibility condition as a simplification; this is among the known limitations of the system.
 
 \begin{figure}[H]
     \centering
@@ -197,9 +183,7 @@ Fusion is a key transformation in our system. However, as demonstrated by the ca
 
 Vectorization transforms a scalar loop that processes one data element per iteration into a vector loop that processes multiple elements simultaneously using \gls{simd} instructions. Modern CPUs support \gls{simd} instruction sets such as SSE (128-bit), AVX2 (256-bit), and \gls{avx}-512 (512-bit), which can operate on 2, 4, 8, or more data elements in a single instruction.
 
-For a loop to be vectorizable, its iterations must be independent (no loop-carried dependencies), the memory accesses must be contiguous (or at least strided with a compile-time-known stride), and the loop body must consist of operations supported by the target \gls{simd} instruction set. Conditional branches within the loop body can be handled through predication, where both branches are executed and the results are masked, but this adds overhead.
-
-In the context of \gls{mlir}, vectorization is applied to Linalg operations through the vector dialect. The \gls{mlir} pipeline progressively lowers Linalg operations to vector operations, which are then converted to \gls{llvm} \gls{ir} and ultimately to \gls{simd} machine instructions. Additional preprocessing steps—such as transposition of convolution operations from NHWC to HWCF layout, and decomposition of large operations into tiles that fit the vector width—may be required for successful vectorization.
+For a loop to be vectorizable, its iterations must be independent (no loop-carried dependencies) and the memory accesses must be contiguous or have a compile-time-known stride. In \gls{mlir}, vectorization is applied to Linalg operations through the vector dialect, which progressively lowers Linalg operations to vector operations and ultimately to \gls{simd} machine instructions.
 
 In our \gls{rl} agent, the \texttt{Vectorization} action (denoted \texttt{V}) is a terminal action: once vectorization is applied to an operation, no further transformations can be applied to it, and the schedule for that operation is considered complete. The agent also supports automatic vectorization preprocessing for convolution and pooling operations.
 
@@ -208,45 +192,6 @@ In our \gls{rl} agent, the \texttt{Vectorization} action (denoted \texttt{V}) is
     \includegraphics[width=1.0\textwidth]{ressources/chapter1/scalar_vs_SIMD_execution_comparison.png}
     \caption{Scalar vs SIMD execution comparison.}
     \label{fig:vectorization}
-\end{figure}
-
-\subsection{Skewing}
-
-Loop skewing transforms the iteration space of a loop nest to enable parallelization of loops that carry dependencies. The basic idea is to change the coordinates of the iteration space so that the dependency direction vectors become parallel to one of the new axes, making the corresponding loop parallelizable.
-
-As an example, consider a loop nest where an array \texttt{A[i][j]} depends on \texttt{A[i-1][j-1]}. In the original iteration space, both loops carry dependencies and cannot be parallelized. By applying the transformation $i' = i$, $j' = i + j$ (skewing the $j$ axis by $i$), the dependency becomes $A[i'][j'-1]$, which is now parallel in the $i'$ dimension.
-
-Skewing is implemented through linear transformations on the iteration space, typically using the polyhedral model~\cite{bacon1993compiler}. While skewing is not currently part of our agent's action space, it is an example of the kind of transformation that a future expansion could incorporate.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_skewing.png}
-    \caption{Loop skewing.}
-    \label{fig:loop-skewing}
-\end{figure}
-
-\subsection{Loop Unswitching}
-
-Loop unswitching moves a loop-invariant conditional branch from inside a loop to outside, duplicating the loop body for each branch direction. The transformation eliminates the overhead of evaluating the condition in every iteration at the cost of code duplication.
-
-For example, if a loop contains a conditional \texttt{if (debug)} that does not depend on the loop iterator, unswitching produces two copies of the loop: one with the debug code included and one without, with the condition evaluated once before the loop. This optimization is particularly beneficial when the condition is rarely true, as it removes the branch misprediction penalty from the common path.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_unswitching.png}
-    \caption{Loop unswitching.}
-    \label{fig:loop-unswitching}
-\end{figure}
-
-\subsection{Inversion}
-
-Loop inversion transforms a \texttt{while} loop into a \texttt{do-while} loop by moving the loop condition to the end of the body and adding a guard before the loop for the case where the body should not execute at all. The \texttt{do-while} form reduces the number of branches per iteration from two (condition and back-edge) to one (condition only). This transformation is typically applied at the back-end level and is not part of our agent's action space.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_inversion.png}
-    \caption{Loop inversion.}
-    \label{fig:loop-inversion}
 \end{figure}
 
 \subsection{Unrolling}
@@ -260,17 +205,6 @@ Unrolling is beneficial when the loop body is small and the branch overhead is s
     \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_unrolling.png}
     \caption{Loop unrolling.}
     \label{fig:loop-unrolling}
-\end{figure}
-
-\subsection{Loop Peeling}
-
-Loop peeling extracts a small number of iterations from the beginning or end of a loop to enable other optimizations. For instance, peeling the first iteration of a loop can remove a conditional branch that is only taken in the first iteration. Peeling can also align the loop body for more efficient vectorization by ensuring that memory accesses start at aligned addresses.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_peeling.png}
-    \caption{Loop peeling.}
-    \label{fig:loop-peeling}
 \end{figure}
 
 \section{Challenges in Modern Compiler Optimization}

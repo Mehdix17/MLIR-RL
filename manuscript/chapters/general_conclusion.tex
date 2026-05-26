@@ -3,4 +3,26 @@
 \addcontentsline{toc}{chapter}{General Conclusion}
 \label{ch:conclusion}
 
-% your content here...
+\section*{Summary of Contributions}
+
+% [Summarize the four contributions developed in this thesis: hardware-aware observation (V1), shaped reward (V2), transformer encoder (V3), and the unified system with expanded action space (V4). Describe the problem each solved, the approach taken, and the key result. Reference chapter 4 for design and chapter 5 for experimental evidence.]
+
+\section*{Main Findings}
+
+% [Synthesize the experimental results from chapter 5. State the aggregate speedup achieved by the proposed system over the baseline. Summarize which feature contributed the most to the improvement. Discuss the cross-platform generalization results. Mention any negative results or benchmarks where the agent underperformed, and what they reveal about the approach's limitations.]
+
+\section*{Limitations}
+
+% [Discuss the limitations encountered: reliance on JIT compilation making training expensive, the static nature of the shaped reward heuristics, the restriction to CPU-only evaluation (no GPU or accelerator targets), the closed-world assumption of predefined transformation types, and the dependence on ONNX as the sole export path. Frame these as opportunities for future work.]
+
+\section*{Future Work}
+
+Several directions emerge from this thesis. Short-term engineering improvements include extending the action space with additional transformation types such as loop unswitching and skewing, and integrating a learned cost model to replace static reward heuristics with execution-time predictions. Longer-term, the auto-scheduler should be extended to target GPU and accelerator backends, moving beyond the CPU-only setting of the current work.
+
+On the benchmark side, expanding the dataset to support more recent and architecturally distinct model families would further validate generalization. The Mixture-of-Experts (MoE) paradigm, exemplified by models such as Gemma~MoE~2B and DeepSeek-MoE, introduces top-$k$ routing that creates data-dependent scheduling challenges not covered by the current set of affine computation graphs. Architectures with near-identical operator structures to those already covered, such as Qwen~0.8B and the dense DeepSeek~1.5B variant, are natural near-term additions that would increase the diversity of tensor shapes and attention patterns without requiring changes to the extraction pipeline. Incorporating these model families would move the benchmark suite closer to comprehensive coverage of production deep learning workloads.
+
+Algorithmically, the AlphaZero-style planning explored by Tirichine et al.~\cite{tirichine2025reinforcement} remains a promising direction. The computational cost of Monte Carlo Tree Search rollouts currently limits its practicality, but hybrid approaches that use MCTS only for high-stakes decisions (e.g., tile size selection) while relying on the reactive PPO policy for routine transformations could combine the planning depth of search with the speed of learned policies. More broadly, the integration of the auto-scheduler as a pass within the MLIR compilation pipeline, rather than as an external tool, would lower the barrier to adoption and enable optimization of code produced by other MLIR-based compilers.
+
+\section*{Closing Remarks}
+
+% [Conclude with a reflection on the broader significance of RL-based compiler optimization. Position the work within the trajectory of the USTHB research group, from Bendib et al. (2024) through Tirichine et al. (2025) to this thesis. Discuss the potential for learned scheduling to reduce the engineering burden of hand-tuning compiler heuristics and to democratize high-performance compilation across diverse hardware platforms.]

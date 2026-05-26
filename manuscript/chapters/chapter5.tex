@@ -27,7 +27,7 @@ All experiments are conducted on a Slurm-based HPC system featuring three distin
         \bottomrule
     \end{tabularx}
 \end{table}
-By training the RL agent on Dalma and evaluating it across Jubail and Bergamo, we comprehensively test the agent's capability to adapt dynamically to wildly different core counts and cache topographies.
+By training the RL agent on Bergamo (256-core AMD EPYC 9754) and evaluating it on Bergamo, Jubail (128-core AMD EPYC 7742), and Dalma (28-core Intel Xeon), we comprehensively test the agent's capability to adapt its scheduling decisions across fundamentally different core counts, cache topographies, and CPU architectures.
 
 The software stack consists of the following components and configurations:
 \begin{itemize}
@@ -49,17 +49,17 @@ The proposed system and all its ablation variants share a common training protoc
         \toprule
         \textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
         \midrule
-        Learning rate & $3 \times 10^{-4}$ & Adam optimizer step size \\
+        Learning rate & $1 \times 10^{-3}$ & Adam optimizer step size \\
         \gls{ppo} clip range ($\epsilon$) & 0.2 & Policy ratio clipping bound \\
         Discount factor ($\gamma$) & 1.0 & GAE discount (no time preference) \\
         GAE~$\lambda$ & 0.95 & Bias-variance trade-off \\
         \gls{ppo} epochs per iteration & 4 & Number of update epochs on collected data \\
-        \gls{ppo} mini-batch size & 64 & Batch size for gradient estimation \\
+        \gls{ppo} mini-batch size & 32 & Batch size for gradient estimation \\
         Value loss coefficient ($c_1$) & 0.5 & Weight of value loss in combined objective \\
         Entropy coefficient ($c_2$) & 0.01 & Exploration bonus weight \\
         Max gradient norm & 0.5 & Gradient clipping threshold \\
-        Training iterations & 2000 & Total number of trajectory-collection cycles \\
-        Benchmarks per trajectory & 32 & Number of programs sampled per iteration \\
+        Training iterations & 10{,}000 & Total number of trajectory-collection cycles \\
+        Benchmarks per trajectory & 64 & Number of programs sampled per iteration \\
         Truncation length & 5 & Maximum transformations per episode \\
         \bottomrule
     \end{tabularx}
@@ -67,16 +67,18 @@ The proposed system and all its ablation variants share a common training protoc
 
 \subsection{Evaluation Metrics}
 
-The primary evaluation metric is the execution-time speedup, defined as the ratio of the unoptimized MLIR-Base execution time to the optimized execution time:
+To account for measurement noise inherent in execution-time benchmarking, each optimized benchmark is executed 5 times on the target hardware. The median execution time across these 5 runs is recorded as the representative time for that benchmark. This follows standard benchmarking methodology and reduces the influence of outlier measurements caused by system-level noise such as scheduling jitter and cache warm-up effects. The same 5-run median protocol is applied to both the unoptimized baseline time $T_\text{MLIR-Base}$ and the optimized time $T_\text{optimized}$.
+
+The primary evaluation metric is the execution-time speedup, defined as the ratio of the unoptimized MLIR-Base execution time to the optimized execution time. MLIR-Base refers to the same MLIR compilation pipeline used during optimization, compiled with \texttt{-O3} applied by LLVM, but with all RL-guided loop-level transformation selection disabled---the default operator schedules are used instead.
 
 \begin{equation}
     \text{Speedup} = \frac{T_\text{MLIR-Base}}{T_\text{optimized}}
 \end{equation}
 
-A speedup greater than $1.0$ indicates an improvement over the standard compiler heuristics. For aggregated comparisons across multiple benchmarks, we report the arithmetic mean of the per-benchmark speedups:
+A speedup greater than $1.0$ indicates an improvement over the standard compiler heuristics. For aggregated comparisons across multiple benchmarks, we report the geometric mean of the per-benchmark speedups, which is the standard metric for normalised performance ratios as it is not skewed by outlier benchmarks:
 
 \begin{equation}
-    \text{Mean Speedup} = \frac{1}{n} \sum_{i=1}^{n} \text{Speedup}_i
+    \text{Geometric Mean Speedup} = \left( \prod_{i=1}^{n} \text{Speedup}_i \right)^{1/n}
 \end{equation}
 
 \section{Overall System Performance}
@@ -90,7 +92,7 @@ We first evaluate the agents on localized linear algebra operations and sequence
 
 \begin{table}[H]
     \centering
-    \caption{Arithmetic mean speedups of the prior MLIR-RL and the Proposed Agent against MLIR-Base. Higher is better.}
+    \caption{Geometric mean speedups of the prior MLIR-RL and the Proposed Agent against MLIR-Base. Higher is better.}
     \label{tab:overall-performance}
     \begin{tabularx}{\textwidth}{l c c c}
         \toprule
@@ -101,7 +103,7 @@ We first evaluate the agents on localized linear algebra operations and sequence
         Element-wise operations & 8 & -- & -- \\
         Operation sequences (2--5 ops) & 15 & -- & -- \\
         \midrule
-        \textbf{Overall Mean} & 45 & -- & -- \\
+        \textbf{Overall Geo.\ Mean} & 45 & -- & -- \\
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -110,34 +112,47 @@ Table~\ref{tab:overall-performance} demonstrates that the proposed system consis
 
 \subsection{Full Neural Network Models}
 
-To assess real-world applicability, the proposed system is further evaluated on complex sub-graphs extracted from full neural network architectures. Here, we also introduce PyTorch (both eager execution and JIT) as external competitive baselines to contextualize the absolute performance.
+To assess real-world applicability, the proposed system is further evaluated on complex sub-graphs extracted from the 18 full neural network architectures spanning eight categories. Table~\ref{tab:full-models} reports results on a representative subset covering all categories. We also introduce PyTorch (both eager execution and JIT) as external competitive baselines to contextualize the absolute performance. For PyTorch, each benchmark is executed with 10 warm-up invocations followed by 11 measurement runs; the median of the 11 measurement runs is reported, following the evaluation protocol established by the MLIR-RL paper~\cite{tirichine2025reinforcement}.
 
 \begin{table}[H]
     \centering
-    \caption{Speedups on full neural network models, normalized against MLIR-Base.}
+    \caption{Speedups on representative full neural network models, normalized against MLIR-Base.}
     \label{tab:full-models}
-    \begin{tabularx}{\textwidth}{l c c c c}
+    \begin{tabularx}{\textwidth}{l l c c c c}
         \toprule
-        \textbf{Model} & \textbf{MLIR-Base} & \textbf{PyTorch} & \textbf{MLIR-RL} & \textbf{Proposed Agent} \\
+        \textbf{Family} & \textbf{Model} & \textbf{MLIR-Base} & \textbf{PyTorch} & \textbf{MLIR-RL} & \textbf{Proposed Agent} \\
         \midrule
-        VGG-16 & 1.0 & -- & -- & -- \\
-        ResNet-50 & 1.0 & -- & -- & -- \\
-        MobileNetV2 & 1.0 & -- & -- & -- \\
+        \multirow{2}{*}[-1pt]{Encoder Transformer} & BERT & 1.0 & -- & -- & -- \\
+        & ALBERT & 1.0 & -- & -- & -- \\
+        \hline
+        \multirow{2}{*}[-1pt]{Decoder / Seq2Seq} & GPT-2 Medium & 1.0 & -- & -- & -- \\
+        & T5 & 1.0 & -- & -- & -- \\
+        \hline
+        \multirow{2}{*}[-1pt]{Vision} & ResNet-50 & 1.0 & -- & -- & -- \\
+        & MobileNetV3-Small & 1.0 & -- & -- & -- \\
+        \hline
+        Graph Neural Network & GAT & 1.0 & -- & -- & -- \\
+        \hline
+        Audio Transformer & Whisper-base & 1.0 & -- & -- & -- \\
+        \hline
+        Object Detection & YOLOv8m & 1.0 & -- & -- & -- \\
+        \hline
+        Modern LLM & Llama~3.2~1B & 1.0 & -- & -- & -- \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
 The Proposed Agent conditions its policy on hardware attributes (cores, cache sizes, SIMD width). We define the \textbf{No-HW-aware} variant by masking this feature vector, forcing the policy to learn an implicit, hardware-agnostic strategy reminiscent of the prior MLIR-RL agent.
 
-To evaluate this, both the Proposed Agent and the No-HW-aware variant are trained exclusively on the Dalma partition (Intel Xeon). We then conduct a critical cross-platform generalization test by evaluating both models—without any retraining—on three distinct architectures: the original training hardware (Dalma), the 128-core Jubail partition (AMD Zen 2), and the 256-core Bergamo partition (AMD Zen 4).
+To evaluate this, both the Proposed Agent and the No-HW-aware variant are trained exclusively on the Bergamo partition (AMD EPYC 9754, Zen 4). We then conduct a cross-platform generalization test by evaluating both models---without any retraining---on three distinct architectures: the original training hardware (Bergamo), the smaller 128-core Jubail partition (AMD EPYC 7742, Zen 2), and the Intel-based Dalma partition (Xeon E5-2680 v4, Broadwell).
 
 \begin{table}[H]
     \centering
-    \caption{Cross-platform generalization speedups. The Proposed Agent retains substantial performance across all hardware setups, whereas the No-HW-aware variant degrades heavily on unseen AMD topologies.}
+    \caption{Cross-platform generalization speedups. The Proposed Agent retains substantial performance on the unseen Intel (Dalma) and smaller AMD (Jubail) platforms, whereas the No-HW-aware variant shows significant performance loss.}
     \label{tab:ablation-nohw}
     \begin{tabularx}{\textwidth}{X c c c}
         \toprule
-        \textbf{System} & \textbf{Dalma (Train HW)} & \textbf{Jubail (128-core)} & \textbf{Bergamo (256-core)} \\
+        \textbf{System} & \textbf{Bergamo (Train HW)} & \textbf{Jubail (128-core)} & \textbf{Dalma (Intel)} \\
         \midrule
         No-HW-aware & -- & -- & -- \\
         \textbf{Proposed Agent (Full)} & -- & -- & -- \\
@@ -153,7 +168,7 @@ Beyond final execution speedup, the impact of reward shaping is most evident in 
 
 \begin{table}[H]
     \centering
-    \caption{Final arithmetic mean speedups on the evaluation set, comparing the full agent against the No-Reward-Shaping ablation.}
+    \caption{Final geometric mean speedups on the evaluation set, comparing the full agent against the No-Reward-Shaping ablation.}
     \label{tab:ablation-reward}
     \begin{tabularx}{\textwidth}{l c c}
         \toprule
@@ -172,7 +187,7 @@ We evaluate this variant explicitly across benchmarks stratified by their loop n
 
 \begin{table}[H]
     \centering
-    \caption{Ablation of the encoder architecture, stratified by loop nest depth. The transformer advantage shines in deeply nested structures.}
+    \caption{Ablation of the encoder architecture, stratified by loop nest depth. The transformer encoder shows larger gains on deeper loop nests.}
     \label{tab:ablation-transformer}
     \begin{tabularx}{\textwidth}{l c c}
         \toprule
@@ -190,7 +205,7 @@ We evaluate this variant explicitly across benchmarks stratified by their loop n
 \label{sec:discussion}
 
 \subsection{Contribution of Individual Components}
-The ablation studies solidify the rationale behind the proposed architectural changes. The hardware-aware features successfully untether the learned policies from the training platform's specific architectural quirks. Dense, shaped rewards solve the credit assignment problem during the fragile early stages of training, leading to faster and more reliable convergence. Finally, the Transformer encoder natively absorbs the complex topological dependencies in loop-nests, decisively outperforming the legacy LSTM implementations on intricate neural network sub-graphs involving four or more cascading loops. 
+The ablation studies solidify the rationale behind the proposed architectural changes. The hardware-aware features successfully untether the learned policies from the training platform's specific architectural quirks. Dense, shaped rewards solve the credit assignment problem during the fragile early stages of training, leading to faster and more reliable convergence. Finally, the Transformer encoder natively absorbs the complex topological dependencies in loop-nests, outperforming the legacy LSTM implementations on intricate neural network sub-graphs involving four or more cascading loops. 
 
 \subsection{Limitations}
 Despite significant advances, the proposed auto-scheduler retains some limitations. The system relies entirely on predefined heuristic handlers and rigid transformation definitions. Furthermore, JIT-compiling every candidate sequence within the reinforcement learning loop remains a massive computational bottleneck, preventing the agent from being deployed for entirely on-the-fly, real-time optimization in production compilers.
@@ -200,6 +215,6 @@ Our approach marks a substantial departure from the prior MLIR-RL agent and foun
 
 \section{Conclusion}
 
-This chapter presented a rigorous, ablation-focused evaluation of our proposed \gls{rl} auto-scheduler for the MLIR compiler framework. By establishing strong baselines against both the standard \gls{mlir} compilation steps (MLIR-Base) and the prior state-of-the-art \gls{rl} implementation (MLIR-RL), we demonstrated that the integrated system comfortably exceeds previous benchmarks in both simple linear algebra domains and full, real-world neural network graph executions.
+This chapter presented a rigorous, ablation-focused evaluation of our proposed \gls{rl} auto-scheduler for the MLIR compiler framework. By establishing strong baselines against both the standard \gls{mlir} compilation steps (MLIR-Base) and the prior state-of-the-art \gls{rl} implementation (MLIR-RL), we demonstrated that the integrated system exceeds previous benchmarks in both simple linear algebra domains and full, real-world neural network graph executions.
 
-Through isolated ablation variants, we quantified the exact utility of each theoretical contribution: the hardware-aware observation, the static shaped rewards, and the Transformer-based encoder. The findings conclusively show that merging these concepts enables deep reinforcement learning to scale reliably to complex, dynamic, and hardware-agnostic compiler optimizations. The final chapter will summarize the scope of this project and outline prominent avenues for future research.
+Through isolated ablation variants, we quantified the exact utility of each theoretical contribution: the hardware-aware observation, the static shaped rewards, and the Transformer-based encoder. The findings indicate that merging these concepts enables deep reinforcement learning to scale reliably to complex, dynamic, and hardware-agnostic compiler optimizations. The final chapter will summarize the scope of this project and outline prominent avenues for future research.

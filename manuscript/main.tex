@@ -56,6 +56,13 @@
 \newacronym{elu}{ELU}{Exponential Linear Unit}
 \newacronym{avx}{AVX}{Advanced Vector Extensions}
 \newacronym{ilp}{ILP}{Instruction-Level Parallelism}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{gpu}{GPU}{Graphics Processing Unit}
+\newacronym{gelu}{GELU}{Gaussian Error Linear Unit}
+\newacronym{llm}{LLM}{Large Language Model}
+\newacronym{onnx}{ONNX}{Open Neural Network Exchange}
+\newacronym{slurm}{SLURM}{Simple Linux Utility for Resource Management}
+\newacronym{pomdp}{POMDP}{Partially Observable Markov Decision Process}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -237,5 +244,48 @@ Contenu du résumé ici...
 
 \chapter*{Appendix}
 \addcontentsline{toc}{chapter}{Appendix}
+
+\section*{A. Per-Model Benchmark Distribution}
+
+Table~\ref{tab:appendix-model-counts} provides the detailed breakdown of extracted benchmarks per model, including both single-operation files and operation blocks. Counts represent the combined pool before the 80/20 train-evaluation split. The legacy synthetic pool contributes an additional 3{,}972 benchmarks (3{,}738 synthesized programs and 234 single operations).
+
+\begin{table}[H]
+    \centering
+    \caption{Detailed per-model benchmark counts.}
+    \label{tab:appendix-model-counts}
+    \begin{tabularx}{\textwidth}{l l r}
+        \toprule
+        \textbf{Family} & \textbf{Model} & \textbf{Count} \\
+        \midrule
+        \multirow{3}{*}[-2pt]{Encoder Transformers} & BERT & -- \\
+        & ALBERT & -- \\
+        & DistilBERT & -- \\
+        \hline
+        \multirow{3}{*}[-2pt]{Decoder / Seq2Seq} & GPT-2 Medium & -- \\
+        & BART & -- \\
+        & T5 & -- \\
+        \hline
+        \multirow{7}{*}[-4pt]{Vision} & ViT-B/16 & -- \\
+        & ResNet-50 & -- \\
+        & ResNeXt-50 & -- \\
+        & MobileNetV3-Small & -- \\
+        & EfficientNet-B0 & -- \\
+        & ConvNeXt-Tiny & -- \\
+        & VGG-16 & -- \\
+        \hline
+        \multirow{2}{*}[-2pt]{Graph Neural Networks} & GAT & -- \\
+        & GIN & -- \\
+        \hline
+        Audio Transformer & Whisper-base & -- \\
+        \hline
+        Object Detection & YOLOv8m & -- \\
+        \hline
+        Modern LLM & Llama~3.2~1B & -- \\
+        \hline
+        \multirow{2}{*}[-2pt]{Legacy / Synthetic} & Synthesized programs & 3{,}738 \\
+        & Single operations & 234 \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
 
 \end{document}

@@ -32,6 +32,7 @@ import os
 import textwrap
 import json
 import hashlib
+import random
 
 
 # Ops to extract — must be single-op linalg structured ops.
@@ -437,9 +438,10 @@ def _build_benchmark(affine_maps: list[str],
 # ---------------------------------------------------------------------------
 
 def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
-                      model_name: str | None = None, min_parallel_loops: int = 2,
-                      require_reduction: bool = True,
-                      clean: bool = False,
+                       model_name: str | None = None, min_parallel_loops: int = 2,
+                       require_reduction: bool = True,
+                       generic_ratio: float | None = None,
+                       clean: bool = False,
                       dynamic_shape_policy: str = "static",
                       dynamic_batch_candidates: list[int] | None = None,
                       dynamic_max_variants: int = 2,
@@ -519,6 +521,11 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
     real_written = 0
     manifest_entries: list[dict] = []
 
+    # Buffer for linalg.generic ops when generic_ratio is set.
+    # Each entry: (op_text, result_type_raw, ins_args, ins_types, outs_args, outs_types,
+    #              is_reduction, op_has_dynamic, dedup_key)
+    pending_generics: list[tuple] = []
+
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -564,12 +571,15 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
 
         i = end_i + 1
 
-        # Skip trivial linalg.generic ops
-        if matched_op == "linalg.generic":
+        # Skip / buffer trivial linalg.generic ops
+        is_generic = matched_op == "linalg.generic"
+        is_reduction = False
+        if is_generic:
+            is_reduction = _count_reduction_loops(op_text) > 0
             if _count_parallel_loops(op_text) < min_parallel_loops:
                 skipped += 1
                 continue
-            if require_reduction and _count_reduction_loops(op_text) == 0:
+            if require_reduction and not is_reduction and generic_ratio is None:
                 skipped += 1
                 continue
 
@@ -684,7 +694,7 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
             # -- Affine maps ----------------------------------------------
             ref_maps = _get_referenced_maps(op_text, affine_map_defs)
 
-            # -- Build and write benchmark --------------------------------
+            # -- Build benchmark (may be deferred if generic_ratio applies) --
             idx = op_counts.get(op_type, 0)
             op_counts[op_type] = idx + 1
 
@@ -698,8 +708,6 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
 
             batch_suffix = f"_bs{chosen_batch}" if (append_batch_tag and op_has_dynamic) else ""
             out_path = os.path.join(target_dir, f"{model_name}_{op_type}{batch_suffix}_{idx}.mlir")
-            with open(out_path, "w") as fh:
-                fh.write(mlir)
 
             signature_blob = "|".join([
                 op_type,
@@ -709,7 +717,7 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
                 op_signature,
             ])
             signature_hash = hashlib.sha1(signature_blob.encode("utf-8")).hexdigest()
-            manifest_entries.append({
+            manifest_entry = {
                 "source_file": os.path.abspath(input_path),
                 "model": model_name,
                 "op_type": op_type,
@@ -722,7 +730,20 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
                 "input_types": all_types,
                 "result_type": spec_result,
                 "signature_hash": signature_hash,
-            })
+            }
+
+            # When generic_ratio is set, defer all generic ops for capped sampling.
+            if generic_ratio is not None and is_generic:
+                pending_generics.append((
+                    mlir, out_path, manifest_entry, is_reduction,
+                ))
+                variant_written = True
+                continue
+
+            with open(out_path, "w") as fh:
+                fh.write(mlir)
+
+            manifest_entries.append(manifest_entry)
 
             written += 1
             if op_has_dynamic:
@@ -733,6 +754,38 @@ def extract_from_file(input_path: str, output_dir: str, batch_size: int = 1,
 
         if not variant_written:
             skipped += 1
+
+    # ------------------------------------------------------------------
+    # Flush deferred generic ops with ratio-based cap
+    # ------------------------------------------------------------------
+    if generic_ratio is not None and pending_generics:
+        total_generics = len(pending_generics)
+        keep_count = max(1, int(total_generics * generic_ratio))
+
+        # Prioritise reduction-containing generics, then fill with element-wise.
+        reduction_entries = [g for g in pending_generics if g[3]]
+        elementwise_entries = [g for g in pending_generics if not g[3]]
+
+        selected = reduction_entries[:keep_count]
+        remaining_slots = keep_count - len(selected)
+        if remaining_slots > 0:
+            selected += random.sample(
+                elementwise_entries,
+                min(remaining_slots, len(elementwise_entries)),
+            )
+
+        skipped += total_generics - len(selected)
+
+        for mlir, out_path, manifest_entry, _is_red in selected:
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            with open(out_path, "w") as fh:
+                fh.write(mlir)
+            manifest_entries.append(manifest_entry)
+            written += 1
+            if manifest_entry["was_dynamic"]:
+                dynamic_variants_written += 1
+            else:
+                real_written += 1
 
     print(f"Model : {model_name}")
     print(f"Written: {written} benchmark file(s) → {output_dir}/")
@@ -830,6 +883,13 @@ def main() -> None:
              "Default: require at least one reduction loop."
     )
     parser.add_argument(
+        "--generic-ratio", type=float, default=None,
+        help="If set, keep at most this fraction of linalg.generic ops (0.0-1.0). "
+             "Reduction-containing generics are prioritised, element-wise fill remaining "
+             "slots via random sampling. Overrides --no-require-reduction for element-wise "
+             "generics; still respects --min-parallel-loops."
+    )
+    parser.add_argument(
         "--clean", action="store_true", default=False,
         help="Remove all existing .mlir files in the output directory before extracting"
     )
@@ -847,6 +907,7 @@ def main() -> None:
                     model_name=effective_name,
                     min_parallel_loops=args.min_parallel_loops,
                     require_reduction=args.require_reduction,
+                    generic_ratio=args.generic_ratio,
                     clean=args.clean and i == 0,
                     dynamic_shape_policy="static",
                     dynamic_batch_candidates=args.batch_sizes,
@@ -865,6 +926,7 @@ def main() -> None:
                 model_name=base_name,
                 min_parallel_loops=args.min_parallel_loops,
                 require_reduction=args.require_reduction,
+                generic_ratio=args.generic_ratio,
                 clean=args.clean,
                 dynamic_shape_policy=args.dynamic_shape_policy,
                 dynamic_batch_candidates=args.batch_sizes,
@@ -899,6 +961,7 @@ def main() -> None:
                         model_name=effective_name,
                         min_parallel_loops=args.min_parallel_loops,
                         require_reduction=args.require_reduction,
+                        generic_ratio=args.generic_ratio,
                         clean=args.clean and i == 0,
                         dynamic_shape_policy="static",
                         dynamic_batch_candidates=args.batch_sizes,
@@ -921,6 +984,7 @@ def main() -> None:
                     model_name=model,
                     min_parallel_loops=args.min_parallel_loops,
                     require_reduction=args.require_reduction,
+                    generic_ratio=args.generic_ratio,
                     clean=args.clean,
                     dynamic_shape_policy=args.dynamic_shape_policy,
                     dynamic_batch_candidates=args.batch_sizes,

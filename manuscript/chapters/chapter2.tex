@@ -358,7 +358,7 @@ where:
     \item \textbf{Repeat}: A new iteration begins with the updated policy.
 \end{enumerate}
 
-\gls{ppo} has become one of the most widely used \gls{rl} algorithms due to its simplicity, stability, and strong empirical performance across a range of domains~\cite{berner2019dota}. These properties make it well-suited for compiler optimization, where training is computationally expensive and stability is important: the clipped objective reduces the risk of catastrophic policy collapse during training, and the on-policy nature ensures that the agent is always evaluated on data representative of its current behavior.
+\gls{ppo} has become one of the most widely used \gls{rl} algorithms due to its simplicity, stability, and strong empirical performance across a range of domains~\cite{berner2019dota}. These properties make it well-suited for compiler optimization, where training is computationally expensive and stability is important: the clipped objective reduces the risk of destabilizing policy collapse during training, and the on-policy nature ensures that the agent is always evaluated on data representative of its current behavior.
 
 \begin{table}[H]
     \centering
