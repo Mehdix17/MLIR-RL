@@ -1,81 +1,163 @@
-# MLIR-RL Dataset: Model Selection Rationale
+# MLIR-RL Dataset: Model Selection & Structure
 
 ## Removed Models
 
 | Model | Category | Reason for Removal |
 |---|---|---|
-| ResNet-18 | CNN | Redundant with ResNet-50. Same architectural pattern (residual conv stacks), just shallower. Keeping both provides no additional op diversity for the RL agent. |
-| DeBERTa | Encoder Transformer | The encoder-only family (BERT, ALBERT, RoBERTa, DistilBERT, DeBERTa, ELECTRA) is heavily over-represented. All produce near-identical MLIR compute graphs dominated by self-attention and feed-forward blocks. Removing the entire group avoids redundancy. |
-| RoBERTa | Encoder Transformer | Same rationale as DeBERTa. RoBERTa is BERT with different pretraining, not a different compute graph. No marginal value for schedule optimization benchmarking. |
-| ELECTRA | Encoder Transformer | Same rationale. ELECTRA's discriminator/generator design is a training-time distinction that disappears in inference IR. The resulting MLIR is essentially BERT-equivalent. |
-| GRU | RNN | Sequential recurrent ops are structurally incompatible with the parallelizable workloads that dominate modern deployment. Adds noise to the benchmark without representing a relevant optimization target. |
-| BiLSTM | RNN | Same rationale as GRU. Bidirectional LSTM introduces gate-heavy sequential compute that is not representative of current production inference workloads. |
-| GCN | Graph Neural Network | Functionally subsumed by GIN. GCN is a simplified special case of GIN's aggregation scheme. Keeping both provides no additional op diversity. |
-| GraphSAGE | Graph Neural Network | Its sampling-based mean/max aggregation collapses to patterns already covered by GIN. The data-loading irregularity it introduces is harder to attribute to schedule optimization specifically. |
+| ResNet-18 | CNN | Redundant with ResNet-50. Same architectural pattern (residual conv stacks), just shallower. |
+| DeBERTa | Encoder Transformer | Encoder-only family over-represented. Near-identical MLIR compute graphs to BERT. |
+| RoBERTa | Encoder Transformer | Same rationale as DeBERTa. Different pretraining, not a different compute graph. |
+| ELECTRA | Encoder Transformer | Discriminator/generator design is training-time only; inference IR equals BERT. |
+| GRU | RNN | Sequential recurrent ops incompatible with parallelizable workloads. |
+| BiLSTM | RNN | Same rationale as GRU. Gate-heavy sequential compute, not representative of production. |
+| GCN | Graph Neural Network | Functionally subsumed by GIN. Simplified special case of GIN's aggregation scheme. |
+| GraphSAGE | Graph Neural Network | Sampling-based aggregation collapses to patterns already covered by GIN. |
+| DenseNet-121 | CNN | Dense connectivity pattern produces op types already well-covered by ResNet/EfficientNet. |
+| VGG-11 | CNN | Replaced by VGG-16 for deeper conv stacks with more scheduling surface. |
+| LSTM / LSTM-Seq2Seq | RNN | Recurrent patterns incompatible with modern parallelizable benchmarks. |
 
 ---
 
-## Kept Models
+## Kept Models (18)
 
 ### Encoder Transformers
 
 | Model | Reason for Keeping |
 |---|---|
-| BERT | Retained as the single representative of the encoder-only family. Provides the standard self-attention + FFN op pattern (matmul-heavy) as a clean baseline. |
-| ALBERT | Parameter-sharing design produces a distinct IR footprint compared to BERT despite similar architecture. Worth keeping as a lightweight attention representative. |
-| DistilBERT | Distilled architecture with fewer layers. Useful for testing agent generalization across model depth variations within the same op family. |
+| BERT | Single representative of encoder-only family. Standard self-attention + FFN (matmul-heavy). |
+| ALBERT | Parameter-sharing design; distinct IR footprint despite similar architecture. |
+| DistilBERT | Distilled architecture with fewer layers; tests agent generalization across depth. |
 
 ### Decoder / Seq2Seq
 
 | Model | Reason for Keeping |
 |---|---|
-| GPT-2 | Autoregressive decoder with causal attention mask. Different compute pattern from encoder-only models, important for covering the decoder side of the Transformer family. |
-| BART | Encoder-decoder architecture. Covers the seq2seq compute pattern and serves as a bridge between pure encoder and pure decoder workloads. |
-| T5 | Encoder-decoder with a distinct tokenization and attention scheme. Widely deployed in production, high benchmark value. |
+| GPT-2 (medium) | Autoregressive decoder with causal attention mask. 345M params, 24 layers. |
+| BART | Encoder-decoder architecture. Covers seq2seq compute patterns. |
+| T5 | Encoder-decoder with distinct tokenization/attention. Widely deployed in production. |
 
 ### Vision
 
 | Model | Reason for Keeping |
 |---|---|
-| ViT-B/16 | The canonical vision Transformer. Attention-heavy, matmul-dominant workload. Fundamentally different from CNN compute graphs, essential for Transformer-side vision benchmarking. |
-| ResNet-50 | The canonical CNN backbone. Conv2D-dominant with residual connections. Non-negotiable baseline for any vision benchmark. |
-| ResNeXt-50 | Grouped convolutions introduce a meaningfully different op pattern from vanilla ResNet. Worth keeping as a CNN variant that stress-tests group conv scheduling. |
-| MobileNetV3-Small | Depthwise separable convolutions and squeeze-and-excitation blocks. Critical for edge/efficiency optimization scenarios, very different op distribution from full convolutions. |
-| EfficientNet-B0 | Compound scaling across width, depth, and resolution. Diverse op shapes across the network make it a strong test of agent generalization. |
-| ConvNeXt-Tiny | Modernized CNN with large 7x7 kernels, LayerNorm, and GELU. Bridges the gap between CNNs and Transformers in terms of op patterns. |
-| VGG-11 | Simple, uniform conv stacks with no residuals. Useful as a low-complexity sanity baseline and for isolating pure conv scheduling behavior. |
+| ViT-B/16 | Canonical vision Transformer. Attention-heavy, matmul-dominant. |
+| ResNet-50 | Canonical CNN backbone. Conv2D-dominant with residual connections. |
+| ResNeXt-50 | Grouped convolutions; stress-tests group conv scheduling. |
+| MobileNetV3-Small | Depthwise separable convolutions + SE blocks; edge-efficiency scenarios. |
+| EfficientNet-B0 | Compound scaling across width, depth, resolution; diverse op shapes. |
+| ConvNeXt-Tiny | Modernized CNN with 7×7 kernels, LayerNorm, GELU. Bridges CNN→Transformer gap. |
+| VGG-16 | Deep uniform conv stacks (no residuals); sanity baseline for pure conv scheduling. |
 
 ### Graph Neural Networks
 
 | Model | Reason for Keeping |
 |---|---|
-| GAT | Attention-weighted neighbor aggregation. Introduces softmax + weighted sum on irregular sparse graphs, the most distinct compute pattern in the GNN group and the closest to modern attention mechanisms. |
-| GIN | Theoretically most expressive GNN (Weisfeiler-Lehman equivalent). Clean sum aggregation followed by MLP layers, providing a high-frequency matmul target on irregular data. Strong research benchmark coverage. |
+| GAT | Attention-weighted neighbor aggregation; closest to modern attention mechanisms. |
+| GIN | Weisfeiler-Lehman equivalent; sum aggregation + MLP layers on irregular data. |
+
+### Audio Transformers
+
+| Model | Reason for Keeping |
+|---|---|
+| Whisper-base (encoder) | Conv1d stem + self-attention layers. Distinct input shape (80 mel bins × time) and GELU. Cross-modality diversity. |
 
 ### Object Detection
 
 | Model | Reason for Adding |
 |---|---|
-| YOLOv8m | The most important missing model in the dataset. Conv2D-dominant with 200-350 conv ops (1x1 and 3x3 kernels), an SPPF pooling block, and feature pyramid neck concats. Entirely different op distribution from all existing models. High real-world deployment relevance and a strong latency-constrained benchmark target for the RL agent. |
+| YOLOv8m (backbone) | Conv2D-dominant (1×1 and 3×3 kernels), SPPF pooling block. High real-world deployment relevance. |
 
 ### Modern LLMs
 
 | Model | Reason for Adding |
 |---|---|
-| Llama 3.2 1B | Covers modern LLM op patterns absent from GPT-2: Grouped Query Attention (GQA), RoPE positional encoding, and RMSNorm. GQA specifically produces a distinct batch_matmul shape that differs from standard MHA, making it a high-value addition for schedule diversity. Compact enough (1B) to remain tractable as a benchmark target. |
+| Llama 3.2 1B | GQA, RoPE positional encoding, RMSNorm. Distinct batch_matmul shapes; compact enough to benchmark. |
 
 ---
 
 ## Future Works
 
-Models evaluated but deferred to future dataset iterations due to architectural redundancy with existing entries or specialized complexity requiring dedicated benchmarking infrastructure.
-
 | Model | Category | Rationale for Deferral |
 |---|---|---|
-| Whisper (encoder) | Audio Transformer | Op types are close to ViT-B/16. Main differentiator is input tensor shape (time x frequency). Low priority given current coverage, but worth adding for cross-modality generalization studies. |
-| Qwen 0.8B | LLM | Architecturally very close to Llama (GQA, RMSNorm, rotary embeddings). Adding both provides size-point variation but minimal op diversity beyond what Llama already covers. |
-| DeepSeek 1.5B (dense) | LLM | Dense variant has near-identical op structure to Llama. The interesting version is DeepSeek MoE (V2/V3) which introduces expert routing ops, deferred alongside Gemma MoE. |
-| Gemma MoE 2B | Mixture-of-Experts | Most architecturally distinct of the group. Top-k routing and conditional expert dispatch introduce data-dependent scheduling problems not present anywhere in the current dataset. High future value but requires dedicated MoE benchmarking support. |
+| Qwen 0.8B | LLM | Architecturally very close to Llama (GQA, RMSNorm, rotary embeddings). |
+| DeepSeek 1.5B (dense) | LLM | Near-identical op structure to Llama. MoE variant (V2/V3) deferred with Gemma MoE. |
+| Gemma MoE 2B | Mixture-of-Experts | Top-k routing introduces data-dependent scheduling problems. Requires dedicated MoE support. |
+
+---
+
+## Data Extraction Pipeline
+
+### Raw Models → Linalg MLIR
+
+18 PyTorch/HuggingFace models are converted to `linalg-on-tensors` MLIR via:
+
+```
+PyTorch model → ONNX (opset 18, torch.onnx.export)
+              → torch-mlir-import-onnx
+              → torch-mlir-opt (lower to linalg)
+```
+
+GPT-2 and Llama 3.2 use a wrapper that passes `cache_position` explicitly to bypass `DynamicCache` tracing issues in transformers ≥4.57. Llama 3.2 is exported in bfloat16 to fit within Slurm memory limits.
+
+### Single-Op Extraction (`extract_ops.py`)
+
+Isolated linalg operations are extracted from raw `_linalg.mlir` files. Each output file wraps a single op in a timed `@main` function with `@nanoTime()` calls.
+
+| Variant | Flag | Purpose | Result |
+|---|---|---|---|
+| **Full Fidelity** | `--no-require-reduction` | Proof of model op coverage (all generics kept) | 952 files → `single_bench_full/` |
+| **Train-Efficient** | `--generic-ratio 0.25` | Training + ablation + performance reporting | 405 files → `single_bench/` |
+
+The `--generic-ratio` flag caps `linalg.generic` ops at a fraction of total generics per model. Reduction-containing generics are prioritised; remaining slots filled by random sampling of element-wise generics. Default ratio 0.25 keeps the generic proportion balanced (~25% of generics per model) regardless of model depth.
+
+### Block Extraction (`extract_blocks.py`)
+
+5-op sliding windows (stride 3) are extracted along consumer→producer dataflow paths via the AST dumper. Each block is a self-contained timed benchmark.
+
+| Variant | Flag | Purpose | Result |
+|---|---|---|---|
+| **Full** | (default) | Real subgraph coverage | 10,198 blocks → `bench/` (backed up) |
+| **Train-Efficient** | `--skip-pure-elementwise` | Training-focused; skip blocks with zero heavy ops | 7,393 blocks → `bench_train/` |
+
+A block is skipped if every op in it is an element-wise `linalg.generic` (no matmul, conv2d, pooling, reduce, or reduction-containing generic). This ensures every block has at least one meaningful scheduling target.
+
+---
+
+## Directory Structure
+
+```
+data/
+├── nn/                           # Neural network model benchmarks
+│   ├── raw_bench/                # 18 *_linalg.mlir files
+│   ├── single_bench/             # 405 isolated ops (train-efficient)
+│   ├── single_bench_full/        # 952 isolated ops (full fidelity)
+│   └── bench_train/              # 7,393 blocks (train-efficient)
+│
+├── legacy/                       # Synthetic legacy benchmarks
+│   ├── bench/                    # 3,738 synthetic single-op benchmarks (filtered)
+│   ├── single_bench/             # 234 synthetic single-op benchmarks (filtered)
+│   ├── bench_removed/            # 3,663 pure element-wise (archived)
+│   └── single_bench_removed/     # 64 excess generics (archived)
+│
+├── all/                          # Final merged dataset (flat per directory)
+│   ├── train/                    # 9,407 files (80% stratified from all sources)
+│   ├── eval/                     # 2,363 files (20% stratified from all sources)
+│   └── eval_full/                # 952 files (100% of nn/single_bench_full)
+│
+└── backup/                       # Archived data
+    ├── nn_bench_unfiltered/       # 10,198 original unfiltered blocks
+    ├── all_code_files_old/        # Stale old all/code_files
+    └── stale_dirs/               # generated/, removed/, old files
+```
+
+### all/ Stratification
+
+`all/train/` and `all/eval/` are populated by an 80/20 stratified split with seed 42. Sources:
+
+- `nn/single_bench/` (405) + `nn/bench_train/` (7,393) — stratified by model name
+- `legacy/single_bench/` (234) + `legacy/bench/` (3,738) — stratified by op family
+
+All 18 models + both legacy pools are proportionally represented in both train and eval. Merged flat: `{model}_{op}_{N}.mlir`, `{model}_block_{N}.mlir`, `bench_{N}.mlir`, `single_bench_{N}.mlir` coexist in a single directory.
 
 ---
 
@@ -84,10 +166,18 @@ Models evaluated but deferred to future dataset iterations due to architectural 
 | Category | Models | Count |
 |---|---|---|
 | Encoder Transformers | BERT, ALBERT, DistilBERT | 3 |
-| Decoder / Seq2Seq | GPT-2, BART, T5 | 3 |
+| Decoder / Seq2Seq | GPT-2 (medium), BART, T5 | 3 |
 | Vision Transformers | ViT-B/16 | 1 |
-| CNN Backbones | ResNet-50, ResNeXt-50, MobileNetV3-Small, EfficientNet-B0, ConvNeXt-Tiny, VGG-11 | 6 |
-| Object Detection | YOLOv8m | 1 |
+| CNN Backbones | ResNet-50, ResNeXt-50, MobileNetV3-Small, EfficientNet-B0, ConvNeXt-Tiny, VGG-16 | 6 |
+| Object Detection | YOLOv8m (backbone) | 1 |
 | Modern LLMs | Llama 3.2 1B | 1 |
+| Audio Transformers | Whisper-base (encoder) | 1 |
 | Graph Neural Networks | GAT, GIN | 2 |
-| **Total** | | **17** |
+| **Total models** | | **18** |
+
+| Dataset Split | Files | Composition |
+|---|---|---|
+| `all/train/` | 9,407 | 80% of nn single_bench + nn bench_train + legacy single_bench + legacy bench |
+| `all/eval/` | 2,363 | 20% of same |
+| `all/eval_full/` | 952 | 100% of nn/single_bench_full (all model ops, unfiltered) |
+| **Total** | **12,722** | |
