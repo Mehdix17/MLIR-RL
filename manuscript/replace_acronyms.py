@@ -26,7 +26,14 @@ acronym_map = {
     'ReLU': 'relu',
     'ELU': 'elu',
     'AVX': 'avx',
-    'ILP': 'ilp'
+    'ILP': 'ilp',
+    'CPU': 'cpu',
+    'GPU': 'gpu',
+    'GELU': 'gelu',
+    'LLM': 'llm',
+    'ONNX': 'onnx',
+    'SLURM': 'slurm',
+    'POMDP': 'pomdp'
 }
 
 def replace_acronyms(text):

@@ -5,9 +5,9 @@
 \label{sec:problem-statement-contributions}
 
 \subsection{Overview of the Problem Statement}
-Modern compilers rely on rigid, hand-crafted heuristics to optimize code, which often fail to unlock the full computational potential of underlying hardware for complex deep learning workloads. While formulating code optimization as a Markov Decision Process (MDP) and leveraging deep reinforcement learning (DRL)---as initiated in early baseline models (Bendib~\cite{bendib2024reinforcement}, Tirichine et al.~\cite{tirichine2025reinforcement})---has demonstrated significant promise, scaling these initial proofs-of-concept into robust, generalized mechanisms reveals critical bottlenecks. 
+Modern compilers rely on rigid, hand-crafted heuristics to optimize code, which often fail to unlock the full computational potential of underlying hardware for complex deep learning workloads. While formulating code optimization as a Markov Decision Process (\gls{mdp}) and leveraging deep reinforcement learning (DRL)---as initiated in early baseline models (Bendib~\cite{bendib2024reinforcement}, Tirichine et al.~\cite{tirichine2025reinforcement})---has demonstrated significant promise, scaling these initial proofs-of-concept into robust, generalized mechanisms reveals critical bottlenecks. 
 
-For readers reviewing this chapter independently, the core problem addressed in this thesis is how to scale RL-based compiler optimization so that it can generalize across fundamentally different algorithmic computation graphs and underlying hardware topologies. Specifically, prior systems are limited by four major limitations:
+For readers reviewing this chapter independently, the core problem addressed in this thesis is how to scale \gls{rl}-based compiler optimization so that it can generalize across fundamentally different algorithmic computation graphs and underlying hardware topologies. Specifically, prior systems are limited by four major limitations:
 \begin{itemize}
     \item \textbf{Training Data Sparsity:} Prior agents are trained on narrow, synthetic datasets. They lack exposure to the structural complexity of true deep learning graphs, heavily restricting their ability to optimize realistic, modern tasks.
     \item \textbf{Hardware-Agnostic Policies:} Current agents learn rigid optimization schedules that are completely blind to the underlying hardware architecture. A policy optimized for a lightweight quad-core laptop will perform poorly when executed on a 256-core HPC node, eliminating cross-hardware portability.
@@ -16,12 +16,12 @@ For readers reviewing this chapter independently, the core problem addressed in 
 \end{itemize}
 
 \subsection{Proposed Contributions}
-To tackle these fundamental bottlenecks, we propose a completely redesigned, robust RL auto-scheduler capable of generalizing across both complex neural network workloads and diverse CPU platforms. Our primary contributions are:
+To tackle these fundamental bottlenecks, we propose a completely redesigned, robust \gls{rl} auto-scheduler capable of generalizing across both complex neural network workloads and diverse \gls{cpu} platforms. Our primary contributions are:
 
 \begin{itemize}
     \item \textbf{Automated Dataset Generation Pipeline:} We engineered an automated extraction infrastructure with heuristic handlers for dynamic batch sizes. This pipeline sources training sub-graphs from 18 diverse neural network architectures spanning eight distinct categories, solving the data sparsity constraint.
     \item \textbf{Hardware-Aware State Representation:} We augmented the agent's observation space with explicit hardware specifications (L1/L2/L3 cache sizes, core counts, and \gls{simd} widths) to enable dynamic, hardware-portable optimization policies.
-    \item \textbf{Transformer-Based Loop-Nest Encoding:} We replaced the legacy LSTM networks with a modern Transformer-based encoder. By processing loop levels as tokens and leveraging self-attention, the model accurately untangles the hierarchical dependencies of complex computation graphs.
+    \item \textbf{Transformer-Based Loop-Nest Encoding:} We replaced the legacy \gls{lstm} networks with a modern Transformer-based encoder. By processing loop levels as tokens and leveraging self-attention, the model accurately untangles the hierarchical dependencies of complex computation graphs.
     \item \textbf{Shaped Multi-Objective Rewards:} We introduced dense, intermediate reward signals driven by static analysis (e.g., arithmetic intensity and vectorizability), drastically accelerating agent convergence by evaluating the mathematical viability of every single transformation step.
 \end{itemize}
 
@@ -37,7 +37,7 @@ To ensure our agent generalizes across modern workloads, we engineered a compreh
 \end{figure}
 
 \subsection{Pipeline Overview}
-The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} Linalg representations. The conversion proceeds through a standardized path: each PyTorch model is exported to ONNX (opset~18) via \texttt{torch.onnx.export}, then lowered to the Linalg-on-tensors dialect through the \texttt{torch-mlir-import-onnx} and \texttt{torch-mlir-opt} tools. This fully automated flow translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems. For autoregressive decoder models (GPT-2 and Llama~3.2), a compatibility wrapper resolves \texttt{DynamicCache} tracing issues by passing cache positions explicitly. Llama~3.2 is exported in bfloat16 precision to accommodate memory constraints on the compute cluster.
+The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} Linalg representations. The conversion proceeds through a standardized path: each PyTorch model is exported to \gls{onnx} (opset~18) via \texttt{torch.onnx.export}, then lowered to the Linalg-on-tensors dialect through the \texttt{torch-mlir-import-onnx} and \texttt{torch-mlir-opt} tools. This fully automated flow translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems. For autoregressive decoder models (GPT-2 and Llama~3.2), a compatibility wrapper resolves \texttt{DynamicCache} tracing issues by passing cache positions explicitly. Llama~3.2 is exported in bfloat16 precision to accommodate memory constraints on the compute cluster.
 
 \subsection{Dynamic Batch Size Handling}
 During the extraction of operations from diverse neural network models, a major challenge arose concerning dynamic or unresolved batch sizes. Frameworks often export computation graphs with dynamic tensor dimensions, which prevents statically compiled \gls{mlir} benchmarks from successfully executing.
@@ -67,7 +67,7 @@ The final dataset merges the extracted neural network benchmarks with a pool of 
     \centering
     \caption{Supported neural network architectures grouped by family.}
     \label{tab:dataset-models}
-    \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{8cm}}
+    \begin{tabularx}{\textwidth}{l X}
         \toprule
         \textbf{Family} & \textbf{Models} \\
         \midrule
@@ -83,7 +83,7 @@ The final dataset merges the extracted neural network benchmarks with a pool of 
         \addlinespace
         Object Detection & YOLOv8m (backbone) \\
         \addlinespace
-        Modern LLM & Llama~3.2~1B \\
+        Modern \gls{llm} & Llama~3.2~1B \\
         \addlinespace
         Legacy / Synthetic & Synthesized programs and single operations \\
         \bottomrule
@@ -98,7 +98,7 @@ The stratification strategy also serves a second, critical purpose: preventing d
     \centering
     \caption{Final dataset composition across training and evaluation splits.}
     \label{tab:dataset-splits}
-    \begin{tabularx}{0.7\textwidth}{l r r}
+    \begin{tabularx}{\textwidth}{l r X}
         \toprule
         \textbf{Split} & \textbf{Files} & \textbf{Description} \\
         \midrule
@@ -125,7 +125,7 @@ To resolve this bottleneck, we inject explicit hardware specifications directly 
     \centering
     \caption{The seven-element hardware feature vector, with auto-detection sources and normalization divisors.}
     \label{tab:hw-features}
-    \begin{tabularx}{\textwidth}{c l l c}
+    \begin{tabularx}{\textwidth}{c X X c}
         \toprule
         \textbf{Idx} & \textbf{Feature} & \textbf{Auto-Detection Source} & \textbf{Normalization} \\
         \midrule
@@ -153,7 +153,7 @@ By grounding the observation in architectural realities, the policy learns to dy
 \section{Transformer Loop-Nest Encoder}
 The previous system processed loop features sequentially using a recursive \gls{lstm} encoder. While effective for simple local dependencies, recurrent sequential architectures fundamentally struggle to model multi-directional, long-range interactions within deeply nested loop structures and producer-consumer contexts. Such bottlenecks obscure the relationships between non-adjacent loops, hampering the model's ability to coordinate large-scale transformations.
 
-To overcome the sequential bottleneck, we engineered a Transformer encoder to parse loop nests. Treating each loop level as a distinct token, the model leverages multiple self-attention layers to simultaneously evaluate the strategic importance of the outermost loop (typically targeted for memory tiling) against the innermost loop (targeted for hardware vectorization). The transformer encoder in the proposed agent employs a model with $d_\text{model} = 256$, $h = 8$ attention heads, $N = 3$ encoder layers, feedforward dimension $d_\text{ff} = 1024$, dropout of $0.1$, and GELU activation.
+To overcome the sequential bottleneck, we engineered a Transformer encoder to parse loop nests. Treating each loop level as a distinct token, the model leverages multiple self-attention layers to simultaneously evaluate the strategic importance of the outermost loop (typically targeted for memory tiling) against the innermost loop (targeted for hardware vectorization). The transformer encoder in the proposed agent employs a model with $d_\text{model} = 256$, $h = 8$ attention heads, $N = 3$ encoder layers, feedforward dimension $d_\text{ff} = 1024$, dropout of $0.1$, and \gls{gelu} activation.
 
 \subsection{Structured Tokenization}
 For each observation sample, the encoder constructs a sequence of 17 tokens: a learned \texttt{[CLS]} token initialized from $\mathcal{N}(0, 0.02)$, a consumer summary token, a producer summary token, and up to 7 consumer loop tokens and 7 producer loop tokens (determined by the configurable \texttt{max\_num\_loops} parameter). Table~\ref{tab:transformer-tokens} details the token composition.
@@ -162,14 +162,14 @@ For each observation sample, the encoder constructs a sequence of 17 tokens: a l
     \centering
     \caption{Token composition of the transformer encoder input. The total token count is $3 + 2 \times \text{max\_num\_loops} = 17$ per observation.}
     \label{tab:transformer-tokens}
-    \begin{tabularx}{\textwidth}{l c c c c >{\raggedright\arraybackslash}p{3.5cm}}
+    \begin{tabularx}{\textwidth}{l c c c c X}
         \toprule
         \textbf{Token} & \textbf{Count} & \textbf{Role} & \textbf{Type} & \textbf{Depth} & \textbf{Source} \\
         \midrule
         \texttt{[CLS]} & 1 & global & cls & 0 & Learned parameter, $\mathcal{N}(0,0.02)$ \\
-        Consumer summary & 1 & consumer & summary & 0 & 2-layer MLP: 711~$\to$~256, GELU, dropout~0.1 \\
+        Consumer summary & 1 & consumer & summary & 0 & 2-layer MLP: 711~$\to$~256, \gls{gelu}, dropout~0.1 \\
         Producer summary & 1 & producer & summary & 0 & Same MLP as consumer \\
-        Consumer loop $k$ & $\leq$~7 & consumer & loop & $k+1$ & 2-layer MLP: 111~$\to$~256, GELU, dropout~0.1 \\
+        Consumer loop $k$ & $\leq$~7 & consumer & loop & $k+1$ & 2-layer MLP: 111~$\to$~256, \gls{gelu}, dropout~0.1 \\
         Producer loop $k$ & $\leq$~7 & producer & loop & $k+1$ & Same loop\_proj MLP \\
         \bottomrule
     \end{tabularx}
@@ -186,7 +186,7 @@ Transformers are permutation-invariant and do not inherently process sequence or
     \centering
     \caption{Structural embeddings added to each token before the transformer encoder. All are implemented as \texttt{nn.Embedding(vocabulary, 256)}.}
     \label{tab:structural-embeddings}
-    \begin{tabularx}{\textwidth}{l c >{\raggedright\arraybackslash}p{7cm}}
+    \begin{tabularx}{\textwidth}{l c X}
         \toprule
         \textbf{Embedding} & \textbf{Vocabulary} & \textbf{Description} \\
         \midrule
@@ -197,9 +197,9 @@ Transformers are permutation-invariant and do not inherently process sequence or
     \end{tabularx}
 \end{table}
 
-The role embedding distinguishes which part of the computation graph each token originates from. The token-type embedding delineates the semantic category (CLS, summary, loop, or action history). The depth embedding explicitly encodes the nesting level of each loop token, giving the attention heads a positional coordinate within the loop hierarchy. All three embeddings are summed with the token vector, and the resulting sequence is processed by three stacked transformer encoder layers with $h = 8$ attention heads, model dimension $d_\text{model} = 256$, feedforward dimension $d_\text{ff} = 1024$, GELU activation, dropout of $0.1$, layer normalization applied before attention and feedforward sub-layers (\texttt{norm\_first}), and batch-first ordering.
+The role embedding distinguishes which part of the computation graph each token originates from. The token-type embedding delineates the semantic category (CLS, summary, loop, or action history). The depth embedding explicitly encodes the nesting level of each loop token, giving the attention heads a positional coordinate within the loop hierarchy. All three embeddings are summed with the token vector, and the resulting sequence is processed by three stacked transformer encoder layers with $h = 8$ attention heads, model dimension $d_\text{model} = 256$, feedforward dimension $d_\text{ff} = 1024$, \gls{gelu} activation, dropout of $0.1$, layer normalization applied before attention and feedforward sub-layers (\texttt{norm\_first}), and batch-first ordering.
 
-After the transformer encoder, the output corresponding to the \texttt{[CLS]} token is taken as the pooled representation (CLS pooling). The action history---a multi-hot encoding of the five most recent transformation steps, totaling 1{,}085 dimensions ($5 \times 7 \times 8 \times 3$ for three tiling variant histories plus $5 \times 7 \times 7$ for interchange history)---is concatenated with the pooled CLS vector. The seven-element hardware feature vector is then concatenated, producing a final embedding of $256 + 1{,}085 + 7 = 1{,}348$ dimensions. This embedding is passed to the policy and value networks, each consisting of three fully connected layers with 512 neurons and ReLU activation, followed by the action-specific output heads.
+After the transformer encoder, the output corresponding to the \texttt{[CLS]} token is taken as the pooled representation (CLS pooling). The action history---a multi-hot encoding of the five most recent transformation steps, totaling 1{,}085 dimensions ($5 \times 7 \times 8 \times 3$ for three tiling variant histories plus $5 \times 7 \times 7$ for interchange history)---is concatenated with the pooled CLS vector. The seven-element hardware feature vector is then concatenated, producing a final embedding of $256 + 1{,}085 + 7 = 1{,}348$ dimensions. This embedding is passed to the policy and value networks, each consisting of three fully connected layers with 512 neurons and \gls{relu} activation, followed by the action-specific output heads.
 
 \begin{figure}[H]
     \centering    \includegraphics[width=0.8\textwidth]{ressources/chapter4/transformer_encoder_architecture.png}
@@ -238,7 +238,7 @@ We apply $\log_{10}(1 + \text{AI})$ rather than using $\text{AI}$ directly for t
 
 The arithmetic intensity term carries the highest weight ($w_\text{ai} = 1.0$) because it is the most direct proxy for computational efficiency: transformations that increase arithmetic intensity (e.g., tiling, fusion) tend to improve cache reuse and reduce memory bandwidth pressure, which are the primary optimization objectives on modern processors.
 
-\textbf{Vectorizability ($\mathbb{I}_\text{vec}(f)$)} is a binary signal: it equals $1.0$ when the \gls{ast} dumper reports that the operation satisfies \gls{mlir}'s vectorization preconditions and $0.0$ otherwise. This flag is extracted from the \texttt{\#START\_VECTORIZABLE} block in the AST output. A transformation that makes an operation vectorizable (e.g., interchange that brings a contiguous-access loop to the innermost position) receives a positive delta from this term, encouraging the agent to create states amenable to \gls{simd} execution. The weight is set modestly ($w_\text{vec} = 0.1$) because vectorizability alone is a necessary but not sufficient condition for performance gains; actual speedup depends on whether the agent subsequently applies vectorization and whether the resulting vector code maps efficiently to the target \gls{simd} width.
+\textbf{Vectorizability ($\mathbb{I}_\text{vec}(f)$)} is a binary signal: it equals $1.0$ when the \gls{ast} dumper reports that the operation satisfies \gls{mlir}'s vectorization preconditions and $0.0$ otherwise. This flag is extracted from the \texttt{\#START\_VECTORIZABLE} block in the \gls{ast} output. A transformation that makes an operation vectorizable (e.g., interchange that brings a contiguous-access loop to the innermost position) receives a positive delta from this term, encouraging the agent to create states amenable to \gls{simd} execution. The weight is set modestly ($w_\text{vec} = 0.1$) because vectorizability alone is a necessary but not sufficient condition for performance gains; actual speedup depends on whether the agent subsequently applies vectorization and whether the resulting vector code maps efficiently to the target \gls{simd} width.
 
 \textbf{Parallel-loop ratio} measures the fraction of loops that carry no loop-carried dependencies and can therefore be parallelized. It is computed as $N_\text{parallel} / \max(1, N_\text{total})$, where $N_\text{parallel}$ counts loops with iterator type \texttt{parallel} and $N_\text{total}$ counts all loops in the nest. The $\max(1, \cdot)$ in the denominator handles edge cases with zero loops. Transformations that convert reduction loops to parallel form (e.g., interchange that moves a reduction to an outer position, enabling inner parallelism) increase this ratio and receive positive intermediate feedback. The weight ($w_\text{par} = 0.1$) mirrors that of vectorizability: parallelism is a structural prerequisite for performance, but the actual gain depends on the parallelization mechanism, thread count, and workload balance, factors captured only by the terminal execution reward.
 
@@ -263,7 +263,7 @@ Table~\ref{tab:reward-weights} lists all reward shaping weights and constants us
     \centering
     \caption{Reward shaping weights and constants.}
     \label{tab:reward-weights}
-    \begin{tabularx}{0.7\textwidth}{l r l}
+    \begin{tabularx}{\textwidth}{l c X}
         \toprule
         \textbf{Parameter} & \textbf{Value} & \textbf{Role} \\
         \midrule
@@ -326,19 +326,19 @@ The implementation of our system relies on a stack of open-source tools and libr
 Python is the primary implementation language of our framework. Its extensive ecosystem of scientific computing and machine learning libraries, combined with its accessibility and rapid prototyping capabilities, makes it well suited for reinforcement learning research. All agent logic, environment interaction, training loops, and evaluation pipelines are implemented in Python~3.11. \\ 
 
 \textbf{PyTorch} \\
-PyTorch~\cite{paszke2019pytorch} is the deep learning framework used to construct and train all neural network components of our system, including the policy and value networks of the \gls{ppo} agent and the \gls{lstm} and Transformer encoders. PyTorch provides dynamic computation graphs, automatic differentiation via its autograd engine, and GPU acceleration. In our work, all training and inference runs on CPU nodes, as the primary computational bottleneck is the compilation and execution of \gls{mlir} code rather than neural network forward and backward passes. \\ 
+PyTorch~\cite{paszke2019pytorch} is the deep learning framework used to construct and train all neural network components of our system, including the policy and value networks of the \gls{ppo} agent and the \gls{lstm} and Transformer encoders. PyTorch provides dynamic computation graphs, automatic differentiation via its autograd engine, and \gls{gpu} acceleration. In our work, all training and inference runs on \gls{cpu} nodes, as the primary computational bottleneck is the compilation and execution of \gls{mlir} code rather than neural network forward and backward passes. \\ 
 
 \textbf{MLIR} \\
 The \gls{mlir} compiler infrastructure~\cite{lattner2021mlir} is the foundation on which our optimization environment operates. The \gls{mlir} framework provides the Linalg dialect for representing structured linear algebra operations, the transform dialect for encoding transformation schedules, and the progressive lowering pipeline that translates high-level operations into executable machine code. The \gls{mlir} tree used in this work is built from source at the \texttt{release/19.x} branch, enabling direct access to the latest compiler passes and Python bindings. \\ 
 
 \textbf{ONNX} \\
-The Open Neural Network Exchange (ONNX)\footnote{\url{https://onnx.ai}} is an open format for representing machine learning models. We use ONNX as the routing mechanism in our dataset generation pipeline (Section~4.2) to export neural network architectures from PyTorch into a standardized graph representation before lowering them to \gls{mlir}. The ONNX intermediate representation preserves the computational graph structure and operator semantics, enabling systematic extraction of operation sub-graphs across diverse model families. \\ 
+The Open Neural Network Exchange (\gls{onnx})\footnote{\url{https://onnx.ai}} is an open format for representing machine learning models. We use \gls{onnx} as the routing mechanism in our dataset generation pipeline (Section~4.2) to export neural network architectures from PyTorch into a standardized graph representation before lowering them to \gls{mlir}. The \gls{onnx} intermediate representation preserves the computational graph structure and operator semantics, enabling systematic extraction of operation sub-graphs across diverse model families. \\ 
 
 \textbf{Streamlit} \\
 Streamlit\footnote{\url{https://streamlit.io}} is an open-source Python framework for building interactive data applications. We developed a custom evaluation dashboard using Streamlit that visualizes the performance of our \gls{rl} agents against multiple baselines. The dashboard loads evaluation results from the standard results directory structure, parses benchmark metadata (model family, operation type, batch size), and renders interactive charts using Plotly. Key views include execution time comparisons across implementations and PyTorch baselines (eager, compile, and \gls{jit} modes), cumulative speedup distribution curves, per-model-family speedup heatmaps, training convergence plots, transformation schedule inspection, head-to-head statistical comparisons with standard deviation error bars, and correlation analysis. The dashboard supports filtering by benchmark category, model family, operation type, and batch size, enabling rapid qualitative assessment across the four agent versions and the baseline. Results can be exported in CSV and JSON formats for further analysis. \\ 
 
 \textbf{SLURM} \\
-The Simple Linux Utility for Resource Management (SLURM)~\cite{yoo2003slurm} is the workload manager that orchestrates job submission, scheduling, and execution on the computing cluster. Training and evaluation jobs are submitted as SLURM batch scripts that handle environment activation (Conda environment, \texttt{.env} variable sourcing), dataset splitting, model checkpointing, and log management. SLURM array jobs enable parallel execution of multiple implementation versions within a single submission. \\ 
+The Simple Linux Utility for Resource Management (\gls{slurm})~\cite{yoo2003slurm} is the workload manager that orchestrates job submission, scheduling, and execution on the computing cluster. Training and evaluation jobs are submitted as \gls{slurm} batch scripts that handle environment activation (Conda environment, \texttt{.env} variable sourcing), dataset splitting, model checkpointing, and log management. \gls{slurm} array jobs enable parallel execution of multiple implementation versions within a single submission. \\ 
 
 \begin{figure}[H]
     \centering
@@ -348,11 +348,11 @@ The Simple Linux Utility for Resource Management (SLURM)~\cite{yoo2003slurm} is 
     \includegraphics[height=1.5cm]{ressources/chapter4/logos/ONNX_logo.png}\hspace{0.6cm}
     \includegraphics[height=1.5cm]{ressources/chapter4/logos/streamlit_logo.png}\hspace{0.6cm}
     \includegraphics[height=1.5cm]{ressources/chapter4/logos/slurm_logo.png}
-    \caption{Logos of the main tools and frameworks used in the implementation (from left to right: Python, PyTorch, MLIR, ONNX, Streamlit, SLURM).}
+    \caption{Logos of the main tools and frameworks used in the implementation (from left to right: Python, PyTorch, \gls{mlir}, \gls{onnx}, Streamlit, \gls{slurm}).}
     \label{fig:tools-logos}
 \end{figure}
 
-\subsection{MLIR Python Bindings}
+\subsection{\gls{mlir} Python Bindings}
 
 A critical component of our implementation is the bridge between Python and the \gls{mlir} C++ compiler infrastructure. The \gls{mlir} project provides comprehensive Python bindings~\cite{lattner2021mlir} that expose the full \gls{mlir} API to Python code. These bindings are generated from the C++ API using a combination of SWIG and pybind11-style wrappers, and they ship as part of the in-tree \gls{mlir} build.
 
@@ -366,7 +366,7 @@ All experiments in this work were conducted on the Bergamo partition of the High
 
 For the multi-hardware portability experiments (Section~5.4), two additional cluster partitions are used: Jubail, equipped with AMD EPYC 7742 processors (Zen 2, 128 cores, 512~GB RAM, 256~MB L3), and Dalma, equipped with Intel Xeon E5-2680~v4 processors (Broadwell, 28 cores, 112~GB RAM, 35~MB L3). All training and default evaluation runs use individual Bergamo nodes allocated exclusively to each job, ensuring no interference from co-located workloads on execution time measurements.
 
-Jobs are submitted to the cluster via the SLURM workload manager. The Conda environment located at \texttt{\textasciitilde/envs/mlir} provides Python~3.11 and all required dependencies, including PyTorch, NumPy, Plotly, and Streamlit. The \texttt{.env} file configures the paths to the \gls{mlir} build artifacts, shared libraries, and external C++ tools (AST dumper, vectorizer) used during dataset generation and baseline extraction.
+Jobs are submitted to the cluster via the \gls{slurm} workload manager. The Conda environment located at \texttt{\textasciitilde/envs/mlir} provides Python~3.11 and all required dependencies, including PyTorch, NumPy, Plotly, and Streamlit. The \texttt{.env} file configures the paths to the \gls{mlir} build artifacts, shared libraries, and external C++ tools (\gls{ast} dumper, vectorizer) used during dataset generation and baseline extraction.
 
 \section{Conclusion}
-The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a robust optimization foundation. We also described the implementation details---the tools and frameworks (PyTorch, \gls{mlir}, Streamlit, SLURM), the \gls{mlir} Python bindings that bridge high-level agent logic with low-level compilation,the Bergamo HPC computing infrastructure---that make the system practical at scale. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups---and detailing the rigorous evaluation protocols applied to benchmarking their true utility---is the primary focus of the succeeding chapter, \textit{Experiments and Results}.
+The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a robust optimization foundation. We also described the implementation details---the tools and frameworks (PyTorch, \gls{mlir}, Streamlit, \gls{slurm}), the \gls{mlir} Python bindings that bridge high-level agent logic with low-level compilation,the Bergamo HPC computing infrastructure---that make the system practical at scale. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups---and detailing the rigorous evaluation protocols applied to benchmarking their true utility---is the primary focus of the succeeding chapter, \textit{Experiments and Results}.

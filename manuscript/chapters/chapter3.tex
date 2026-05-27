@@ -29,7 +29,7 @@ Within the same research group, work by Lamouri and Merad~\cite{lamouri2024tiram
 
 The \gls{mdp} formulation treated each scheduling command as an action that transitions the program from one partial schedule to another. The reward was the execution-time speedup achieved by the final schedule. The policy network was an \gls{lstm}-based architecture that processed the sequence of features extracted from the polyhedral representation.
 
-An earlier effort by Hennouni and El Hassane~\cite{henouni2022utilisation} had explored \gls{rl} for Tiramisu using a feedforward policy network with a fully observed \gls{mdp}, where the entire state was visible at every step. Lamouri and Merad improved on this by adopting a partially observable \gls{mdp} (POMDP) formulation with an \gls{lstm} encoder, which allowed the agent to accumulate knowledge about the program structure across multiple observation steps.
+An earlier effort by Hennouni and El Hassane~\cite{henouni2022utilisation} had explored \gls{rl} for Tiramisu using a feedforward policy network with a fully observed \gls{mdp}, where the entire state was visible at every step. Lamouri and Merad improved on this by adopting a partially observable \gls{mdp} (\gls{pomdp}) formulation with an \gls{lstm} encoder, which allowed the agent to accumulate knowledge about the program structure across multiple observation steps.
 
 \textbf{Limitations.} The polyhedral model imposes restrictions on the programs that can be represented: loop bounds and array indices must be affine functions of enclosing loop iterators and symbolic constants. Many operations in modern machine learning workloads, particularly those with dynamic tensor shapes, indirect memory accesses, or non-affine control flow, fall outside these constraints. Operations such as convolutions with padding, depthwise separable convolutions, and attention mechanisms often violate the affine restriction. Additionally, Tiramisu is a research compiler with a narrower scope than \gls{mlir}, which is part of the \gls{llvm} ecosystem with broad industry adoption and an active development community.
 
@@ -41,7 +41,7 @@ CompilerGym, introduced by Cummins et al.~\cite{cummins2021compilergym}, is a re
 
 CompilerGym exposes two main categories of benchmark tasks. The first is phase ordering, where the agent selects the sequence of \gls{llvm} optimization passes to apply to a program. The action space is a discrete set of \gls{llvm} passes such as \texttt{-mem2reg}, \texttt{-loop-unroll}, and \texttt{-inline}, and the agent decides the order and repetition of these passes. The second is flag tuning, where the agent selects compiler command-line flags to control optimization behavior globally.
 
-The observation space consists of program features extracted by \gls{llvm}'s built-in analysis passes: instruction counts by opcode, basic block counts, loop depth histograms, and control-flow graph properties. The reward is typically the reduction in code size or the improvement in execution time relative to a baseline compilation using default optimization flags. CompilerGym ships with a large dataset of programs from diverse sources, including C benchmarks, C++ programs, and the LLVM test suite.
+The observation space consists of program features extracted by \gls{llvm}'s built-in analysis passes: instruction counts by opcode, basic block counts, loop depth histograms, and control-flow graph properties. The reward is typically the reduction in code size or the improvement in execution time relative to a baseline compilation using default optimization flags. CompilerGym ships with a large dataset of programs from diverse sources, including C benchmarks, C++ programs, and the \gls{llvm} test suite.
 
 \textbf{Limitations.} CompilerGym's action space operates at the granularity of entire optimization passes applied to whole translation units, rather than per-operation or per-loop transformations. This makes it suitable for coarse-grained pass selection but limits its ability to express fine-grained schedules where different transformations are applied to different parts of the same program. The observation space, while rich in aggregate statistics, does not include the structured loop-level features (access matrices, loop bounds, iterator types) that are critical for loop nest optimization. Furthermore, the \gls{llvm}-level representation is lower-level than Linalg operations, making it harder to reason about high-level transformations such as tiling and fusion that are naturally expressed on structured linear algebra operations.
 
@@ -65,7 +65,7 @@ The work by Bendib et al.~\cite{bendib2024reinforcement} established the first r
 
 \textbf{Environment design.} The environment defines a discrete, hierarchical action space. At the top level, the agent selects an action type from among Tiling (\texttt{T}), TiledParallelization (\texttt{TP}), Interchange (\texttt{I}), Vectorization (\texttt{V}), and NoTransformation (\texttt{NT}). Once the action type is chosen, the agent selects the parameters for that action through a type-specific parameter head. For tiling actions, the parameters are tile sizes for each loop in the nest, chosen from a set of powers of two (a tile size of zero indicates that loop should not be tiled). For interchange, the parameter is a permutation of the loop indices, encoded through one of three mechanisms: pre-enumerated candidate permutations, pointer-based sequential selection, or continuous Lehmer-code decoding. Vectorization is a terminal action: once applied, no further transformations can be applied to that operation.
 
-The reward function is the log-speedup relative to the unoptimized baseline execution time. Penalties are applied for invalid transformations (e.g., tile sizes that do not divide loop bounds, a restriction specific to the MLIR RL implementation rather than a general tiling constraint) and for execution failures during the compilation and \gls{jit} execution pipeline.
+The reward function is the log-speedup relative to the unoptimized baseline execution time. Penalties are applied for invalid transformations (e.g., tile sizes that do not divide loop bounds, a restriction specific to the \gls{mlir} \gls{rl} implementation rather than a general tiling constraint) and for execution failures during the compilation and \gls{jit} execution pipeline.
 
 \textbf{State representation and policy.} The observation space encodes a fixed-size feature vector for each operation: operation type (matmul, conv, add, etc.), loop upper bounds, iterator types (parallel, reduction), load and store access matrices describing which loop iterators index which array dimensions, and arithmetic operation counts. These features are extracted directly from the \gls{mlir} Linalg operation using the \gls{mlir} Python bindings.
 
@@ -79,7 +79,7 @@ The work by Tirichine et al.~\cite{tirichine2025reinforcement} represents a subs
 
 \textbf{\gls{ast}-based state representation and recursive \gls{lstm} encoder.} A central contribution of Tirichine et al. is the replacement of the flat per-operation feature vector with a structured \gls{ast}-based state representation. The computation graph is represented as a tree where leaf nodes correspond to individual Linalg operations and internal nodes encode the hierarchical structure of producer-consumer relationships. Each operation node carries the same features as in the Bendib baseline (operation type, loop bounds, iterator types, access matrices).
 
-To encode this tree-structured observation into a fixed-size vector suitable for the policy network, the authors introduce a recursive \gls{lstm} encoder. Beginning at the leaf nodes, the features of each operation are embedded by a multi-layer perceptron. The embeddings of consumer operations are then combined with the embeddings of their producer operations through an \gls{lstm} that processes the AST bottom-up, producing an aggregated embedding at the root that summarizes the entire computation graph. This recursive structure naturally captures the dependence chain: the encoding of a consumer reflects not only its own features but also those of all operations whose output it consumes.
+To encode this tree-structured observation into a fixed-size vector suitable for the policy network, the authors introduce a recursive \gls{lstm} encoder. Beginning at the leaf nodes, the features of each operation are embedded by a multi-layer perceptron. The embeddings of consumer operations are then combined with the embeddings of their producer operations through an \gls{lstm} that processes the \gls{ast} bottom-up, producing an aggregated embedding at the root that summarizes the entire computation graph. This recursive structure naturally captures the dependence chain: the encoding of a consumer reflects not only its own features but also those of all operations whose output it consumes.
 
 \textbf{Fusion action and producer-consumer traversal.} To exploit the producer-consumer relationships captured by the \gls{ast}, Tirichine et al. introduce a new Fusion action, denoted \texttt{TiledFusion} (\texttt{TF}). This action merges a producer operation into its consumer's loop nest using \gls{mlir}'s tiling and fusion mechanisms, eliminating the intermediate buffer that would otherwise store the producer's output. When combined with tiling and parallelization, the action becomes \texttt{TiledParallelFusion} (\texttt{TPF}), which tiles both operations, fuses them, and parallelizes the resulting loop nest.
 
@@ -143,14 +143,14 @@ This section synthesizes the systems surveyed above, identifying common design p
         & Sparse
         & No \\
         \addlinespace
-        MLIR-Base~\cite{bendib2024reinforcement}
+        \gls{mlir}-Base~\cite{bendib2024reinforcement}
         & \gls{mlir} Linalg
         & Flat op features
         & \gls{lstm}
         & Sparse
         & No \\
         \addlinespace
-        MLIR-RL~\cite{tirichine2025reinforcement}
+        \gls{mlir}-\gls{rl}~\cite{tirichine2025reinforcement}
         & \gls{mlir} Linalg
         & \gls{ast} block sequences
         & \gls{lstm}

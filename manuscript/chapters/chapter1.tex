@@ -5,7 +5,7 @@
 
 A compiler is a program that translates source code written in a high-level programming language into machine code executable by a processor. This translation is not a straightforward one-to-one mapping: modern compilers perform extensive analysis and transformation of the program to produce code that executes faster, consumes less energy, or occupies less memory. These transformations are collectively referred to as \textit{code optimizations}.
 
-The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide \gls{simd} units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads—particularly in machine learning—have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
+The importance of compiler optimization has grown alongside the complexity of both hardware and software. Modern processors feature deep cache hierarchies, wide \gls{simd} units, and multiple cores, each introducing new opportunities and constraints for program optimization. Simultaneously, software workloads, particularly in machine learning, have grown in scale and computational intensity, making the quality of compiled code a critical factor in overall system performance.
 
 \section{Phases of a Compiler: From Source Code to Executable}
 
@@ -23,9 +23,9 @@ A compiler typically operates in three major phases: the \textit{front-end}, the
 The front-end is responsible for reading the source code and converting it into an intermediate representation (\gls{ir}). This process involves three sub-steps:
 
 \begin{itemize}
-    \item \textbf{Lexical analysis} (scanning): The source text is broken into tokens—keywords, identifiers, literals, and operators. For instance, the expression \texttt{x = a + 2} is tokenized into \texttt{IDENT(x)}, \texttt{ASSIGN}, \texttt{IDENT(a)}, \texttt{PLUS}, \texttt{INT(2)}.
+    \item \textbf{Lexical analysis} (scanning): The source text is broken into tokens, keywords, identifiers, literals, and operators. For instance, the expression \texttt{x = a + 2} is tokenized into \texttt{IDENT(x)}, \texttt{ASSIGN}, \texttt{IDENT(a)}, \texttt{PLUS}, \texttt{INT(2)}.
     \item \textbf{Syntax analysis} (parsing): The sequence of tokens is organized into a parse tree or abstract syntax tree (\gls{ast}) according to the grammar of the source language. This step verifies that the program is syntactically well-formed.
-    \item \textbf{Semantic analysis}: The compiler checks for semantic correctness—type compatibility, variable declarations before use, scope rules—and annotates the \gls{ast} with type information and symbol table entries.
+    \item \textbf{Semantic analysis}: The compiler checks for semantic correctness, type compatibility, variable declarations before use, scope rules, and annotates the \gls{ast} with type information and symbol table entries.
 \end{itemize}
 
 The output of the front-end is an \gls{ir}, typically in a form such as three-address code or static single assignment (\gls{ssa}) form. \gls{ssa} is a representation where each variable is assigned exactly once, which simplifies many subsequent analyses and transformations.
@@ -60,31 +60,31 @@ While the back-end performs critical low-level optimizations, our work focuses o
 
 Compiler optimizations can be categorized along several axes, and they are supported by fundamental program analysis techniques.
 
-\subsection{Machine-Dependent vs. Machine-Independent Optimization}
+\subsection{Machine-Dependent vs. Machine-Independent optimization}
 
 Optimizations are classified as \textit{machine-independent} when they improve the program without knowledge of the target hardware, and \textit{machine-dependent} when they exploit specific hardware features.
 
 Machine-independent optimizations include constant folding (evaluating constant expressions at compile time), dead code elimination (removing computations whose results are never used), and common subexpression elimination (reusing previously computed values). These transformations are universally beneficial and apply regardless of the target architecture.
 
-Machine-dependent optimizations, by contrast, require knowledge of the target processor. Examples include selecting vector instructions matching the \gls{simd} width of the CPU, choosing tile sizes that fit within a specific cache level, and scheduling instructions to match the pipeline depth of a particular micro-architecture. One of the contributions of this thesis (version V1, described in Chapter~4) is to make the \gls{rl} agent hardware-aware by feeding processor specifications directly into its observation.
+Machine-dependent optimizations, by contrast, require knowledge of the target processor. Examples include selecting vector instructions matching the \gls{simd} width of the \gls{cpu}, choosing tile sizes that fit within a specific cache level, and scheduling instructions to match the pipeline depth of a particular micro-architecture. One of the contributions of this thesis (version V1, described in Chapter~4) is to make the \gls{rl} agent hardware-aware by feeding processor specifications directly into its observation.
 
 \subsection{Static vs.\ Dynamic Optimization}
 
 Optimizations can also be classified by when they are applied. \textit{Static optimization} occurs at compile time, before the program executes. The compiler analyzes the source code or \gls{ir} and applies transformations based on information available statically. Most traditional compiler optimizations fall into this category.
 
-\textit{Dynamic optimization} occurs at runtime, during program execution. Just-In-Time (\gls{jit}) compilers, such as those in Java Virtual Machines or PyTorch's \gls{jit} backend, monitor program behavior and apply optimizations based on observed execution patterns. Dynamic optimization can exploit runtime information—such as branch frequencies, hot paths, and actual data values—that is unavailable at compile time. The trade-off is that the optimization itself consumes runtime resources.
+\textit{Dynamic optimization} occurs at runtime, during program execution. Just-In-Time (\gls{jit}) compilers, such as those in Java Virtual Machines or PyTorch's \gls{jit} backend, monitor program behavior and apply optimizations based on observed execution patterns. Dynamic optimization can exploit runtime information, such as branch frequencies, hot paths, and actual data values, that is unavailable at compile time. The trade-off is that the optimization itself consumes runtime resources.
 
 Our \gls{rl}-based auto-scheduler operates as a static optimizer: it selects transformations before execution, guided by features extracted from the \gls{mlir} code. However, the execution-time feedback used during training provides a form of dynamic information that shapes the learned policy.
 
 \subsection{Control-Flow and Data-Flow Analysis}
 
-Before applying any transformation, the compiler must analyze the program to determine whether the transformation is legal (i.e., preserves the program's semantics) and to estimate whether it will be beneficial. Two families of analysis form the foundation of most compiler optimizations.
+Before applying any transformation, the compiler must analyze the program to determine whether the transformation is legal and to estimate whether it will be beneficial. Two families of analysis form the foundation of most compiler optimizations.
 
-\textbf{Control-flow analysis} constructs a representation of the possible execution paths through the program. The most common representation is the \textit{control-flow graph} (\gls{cfg}), where nodes represent \textit{basic blocks}—maximal sequences of instructions with a single entry and a single exit—and edges represent possible transfers of control (branches, jumps, fall-through). The \gls{cfg} enables the compiler to reason about dominance (which blocks must execute before others), loops (strongly connected components in the \gls{cfg} with a single entry called the \textit{header}), and reachability.
+\textbf{Control-flow analysis} constructs a representation of the possible execution paths through the program. The most common representation is the \gls{cfg}, where nodes represent \textit{basic blocks}, maximal sequences of instructions with a single entry and a single exit, and edges represent possible transfers of control (branches, jumps, fall-through). The \gls{cfg} enables the compiler to reason about dominance (which blocks must execute before others), loops and reachability.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{ressources/chapter1/control_flow_graph.png}
+    \includegraphics[width=0.8\textwidth]{ressources/chapter1/control_flow_graph.png}
     \caption{Example of a control-flow graph for a nested loop structure}
     \label{fig:cfg-example}
 \end{figure}
@@ -97,7 +97,7 @@ Before applying any transformation, the compiler must analyze the program to det
     \item \textbf{Available expressions}: Which expressions have already been computed and not invalidated? This supports global common subexpression elimination.
 \end{itemize}
 
-These analyses are typically formulated as iterative fixed-point computations over a lattice of data-flow facts. In the context of \gls{mlir} and our work, similar analyses—such as dependence analysis for loop transformations—are performed using the polyhedral model or by the \gls{mlir} analysis infrastructure.
+These analyses are typically formulated as iterative fixed-point computations over a lattice of data-flow facts. In the context of \gls{mlir} and our work, similar analyses, such as dependence analysis for loop transformations, are performed using the polyhedral model or by the \gls{mlir} analysis infrastructure.
 
 \section{Loop Nest Optimization}
 
@@ -130,7 +130,7 @@ This section describes the loop nest transformations that are relevant to our re
 
 \subsection{Parallelization}
 
-Parallelization distributes the iterations of a loop across multiple processing units (cores or threads) so that they execute concurrently. A loop can be parallelized if its iterations are \textit{independent}—that is, no iteration reads from or writes to a memory location that is written by another iteration. Loops that carry no data dependencies across iterations are called \textit{parallel loops}, while those that carry dependencies are called \textit{sequential} or \textit{reduction} loops (the latter being parallelizable if the reduction operation is associative and commutative).
+Parallelization distributes the iterations of a loop across multiple processing units (cores or threads) so that they execute concurrently. A loop can be parallelized if its iterations are \textit{independent}, that is, no iteration reads from or writes to a memory location that is written by another iteration. Loops that carry no data dependencies across iterations are called \textit{parallel loops}, while those that carry dependencies are called \textit{sequential} or \textit{reduction} loops (the latter being parallelizable if the reduction operation is associative and commutative).
 
 In \gls{mlir}, parallelization is expressed through the \texttt{scf.forall} operation, which explicitly marks a loop as parallel and allows the compiler to map its iterations to hardware threads. A related concept is \textit{tiled parallelization}, which combines tiling with parallelization: the loop nest is first tiled, and the outer tile loops are marked as parallel while the inner loops remain sequential. This approach balances parallelism with cache locality.
 
@@ -155,7 +155,7 @@ Tiling (also called \textit{blocking}) partitions the iteration space of a loop 
 
 The choice of tile size is critical: tiles that are too large do not fit in cache and provide no benefit; tiles that are too small incur excessive loop overhead and underutilize cache lines. The optimal tile size depends on the cache capacity, the size of the data elements, and the number of arrays accessed in the loop body. In our hardware-aware observation (V1), the agent receives cache size information to inform this choice.
 
-In our system, the \texttt{Tiling} action (denoted \texttt{T}) selects, for each loop in the nest, a tile size from a set of powers of two. A tile size of zero indicates that the loop should not be tiled. While tiling in general does not require the tile size to divide the loop bound (remainder iterations can be handled by an epilogue loop), the current MLIR RL implementation requires this divisibility condition as a simplification; this is among the known limitations of the system.
+In our system, the \texttt{Tiling} action (denoted \texttt{T}) selects, for each loop in the nest, a tile size from a set of powers of two. A tile size of zero indicates that the loop should not be tiled. While tiling in general does not require the tile size to divide the loop bound (remainder iterations can be handled by an epilogue loop), the current \gls{mlir} \gls{rl} implementation requires this divisibility condition as a simplification; this is among the known limitations of the system.
 
 \begin{figure}[H]
     \centering
@@ -172,7 +172,7 @@ Fusion is legal when there are no backward dependencies between the loop bodies 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_fusion_comparison.png}
+    \includegraphics[width=0.9\textwidth]{ressources/chapter1/loop_fusion_comparison.png}
     \caption{Loop fusion: eliminating intermediate storage by merging producer and consumer loops.}
     \label{fig:fusion-before}
 \end{figure}
@@ -190,21 +190,8 @@ In our \gls{rl} agent, the \texttt{Vectorization} action (denoted \texttt{V}) is
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{ressources/chapter1/scalar_vs_SIMD_execution_comparison.png}
-    \caption{Scalar vs SIMD execution comparison.}
+    \caption{Scalar vs \gls{simd} execution comparison.}
     \label{fig:vectorization}
-\end{figure}
-
-\subsection{Unrolling}
-
-Loop unrolling replicates the body of a loop multiple times, adjusting the stride and trip count accordingly, to reduce loop overhead (branch and counter instructions) and expose instruction-level parallelism. For a loop that iterates $N$ times, applying an unroll factor of $U$ produces a new loop body containing $U$ copies of the original body, with the loop iterating $\lfloor N/U \rfloor$ times. A remainder loop handles the last $N \bmod U$ iterations.
-
-Unrolling is beneficial when the loop body is small and the branch overhead is significant relative to the useful computation. However, excessive unrolling increases code size, which can pressure the instruction cache and cause performance degradation.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter1/loop_unrolling.png}
-    \caption{Loop unrolling.}
-    \label{fig:loop-unrolling}
 \end{figure}
 
 \section{Challenges in Modern Compiler Optimization}
@@ -215,7 +202,7 @@ Despite decades of research and engineering, several fundamental challenges make
 
 The phase ordering problem is the challenge of determining the optimal sequence in which to apply compiler transformations. Transformations are not commutative: applying transformation $A$ before transformation $B$ can produce a different outcome than applying $B$ before $A$, because each transformation modifies the program in ways that affect the applicability and benefit of subsequent transformations.
 
-For a concrete example, consider loop fusion and parallelization applied to a sequence of operations. If fusion is applied first, the two operations are merged, and the resulting combined loop can be parallelized. If parallelization is applied first, each operation is parallelized independently, and fusion may no longer be possible because the parallel loop structure differs. The choice between these two orders depends on the specific operation sizes, the cache hierarchy, and the available parallelism—there is no universally optimal order.
+For a concrete example, consider loop fusion and parallelization applied to a sequence of operations. If fusion is applied first, the two operations are merged, and the resulting combined loop can be parallelized. If parallelization is applied first, each operation is parallelized independently, and fusion may no longer be possible because the parallel loop structure differs. The choice between these two orders depends on the specific operation sizes, the cache hierarchy, and the available parallelism, there is no universally optimal order.
 
 The search space of possible transformation sequences is combinatorial in the number of transformations and their parameters. For a loop nest with $D$ loops, there are $D!$ possible interchange permutations, $\mathcal{O}(T^D)$ possible tiling configurations (where $T$ is the number of tile size options), and an exponential number of interleavings between different transformation types. Exhaustive search is infeasible, and heuristics often fail to capture the interaction effects between transformations.
 
@@ -263,7 +250,7 @@ A dialect in \gls{mlir} is a self-contained namespace of operations, types, and 
 
     \item \textbf{Vector}: Represents \gls{simd} operations on fixed-size vectors, providing a target for vectorization transformations.
 
-    \item \textbf{MemRef}: Represents memory references—typed pointers to multi-dimensional arrays with optional layout maps. MemRef is the type used for buffer-based computations.
+    \item \textbf{MemRef}: Represents memory references, typed pointers to multi-dimensional arrays with optional layout maps. MemRef is the type used for buffer-based computations.
 
     \item \textbf{LLVM}: A direct mapping of the \gls{llvm} \gls{ir} into \gls{mlir}, enabling a seamless transition from high-level \gls{mlir} dialects to the \gls{llvm} back-end for code generation.
 
@@ -295,12 +282,12 @@ A dialect in \gls{mlir} is a self-contained namespace of operations, types, and 
     \end{tabularx}
 \end{table}
 
-An \gls{mlir} module is a container for operations, which may themselves contain regions of nested operations. This hierarchical structure, combined with the dialect system, allows the same module to contain Linalg operations describing a neural network layer, vector operations representing the \gls{simd} instructions generated for that layer, and \gls{llvm} operations ready for code generation—all within a single, coherent representation.
+An \gls{mlir} module is a container for operations, which may themselves contain regions of nested operations. This hierarchical structure, combined with the dialect system, allows the same module to contain Linalg operations describing a neural network layer, vector operations representing the \gls{simd} instructions generated for that layer, and \gls{llvm} operations ready for code generation, all within a single, coherent representation.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{ressources/chapter1/progressive_lowering_MLIR.png}
-    \caption{Progressive lowering in MLIR flowchart.}
+    \caption{Progressive lowering in \gls{mlir} flowchart.}
     \label{fig:mlir-dialect-stack}
 \end{figure}
 
@@ -337,4 +324,4 @@ We then discussed the fundamental challenges that motivate the automation of com
 
 Finally, we introduced \gls{mlir}, the compiler infrastructure on which our work is built. \gls{mlir}'s multi-level \gls{ir}, dialect system, explicit operation structure, and Python bindings make it uniquely suitable as a platform for \gls{rl}-based optimization. The Linalg dialect, in particular, provides the structured representation of linear algebra operations that our agent observes and transforms, while the transform dialect provides the mechanism for applying those transformations.
 
-The optimization challenges described in this chapter—especially the phase ordering problem and the vast combinatorial search space of possible transformation sequences—motivate the use of reinforcement learning, which is capable of learning effective strategies through interaction with the environment rather than relying on pre-programmed rules. The next chapter introduces the concepts and algorithms of reinforcement learning that underpin our approach.
+The optimization challenges described in this chapter, especially the phase ordering problem and the vast combinatorial search space of possible transformation sequences, motivate the use of reinforcement learning, which is capable of learning effective strategies through interaction with the environment rather than relying on pre-programmed rules. The next chapter introduces the concepts and algorithms of reinforcement learning that underpin our approach.

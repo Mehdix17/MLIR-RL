@@ -81,7 +81,7 @@ LSTMs are used in the baseline version of our system (as well as in versions V1,
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{ressources/chapter2/RNN_vs_LSTM.png}
-    \caption{Architecture of RNN and LSTM.}
+    \caption{Architecture of \gls{rnn} and \gls{lstm}.}
     \label{fig:rnn-lstm}
 \end{figure}
 
@@ -145,7 +145,7 @@ This interaction loop, illustrated in Figure~\ref{fig:rl-loop}, continues until 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{ressources/chapter2/reinforcement_learning_feedback_loop.png}
+    \includegraphics[width=0.8\textwidth]{ressources/chapter2/reinforcement_learning_feedback_loop.png}
     \caption{The reinforcement learning feedback loop. \cite{sutton2018reinforcement}}
     \label{fig:rl-loop}
 \end{figure}
@@ -302,17 +302,17 @@ By tuning $\lambda$, \gls{gae} transitions smoothly between the low-variance but
 
 Proximal Policy Optimization, introduced by Schulman et al.~\cite{schulman2017ppo}, is the \gls{rl} algorithm used in our system. \gls{ppo} addresses a central challenge in policy gradient methods: how to take the largest possible improvement step on the policy without causing a collapse in performance due to excessively large updates. It limits the magnitude of policy updates using a clipped surrogate objective while relying on an actor-critic structure.
 
-To formalize this, algorithm~\ref{alg:ppo} details the exact procedure by which PPO alternates between trajectory collection and multiple epochs of stochastic gradient ascent on the clipped loss.
+To formalize this, algorithm~\ref{alg:ppo} details the exact procedure by which \gls{ppo} alternates between trajectory collection and multiple epochs of stochastic gradient ascent on the clipped loss.
 
 \begin{algorithm}[H]
-\caption{Proximal Policy Optimization (PPO)}\label{alg:ppo}
+\caption{Proximal Policy Optimization (\gls{ppo})}\label{alg:ppo}
 \textbf{Input:} clipping threshold $\epsilon$, policy learning rate $\alpha$, value learning rate $\beta$, entropy coefficient $c_2$, value loss coefficient $c_1$. \\
 \textbf{Output:} Optimized policy $\pi_\theta(a \mid s)$
 \begin{algorithmic}
 \State Initialize policy $\pi_\theta$ and value function $V_\phi$
 \For{each iteration}
     \State Collect trajectory $\{s_t, a_t, r_t\}_{t=0}^T$ using current policy $\pi_\theta$
-    \State Compute the advantage estimates $\hat{A}_t$ using GAE (and targets $V_t^{\text{target}}$)
+    \State Compute the advantage estimates $\hat{A}_t$ using \gls{gae} (and targets $V_t^{\text{target}}$)
     \For{each epoch}
         \For{each minibatch}
             \State Compute ratio: $r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}$
@@ -383,6 +383,6 @@ where:
 
 This chapter introduced reinforcement learning (\gls{rl}) as the algorithmic foundation of our compiler optimization framework. We defined the interaction loop consisting of states, actions, transforming an uncertain environment into a mathematically formulated Markov Decision Process. 
 
-By detailing value and policy functions, alongside advancements like generalized advantage estimation, we established the need for robust learning policies. We highlighted proximal policy optimization (\gls{ppo})—our actor-critic algorithm of choice—which uses clipped objectives to stabilize learning and effectively balance exploration versus exploitation through entropy regularization. These properties make PPO exceptionally well-suited for the noisy, high-dimensional search spaces inherent in compiler optimization.
+By detailing value and policy functions, alongside advancements like generalized advantage estimation, we established the need for robust learning policies. We highlighted proximal policy optimization (\gls{ppo})—our actor-critic algorithm of choice—which uses clipped objectives to stabilize learning and effectively balance exploration versus exploitation through entropy regularization. These properties make \gls{ppo} exceptionally well-suited for the noisy, high-dimensional search spaces inherent in compiler optimization.
 
 With the necessary \gls{rl} concepts formalized, the subsequent chapter surveys the state-of-the-art literature, situating our \gls{ppo}-based agent against existing machine-learning-driven compiler optimizations and defining our distinct contributions.

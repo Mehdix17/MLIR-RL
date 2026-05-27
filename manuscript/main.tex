@@ -56,6 +56,7 @@
 \newacronym{elu}{ELU}{Exponential Linear Unit}
 \newacronym{avx}{AVX}{Advanced Vector Extensions}
 \newacronym{ilp}{ILP}{Instruction-Level Parallelism}
+\newacronym{smt}{SMT}{Simultaneous Multi-Threading}
 \newacronym{cpu}{CPU}{Central Processing Unit}
 \newacronym{gpu}{GPU}{Graphics Processing Unit}
 \newacronym{gelu}{GELU}{Gaussian Error Linear Unit}
@@ -176,15 +177,37 @@
 
 \chapter*{Acknowledgements}
 \thispagestyle{empty} 
-First and foremost, we express our deep gratitude to God Almighty...
+First and foremost, we express our deep gratitude to God Almighty for granting us the strength, patience,
+and perseverance necessary to carry out this work as well as the
+courage to overcome all difficulties and allowed us to successfully complete this project.
+
+We therefore extend our most sincere thanks to our supervisor, Dr. Mohamed Riyadh Baghdadi, for his trust, his listening, and his support, which we were able to benefit from throughout this experience, including the numerous advice and evaluations aimed at improving our work as best as possible.
+
+We also have a warm thought for all our loved ones, family members and friends who
+have continued to support and encourage us on a daily basis and in difficult times.
 
 \chapter*{Abstract}
 \thispagestyle{empty} 
-Abstract content here...
+Code optimization within modern compiler infrastructures is vital for improving the performance of machine learning models, which continue to grow in size and complexity. Traditional manually crafted heuristics are difficult to scale, rigidly designed, and fall short when adapting to diverse hardware architectures. Deep Reinforcement Learning (DRL) provides a compelling alternative by allowing an agent to automatically discover optimal transformation sequences through trial and error. 
+
+In this work, we present an advanced DRL-based framework for automatic code optimization targeting the Multi-Level Intermediate Representation (MLIR) compiler. To overcome the limitations of prior approaches and handle complex, real-world neural network programs, we introduce several novel mechanisms. First, we adopt a Transformer-based architecture to effectively capture the hierarchical structure of deep loop nests. Second, we integrate hardware-aware feature observations, enabling the agent to learn cross-platform generalization strategies. Additionally, we employ custom reward shaping, incorporating metrics such as arithmetic intensity to accelerate training, utilizing a highly scalable and diverse dataset of full neural network models.
+
+Experimental results indicate that our proposed agent achieves noticeable performance improvements and speedups over the standard MLIR heuristics (MLIR-Base) across various hardware platforms. By effectively learning adaptive, hardware-aware optimization policies, this work demonstrates the increasing potential of DRL-guided compilation for modern deep learning workloads.
+
+\vspace{0.5cm}
+\noindent \textbf{Keywords:} Deep Reinforcement Learning, Code Optimization, MLIR, neural networks
 
 \chapter*{Résumé}
 \thispagestyle{empty} 
-Contenu du résumé ici...
+L'optimisation de code au sein des infrastructures de compilation modernes est vitale pour améliorer les performances des modèles d'apprentissage automatique, dont la taille et la complexité ne cessent de croître. Les heuristiques traditionnelles conçues manuellement sont difficiles à mettre à l'échelle, de conception rigide et peinent à s'adapter à diverses architectures matérielles. L'apprentissage par renforcement profond (DRL) offre une alternative convaincante en permettant à un agent de découvrir automatiquement des séquences de transformations optimales par essais et erreurs.
+
+Dans ce travail, nous présentons un framework avancé basé sur le DRL pour l'optimisation automatique du code ciblant le compilateur MLIR (Multi-Level Intermediate Representation). Afin de surmonter les limites des approches précédentes et de traiter des programmes de réseaux de neurones complexes et réels, nous introduisons plusieurs mécanismes novateurs. Premièrement, nous adoptons une architecture basée sur les Transformers pour capturer efficacement la structure hiérarchique des nids de boucles profonds. Deuxièmement, nous intégrons des observations de caractéristiques tenant compte du matériel (hardware-aware), permettant à l'agent d'apprendre des stratégies de généralisation multiplateformes. De plus, nous utilisons une fonction de récompense personnalisée (reward shaping), intégrant des métriques telles que l'intensité arithmétique pour accélérer l'entraînement, en utilisant un ensemble de données très évolutif et diversifié de modèles de réseaux de neurones complets.
+
+Les résultats expérimentaux indiquent que l'agent proposé permet d'obtenir des améliorations de performances et des accélérations notables par rapport aux heuristiques standard (MLIR-Base) sur diverses plateformes matérielles. En apprenant efficacement des optimisations adaptatives tenant compte du matériel, ce travail démontre le potentiel croissant de la compilation guidée par le DRL pour les charges de travail modernes de l'apprentissage profond.
+
+
+\vspace{0.5cm}
+\noindent \textbf{Mots-clés~:} Apprentissage par renforcement profond, Optimisation de code, MLIR, réseaux de neurones
 
 % Table of Contents and Lists
 \newpage

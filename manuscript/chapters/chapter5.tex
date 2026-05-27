@@ -3,7 +3,7 @@
 
 \section{Introduction}
 
-The previous chapter described the design of our proposed RL auto-scheduler. This chapter empirically evaluates the proposed \gls{rl} auto-scheduler to quantify the impact of its architectural enhancements: hardware-aware observations, shaped rewards, and the transformer-based encoder. We benchmark the system against standard MLIR heuristics and the prior MLIR-RL agent~\cite{tirichine2025reinforcement}, and validate individual components via rigorous ablation studies.
+The previous chapter described the design of our proposed \gls{rl} auto-scheduler. This chapter empirically evaluates the proposed \gls{rl} auto-scheduler to quantify the impact of its architectural enhancements: hardware-aware observations, shaped rewards, and the transformer-based encoder. We benchmark the system against standard \gls{mlir} heuristics and the prior \gls{mlir}-\gls{rl} agent~\cite{tirichine2025reinforcement}, and validate individual components via rigorous ablation studies.
 
 The chapter is organized as follows: Section~5.2 details the experimental setup. Section~5.3 presents the overall system performance, followed by ablation studies in Section~5.4. Section~5.5 discusses the findings, and Section~5.6 concludes the chapter.
 
@@ -27,13 +27,13 @@ All experiments are conducted on a Slurm-based HPC system featuring three distin
         \bottomrule
     \end{tabularx}
 \end{table}
-By training the RL agent on Bergamo (256-core AMD EPYC 9754) and evaluating it on Bergamo, Jubail (128-core AMD EPYC 7742), and Dalma (28-core Intel Xeon), we comprehensively test the agent's capability to adapt its scheduling decisions across fundamentally different core counts, cache topographies, and CPU architectures.
+By training the \gls{rl} agent on Bergamo (256-core AMD EPYC 9754) and evaluating it on Bergamo, Jubail (128-core AMD EPYC 7742), and Dalma (28-core Intel Xeon), we comprehensively test the agent's capability to adapt its scheduling decisions across fundamentally different core counts, cache topographies, and \gls{cpu} architectures.
 
 The software stack consists of the following components and configurations:
 \begin{itemize}
     \item Python~3.11 and PyTorch~2.0~\cite{paszke2019pytorch}.
-    \item MLIR built from the LLVM~19.x release branch with \gls{mlir} Python bindings.
-    \item \gls{mlir} benchmarks compiled via progressive lowering (Linalg to Affine to \gls{scf} to Vector to \gls{llvm}) and \gls{jit}-compiled with optimization level \texttt{-O3} using the MLIR ExecutionEngine.
+    \item \gls{mlir} built from the \gls{llvm}~19.x release branch with \gls{mlir} Python bindings.
+    \item \gls{mlir} benchmarks compiled via progressive lowering (Linalg to Affine to \gls{scf} to Vector to \gls{llvm}) and \gls{jit}-compiled with optimization level \texttt{-O3} using the \gls{mlir} ExecutionEngine.
     \item Execution time measurements are performed on zero-initialized buffers to eliminate data-dependent variability, with a warm-up invocation preceding each timed invocation.
 \end{itemize}
 
@@ -45,14 +45,14 @@ The proposed system and all its ablation variants share a common training protoc
     \centering
     \caption{Training hyperparameters shared across the proposed agent and its ablation variants.}
     \label{tab:hyperparameters}
-    \begin{tabularx}{\textwidth}{l l l}
+    \begin{tabularx}{\textwidth}{l l X}
         \toprule
         \textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
         \midrule
         Learning rate & $1 \times 10^{-3}$ & Adam optimizer step size \\
         \gls{ppo} clip range ($\epsilon$) & 0.2 & Policy ratio clipping bound \\
-        Discount factor ($\gamma$) & 1.0 & GAE discount (no time preference) \\
-        GAE~$\lambda$ & 0.95 & Bias-variance trade-off \\
+        Discount factor ($\gamma$) & 1.0 & \gls{gae} discount (no time preference) \\
+        \gls{gae}~$\lambda$ & 0.95 & Bias-variance trade-off \\
         \gls{ppo} epochs per iteration & 4 & Number of update epochs on collected data \\
         \gls{ppo} mini-batch size & 32 & Batch size for gradient estimation \\
         Value loss coefficient ($c_1$) & 0.5 & Weight of value loss in combined objective \\
@@ -67,12 +67,12 @@ The proposed system and all its ablation variants share a common training protoc
 
 \subsection{Evaluation Metrics}
 
-To account for measurement noise inherent in execution-time benchmarking, each optimized benchmark is executed 5 times on the target hardware. The median execution time across these 5 runs is recorded as the representative time for that benchmark. This follows standard benchmarking methodology and reduces the influence of outlier measurements caused by system-level noise such as scheduling jitter and cache warm-up effects. The same 5-run median protocol is applied to both the unoptimized baseline time $T_\text{MLIR-Base}$ and the optimized time $T_\text{optimized}$.
+To account for measurement noise inherent in execution-time benchmarking, each optimized benchmark is executed 5 times on the target hardware. The median execution time across these 5 runs is recorded as the representative time for that benchmark. This follows standard benchmarking methodology and reduces the influence of outlier measurements caused by system-level noise such as scheduling jitter and cache warm-up effects. The same 5-run median protocol is applied to both the unoptimized baseline time $T_\text{\gls{mlir}-Base}$ and the optimized time $T_\text{optimized}$.
 
-The primary evaluation metric is the execution-time speedup, defined as the ratio of the unoptimized MLIR-Base execution time to the optimized execution time. MLIR-Base refers to the same MLIR compilation pipeline used during optimization, compiled with \texttt{-O3} applied by LLVM, but with all RL-guided loop-level transformation selection disabled---the default operator schedules are used instead.
+The primary evaluation metric is the execution-time speedup, defined as the ratio of the unoptimized \gls{mlir}-Base execution time to the optimized execution time. \gls{mlir}-Base refers to the same \gls{mlir} compilation pipeline used during optimization, compiled with \texttt{-O3} applied by \gls{llvm}, but with all \gls{rl}-guided loop-level transformation selection disabled---the default operator schedules are used instead.
 
 \begin{equation}
-    \text{Speedup} = \frac{T_\text{MLIR-Base}}{T_\text{optimized}}
+    \text{Speedup} = \frac{T_\text{\gls{mlir}-Base}}{T_\text{optimized}}
 \end{equation}
 
 A speedup greater than $1.0$ indicates an improvement over the standard compiler heuristics. For aggregated comparisons across multiple benchmarks, we report the geometric mean of the per-benchmark speedups, which is the standard metric for normalised performance ratios as it is not skewed by outlier benchmarks:
@@ -84,7 +84,7 @@ A speedup greater than $1.0$ indicates an improvement over the standard compiler
 \section{Overall System Performance}
 \label{sec:overall-performance}
 
-This section compares the Proposed Agent against two strong baselines: the unoptimized compiler code (MLIR-Base), and the prior reinforcement learning system (MLIR-RL) by Tirichine et al.~\cite{tirichine2025reinforcement}.
+This section compares the Proposed Agent against two strong baselines: the unoptimized compiler code (\gls{mlir}-Base), and the prior reinforcement learning system (\gls{mlir}-\gls{rl}) by Tirichine et al.~\cite{tirichine2025reinforcement}.
 
 \subsection{Operations and Sequences}
 
@@ -92,11 +92,11 @@ We first evaluate the agents on localized linear algebra operations and sequence
 
 \begin{table}[H]
     \centering
-    \caption{Geometric mean speedups of the prior MLIR-RL and the Proposed Agent against MLIR-Base. Higher is better.}
+    \caption{Geometric mean speedups of the prior \gls{mlir}-\gls{rl} and the Proposed Agent against \gls{mlir}-Base. Higher is better.}
     \label{tab:overall-performance}
-    \begin{tabularx}{\textwidth}{l c c c}
+    \begin{tabularx}{\textwidth}{X c c c}
         \toprule
-        \textbf{Benchmark Category} & \textbf{Number of Benchmarks} & \textbf{MLIR-RL} & \textbf{Proposed Agent} \\
+        \textbf{Benchmark Category} & \textbf{Number of Benchmarks} & \textbf{\gls{mlir}-RL} & \textbf{Proposed Agent} \\
         \midrule
         Matrix multiplication (various sizes) & 12 & -- & -- \\
         2D convolution (various sizes) & 10 & -- & -- \\
@@ -108,41 +108,41 @@ We first evaluate the agents on localized linear algebra operations and sequence
     \end{tabularx}
 \end{table}
 
-Table~\ref{tab:overall-performance} demonstrates that the proposed system consistently outperforms both the unoptimized standard (represented by a baseline of 1.0) and the prior MLIR-RL agent across all evaluated categories.
+Table~\ref{tab:overall-performance} demonstrates that the proposed system consistently outperforms both the unoptimized standard (represented by a baseline of 1.0) and the prior \gls{mlir}-\gls{rl} agent across all evaluated categories.
 
 \subsection{Full Neural Network Models}
 
-To assess real-world applicability, the proposed system is further evaluated on complex sub-graphs extracted from the 18 full neural network architectures spanning eight categories. Table~\ref{tab:full-models} reports results on a representative subset covering all categories. We also introduce PyTorch (both eager execution and JIT) as external competitive baselines to contextualize the absolute performance. For PyTorch, each benchmark is executed with 10 warm-up invocations followed by 11 measurement runs; the median of the 11 measurement runs is reported, following the evaluation protocol established by the MLIR-RL paper~\cite{tirichine2025reinforcement}.
+To assess real-world applicability, the proposed system is further evaluated on complex sub-graphs extracted from the 18 full neural network architectures spanning eight categories. Table~\ref{tab:full-models} reports results on a representative subset covering all categories. We also introduce PyTorch (both eager execution and \gls{jit}) as external competitive baselines to contextualize the absolute performance. For PyTorch, each benchmark is executed with 10 warm-up invocations followed by 11 measurement runs; the median of the 11 measurement runs is reported, following the evaluation protocol established by the \gls{mlir}-\gls{rl} paper~\cite{tirichine2025reinforcement}.
 
 \begin{table}[H]
     \centering
-    \caption{Speedups on representative full neural network models, normalized against MLIR-Base.}
+    \caption{Speedups on representative full neural network models, normalized against \gls{mlir}-Base.}
     \label{tab:full-models}
-    \begin{tabularx}{\textwidth}{l l c c c c}
+    \begin{tabularx}{\textwidth}{X c c c c}
         \toprule
-        \textbf{Family} & \textbf{Model} & \textbf{MLIR-Base} & \textbf{PyTorch} & \textbf{MLIR-RL} & \textbf{Proposed Agent} \\
+        \textbf{Model} & \textbf{\gls{mlir}-Base} & \textbf{PyTorch} & \textbf{\gls{mlir}-RL} & \textbf{Proposed Agent} \\
         \midrule
-        \multirow{2}{*}[-1pt]{Encoder Transformer} & BERT & 1.0 & -- & -- & -- \\
-        & ALBERT & 1.0 & -- & -- & -- \\
+        BERT & 1.0 & -- & -- & -- \\
+        ALBERT & 1.0 & -- & -- & -- \\
         \hline
-        \multirow{2}{*}[-1pt]{Decoder / Seq2Seq} & GPT-2 Medium & 1.0 & -- & -- & -- \\
-        & T5 & 1.0 & -- & -- & -- \\
+        GPT-2 Medium & 1.0 & -- & -- & -- \\
+        T5 & 1.0 & -- & -- & -- \\
         \hline
-        \multirow{2}{*}[-1pt]{Vision} & ResNet-50 & 1.0 & -- & -- & -- \\
-        & MobileNetV3-Small & 1.0 & -- & -- & -- \\
+        ResNet-50 & 1.0 & -- & -- & -- \\
+        MobileNetV3-Small & 1.0 & -- & -- & -- \\
         \hline
-        Graph Neural Network & GAT & 1.0 & -- & -- & -- \\
+        GAT & 1.0 & -- & -- & -- \\
         \hline
-        Audio Transformer & Whisper-base & 1.0 & -- & -- & -- \\
+        Whisper-base & 1.0 & -- & -- & -- \\
         \hline
-        Object Detection & YOLOv8m & 1.0 & -- & -- & -- \\
+        YOLOv8m & 1.0 & -- & -- & -- \\
         \hline
-        Modern LLM & Llama~3.2~1B & 1.0 & -- & -- & -- \\
+        Llama~3.2~1B & 1.0 & -- & -- & -- \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
-The Proposed Agent conditions its policy on hardware attributes (cores, cache sizes, SIMD width). We define the \textbf{No-HW-aware} variant by masking this feature vector, forcing the policy to learn an implicit, hardware-agnostic strategy reminiscent of the prior MLIR-RL agent.
+The Proposed Agent conditions its policy on hardware attributes (cores, cache sizes, \gls{simd} width). We define the \textbf{No-HW-aware} variant by masking this feature vector, forcing the policy to learn an implicit, hardware-agnostic strategy reminiscent of the prior \gls{mlir}-\gls{rl} agent.
 
 To evaluate this, both the Proposed Agent and the No-HW-aware variant are trained exclusively on the Bergamo partition (AMD EPYC 9754, Zen 4). We then conduct a cross-platform generalization test by evaluating both models---without any retraining---on three distinct architectures: the original training hardware (Bergamo), the smaller 128-core Jubail partition (AMD EPYC 7742, Zen 2), and the Intel-based Dalma partition (Xeon E5-2680 v4, Broadwell).
 
@@ -170,7 +170,7 @@ Beyond final execution speedup, the impact of reward shaping is most evident in 
     \centering
     \caption{Final geometric mean speedups on the evaluation set, comparing the full agent against the No-Reward-Shaping ablation.}
     \label{tab:ablation-reward}
-    \begin{tabularx}{\textwidth}{l c c}
+    \begin{tabularx}{\textwidth}{X c c}
         \toprule
         \textbf{Benchmark Category} & \textbf{No-Reward-Shaping} & \textbf{Proposed Agent (Full)} \\
         \midrule
@@ -181,7 +181,7 @@ Beyond final execution speedup, the impact of reward shaping is most evident in 
 
 \subsection{Impact of the Transformer Encoder (No-Transformer)}
 
-The Proposed Agent introduces a Transformer-based loop nest encoder to handle deep algorithmic structures via self-attention mechanisms. The \textbf{No-Transformer} variant reverts this component to a sequential LSTM encoder, identical to the one used in the prior MLIR-RL system. 
+The Proposed Agent introduces a Transformer-based loop nest encoder to handle deep algorithmic structures via self-attention mechanisms. The \textbf{No-Transformer} variant reverts this component to a sequential \gls{lstm} encoder, identical to the one used in the prior \gls{mlir}-\gls{rl} system. 
 
 We evaluate this variant explicitly across benchmarks stratified by their loop nest depth to illustrate the structural limits of sequential encoders versus attention-based architectures.
 
@@ -189,7 +189,7 @@ We evaluate this variant explicitly across benchmarks stratified by their loop n
     \centering
     \caption{Ablation of the encoder architecture, stratified by loop nest depth. The transformer encoder shows larger gains on deeper loop nests.}
     \label{tab:ablation-transformer}
-    \begin{tabularx}{\textwidth}{l c c}
+    \begin{tabularx}{\textwidth}{X c c}
         \toprule
         \textbf{Nest Depth} & \textbf{No-Transformer} & \textbf{Proposed Agent (Full)} \\
         \midrule
@@ -205,16 +205,16 @@ We evaluate this variant explicitly across benchmarks stratified by their loop n
 \label{sec:discussion}
 
 \subsection{Contribution of Individual Components}
-The ablation studies solidify the rationale behind the proposed architectural changes. The hardware-aware features successfully untether the learned policies from the training platform's specific architectural quirks. Dense, shaped rewards solve the credit assignment problem during the fragile early stages of training, leading to faster and more reliable convergence. Finally, the Transformer encoder natively absorbs the complex topological dependencies in loop-nests, outperforming the legacy LSTM implementations on intricate neural network sub-graphs involving four or more cascading loops. 
+The ablation studies solidify the rationale behind the proposed architectural changes. The hardware-aware features successfully untether the learned policies from the training platform's specific architectural quirks. Dense, shaped rewards solve the credit assignment problem during the fragile early stages of training, leading to faster and more reliable convergence. Finally, the Transformer encoder natively absorbs the complex topological dependencies in loop-nests, outperforming the legacy \gls{lstm} implementations on intricate neural network sub-graphs involving four or more cascading loops. 
 
 \subsection{Limitations}
-Despite significant advances, the proposed auto-scheduler retains some limitations. The system relies entirely on predefined heuristic handlers and rigid transformation definitions. Furthermore, JIT-compiling every candidate sequence within the reinforcement learning loop remains a massive computational bottleneck, preventing the agent from being deployed for entirely on-the-fly, real-time optimization in production compilers.
+Despite significant advances, the proposed auto-scheduler retains some limitations. The system relies entirely on predefined heuristic handlers and rigid transformation definitions. Furthermore, \gls{jit}-compiling every candidate sequence within the reinforcement learning loop remains a massive computational bottleneck, preventing the agent from being deployed for entirely on-the-fly, real-time optimization in production compilers.
 
 \subsection{Comparison with Prior Work}
-Our approach marks a substantial departure from the prior MLIR-RL agent and foundational systems like Halide and Tiramisu. While PolyGym tackled polyhedral transformations via MDPs, it remained confined to highly regular static domains. The proposed system effectively bridges these domains into unstructured deep learning ecosystems by actively managing dynamic configurations, injecting hardware realities directly into the policy state, and fortifying the structural analysis via modern Transformer layouts.
+Our approach marks a substantial departure from the prior \gls{mlir}-\gls{rl} agent and foundational systems like Halide and Tiramisu. While PolyGym tackled polyhedral transformations via MDPs, it remained confined to highly regular static domains. The proposed system effectively bridges these domains into unstructured deep learning ecosystems by actively managing dynamic configurations, injecting hardware realities directly into the policy state, and fortifying the structural analysis via modern Transformer layouts.
 
 \section{Conclusion}
 
-This chapter presented a rigorous, ablation-focused evaluation of our proposed \gls{rl} auto-scheduler for the MLIR compiler framework. By establishing strong baselines against both the standard \gls{mlir} compilation steps (MLIR-Base) and the prior state-of-the-art \gls{rl} implementation (MLIR-RL), we demonstrated that the integrated system exceeds previous benchmarks in both simple linear algebra domains and full, real-world neural network graph executions.
+This chapter presented a rigorous, ablation-focused evaluation of our proposed \gls{rl} auto-scheduler for the \gls{mlir} compiler framework. By establishing strong baselines against both the standard \gls{mlir} compilation steps (\gls{mlir}-Base) and the prior state-of-the-art \gls{rl} implementation (\gls{mlir}-\gls{rl}), we demonstrated that the integrated system exceeds previous benchmarks in both simple linear algebra domains and full, real-world neural network graph executions.
 
 Through isolated ablation variants, we quantified the exact utility of each theoretical contribution: the hardware-aware observation, the static shaped rewards, and the Transformer-based encoder. The findings indicate that merging these concepts enables deep reinforcement learning to scale reliably to complex, dynamic, and hardware-agnostic compiler optimizations. The final chapter will summarize the scope of this project and outline prominent avenues for future research.
