@@ -239,23 +239,7 @@ The Multi-Level Intermediate Representation (\gls{mlir}) is a compiler infrastru
 
 \subsection{Dialects and Core Concepts}
 
-A dialect in \gls{mlir} is a self-contained namespace of operations, types, and attributes that model a specific domain or abstraction level. \gls{mlir} ships with a set of core dialects that cover common compiler tasks:
-
-\begin{itemize}
-    \item \textbf{Linalg} (Linear Algebra): Represents structured operations on buffers and tensors, such as matrix multiplication (\texttt{linalg.matmul}), convolution (\texttt{linalg.conv\_2d}), element-wise addition (\texttt{linalg.add}), and generic operations with user-specified indexing maps (\texttt{linalg.generic}). Linalg operations explicitly encode the loop structure, access patterns, and computation, making them amenable to systematic transformation. All benchmarks in our system are expressed in the Linalg dialect.
-
-    \item \textbf{Affine}: Provides a restricted form of loop nests and memory accesses where loop bounds and array indices are affine (linear) functions of enclosing loop iterators and symbolic constants. The affine dialect enables precise dependence analysis and polyhedral loop transformations.
-
-    \item \textbf{SCF} (Structured Control Flow): Represents standard control flow constructs such as \texttt{scf.for}, \texttt{scf.while}, \texttt{scf.if}, and the parallel loop construct \texttt{scf.forall}. After Linalg operations are lowered to loop form, the resulting loops belong to the \gls{scf} dialect.
-
-    \item \textbf{Vector}: Represents \gls{simd} operations on fixed-size vectors, providing a target for vectorization transformations.
-
-    \item \textbf{MemRef}: Represents memory references, typed pointers to multi-dimensional arrays with optional layout maps. MemRef is the type used for buffer-based computations.
-
-    \item \textbf{LLVM}: A direct mapping of the \gls{llvm} \gls{ir} into \gls{mlir}, enabling a seamless transition from high-level \gls{mlir} dialects to the \gls{llvm} back-end for code generation.
-
-    \item \textbf{Transform}: A meta-dialect that encodes transformation schedules as operations. A \texttt{transform.named\_sequence} describes a sequence of transformations (e.g., match an operation, tile it, vectorize it) that are applied to a target \gls{ir} module. The transform dialect is the mechanism through which our \gls{rl} agent's chosen actions are applied to \gls{mlir} code.
-\end{itemize}
+A dialect in \gls{mlir} is a self-contained namespace of operations, types, and attributes that model a specific domain or abstraction level. \gls{mlir} ships with a set of core dialects that cover common compiler tasks. Table~\ref{tab:mlir-dialects} summarizes the primary dialects utilized throughout our system architecture.
 
 \begin{table}[H]
     \centering
@@ -304,15 +288,7 @@ Several properties of \gls{mlir} make it well-suited for automated optimization 
 
 \subsection{Execution Pipeline}
 
-To measure the performance impact of a transformation sequence, our system compiles and executes the transformed \gls{mlir} code. The pipeline proceeds as follows:
-
-\begin{enumerate}
-    \item The transformed \gls{mlir} module (containing the sequence of Linalg transformations selected by the agent) is processed through a series of lowering passes: Linalg to loops, \gls{scf} to OpenMP, vectorization, buffer deallocation, and conversion to the \gls{llvm} dialect.
-    \item The resulting \gls{llvm} dialect module is translated to \gls{llvm} \gls{ir} and \gls{jit}-compiled using \gls{mlir}'s ExecutionEngine at optimization level \texttt{-O3}.
-    \item The compiled function is invoked through a timed wrapper that measures execution time in nanoseconds. The function operates on zero-initialized buffers to eliminate data-dependent variability, and a warm-up invocation precedes the timed invocation to amortize \gls{jit} compilation overhead.
-\end{enumerate}
-
-This execution pipeline is the evaluation mechanism for the reward function discussed in Chapter~4.
+To measure the performance impact of a transformation sequence, our system compiles and executes the transformed \gls{mlir} code. The module is processed through a series of lowering passes to the \gls{llvm} dialect, translated to \gls{llvm} \gls{ir}, and \gls{jit}-compiled using \gls{mlir}'s ExecutionEngine at optimization level \texttt{-O3}. Finally, the compiled function is invoked through a timed wrapper to measure execution time. This execution pipeline serves as the primary evaluation mechanism for the reward function, as detailed in Chapter~4.
 
 \section{Conclusion}
 

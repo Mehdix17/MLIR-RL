@@ -19,7 +19,7 @@ Building on this architecture, Pecenin et al.~\cite{pecenin2019halide} replaced 
 
 The agent was trained using \gls{ppo}~\cite{schulman2017ppo} and achieved speedups competitive with the heuristic auto-scheduler, while requiring no manual tuning of the search strategy or hand-crafted cost model features. This result demonstrated that \gls{rl} can learn effective scheduling policies for domain-specific compilers.
 
-\textbf{Limitations.} Halide's action space and cost model are tailored to image processing pipelines, which have a regular structure of stencil computations, upsampling, and downsampling. The scheduling primitives are specific to this domain and do not directly transfer to the broader set of linear algebra operations found in deep learning workloads. Furthermore, Halide is a standalone compiler rather than part of a general-purpose compiler infrastructure, limiting the applicability of its auto-scheduling techniques to other \glspl{ir} and optimization domains. The agent also does not incorporate hardware-specific features into its observation, making its decisions implicitly tied to the target platform used during training.
+\textbf{Limitations.} Halide's action space and cost model are tailored to image processing pipelines, which have a regular structure of stencil computations, upsampling, and downsampling. This heavily restricts the training scope exclusively to synthetic or narrow domains rather than the messy, diverse computation graphs seen in modern machine learning workloads. The scheduling primitives do not seamlessly transfer to the broader set of linear algebra operations. Furthermore, the agent operates entirely hardware-blind; it does not incorporate physical machine characteristics (e.g., caches, cores) into its observation, structurally stunting its ability to generalize and guaranteeing that the policy intimately overfits to the target platform on which it was trained. Lastly, relying almost entirely on terminal execution-time improvement provides a sparse reward signal that fails to reward structurally sound intermediate local schedules.
 
 \subsection{Tiramisu}
 
@@ -31,7 +31,7 @@ The \gls{mdp} formulation treated each scheduling command as an action that tran
 
 An earlier effort by Hennouni and El Hassane~\cite{henouni2022utilisation} had explored \gls{rl} for Tiramisu using a feedforward policy network with a fully observed \gls{mdp}, where the entire state was visible at every step. Lamouri and Merad improved on this by adopting a partially observable \gls{mdp} (\gls{pomdp}) formulation with an \gls{lstm} encoder, which allowed the agent to accumulate knowledge about the program structure across multiple observation steps.
 
-\textbf{Limitations.} The polyhedral model imposes restrictions on the programs that can be represented: loop bounds and array indices must be affine functions of enclosing loop iterators and symbolic constants. Many operations in modern machine learning workloads, particularly those with dynamic tensor shapes, indirect memory accesses, or non-affine control flow, fall outside these constraints. Operations such as convolutions with padding, depthwise separable convolutions, and attention mechanisms often violate the affine restriction. Additionally, Tiramisu is a research compiler with a narrower scope than \gls{mlir}, which is part of the \gls{llvm} ecosystem with broad industry adoption and an active development community.
+\textbf{Limitations.} The polyhedral model inherently limits program representation: loop bounds and array indices must be affine functions of enclosing iterators and symbolic constants. Because of this affine restriction, Tiramisu evaluates primarily on classical static kernels (e.g., highly regular scientific loops), lacking structural exposure to the dynamic tensor shapes and indirect memory accesses dominant in real-world neural network optimization. Moreover, the state encoders often rely on sequential recurrent units (e.g., LSTMs or feedforward networks). This recursive, sequential processing structurally struggles to connect non-adjacent, global dependencies nested deep within compiler subgraphs, rendering it ill-equipped for deeply nested topologies where an inner loop geometry intimately depends on an arbitrary outer loop.
 
 \section{General-Purpose \gls{rl} Environments for Compilers}
 
@@ -43,7 +43,7 @@ CompilerGym exposes two main categories of benchmark tasks. The first is phase o
 
 The observation space consists of program features extracted by \gls{llvm}'s built-in analysis passes: instruction counts by opcode, basic block counts, loop depth histograms, and control-flow graph properties. The reward is typically the reduction in code size or the improvement in execution time relative to a baseline compilation using default optimization flags. CompilerGym ships with a large dataset of programs from diverse sources, including C benchmarks, C++ programs, and the \gls{llvm} test suite.
 
-\textbf{Limitations.} CompilerGym's action space operates at the granularity of entire optimization passes applied to whole translation units, rather than per-operation or per-loop transformations. This makes it suitable for coarse-grained pass selection but limits its ability to express fine-grained schedules where different transformations are applied to different parts of the same program. The observation space, while rich in aggregate statistics, does not include the structured loop-level features (access matrices, loop bounds, iterator types) that are critical for loop nest optimization. Furthermore, the \gls{llvm}-level representation is lower-level than Linalg operations, making it harder to reason about high-level transformations such as tiling and fusion that are naturally expressed on structured linear algebra operations.
+\textbf{Limitations.} CompilerGym's action space operates at the granularity of entire optimization passes applied to whole translation units. While suitable for coarse-grained phase ordering, it lacks the ability to execute precise structural loop transformations. Furthermore, applying coarse passes to vast compilation units exacerbates the sparse reward dilemma; rewarding the total operation binary size or end-time masks which explicit pass in the long sequence was actually effective, severely raising the variance of learning. While CompilerGym embraces large C/C++ evaluation suites (like the LLVM test suite), these synthetic academic datasets skew far from the densely packed tensor complexities seen in real-world neural network subgraphs.
 
 \subsection{PolyGym}
 
@@ -53,7 +53,7 @@ The PolyGym state representation encodes detailed polyhedral features of the loo
 
 PolyGym supports multiple benchmark suites, including PolyBench (a collection of kernels from linear algebra and scientific computing) and the Rodinia benchmark suite for heterogeneous computing. Its design enables head-to-head comparisons of different \gls{rl} algorithms on the same set of optimization problems.
 
-\textbf{Limitations.} PolyGym shares the fundamental limitation of polyhedral methods: it can only represent programs with static, affine loop bounds and array accesses. This excludes many operations commonly found in machine learning compilers, such as convolutions with non-unit strides, depthwise separable convolutions, and attention mechanisms with dynamic shapes. Additionally, the polyhedral representation is opaque to the learning agent: the agent receives numerical features extracted from the polyhedra rather than the structured program graph or \gls{ast} that a compiler developer might reason about, making the learned policy difficult to interpret.
+\textbf{Limitations.} PolyGym shares the fundamental limitation of polyhedral methods: tying its scope severely to static, affine loop arrays and preventing evaluation on large-scale, non-synthetic tensor iterations. In addition to excluding highly diverse ML models from its dataset suite (relying instead on academic kernels like PolyBench), feeding rigid polyhedral numerical bounds into its feedforward policy networks strips the nuanced, hierarchical geometry of the loop layout. Architectures that rely strictly on sequential or fixed-size feedforward ingestion inherently fail to capture the complex, geometric relationships between scattered loop iterators—a bottleneck that points directly toward architectures prioritizing global self-attention.
 
 \section{\gls{rl} for \gls{mlir} Optimization}
 
@@ -111,58 +111,51 @@ This section synthesizes the systems surveyed above, identifying common design p
     \centering
     \caption{Comparative synthesis of \gls{rl}-based compiler optimization systems.}
     \label{tab:related-work-synthesis}
-    \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2cm} >{\raggedright\arraybackslash}p{2cm} >{\raggedright\arraybackslash}p{1.5cm}}
+    \begin{tabularx}{\textwidth}{l X X X X}
         \toprule
-        \textbf{System} & \textbf{Target Format} & \textbf{State Elements} & \textbf{Agent Architecture} & \textbf{Reward Type} & \textbf{HW-Aware} \\
+        \textbf{System} & \textbf{Optimization Paradigm} & \textbf{State Abstraction} & \textbf{Credit Assignment} & \textbf{HW Adaptability} \\
         \midrule
         Halide + DRL~\cite{pecenin2019halide}
-        & Halide
-        & Loop nest features, buffer sizes
-        & Feedforward / Beam Search
-        & Sparse
-        & No \\
+        & Schedule parameter search
+        & Flat loop features
+        & Sparse (Execution time)
+        & Implicit (Feedback) \\
         \addlinespace
         Tiramisu~\cite{lamouri2024tiramisu}
-        & Polyhedral
-        & Iteration domains, dependencies
-        & \gls{lstm}
-        & Sparse
-        & No \\
+        & Loop transformations
+        & Polyhedral domains
+        & Sparse (Execution time)
+        & Implicit (Feedback) \\
         \addlinespace
         CompilerGym~\cite{cummins2021compilergym}
-        & \gls{llvm} \gls{ir}
-        & Aggregate program statistics
-        & Feedforward
-        & Sparse
-        & No \\
+        & Phase ordering
+        & Aggregate graph stats
+        & Sparse (Delta reward)
+        & Implicit (Feedback) \\
         \addlinespace
         PolyGym~\cite{brauckmann2021polygym}
-        & Polyhedral
-        & Dependence polyhedra
-        & Feedforward
-        & Sparse
-        & No \\
+        & Polyhedral scheduling
+        & Matrix representations
+        & Sparse (Execution time)
+        & Implicit (Feedback) \\
         \addlinespace
         \gls{mlir}-Base~\cite{bendib2024reinforcement}
-        & \gls{mlir} Linalg
-        & Flat op features
-        & \gls{lstm}
-        & Sparse
-        & No \\
+        & Single-op tiling
+        & Flat token arrays
+        & Sparse (Execution time)
+        & Implicit (Feedback) \\
         \addlinespace
         \gls{mlir}-\gls{rl}~\cite{tirichine2025reinforcement}
-        & \gls{mlir} Linalg
-        & \gls{ast} block sequences
-        & \gls{lstm}
-        & Sparse
-        & No \\
+        & Subgraph restructuring
+        & Sequential \gls{ast}
+        & Sparse (Execution time)
+        & Implicit (Feedback) \\
         \addlinespace
         \textbf{Proposed Agent}
-        & \gls{mlir} Linalg
-        & \textbf{\gls{ast} + HW profiles}
-        & \textbf{Transformer}
-        & \textbf{Shaped}
-        & \textbf{Yes} \\
+        & \textbf{HW-aware subgraph sched.}
+        & \textbf{Global \gls{ast} attention}
+        & \textbf{Shaped (Arith. Intensity)}
+        & \textbf{Explicit (Embeddings)} \\
         \bottomrule
     \end{tabularx}
 \end{table}

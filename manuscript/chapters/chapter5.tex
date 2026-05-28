@@ -69,7 +69,7 @@ The proposed system and all its ablation variants share a common training protoc
 
 To account for measurement noise inherent in execution-time benchmarking, each optimized benchmark is executed 5 times on the target hardware. The median execution time across these 5 runs is recorded as the representative time for that benchmark. This follows standard benchmarking methodology and reduces the influence of outlier measurements caused by system-level noise such as scheduling jitter and cache warm-up effects. The same 5-run median protocol is applied to both the unoptimized baseline time $T_\text{\gls{mlir}-Base}$ and the optimized time $T_\text{optimized}$.
 
-The primary evaluation metric is the execution-time speedup, defined as the ratio of the unoptimized \gls{mlir}-Base execution time to the optimized execution time. \gls{mlir}-Base refers to the same \gls{mlir} compilation pipeline used during optimization, compiled with \texttt{-O3} applied by \gls{llvm}, but with all \gls{rl}-guided loop-level transformation selection disabled---the default operator schedules are used instead.
+The primary evaluation metric is the execution-time speedup, defined as the ratio of the unoptimized \gls{mlir}-Base execution time to the optimized execution time. \gls{mlir}-Base refers to the same \gls{mlir} compilation pipeline used during optimization, compiled with \texttt{-O3} applied by \gls{llvm}, but with all \gls{rl}-guided loop-level transformation selection disabled, the default operator schedules are used instead.
 
 \begin{equation}
     \text{Speedup} = \frac{T_\text{\gls{mlir}-Base}}{T_\text{optimized}}
@@ -110,6 +110,13 @@ We first evaluate the agents on localized linear algebra operations and sequence
 
 Table~\ref{tab:overall-performance} demonstrates that the proposed system consistently outperforms both the unoptimized standard (represented by a baseline of 1.0) and the prior \gls{mlir}-\gls{rl} agent across all evaluated categories.
 
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=\textwidth]{figures/overall_speedups.pdf}
+    \caption{Geometric mean speedups across localized linear algebra operations and sequences.}
+    \label{fig:overall-speedups}
+\end{figure}
+
 \subsection{Full Neural Network Models}
 
 To assess real-world applicability, the proposed system is further evaluated on complex sub-graphs extracted from the 18 full neural network architectures spanning eight categories. Table~\ref{tab:full-models} reports results on a representative subset covering all categories. We also introduce PyTorch (both eager execution and \gls{jit}) as external competitive baselines to contextualize the absolute performance. For PyTorch, each benchmark is executed with 10 warm-up invocations followed by 11 measurement runs; the median of the 11 measurement runs is reported, following the evaluation protocol established by the \gls{mlir}-\gls{rl} paper~\cite{tirichine2025reinforcement}.
@@ -142,9 +149,16 @@ To assess real-world applicability, the proposed system is further evaluated on 
     \end{tabularx}
 \end{table}
 
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=\textwidth]{figures/full_models_speedups.pdf}
+    \caption{Visual comparison of speedups on representative full neural network models against MLIR-Base and PyTorch.}
+    \label{fig:full-models-speedups}
+\end{figure}
+
 The Proposed Agent conditions its policy on hardware attributes (cores, cache sizes, \gls{simd} width). We define the \textbf{No-HW-aware} variant by masking this feature vector, forcing the policy to learn an implicit, hardware-agnostic strategy reminiscent of the prior \gls{mlir}-\gls{rl} agent.
 
-To evaluate this, both the Proposed Agent and the No-HW-aware variant are trained exclusively on the Bergamo partition (AMD EPYC 9754, Zen 4). We then conduct a cross-platform generalization test by evaluating both models---without any retraining---on three distinct architectures: the original training hardware (Bergamo), the smaller 128-core Jubail partition (AMD EPYC 7742, Zen 2), and the Intel-based Dalma partition (Xeon E5-2680 v4, Broadwell).
+To evaluate this, both the Proposed Agent and the No-HW-aware variant are trained exclusively on the Bergamo partition (AMD EPYC 9754, Zen 4). We then conduct a cross-platform generalization test by evaluating both models, without any retraining, on three distinct architectures: the original training hardware (Bergamo), the smaller 128-core Jubail partition (AMD EPYC 7742, Zen 2), and the Intel-based Dalma partition (Xeon E5-2680 v4, Broadwell).
 
 \begin{table}[H]
     \centering
@@ -159,6 +173,13 @@ To evaluate this, both the Proposed Agent and the No-HW-aware variant are traine
         \bottomrule
     \end{tabularx}
 \end{table}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{figures/cross_platform_generalization.pdf}
+    \caption{Cross-platform generalization speedups showing the impact of the hardware-aware observation space.}
+    \label{fig:cross-platform-generalization}
+\end{figure}
 
 \subsection{Impact of Shaped Rewards (No-Reward-Shaping)}
 
@@ -178,6 +199,13 @@ Beyond final execution speedup, the impact of reward shaping is most evident in 
         \bottomrule
     \end{tabularx}
 \end{table}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{figures/training_convergence.pdf}
+    \caption{Training learning curves showing the impact of intermediate shaped rewards on policy convergence variance and speed.}
+    \label{fig:training-convergence}
+\end{figure}
 
 \subsection{Impact of the Transformer Encoder (No-Transformer)}
 
@@ -200,6 +228,13 @@ We evaluate this variant explicitly across benchmarks stratified by their loop n
         \bottomrule
     \end{tabularx}
 \end{table}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{figures/encoder_ablation_depth.pdf}
+    \caption{Performance impact of the Transformer encoder over LSTM on shallow versus deep loop nests.}
+    \label{fig:ablation-transformer}
+\end{figure}
 
 \section{Discussion}
 \label{sec:discussion}
