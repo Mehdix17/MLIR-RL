@@ -29,10 +29,54 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 - **Mechanism:** Treat each loop level in a nest as a "token." Use Self-Attention to allow the model to weigh the importance of the outermost loop (for tiling) against the innermost loop (for vectorization) simultaneously.
 - **Positional Encoding:** Use structural encoding to maintain the hierarchy of the loop nest (which loop is inside which).
 
-### Novelty 3: Expanded Transformation Action Space (Future Work - V5)
+### Novelty 3: Multi-Objective and Shaped Rewards (Already Implemented)
+
+**The Problem:** Speedup is a "sparse" reward (only known at the end of execution) and doesn't account for other factors like energy or memory.
+**The Solution:** **Reward Shaping:** Add intermediate rewards based on static analysis:
+- **Arithmetic Intensity:** Ops/Byte ratio.
+- **Vectorization Ratio:** Percentage of loops successfully vectorized.
+
+- **Multi-Objective:** Create a weighted reward: $R = w_1(Speedup) + w_2(PeakMemoryUsage)$. This is critical for edge computing where memory is constrained.
+
+**Status:** This novelty has been implemented and integrated into the training pipeline (V4.5+).
+
+**Reward Design Lessons (V4.6/7/8):**
+- **Shaped reward magnitude:** Must be ≤10% of terminal reward magnitude. Original V4.5 had shaped reward dominating terminal speedup reward by 20×, causing the agent to optimize static heuristics (parallel ratio, vectorizability) rather than actual execution time.
+- **Terminal reward anchor:** `log10(speedup)` provides ±0.3-0.5 per benchmark — shaped reward must be scaled to this range (`reward_shaping_scale=0.05`).
+- **Slowdown penalty:** Zero intermediate rewards when speedup < 1.0 to prevent the agent from being rewarded for making code slower.
+- **Vectorization bonus:** Must scale with `reward_shaping_scale`. In V4.5, it was added after scaling (bug), inflating shaped reward.
+- **Hardware core count:** Changed from `os.cpu_count()` (physical) to `SLURM_CPUS_PER_TASK` to reflect allocated resources on HPC clusters.
+- **Execution timeout:** Min reduced from 30s to 2s (`MIN_EXEC_TIMEOUT` env var), multiplier 10x → 5x. Bad schedules fail fast; 2s safety kill is sufficient since a good schedule runs well under baseline time.
+
+---
+
+## 3. Future Work (V4+)
+
+### Reward-Fixed Training Runs (V4.6, V4.7, V4.8) — Completed
+**Status:** Trained on 18-model new dataset (Bergamo HPC). All three share the V4.5 implementation package (`rl_autoschedular_v4_5`) with corrected reward shaping and execution timeout improvements.
+
+| Version | Transformer | Sched/Iter | Best Avg Speedup |
+|---------|------------|-----------|-----------------|
+| V4.6 | Classic (d=256, h=8, L=3, ffn=1024) | ~97s | 1.82x |
+| V4.7 | Small (d=64, h=2, L=2, ffn=128) | ~62s | 2.59x (early), regressed to 1.42x |
+| V4.8 | Classic (d=256, h=8, L=3, ffn=1024) | ~97s | 1.98x |
+
+All three use identical reward fixes (scale=0.05, clip=0.1, vec_bonus=0.0, slowdown penalty).
+
+See [`docs/VERSIONS.md`](VERSIONS.md) for full details on each version's fixes, results, and lessons learned.
+
+### Novelty 4: Full Graph Observation (Future Work - V5)
+
+**The Problem:** The current agent optimizes operations in isolation, traversing the computation graph in reverse order (Consumer → Producer). This limits the agent's ability to make globally optimal scheduling decisions that depend on the entire model structure.
+**The Solution:** Enhance the observation space to include the full computation graph structure as input to the agent.
+
+- **Mechanism:** Instead of per-operation features, construct a graph neural network (GNN) representation of the entire model dependency graph.
+- **Impact:** The agent gains context about downstream operations, enabling scheduling decisions that account for data reuse patterns and cross-operation optimization opportunities.
+
+### Novelty 5: Expanded Transformation Action Space (Future Work - V6)
 
 **The Problem:** The current set of actions is limited to high-level loop transformations (Tiling, Parallelization, Fusion, Interchange, Vectorization). The agent cannot express schedules that combine high-level tiling with low-level memory layout changes or instruction-level parallelism optimizations.
-**The Solution:** Implement finer-grained transformations available in the MLIR Transform Dialect. This is planned for future work (e.g., **`rl_autoschedular_v5`**):
+**The Solution:** Implement finer-grained transformations available in the MLIR Transform Dialect. This is planned for future work (e.g., **`rl_autoschedular_v6`**):
 
 - **Pad (`P`):** Pads operation dimensions to multiples of powers of 2, ensuring aligned memory accesses and efficient vectorization.
 - **Pack (`PK`):** Reorganizes data into blocked/tiled layouts using `transform.structured.pack`, improving cache locality for tiled access patterns.
@@ -40,7 +84,7 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 
 See [`docs/Novelties/v5_action_space_expansion.md`](Novelties/v5_action_space_expansion.md) for full planned implementation details.
 
-### Novelty 4: Guided Search Strategy (Beam Search / MCTS) (Future Work - V6)
+### Novelty 6: Guided Search Strategy (Beam Search / MCTS) (Future Work - V6)
 
 **The Problem:** The RL agent currently suffers from "Greedy Brittleness" — it makes a single "greedy" choice per step. If one choice is wrong, the entire schedule fails because it cannot backtrack.
 **The Solution:** Implement a search layer during the inference/evaluation phase. _Note: This is currently not yet implemented and is planned for future work (e.g., `rl_autoschedular_v6`)._
@@ -48,15 +92,7 @@ See [`docs/Novelties/v5_action_space_expansion.md`](Novelties/v5_action_space_ex
 - **Beam Search:** Instead of picking the top action, keep the $K$ most likely transformation sequences and evaluate them all.
 - **Monte Carlo Tree Search (MCTS):** Use the RL policy as a "prior" to guide an MCTS exploration. This helps the agent find deep optimization sequences that a standard greedy policy would miss.
 
-### Novelty 5: Multi-Objective and Shaped Rewards (Future Work)
-
-**The Problem:** Speedup is a "sparse" reward (only known at the end of execution) and doesn't account for other factors like energy or memory.
-**The Solution:** _ **Reward Shaping:** Add intermediate rewards based on static analysis:
-_ _Arithmetic Intensity:_ Ops/Byte ratio. \* _Vectorization Ratio:_ Percentage of loops successfully vectorized.
-
-- **Multi-Objective:** Create a weighted reward: $R = w_1(Speedup) + w_2(PeakMemoryUsage)$. This is critical for edge computing where memory is constrained.
-
-### Novelty 6: Meta-Learning for Fast Adaptation (MAML) (Future Work)
+### Novelty 7: Meta-Learning for Fast Adaptation (MAML) (Future Work)
 
 **The Problem:** Training an RL agent from scratch for every new dialect or hardware is expensive.
 **The Solution:** Use **Model-Agnostic Meta-Learning (MAML)**.
@@ -64,41 +100,3 @@ _ _Arithmetic Intensity:_ Ops/Byte ratio. \* _Vectorization Ratio:_ Percentage o
 - **Goal:** Train the agent on a wide variety of "tasks" (different kernels like MatMul, Convolutions, Softmax).
 - **Outcome:** The agent develops a "meta-policy" that can adapt to a completely new, unseen kernel with only 5–10 optimization steps.
 
----
-
-## 3. Implementation Roadmap
-
-This roadmap is divided into four phases, moving from environment enhancements to architectural shifts.
-
-### Phase 1: Environment & Observation (Weeks 1-4)
-
-- **Task 1.1:** Update `observation.py` to include the Hardware Feature vector (Cores, Cache, SIMD).
-- **Task 1.2:** Modify the reward function in `env.py` to include "Shaped Rewards" (Arithmetic intensity).
-- **Task 1.3:** Conduct a baseline test: See if the agent learns to pick different tile sizes for two different (simulated) cache sizes.
-
-### Phase 2: Action Space Expansion (Planned for V5)
-
-- **Task 2.1:** Integrate **Pad**, **Pack**, and **Unroll** into new actions definitions and transforms.
-- **Task 2.2:** Update `action_mask` logic for all three new actions (Pad/Pack per-dimension validity, Unroll divisibility checks and terminal restrictions).
-- **Task 2.3:** Benchmark performance on the existing dataset to measure speedup from expanded schedule space.
-
-### Phase 3: Architectural Upgrade (Weeks 9-14)
-
-- **Task 3.1:** Replace the LSTM in `model.py` with a **Transformer Block**.
-- **Task 3.2:** Implement the tokenization logic for loop nests (converting loop features into sequence tokens).
-- **Task 3.3:** Retrain the model on the full dataset. This will be the most compute-intensive phase.
-
-### Phase 4: Advanced Search & Meta-Learning (Future Work - V6)
-
-- **Task 4.1:** Implement **Beam Search** in the `evaluation.py` script. Compare "Greedy RL" vs "Beam Search RL." _(Planned for V6)_
-- **Task 4.2:** (Optional/Advanced) Implement the MAML outer loop in `ppo.py` to enable fast adaptation to new kernels.
-- **Task 4.3:** Final evaluation: Compare your final system against the previous student's baseline and standard MLIR `O3` optimizations.
-
----
-
-## 4. Summary of Expected Contributions
-
-1.  **A more robust encoder:** Moving from LSTMs to Transformers for code structural analysis.
-2.  **Hardware-aware policies:** A single model capable of optimizing for different CPUs.
-3.  **Efficiency gains:** Through future Pad, Pack, and Unroll actions (V5) not present in the baseline, enabling finer-grained control over memory layout and instruction-level parallelism.
-4.  **Better Search (Planned for V6):** Using Beam Search to find higher-performing schedules than greedy inference (addressing greedy brittleness).

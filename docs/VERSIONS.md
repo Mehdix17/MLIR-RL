@@ -334,7 +334,96 @@ Notes/limitations:
 - Success-Contingent rewards may initially slow down learning but ensure the final policy is 100% runnable.
 
 
-### V5 - Action Space Expansion (Pad + Pack + Unroll)
+### V4.6 — Reward-Fixed Classic Transformer
+- Status: complete (trained to iter 155, timed out at 5h; resumed, training at iter ~50)
+- Date completed: 2026-05-31
+- Novelty scope: Corrected reward shaping + optimizer checkpointing (same Classic Transformer as V4.5)
+- Package: `rl_autoschedular_v4_5` (shared with V4.5)
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+- Config file: `config/new_dataset/train/v4_6.json`
+
+Key fixes from V4.5:
+- **Reward shaping scale**: 1.0 → **0.05** (shaped reward = 10% of terminal, not 20×)
+- **Reward shaping clip**: 2.0 → **0.1**
+- **Vectorization bonus**: 0.2 → **0.0** (scaled with `reward_shaping_scale`)
+- **Slowdown penalty**: Zero intermediate rewards when speedup < 1.0
+- **Hardware cores**: Prefers `SLURM_CPUS_PER_TASK` over `os.cpu_count()`
+- **Optimizer checkpointing**: Adam state saved with model (dict format: `{'model': ..., 'optimizer': ..., 'step': ...}`)
+- **Execution timeout**: Min reduced 30s → 2s, multiplier 10x → 5x (`MIN_EXEC_TIMEOUT` env var, default 2)
+
+Architecture:
+- Transformer: d_model=256, nhead=8, num_layers=3, ffn_dim=1024
+- New dataset: 18-model block benchmarks, 8822 train / 2163 eval
+- Training: nb_iterations=10000, bench_count=64, batch_size=32
+
+Results (at iter 153, 5h timeout): avg speedup **1.82x**, best **16.69x**
+
+Notes:
+- Eval config (`v4_6_eval.json`) still uses old reward values (scale=1.0, clip=2.0) — discrepancy with training
+- Training resumed after timeout, 72h time limit applied
+
+### V4.7 — Reward-Fixed Small Transformer
+- Status: complete (trained to iter 238, timed out at 5h; resumed, training at iter ~58)
+- Date completed: 2026-05-31
+- Novelty scope: Same reward fixes as V4.6 but with reduced transformer for faster training
+- Package: `rl_autoschedular_v4_5` (shared with V4.5)
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+- Config file: `config/new_dataset/train/v4_7.json`
+
+Key differences from V4.6:
+- **Transformer**: d_model=**64**, nhead=**2**, num_layers=**2**, ffn_dim=**128** (3.6× fewer params)
+- **Training speed**: ~62s/iter vs V4.6's 97s/iter (36% faster per iteration)
+- All reward fixes and timeout improvements identical to V4.6
+
+Results (at iter 238, 5h timeout):
+- Avg speedup: **1.42x** (regressed from earlier peak of **2.59x** at iter 102)
+- Best: **7.66x**
+- Hypothesis: Smaller model converges faster initially but lacks capacity to sustain improvement — gradient noise or shaped reward exploitation causes regression
+
+Notes:
+- Peaked early (2.59x at iter 102) then degraded — classic overfitting to bad schedules
+- Valuable as an ablation: confirms d_model≥256 needed for stable convergence
+
+### V4.8 — Reward-Fixed Classic Transformer (Eval-Corrected)
+- Status: complete (trained to iter 155, timed out at 5h; resumed, training at iter ~50)
+- Date completed: 2026-06-01
+- Novelty scope: Identical architecture to V4.6 with corrected eval config
+- Package: `rl_autoschedular_v4_5` (shared with V4.5)
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+- Config file: `config/new_dataset/train/v4_8.json`
+
+Key differences from V4.6:
+- **Eval config**: Uses corrected reward values (scale=0.05, clip=0.1, vec_bonus=0.0) matching training config — fixes V4.6's eval config discrepancy
+- Training config: Identical to V4.6 (Classic Transformer, same reward fixes)
+
+Results (at iter 155, 5h timeout): avg speedup **1.98x**, best **14.59x**
+
+Notes:
+- Slightly better than V4.6 (1.98x vs 1.82x at same iteration) — likely noise, not systematic
+- Second run confirms Classic Transformer with reward fixes is viable
+- Eval config correction ensures fair comparison with train-era rewards
+
+### V4.9 — Pre-Seeded Execution Cache (Abandoned)
+- Status: **abandoned**
+- Date: 2026-06-01
+- Novelty scope: Offline schedule cache to accelerate early training iterations
+- Package: `rl_autoschedular_v4_5`
+- Config file: `config/new_dataset/train/v4_9.json`
+
+Approach:
+- Generate N random schedules per training benchmark offline
+- Execute and cache results in `schedule_cache.json`
+- Training references cache via `main_exec_data_file` — cache hits skip execution
+
+Why abandoned:
+- Random schedules overwhelmingly bad → timeout at 30s+ each
+- At N=20: 176K schedule executions, ~46h estimated vs 4h Slurm timeout
+- At N=5: only ~2.3% expected cache hit rate per trajectory step (5/216 possible sequences)
+- Pre-seeded cache delivers negligible training speedup for this dataset
+
+Lesson: Pre-execution cache only viable when the schedule search space is small or when a strong prior (not uniform random) exists for schedule quality.
+
+
 - Status: planned (future work)
 - Date completed: N/A
 - Novelty scope: Expanded transformation action space only

@@ -12,7 +12,7 @@
 │  get_base.py        → exec_times/base.json    (MLIR raw)    │
 │  get_pytorch_times  → exec_times/pytorch.json (PyTorch)     │
 │  split_json.py      → exec_times/base_train.json            │
-│                     → exec_times/base_eval.json              │
+│                     → exec_times/base_eval.json             │
 └─────────────────┬───────────────────────────────────────────┘
                   │
     ┌─────────────┼─────────────┬─────────────┬─────────────┐
@@ -27,10 +27,10 @@
     └─────┬─────┴─────┬─────┴─────┬─────┴─────┬─────┴─────┬─────┘
           │           │           │           │           │
           ▼           ▼           ▼           ▼           ▼
-    ┌─────────────────────────────────────────────────┐
-    │  dashboard.py        → interactive viz          │
-    │  (Head-to-Head tab compares all implementations) │
-    └─────────────────────────────────────────────────┘
+        ┌──────────────────────────────────────────────────┐
+        │  dashboard.py        → interactive viz           │
+        │  (Head-to-Head tab compares all implementations) │
+        └──────────────────────────────────────────────────┘
 ```
 
 ---
