@@ -64,7 +64,36 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` can fail with "Permission denied" on br
 | `rl_autoschedular_v45_no_hw`     | Ablation: hardware-awareness disabled |
 | `rl_autoschedular_v45_no_shaped_reward` | Ablation: no reward shaping |
 | `rl_autoschedular_v45_no_transformer` | Ablation: baseline policy (no transformer) |
-| `rl_autoschedular_v5`+ | Future novelties (one per version)   |
+| `rl_autoschedular_v5`+ | Future novelties (one per version) |
+
+### V4.6 / V4.7 / V4.8 — Reward-Fixed Versions
+
+These share the `rl_autoschedular_v4_5` implementation package but use different configs. Key changes from V4.5:
+
+| Fix | V4.5 (old) | V4.6/V4.7/V4.8 |
+|-----|-----------|-----------------|
+| Shaped reward scale | 1.0 | **0.05** (shaped reward = 10% of terminal, not 20×) |
+| Shaped reward clip | 2.0 | **0.1** |
+| Vectorization bonus | 0.2 | **0.0** (scaled with `reward_shaping_scale`) |
+| Slowdown penalty | None | **Zero intermediate rewards when speedup < 1.0** |
+| Hardware cores | `os.cpu_count()` (physical) | **Prefers `SLURM_CPUS_PER_TASK`** |
+| Optimizer checkpointing | None | **Adam state saved with model** |
+
+| Version | Transformer | Config | Results dir |
+|---------|------------|--------|-------------|
+| V4.6 | Classic (d=256, h=8, L=3, ffn=1024) | `train/v4_6.json` | `v4_6_agent` |
+| V4.7 | Small (d=64, h=2, L=2, ffn=128) | `train/v4_7.json` | `v4_7_agent` |
+| V4.8 | Classic (d=256, h=8, L=3, ffn=1024) | `train/v4_8.json` | `v4_8_agent` |
+
+### Reward Design Lessons
+
+**Root cause of V4.5's 0.66x:** Shaped reward dominated terminal speedup reward by 20×. Agent optimized static heuristics (parallel ratio, vectorizability) rather than actual execution time. Removing shaped reward entirely (No-Reward ablation) achieves **3.27x**.
+
+**Design rules:**
+- Shaped reward must be ≤ 10% of terminal reward magnitude
+- Terminal `log10(speedup)` is the anchor (±0.3-0.5 per benchmark)
+- Slowdown penalty: zero intermediate rewards when speedup < 1.0, preserve negative terminal
+- Vectorization bonus must scale with `reward_shaping_scale` (was added after scaling — bug)
 
 Each `vN` is a **full standalone copy** of the baseline with internal imports redirected to itself. Do **not** mix imports between packages.
 
@@ -514,8 +543,28 @@ The config fields `json_file` and `eval_json_file` default to `""` — when empt
 
 - **DaskManager is disabled by default** (`ENABLED = False` in `utils/dask_manager.py`). Distributed execution across Slurm workers only activates if you set `ENABLED = True` and `DASK_NODES` env var. All execution runs single-process on the Slurm node otherwise.
 - **SIGABRT handler** — `train.py` and `eval.py` install a signal handler that catches native MLIR crashes (`SIGABRT`) and converts them to Python exceptions so training can continue past a bad schedule.
-- **`submit_and_monitor.sh`** — Submits a Slurm script, waits for the job to start, then tails its output (`scripts/utils/submit_and_monitor.sh scripts/train/train.sh config/train/train1.json`).
+- **`submit_and_monitor.sh`** — Submits a Slurm script, waits for the job to start, then tails its output (`scripts/submit_and_monitor.sh scripts/train.sh config/train1.json`).
 - **Check running jobs before submitting** — `squeue -u mb10856`. Two reward-eval jobs currently use 2 nodes (`rew-eval-low`, `rew-eval-high`). Submitting eval with `--cpus-per-task=4` avoids `AssocGrpCpuLimit`.
+
+### Eval Script Operational Fixes
+
+**3 bugs fixed in `scripts/eval/eval.py`:**
+
+1. **Checkpoint format** — Models saved after optimizer fix are `{'model': state_dict, 'optimizer': ..., 'step': ...}` dicts, not raw state_dict files. `eval.py` and `ablation_eval.py` now handle both formats.
+
+2. **EVAL_STRIDE** — Was hardcoded `EVAL_STRIDE = 100`, ignored `$EVAL_STRIDE` env var. Now reads from environment: `EVAL_STRIDE = int(os.getenv("EVAL_STRIDE", "100"))`.
+
+3. **export syntax** — When submitting eval sbatch scripts, each env var needs its own `export` line. `export VAR1=val1 VAR2=val2` only exports VAR1 in bash.
+
+### Marker Directory Mapping
+
+Evaluation markers are stored per checkpoint in isolated directories:
+```
+results/<experiment>/<agent>/global_markers/<id>/
+```
+Where `<id>` is `FORCE_RUN_ID` (e.g., `v4_6_ckpt50`, `v4_7_ckpt250`). Training markers go to `global_markers/default/` and are cleared each iteration.
+
+**Master mapping file:** `results/new_dataset_results/eval_marker_mapping.csv` — maps every checkpoint to its marker directory, model name, and status. Auto-updated by `ppo.py:__execute_states` which writes `_eval_meta.json` in each markers directory.
 
 ### Critical: BindingsProcess.ENABLED Must Stay False
 

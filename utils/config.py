@@ -126,6 +126,10 @@ class Config(metaclass=Singleton):
     """Token pooling strategy for transformer output."""
     transformer_use_action_history_token: bool = False
     """If true, action history is injected as a transformer token instead of post-concatenation."""
+    eval_runs: int = 1
+    """Number of execution runs per benchmark during evaluation (default 1 = single run)."""
+    eval_aggregation: Literal['min', 'median', 'mean'] = 'min'
+    """Aggregation method for multiple eval runs: min, median, or mean."""
 
     def __init__(self):
         """Load the configuration from the JSON file

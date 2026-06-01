@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import timedelta
+import math
 from statistics import mean
 import sys
 import torch
@@ -18,6 +19,7 @@ from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
 from utils.dask_manager import DaskManager
 from time import time
+import math
 from typing import Optional
 
 
@@ -164,13 +166,18 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         f", cache miss rate: {cache_miss_rate:.2f}%"
     ))
 
-    # Clear markers granularly after successful iteration to avoid race conditions
-    marker_dir = os.path.join(cfg.results_dir, 'global_markers')
-    for state in states:
-        marker_file = os.path.join(marker_dir, state.bench_name)
-        if os.path.exists(marker_file):
+    # Archive training markers per iteration for post-hoc analysis
+    import shutil
+    src = os.path.join(cfg.results_dir, 'global_markers', 'default')
+    dst = os.path.join(cfg.results_dir, 'global_markers', 'training', f'iter_{step}')
+    if os.path.exists(src):
+        try:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            os.rename(src, dst)
+        except OSError:
             try:
-                os.remove(marker_file)
+                if os.path.exists(src):
+                    shutil.rmtree(src)
             except OSError:
                 pass
 
@@ -386,14 +393,16 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
         print_info(str(state.transformation_history), add_label=False)
 
     if len(all_speedups) > 0:
-        fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
+        geo_mean = math.exp(sum(math.log(max(s, 1e-12)) for s in all_speedups) / len(all_speedups))
+        fl['eval/average_speedup'].append(geo_mean)
+        fl['eval/arithmetic_mean_speedup'].append(sum(all_speedups) / len(all_speedups))
     exe.update_execution_cache(new_cache_data)
 
     eval_end = time()
     print_info(f"Evaluation time: {timedelta(seconds=eval_end - eval_start)}")
 
     # Clear markers granularly after successful evaluation to avoid race conditions
-    marker_dir = os.path.join(Config().results_dir, 'global_markers')
+    marker_dir = os.path.join(Config().results_dir, 'global_markers', os.getenv('FORCE_RUN_ID') or 'default')
     for state in states:
         marker_file = os.path.join(marker_dir, state.bench_name)
         if os.path.exists(marker_file):
@@ -411,13 +420,30 @@ def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchma
     import json as _json
     # Use a persistent marker directory across runs for the same experiment
     cfg = Config()
-    marker_dir = os.path.join(cfg.results_dir, 'global_markers')
+    marker_dir = os.path.join(cfg.results_dir, 'global_markers', os.getenv('FORCE_RUN_ID') or 'default')
     # Robust directory creation (handles race conditions)
     if not os.path.exists(marker_dir):
         try:
             os.makedirs(marker_dir, exist_ok=True)
         except OSError:
             pass
+
+    # Auto-document this eval run
+    meta_file = os.path.join(marker_dir, '_eval_meta.json')
+    if not os.path.exists(meta_file):
+        try:
+            import json as _j, time as _t
+            meta = {
+                'implementation': cfg.implementation,
+                'results_dir': cfg.results_dir,
+                'checkpoint': os.path.basename(marker_dir),
+                'eval_started': _t.strftime('%Y-%m-%d %H:%M:%S'),
+                'eval_runs': cfg.eval_runs if hasattr(cfg, 'eval_runs') else 1,
+                'eval_aggregation': cfg.eval_aggregation if hasattr(cfg, 'eval_aggregation') else 'min',
+            }
+            with open(meta_file, 'w') as _f:
+                _j.dump(meta, _f, indent=2)
+        except: pass
 
     marker_file = os.path.join(marker_dir, state.bench_name)
     if os.path.exists(marker_file):

@@ -98,9 +98,14 @@ if models_list:
     import builtins
     latest_model_file = builtins.max(models_list, key=lambda f: int(re.search(r'model_(\d+)\.pt', f).group(1)))
     latest_step = int(re.search(r'model_(\d+)\.pt', latest_model_file).group(1))
-    model.load_state_dict(torch.load(os.path.join(fl.models_dir, latest_model_file), map_location=device, weights_only=True))
+    checkpoint = torch.load(os.path.join(fl.models_dir, latest_model_file), map_location=device, weights_only=False)
+    model.load_state_dict(checkpoint['model'])
+    try:
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        print_success(f"Resumed model + optimizer from {latest_model_file}")
+    except Exception:
+        print_success(f"Resumed model from {latest_model_file} (optimizer not restored)")
     start_step = latest_step + 1
-    print_success(f"Resumed model from checkpoint {latest_model_file} (Start step: {start_step})")
 
 print_info(f"Training loop: start={start_step}, end={cfg.nb_iterations}, steps={cfg.nb_iterations - start_step}")
 
@@ -142,11 +147,20 @@ for step in range(start_step, cfg.nb_iterations):
         # Update policy model with PPO
         ppo_update(trajectory, model, optimizer)
 
-        # Save the model every iteration for crash resilience
+        # Save model + optimizer state every iteration for crash resilience
         torch.save(
-            model.state_dict(),
+            {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': step},
             os.path.join(fl.models_dir, f'model_{step}.pt')
         )
+
+        # Archive training markers per iteration for post-hoc analysis
+        marker_dir = os.path.join(fl.run_dir, 'eval', 'markers')
+        if os.path.exists(marker_dir) and len(os.listdir(marker_dir)) > 0:
+            dst = os.path.join(os.path.dirname(marker_dir), f'markers_iter_{step}')
+            try:
+                os.rename(marker_dir, dst)
+            except OSError:
+                pass
 
         main_end = time()
         iter_time = main_end - main_start

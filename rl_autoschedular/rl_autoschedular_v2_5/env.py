@@ -8,6 +8,7 @@ from utils.config import Config
 import random
 import math
 import traceback
+import statistics
 
 
 class Env:
@@ -102,14 +103,32 @@ class Env:
         # Evaluate the code (since the operation is done)
         try:
             # Pass root_exec_time to allow profiling-based timeout safeguard
-            new_exec_time, exec_succeeded, cache_miss, error_msg = Execution().execute_code(
-                transformed_code, 
-                self.benchmark_data.bench_name, 
-                seq,
-                root_exec_time=self.benchmark_data.root_exec_time
-            )
-            if not exec_succeeded:
-                raise Exception(error_msg or "Unknown execution failure")
+            cfg = Config()
+            num_runs = cfg.eval_runs if hasattr(cfg, 'eval_runs') else 1
+            run_times = []
+            for run_idx in range(num_runs):
+                run_time, run_ok, run_miss, run_err = Execution().execute_code(
+                    transformed_code, 
+                    self.benchmark_data.bench_name, 
+                    seq,
+                    root_exec_time=self.benchmark_data.root_exec_time
+                )
+                if run_ok:
+                    run_times.append(run_time)
+            
+            if run_times:
+                aggr = cfg.eval_aggregation if hasattr(cfg, 'eval_aggregation') else 'min'
+                if aggr == 'median':
+                    new_exec_time = statistics.median(run_times)
+                elif aggr == 'mean':
+                    new_exec_time = sum(run_times) / len(run_times)
+                else:
+                    new_exec_time = min(run_times)
+                exec_succeeded = True
+                cache_miss = run_miss
+                error_msg = None
+            else:
+                raise Exception(run_err or "All execution runs failed")
         except Exception as e:
             seq_str = '\n'.join([str(list(map(str, op_seq))) for op_seq in seq])
             print_error(

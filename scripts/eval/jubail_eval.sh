@@ -12,8 +12,8 @@
 set -e
 
 # Usage:
-#   sbatch scripts/jubail_eval.sh config/train/v4_5.json
-#   EVAL_LAST_ONLY=1 sbatch scripts/jubail_eval.sh config/train/v4_5.json
+#   sbatch scripts/jubail_eval.sh config/old_dataset/train/v4_5.json
+#   EVAL_LAST_ONLY=1 sbatch scripts/jubail_eval.sh config/old_dataset/train/v4_5.json
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${SLURM_SUBMIT_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)}"
@@ -33,7 +33,7 @@ export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
 # Config Resolution
-CONFIG="${1:-$PROJECT_ROOT/config/train/v4_5.json}"
+CONFIG="${1:-$PROJECT_ROOT/config/old_dataset/train/v4_5.json}"
 if [[ "$CONFIG" != /* ]]; then
     CONFIG="$PROJECT_ROOT/$CONFIG"
 fi

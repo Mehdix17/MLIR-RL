@@ -112,7 +112,7 @@ eval_files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 # Filter and sort checkpoints
 import re
 EVAL_LAST_ONLY = os.getenv("EVAL_LAST_ONLY", "").strip().lower() in ("1", "true", "yes")
-EVAL_STRIDE = 100
+EVAL_STRIDE = int(os.getenv("EVAL_STRIDE", "100"))
 EVAL_START = int(os.getenv("EVAL_START", "0"))
 EVAL_END = int(os.getenv("EVAL_END", "999999"))
 
@@ -186,7 +186,11 @@ for step, model_file in enumerate(pending_files):
     if not os.path.exists(model_path):
         print_info(f"Model file {model_path} does not exist. Skipping.")
         continue
-    model.load_state_dict(torch.load(model_path, weights_only=True))
+    checkpoint = torch.load(model_path, weights_only=False)
+    if isinstance(checkpoint, dict) and 'model' in checkpoint:
+        model.load_state_dict(checkpoint['model'])
+    else:
+        model.load_state_dict(checkpoint)
 
     evaluate_benchmarks(model, eval_data)
 

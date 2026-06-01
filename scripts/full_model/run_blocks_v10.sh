@@ -26,7 +26,7 @@ export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJEC
 MODEL="$1"
 CHECKPOINT_DIR="$PROJECT_ROOT/results/experiment3/v4_5_agent/run_0/models"
 
-export CONFIG_FILE_PATH="$PROJECT_ROOT/config/full_model/full_model_optim.json"
+export CONFIG_FILE_PATH="$PROJECT_ROOT/config/old_dataset/full_model/full_model_optim.json"
 export AUTOSCHEDULER_IMPL="rl_autoschedular_v4_5"
 
 echo "=========================================="

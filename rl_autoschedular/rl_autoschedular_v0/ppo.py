@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import timedelta
+import math
 from statistics import mean
 import sys
 import torch
@@ -18,6 +19,7 @@ from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
 from utils.dask_manager import DaskManager
 from time import time
+import math
 from typing import Optional
 
 
@@ -117,6 +119,13 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
     for tc, state, rewards, speedup, exec_time in zip(tcs, states, all_rewards, all_speedups, all_exec_times):
         # Update trajectory
         tc.rewards = rewards
+        # Safety Check: ensure rewards list length matches trajectory steps exactly
+        if len(rewards) != len(tc.obs):
+            print_error(f"Reward length mismatch for {state.bench_name}: rewards={len(rewards)}, steps={len(tc.obs)}. Fixing...")
+            if len(rewards) > len(tc.obs):
+                tc.rewards = rewards[:len(tc.obs)]
+            else:
+                tc.rewards = rewards + [0.0] * (len(tc.obs) - len(rewards))
         # Log metrics
         fl['train/reward'].extend(rewards)
         fl['train/final_speedup'].append(speedup)
@@ -132,7 +141,9 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
     eval_json: dict[str, Optional[int]] = {}
     for state, exec_time in zip(states, all_exec_times):
         eval_json[state.bench_name] = exec_time
-    with open(os.path.join(fl.logs_dir, 'eval', 'eval_exec_times.json'), 'w') as f:
+    eval_dir = os.path.join(fl.logs_dir, 'eval')
+    os.makedirs(eval_dir, exist_ok=True)
+    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
         json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 
@@ -362,12 +373,16 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
         print_info(str(state.transformation_history), add_label=False)
 
     if len(all_speedups) > 0:
-        fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
+        geo_mean = math.exp(sum(math.log(max(s, 1e-12)) for s in all_speedups) / len(all_speedups))
+        fl['eval/average_speedup'].append(geo_mean)
+        fl['eval/arithmetic_mean_speedup'].append(sum(all_speedups) / len(all_speedups))
     # Save eval exec times as JSON (bench_name -> optimized_time_ns)
     eval_json: dict[str, Optional[int]] = {}
     for state, exec_time in zip(states, all_exec_times):
         eval_json[state.bench_name] = exec_time
-    with open(os.path.join(fl.logs_dir, 'eval', 'eval_exec_times.json'), 'w') as f:
+    eval_dir = os.path.join(fl.logs_dir, 'eval')
+    os.makedirs(eval_dir, exist_ok=True)
+    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
         json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 

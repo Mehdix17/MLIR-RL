@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import timedelta
+import math
 from statistics import mean
 import sys
 import torch
@@ -18,6 +19,7 @@ from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
 from utils.dask_manager import DaskManager
 from time import time
+import math
 from typing import Optional
 
 
@@ -372,7 +374,9 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
         print_info(str(state.transformation_history), add_label=False)
 
     if len(all_speedups) > 0:
-        fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
+        geo_mean = math.exp(sum(math.log(max(s, 1e-12)) for s in all_speedups) / len(all_speedups))
+        fl['eval/average_speedup'].append(geo_mean)
+        fl['eval/arithmetic_mean_speedup'].append(sum(all_speedups) / len(all_speedups))
     # Save eval exec times as JSON (bench_name -> optimized_time_ns)
     eval_json: dict[str, Optional[int]] = {}
     for state, exec_time in zip(states, all_exec_times):

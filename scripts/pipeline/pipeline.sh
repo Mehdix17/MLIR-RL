@@ -10,17 +10,17 @@
 #   5. Evaluate each implementation                      → Slurm
 #
 # Shared steps (1-3) use the first config argument.
-# Per-version steps (4-5) auto-derive config/train/<version>.json from each
-# implementation name.  Example: rl_autoschedular_v1 → config/train/v1.json.
+# Per-version steps (4-5) auto-derive config/old_dataset/train/<version>.json from each
+# implementation name.  Example: rl_autoschedular_v1 → config/old_dataset/train/v1.json.
 #
 # Failures in one implementation do NOT stop the pipeline — remaining
 # versions continue.  Progress is logged to a timestamped file in
 # pipeline_logs/.
 #
 # Usage:
-#   bash scripts/pipeline.sh config/train/baseline.json
-#   bash scripts/pipeline.sh config/train/baseline.json "rl_autoschedular_v0,rl_autoschedular_v1,rl_autoschedular_v3"
-#   bash scripts/pipeline.sh config/train/baseline.json "rl_autoschedular_v3"
+#   bash scripts/pipeline.sh config/old_dataset/train/baseline.json
+#   bash scripts/pipeline.sh config/old_dataset/train/baseline.json "rl_autoschedular_v0,rl_autoschedular_v1,rl_autoschedular_v3"
+#   bash scripts/pipeline.sh config/old_dataset/train/baseline.json "rl_autoschedular_v3"
 # =============================================================================
 
 BASE_CONFIG="${1:?Usage: pipeline.sh <base_config_path> [implementations]}"
@@ -64,7 +64,7 @@ echo ""
 resolve_impl_config() {
     local impl="$1"
     # Strip rl_autoschedular_ prefix → v0, v1, v2, v3, ...
-    # rl_autoschedular_v0 uses config/train/baseline.json (or BASE_CONFIG fallback)
+    # rl_autoschedular_v0 uses config/old_dataset/train/baseline.json (or BASE_CONFIG fallback)
     local token
     if [[ "$impl" == "rl_autoschedular" ]]; then
         echo "WARNING: 'rl_autoschedular' renamed to 'rl_autoschedular_v0'" >&2
@@ -77,7 +77,7 @@ resolve_impl_config() {
         token="${impl#rl_autoschedular_}"
     fi
 
-    local candidate="config/train/${token}.json"
+    local candidate="config/old_dataset/train/${token}.json"
     if [[ -z "$token" ]] || [[ ! -f "$candidate" ]]; then
         echo "  [resolve] $impl → fallback to $BASE_CONFIG" | tee -a "$LOGFILE"
         echo "$BASE_CONFIG"

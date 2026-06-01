@@ -36,7 +36,7 @@ export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
 export AUTOSCHEDULER_IMPL=rl_autoschedular_v4_5
-export CONFIG_FILE_PATH="${CONFIG_FILE_PATH:-$PROJECT_ROOT/config/eval/v4_5_eval.json}"
+export CONFIG_FILE_PATH="${CONFIG_FILE_PATH:-$PROJECT_ROOT/config/old_dataset/eval/v4_5_eval.json}"
 export EVAL_DIR="$PROJECT_ROOT/results/experiment3/v4_5_agent/run_0/models"
 export EVAL_START="$CKPT_NUM"
 export EVAL_END="$CKPT_NUM"

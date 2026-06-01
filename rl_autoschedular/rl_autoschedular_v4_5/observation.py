@@ -126,6 +126,10 @@ def _build_hardware_vector() -> torch.Tensor:
     cpuinfo_text = _read_cpuinfo_text() if cfg.hardware_auto_detect else ""
 
     logical_cores = os.cpu_count() or 0
+    # Prefer Slurm CPU allocation over physical machine count (V4.6+)
+    slurm_cpus = os.getenv('SLURM_CPUS_PER_TASK')
+    if slurm_cpus and slurm_cpus.isdigit():
+        logical_cores = int(slurm_cpus)
     physical_cores = _detect_physical_cores(cpuinfo_text, logical_cores) if cfg.hardware_auto_detect else 0
     l1_kb = _read_cache_level_kb(1) if cfg.hardware_auto_detect else 0.0
     l2_kb = _read_cache_level_kb(2) if cfg.hardware_auto_detect else 0.0
