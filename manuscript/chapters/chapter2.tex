@@ -1,9 +1,9 @@
-\chapter{Reinforcement Learning Technology}
+\chapter{Reinforcement Learning}
 \label{ch:rl-foundations}
 
 \section{Introduction}
 
-The previous chapter detailed the compiler optimization challenges—particularly the phase ordering problem and the vast search space—that make hand-crafted heuristics insufficient. This chapter introduces the reinforcement learning (\gls{rl}) paradigm that offers a robust alternative. In this framework, an agent learns to make sequential decisions by interacting directly with an environment, guided only by numerical rewards.
+The previous chapter detailed the compiler optimization challenges—particularly the phase ordering problem and the vast search space—that make hand-crafted heuristics insufficient. This chapter introduces the \gls{rl} paradigm that offers a robust alternative. In this framework, an agent learns to make sequential decisions by interacting directly with an environment, guided only by numerical rewards.
 
 Reinforcement learning occupies a distinct position within machine learning. Unlike supervised learning, which models from labeled examples, or unsupervised learning, which discovers latent structures, \gls{rl} addresses the challenge of learning optimal policies through trial and error. This positions \gls{rl} as an ideal candidate for compiler optimization, where the "correct" sequence of transformations is never known a priori and can only be evaluated by measuring empirical execution time.
 
@@ -56,11 +56,11 @@ where $\eta$ is the \textit{learning rate}, a hyperparameter controlling the ste
 
 \textbf{Backpropagation} efficiently computes these gradients by applying the chain rule of calculus through the network, propagating the error signal from the output layer back to the input layer. Modern deep learning frameworks such as PyTorch~\cite{paszke2019pytorch} automate this process through automatic differentiation.
 
-\textbf{Stochastic gradient descent (\gls{sgd})} and its variants (Adam~\cite{kingma2014adam}, RMSProp) estimate gradients from small random subsets (\textit{mini-batches}) of the training data rather than the entire dataset, making training computationally tractable for large models and datasets. Our system uses the Adam optimizer for both the policy and value networks.
+\textbf{\gls{sgd}} and its variants (Adam~\cite{kingma2014adam}, RMSProp) estimate gradients from small random subsets (\textit{mini-batches}) of the training data rather than the entire dataset, making training computationally tractable for large models and datasets. Our system uses the Adam optimizer for both the policy and value networks.
 
 \subsection{Recurrent Neural Networks}
 
-A recurrent neural network (\gls{rnn}) is a class of neural network designed for sequential data. Unlike feedforward networks, RNNs maintain an internal \textit{hidden state} that is updated at each time step, allowing them to capture temporal dependencies. Given an input sequence $x_1, x_2, \ldots, x_T$, an \gls{rnn} computes:
+A recurrent neural network is a class of neural network designed for sequential data. Unlike feedforward networks, \gls{rnn}\textbf{s} maintain an internal \textit{hidden state} that is updated at each time step, allowing them to capture temporal dependencies. Given an input sequence $x_1, x_2, \ldots, x_T$, an \gls{rnn} computes:
 
 \begin{equation}
     h_t = f(W_h h_{t-1} + W_x x_t + b)
@@ -68,7 +68,7 @@ A recurrent neural network (\gls{rnn}) is a class of neural network designed for
 
 where $h_t$ is the hidden state at time $t$, and $W_h$, $W_x$, and $b$ are learned parameters shared across all time steps.
 
-\textbf{Long Short-Term Memory (\gls{lstm})} networks~\cite{hochreiter1997lstm} are a specialized \gls{rnn} architecture designed to address the vanishing gradient problem that limits the ability of standard RNNs to learn long-range dependencies. An \gls{lstm} unit contains three gating mechanisms:
+\gls{lstm} networks~\cite{hochreiter1997lstm} are a specialized \gls{rnn} architecture designed to address the vanishing gradient problem that limits the ability of standard RNNs to learn long-range dependencies. An \gls{lstm} unit contains three gating mechanisms:
 
 \begin{itemize}
     \item \textbf{Forget gate}: Controls which information is discarded from the cell state.
@@ -76,12 +76,12 @@ where $h_t$ is the hidden state at time $t$, and $W_h$, $W_x$, and $b$ are learn
     \item \textbf{Output gate}: Controls which information from the cell state is exposed as the output.
 \end{itemize}
 
-LSTMs are used in the baseline version of our system (as well as in versions V1, V2) to encode sequences of operation features into fixed-size embedding vectors. Version V3 replaces the \gls{lstm} with a transformer-based encoder (described in Chapter~4).
+\textbf{\gls{lstm}s} are used in \gls{mlir}-\gls{rl} to encode sequences of operation features into fixed-size embedding vectors.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{ressources/chapter2/RNN_vs_LSTM.png}
-    \caption{Architecture of \gls{rnn} and \gls{lstm}.}
+    \caption{Architecture of RNN and LSTM.}
     \label{fig:rnn-lstm}
 \end{figure}
 
@@ -103,7 +103,7 @@ where $Q$ (query), $K$ (key), and $V$ (value) are learned linear projections of 
 
 where $\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$.
 
-A transformer layer consists of multi-head self-attention followed by a position-wise feedforward network, with residual connections and layer normalization around each sub-layer. Multiple such layers are stacked to form the full transformer encoder. In version V3 of our system, the transformer encoder replaces the \gls{lstm} for encoding loop nest features, using structured tokenization where each loop level is treated as a token and positional encodings capture the depth and role of each token in the nest hierarchy.
+A transformer layer consists of multi-head self-attention followed by a position-wise feedforward network, with residual connections and layer normalization around each sub-layer. Multiple such layers are stacked to form the full transformer encoder. In our system, the transformer encoder replaces the \gls{lstm} for encoding loop nest features, using structured tokenization where each loop level is treated as a token and positional encodings capture the depth and role of each token in the nest hierarchy.
 
 \begin{figure}[H]
     \centering
@@ -118,7 +118,7 @@ Reinforcement learning formalizes the problem of learning through interaction to
 
 \subsection{Markov Decision Processes}
 
-The standard formalism for \gls{rl} is the \textit{Markov decision process} (\gls{mdp}). An \gls{mdp} is defined by the tuple $(\mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma)$, where:
+The standard formalism for \gls{rl} is the \gls{mdp}. An \gls{mdp} is defined by the tuple $(\mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma)$, where:
 
 \begin{itemize}
     \item $\mathcal{S}$ is the set of \textit{states} that the environment can be in.
@@ -145,7 +145,7 @@ This interaction loop, illustrated in Figure~\ref{fig:rl-loop}, continues until 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{ressources/chapter2/reinforcement_learning_feedback_loop.png}
+    \includegraphics[width=0.7\textwidth]{ressources/chapter2/reinforcement_learning_feedback_loop.png}
     \caption{The reinforcement learning feedback loop. \cite{sutton2018reinforcement}}
     \label{fig:rl-loop}
 \end{figure}
@@ -154,43 +154,53 @@ In our compiler optimization environment, the agent is the \gls{ppo} policy netw
 
 \subsection{Policy and Value Functions}
 
-The agent's behavior is defined by its \textit{policy} $\pi$, a mapping from states to a probability distribution over actions:
+A \textit{policy}, denoted $\pi$, is the agent's strategy: given the current state $s$, it decides which action $a$ to take. Formally, a policy maps each state to a probability distribution over actions:
 
 \begin{equation}
     \pi(a \mid s) = P(A_t = a \mid S_t = s)
 \end{equation}
 
-The policy can be deterministic (mapping each state to a single action) or stochastic (providing a distribution from which actions are sampled). Stochastic policies are essential for exploration: by occasionally selecting suboptimal actions, the agent discovers potentially superior strategies that it would otherwise never encounter.
+In plain terms, $\pi(a \mid s)$ answers the question: "If I am in state $s$, how likely am I to choose action $a$?" A policy can be \textit{deterministic} (always selecting the same action in a given state) or \textit{stochastic} (selecting actions according to a probability distribution). Stochastic policies are essential for exploration: by occasionally trying suboptimal actions, the agent discovers strategies it would otherwise miss.
 
-The objective of \gls{rl} is to find an optimal policy $\pi^*$ that maximizes the expected cumulative discounted reward, called the \textit{return}:
+The agent's goal is to find an \textit{optimal policy} $\pi^*$ that maximizes the cumulative reward collected over time. The total reward from time step $t$ onward, called the \textit{return} $G_t$, is:
 
 \begin{equation}
     G_t = r_{t+1} + \gamma r_{t+2} + \gamma^2 r_{t+3} + \cdots = \sum_{k=0}^{\infty} \gamma^k r_{t+k+1}
 \end{equation}
 
-To evaluate how good it is to be in a particular state under a given policy, we define the \textit{state-value function}:
+Here, $r_{t+1}$ is the immediate reward after the first action, $r_{t+2}$ is the reward one step later, and so on. The \textit{discount factor} $\gamma \in [0, 1]$ controls how much future rewards matter: $\gamma = 1$ means all rewards are equally important, while $\gamma = 0$ makes the agent care only about the immediate reward. Multiplying by $\gamma^k$ ensures that rewards $k$ steps in the future contribute less than near-term rewards, which reflects the intuition that a reward now is worth more than the same reward later.
+
+To evaluate how good a given state is, we define the \textit{state-value function} $V^\pi(s)$, which estimates the expected return when starting in state $s$ and following policy $\pi$ thereafter:
 
 \begin{equation}
-    V^\pi(s) = \mathbb{E}_\pi\left[ G_t \mid S_t = s \right] = \mathbb{E}_\pi\left[ \sum_{k=0}^{\infty} \gamma^k r_{t+k+1} \;\middle|\; S_t = s \right]
+    V^\pi(s) = \mathbb{E}_\pi\left[ G_t \mid S_t = s \right]
 \end{equation}
 
-Similarly, the \textit{action-value function} (or Q-function) evaluates the expected return of taking action $a$ in state $s$ and then following policy $\pi$:
+The notation $\mathbb{E}_\pi[\cdot]$ denotes an \textit{expectation} under policy $\pi$: since both the environment transitions and the policy's action choices are probabilistic, $V^\pi(s)$ averages over all possible futures starting from $s$.
+
+A related concept is the \textit{action-value function} $Q^\pi(s, a)$, which estimates the expected return when taking a specific action $a$ in state $s$ and then following policy $\pi$ afterwards:
 
 \begin{equation}
     Q^\pi(s, a) = \mathbb{E}_\pi\left[ G_t \mid S_t = s, A_t = a \right]
 \end{equation}
 
-The value function and Q-function are related by the \textit{Bellman equation}, which expresses the value of a state in terms of the immediate reward and the discounted value of the next state:
+While $V^\pi(s)$ evaluates the state itself, $Q^\pi(s, a)$ evaluates a specific action choice, it answers: "If I take action $a$ now and follow the policy from then on, what total reward should I expect?"
+
+The value functions obey a recursive relationship known as the \textit{Bellman equation}. Intuitively, the value of a state equals the immediate reward expected from the next action, plus the discounted value of the resulting next state:
 
 \begin{equation}
     V^\pi(s) = \sum_a \pi(a \mid s) \sum_{s'} \mathcal{P}(s' \mid s, a) \left[ \mathcal{R}(s, a, s') + \gamma V^\pi(s') \right]
 \end{equation}
 
-The optimal value function $V^*$ and optimal Q-function $Q^*$ satisfy the \textit{Bellman optimality equations}:
+Reading from left to right: for each possible action $a$ (weighted by how often the policy selects it, $\pi(a \mid s)$), consider each possible next state $s'$ (weighted by the environment's transition probability $\mathcal{P}(s' \mid s, a)$). The value is the immediate reward $\mathcal{R}(s, a, s')$ plus the discounted value of the next state $\gamma V^\pi(s')$. This recursive structure is what enables learning: the value of any state can be expressed in terms of the values of its successors.
+
+The \textit{optimal} value functions $V^*$ and $Q^*$ are those achieved by the best possible policy $\pi^*$. They satisfy the Bellman optimality equation, which replaces the policy's action weighting with a maximization over actions:
 
 \begin{equation}
     Q^*(s, a) = \sum_{s'} \mathcal{P}(s' \mid s, a) \left[ \mathcal{R}(s, a, s') + \gamma \max_{a'} Q^*(s', a') \right]
 \end{equation}
+
+This equation says: the value of taking action $a$ in state $s$ is the immediate reward plus the discounted value of the best possible action in the next state. The $\max_{a'}$ operator reflects optimal behavior---in state $s'$, the optimal agent will always pick the action with the highest Q-value.
 
 \subsection{Exploration vs.\ Exploitation}
 
@@ -217,7 +227,7 @@ Our \gls{ppo} agent uses a combination of entropy regularization and optional $\
 
 \subsection{Value-Based vs.\ Policy-Based Methods}
 
-\textbf{Value-based} methods learn the optimal action-value function $Q^*$ and derive a policy implicitly by selecting actions that maximize $Q^*$ (e.g., $\pi(s) = \arg\max_a Q(s, a)$). Q-Learning and Deep Q-Networks (\gls{dqn}) are value-based methods. They are effective for discrete action spaces but can struggle with continuous actions and stochastic policies.
+\textbf{Value-based} methods learn the optimal action-value function $Q^*$ and derive a policy implicitly by selecting actions that maximize $Q^*$ (e.g., $\pi(s) = \arg\max_a Q(s, a)$). Q-Learning and \gls{dqn} are value-based methods. They are effective for discrete action spaces but can struggle with continuous actions and stochastic policies.
 
 \textbf{Policy-based} methods learn an explicit parameterized policy $\pi_\theta(a \mid s)$ directly, optimizing the policy parameters $\theta$ to maximize expected return. Pure policy gradient methods (e.g., REINFORCE) fall into this category. They naturally handle stochastic policies and can be extended to continuous action spaces, making them well-suited for hierarchical action spaces.
 
@@ -237,7 +247,7 @@ This section presents the specific algorithms that form the foundation of modern
 
 \subsection{Q-Learning}
 
-Q-Learning, introduced by Watkins and Dayan~\cite{watkins1992qlearning}, is a model-free, off-policy, value-based algorithm. It learns the optimal action-value function $Q^*$ through temporal-difference (\gls{td}) learning. The update rule is:
+Q-Learning, introduced by Watkins and Dayan~\cite{watkins1992qlearning}, is a model-free, off-policy, value-based algorithm. It learns the optimal action-value function $Q^*$ through \gls{td} learning. The update rule is:
 
 \begin{equation}
     Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ r_{t+1} + \gamma \max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t) \right]
@@ -247,7 +257,7 @@ where $\alpha$ is the learning rate. The term in brackets is the \textit{\gls{td
 
 Q-Learning is guaranteed to converge to $Q^*$ in the tabular case (finite state and action spaces) under standard stochastic approximation conditions~\cite{watkins1992qlearning}. However, tabular methods are limited to problems with small, discrete state spaces—a condition that compiler optimization, with its high-dimensional state representation, does not satisfy.
 
-\subsection{Deep Q-Networks (\gls{dqn})}
+\subsection{Deep Q-Networks}
 
 Deep Q-Networks, introduced by Mnih et al.~\cite{mnih2015human}, extend Q-Learning to high-dimensional state spaces by approximating the Q-function with a deep neural network: $Q(s, a; \theta) \approx Q^*(s, a)$. \gls{dqn} introduced two key innovations to stabilize training with non-linear function approximators:
 
@@ -288,7 +298,7 @@ where $\Psi_t$ is a quantity that evaluates the quality of action $a$ in state $
 
 While simple and unbiased, REINFORCE suffers from high variance in the gradient estimates, leading to slow and unstable learning. Actor-critic methods reduce this variance, and \gls{ppo} further improves stability through a clipped objective.
 
-\subsection{Generalized Advantage Estimation (\gls{gae})}
+\subsection{Generalized Advantage Estimation}
 
 Generalized Advantage Estimation~\cite{schulman2015gae} computes advantage estimates that dynamically balance bias and variance. The \gls{gae} advantage at time $t$ uses the one-step \gls{td} error $\delta_t = r_{t+1} + \gamma V(s_{t+1}) - V(s_t)$, discounted exponentially using the hyperparameter $\lambda \in [0, 1]$:
 
@@ -298,14 +308,14 @@ Generalized Advantage Estimation~\cite{schulman2015gae} computes advantage estim
 
 By tuning $\lambda$, \gls{gae} transitions smoothly between the low-variance but potentially biased 1-step \gls{td} error ($\lambda = 0$) and the unbiased, high-variance Monte Carlo return ($\lambda = 1$). Our agent utilizes \gls{gae} to provide robust baseline subtraction during policy updates.
 
-\subsection{Proximal Policy Optimization (\gls{ppo})}
+\subsection{Proximal Policy Optimization}
 
 Proximal Policy Optimization, introduced by Schulman et al.~\cite{schulman2017ppo}, is the \gls{rl} algorithm used in our system. \gls{ppo} addresses a central challenge in policy gradient methods: how to take the largest possible improvement step on the policy without causing a collapse in performance due to excessively large updates. It limits the magnitude of policy updates using a clipped surrogate objective while relying on an actor-critic structure.
 
 To formalize this, algorithm~\ref{alg:ppo} details the exact procedure by which \gls{ppo} alternates between trajectory collection and multiple epochs of stochastic gradient ascent on the clipped loss.
 
 \begin{algorithm}[H]
-\caption{Proximal Policy Optimization (\gls{ppo})}\label{alg:ppo}
+\caption{Proximal Policy Optimization}\label{alg:ppo}
 \textbf{Input:} clipping threshold $\epsilon$, policy learning rate $\alpha$, value learning rate $\beta$, entropy coefficient $c_2$, value loss coefficient $c_1$. \\
 \textbf{Output:} Optimized policy $\pi_\theta(a \mid s)$
 \begin{algorithmic}
@@ -364,9 +374,10 @@ where:
     \centering
     \caption{Summary of reinforcement learning algorithms discussed in this chapter.}
     \label{tab:rl-algorithms}
+    \vspace{0.2cm}
     \begin{tabularx}{\textwidth}{l l l l >{\raggedright\arraybackslash}p{4cm}}
         \toprule
-        \textbf{Algorithm} & \textbf{Type} & \textbf{On/Off-Policy} & \textbf{Action Space} & \textbf{Key Features} \\
+        \textbf{Algorithm} & \textbf{Type} & \textbf{Policy} & \textbf{Action Space} & \textbf{Key Features} \\
         \midrule
         Q-Learning & Value-based & Off-policy & Discrete & Tabular, guaranteed convergence \\
         \addlinespace
@@ -381,8 +392,8 @@ where:
 
 \section{Conclusion}
 
-This chapter introduced reinforcement learning (\gls{rl}) as the algorithmic foundation of our compiler optimization framework. We defined the interaction loop consisting of states, actions, transforming an uncertain environment into a mathematically formulated Markov Decision Process. 
+This chapter introduced \gls{rl} as the algorithmic foundation of our compiler optimization framework. We defined the interaction loop consisting states, actions, rewards, and transitions, formalized as a Markov Decision Process. 
 
-By detailing value and policy functions, alongside advancements like generalized advantage estimation, we established the need for robust learning policies. We highlighted proximal policy optimization (\gls{ppo})—our actor-critic algorithm of choice—which uses clipped objectives to stabilize learning and effectively balance exploration versus exploitation through entropy regularization. These properties make \gls{ppo} exceptionally well-suited for the noisy, high-dimensional search spaces inherent in compiler optimization.
+By detailing value and policy functions, alongside advancements like generalized advantage estimation, we established the need for robust learning policies. We highlighted \gls{ppo}; our actor-critic algorithm of choice, which uses clipped objectives to stabilize learning and effectively balance exploration versus exploitation through entropy regularization. These properties make \gls{ppo} exceptionally well-suited for the noisy, high-dimensional search spaces inherent in compiler optimization.
 
 With the necessary \gls{rl} concepts formalized, the subsequent chapter surveys the state-of-the-art literature, situating our \gls{ppo}-based agent against existing machine-learning-driven compiler optimizations and defining our distinct contributions.

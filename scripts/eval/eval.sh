@@ -8,12 +8,10 @@
 #SBATCH --mail-type=END,FAIL
 #
 # Usage:
-#   sbatch scripts/eval.sh                           # array mode: auto-picks version
-#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json       # single version from config
-#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json v1    # explicit version
-#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json v1 v2 v3  # space-separated versions
-#
-# Array mode: sbatch --array=0-2 scripts/eval.sh     # v1, v2, v3
+#   sbatch scripts/eval.sh                                                    # array mode: auto-picks version
+#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json             # single version from config
+#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json v1          # explicit version
+#   sbatch scripts/eval.sh config/new_dataset/eval/v4_6_eval.json --checkpoint 100  # single checkpoint eval
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${SLURM_SUBMIT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
@@ -31,6 +29,24 @@ export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
 export MIN_EXEC_TIMEOUT=60
+
+# Extract --checkpoint flag before consuming positional args
+EVAL_CHECKPOINT=""
+POS_ARGS=()
+for arg in "$@"; do
+    if [[ "$arg" == "--checkpoint" ]]; then
+        _expect_checkpoint=1
+    elif [[ -n "${_expect_checkpoint:-}" ]]; then
+        EVAL_CHECKPOINT="$arg"
+        _expect_checkpoint=""
+    else
+        POS_ARGS+=("$arg")
+    fi
+done
+export EVAL_CHECKPOINT
+
+# Replay positional args
+set -- "${POS_ARGS[@]}"
 
 # Version resolution: array task > positional args > config file
 ALL_VERSIONS=(v0 v1 v2 v3 v4)
@@ -74,37 +90,34 @@ for VERSION in "${VERSIONS[@]}"; do
         export FORCE_RUN_ID="$FORCE_RUN_ID"
     fi
 
+    # If --checkpoint mode: EVAL_DIR = <results_dir>/models/
+    if [[ -n "${EVAL_CHECKPOINT:-}" ]]; then
+        RESULTS_DIR=$(python3 -c "import json; print(json.load(open('$CONFIG'))['results_dir'])")
+        MODELS_DIR="$PROJECT_ROOT/$RESULTS_DIR/models"
+        if [[ -d "$MODELS_DIR" ]]; then
+            export EVAL_DIR="$MODELS_DIR"
+            export EVAL_START="$EVAL_CHECKPOINT"
+            export EVAL_END="$EVAL_CHECKPOINT"
+            export EVAL_STRIDE=1
+            export FORCE_RUN_ID="ckpt_${EVAL_CHECKPOINT}"
+        else
+            echo "ERROR: models/ directory not found at $MODELS_DIR"
+            exit 1
+        fi
+    fi
+
     echo "=========================================="
     echo "Evaluation started at $(date)"
     echo "Version:  $VERSION ($IMPLEMENTATION)"
     echo "Config:   $CONFIG_FILE_PATH"
+    [[ -n "${EVAL_CHECKPOINT:-}" ]] && echo "Checkpoint: $EVAL_CHECKPOINT"
     echo "Node:     $(hostname)"
     echo "=========================================="
 
     # Derive EVAL_DIR: ONLY if not already set by environment
     if [[ -z "${EVAL_DIR:-}" ]]; then
-        mapfile -t EVAL_META < <(python3 - <<PY
-import json
-from utils.implementation import get_agent_subdir
-cfg = json.load(open("$CONFIG"))
-print(cfg["results_dir"])
-print(get_agent_subdir("$IMPLEMENTATION"))
-PY
-)
-        RESULTS_DIR="${EVAL_META[0]}"
-        AGENT_SUBDIR="${EVAL_META[1]}"
-        AGENT_ROOT="$RESULTS_DIR/$AGENT_SUBDIR"
-        LATEST_MODELS=$(python3 -c "
-import os
-r = '$AGENT_ROOT'
-if not os.path.isdir(r):
-    raise SystemExit(f'Agent run directory not found: {r}')
-runs = sorted([d for d in os.listdir(r) if d.startswith('run_') and d.split('_')[-1].isdigit()], key=lambda x: int(x.split('_')[1]))
-candidates = [os.path.join(r, d, 'models') for d in runs]
-candidates = [p for p in candidates if os.path.isdir(p) and any(f.endswith('.pt') for f in os.listdir(p))]
-print(candidates[-1]) if candidates else exit(1)
-")
-        export EVAL_DIR="$LATEST_MODELS"
+        RESULTS_DIR=$(python3 -c "import json; print(json.load(open('$CONFIG'))['results_dir'])")
+        export EVAL_DIR="$PROJECT_ROOT/$RESULTS_DIR/models"
     fi
     echo "EVAL_DIR: $EVAL_DIR"
 

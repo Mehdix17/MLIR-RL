@@ -5,39 +5,40 @@
 \label{sec:problem-statement-contributions}
 
 \subsection{Overview of the Problem Statement}
-Modern compilers rely on rigid, hand-crafted heuristics to optimize code, which often fail to unlock the full computational potential of underlying hardware for complex deep learning workloads. While formulating code optimization as a Markov Decision Process (\gls{mdp}) and leveraging deep reinforcement learning (DRL)---as initiated in early baseline models (Bendib~\cite{bendib2024reinforcement}, Tirichine et al.~\cite{tirichine2025reinforcement})---has demonstrated significant promise, scaling these initial proofs-of-concept into robust, generalized mechanisms reveals critical bottlenecks. 
+Modern compilers rely on rigid, hand-crafted heuristics to optimize code. These heuristics fail to adapt across the growing diversity of hardware architectures and deep learning workloads. While formulating code optimization as an \gls{mdp} and leveraging \gls{drl}---as initiated by Bendib et al.~\cite{bendib2024reinforcement} and extended by Tirichine et al.~\cite{tirichine2025reinforcement}---has demonstrated feasibility, scaling these initial proofs-of-concept to handle realistic neural network programs reveals four limitations:
 
-For readers reviewing this chapter independently, the core problem addressed in this thesis is how to scale \gls{rl}-based compiler optimization so that it can generalize across fundamentally different algorithmic computation graphs and underlying hardware topologies. Specifically, prior systems are limited by four major limitations:
 \begin{itemize}
-    \item \textbf{Training Data Sparsity:} Prior agents are trained on narrow, synthetic datasets. They lack exposure to the structural complexity of true deep learning graphs, heavily restricting their ability to optimize realistic, modern tasks.
-    \item \textbf{Hardware-Agnostic Policies:} Current agents learn rigid optimization schedules that are completely blind to the underlying hardware architecture. A policy optimized for a lightweight quad-core laptop will perform poorly when executed on a 256-core HPC node, eliminating cross-hardware portability.
-    \item \textbf{Sequential Representation Constraints:} The standard use of recursive \gls{lstm} networks to encode the program state introduces severe informational bottlenecks. LSTMs struggle to maintain context over long-range dependencies inherent in deeply nested loops and broad computation sub-graphs.
-    \item \textbf{Sparse Reward Structures:} Extracting a reward only at the end of execution (terminal speedup) yields excessively delayed feedback, causing high variance, slow training convergence, and inefficient exploration spaces.
+    \item \textbf{Training Data Sparsity:} Prior agents trained on narrow, synthetic datasets. They lack exposure to the structural diversity of real deep learning computation graphs, limiting their ability to optimize the operations found in modern neural network architectures.
+    \item \textbf{Hardware-Agnostic Policies:} Existing agents learn optimization schedules without awareness of the target hardware. A policy trained on one processor cannot adapt its tile sizes or parallelization decisions when deployed on a different \gls{cpu}, eliminating cross-hardware portability.
+    \item \textbf{Sequential Representation Constraints:} The recursive \gls{lstm} networks used by prior work to encode program state process loop levels sequentially. This sequential structure causes information about early loop levels to decay by the time later levels are processed, weakening the representation of deep loop nests where relationships between non-adjacent levels determine optimization quality.
+    \item \textbf{Unreliable Reward Shaping:} Prior \gls{mlir}-\gls{rl} systems rely on a sparse terminal reward received only at episode completion.
 \end{itemize}
 
+\newpage
 \subsection{Proposed Contributions}
-To tackle these fundamental bottlenecks, we propose a completely redesigned, robust \gls{rl} auto-scheduler capable of generalizing across both complex neural network workloads and diverse \gls{cpu} platforms. Our primary contributions are:
+To address these limitations, we extend the prior \gls{mlir}-\gls{rl} framework with four architectural enhancements:
 
 \begin{itemize}
-    \item \textbf{Automated Dataset Generation Pipeline:} We engineered an automated extraction infrastructure with heuristic handlers for dynamic batch sizes. This pipeline sources training sub-graphs from 18 diverse neural network architectures spanning eight distinct categories, solving the data sparsity constraint.
-    \item \textbf{Hardware-Aware State Representation:} We augmented the agent's observation space with explicit hardware specifications (L1/L2/L3 cache sizes, core counts, and \gls{simd} widths) to enable dynamic, hardware-portable optimization policies.
-    \item \textbf{Transformer-Based Loop-Nest Encoding:} We replaced the legacy \gls{lstm} networks with a modern Transformer-based encoder. By processing loop levels as tokens and leveraging self-attention, the model accurately untangles the hierarchical dependencies of complex computation graphs.
-    \item \textbf{Shaped Multi-Objective Rewards:} We introduced dense, intermediate reward signals driven by static analysis (e.g., arithmetic intensity and vectorizability), drastically accelerating agent convergence by evaluating the mathematical viability of every single transformation step.
+    \item \textbf{Automated Dataset Generation Pipeline:} An extraction infrastructure that sources training benchmarks from 18 neural network architectures spanning 8 categories, with heuristic handlers for dynamic batch sizes. This expands the training data beyond the narrow synthetic benchmarks used in prior work.
+    \item \textbf{Hardware-Aware State Representation:} A 7-element hardware feature vector (L1/L2/L3 cache sizes, physical and logical core counts, \gls{simd} width, and clock frequency) concatenated to the policy and value network inputs. This enables the agent to condition tile sizes and parallelization decisions on the target hardware.
+    \item \textbf{Transformer-Based Loop-Nest Encoder:} A self-attention-based encoder that replaces the sequential \gls{lstm} architecture of prior work. Loop levels are tokenized and processed simultaneously, allowing direct attention between non-adjacent levels.
+    \item \textbf{Shaped Reward Exploration:} An investigation of dense intermediate reward signals based on static code analysis---arithmetic intensity, vectorizability, and parallel-loop ratio---computed at each transformation step.
 \end{itemize}
 
-The remainder of this chapter details the systemic design, theoretical formulation, and practical implementation of these contributions within the \gls{mlir} ecosystem.
+The following sections detail the implementation of these contributions within the \gls{mlir} ecosystem.
 
 \section{Dataset Generation and Evaluation Infrastructure}
-To ensure our agent generalizes across modern workloads, we engineered a comprehensive and automated dataset extraction pipeline. Previous approaches relied on manual extraction or heavily hard-coded synthetic generation, severely limiting the structural diversity of the training data. Our automated pipeline supports 18 neural network architectures across eight distinct categories: encoder transformers (BERT~\cite{devlin2019bert}, ALBERT~\cite{lan2020albert}, DistilBERT~\cite{sanh2019distilbert}), decoder and seq2seq models (GPT-2 Medium~\cite{radford2019gpt2}, BART~\cite{lewis2020bart}, T5~\cite{raffel2020t5}), vision models (ViT-B/16~\cite{dosovitskiy2021vit}, ResNet-50~\cite{he2016resnet}, ResNeXt-50~\cite{xie2017resnext}, MobileNetV3-Small~\cite{howard2019mobilenetv3}, EfficientNet-B0~\cite{tan2019efficientnet}, ConvNeXt-Tiny~\cite{liu2022convnext}, VGG-16~\cite{simonyan2015vgg}), graph neural networks (GAT~\cite{velickovic2018gat}, GIN~\cite{xu2019gin}), an audio transformer (Whisper-base~\cite{radford2023whisper}), an object detection backbone (YOLOv8m~\cite{jocher2023yolov8}), and a modern large language model (Llama~3.2~1B~\cite{grattafiori2024llama3}).
+We engineered an automated dataset extraction pipeline that supports 18 neural network architectures across six model families.
 
 \begin{figure}[H]
-    \centering    \includegraphics[width=0.8\textwidth]{ressources/chapter4/data_generation_pipeline.png}
+    \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/data_generation_pipeline.png}
     \caption{The automated pipeline for dataset generation.}
     \label{fig:automated_pipeline}
 \end{figure}
 
+\newpage
 \subsection{Pipeline Overview}
-The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} Linalg representations. The conversion proceeds through a standardized path: each PyTorch model is exported to \gls{onnx} (opset~18) via \texttt{torch.onnx.export}, then lowered to the Linalg-on-tensors dialect through the \texttt{torch-mlir-import-onnx} and \texttt{torch-mlir-opt} tools. This fully automated flow translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems. For autoregressive decoder models (GPT-2 and Llama~3.2), a compatibility wrapper resolves \texttt{DynamicCache} tracing issues by passing cache positions explicitly. Llama~3.2 is exported in bfloat16 precision to accommodate memory constraints on the compute cluster.
+The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} Linalg representations. The conversion proceeds through a standardized path: each PyTorch model is exported to \gls{onnx} via \texttt{torch.onnx.export}, then lowered to the Linalg-on-tensors dialect through the \texttt{torch-mlir-import-onnx} and \texttt{torch-mlir-opt} tools. This fully automated flow translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems. For autoregressive decoder models (GPT-2 and Llama~3.2), a compatibility wrapper resolves \texttt{DynamicCache} tracing issues by passing cache positions explicitly.
 
 \subsection{Dynamic Batch Size Handling}
 During the extraction of operations from diverse neural network models, a major challenge arose concerning dynamic or unresolved batch sizes. Frameworks often export computation graphs with dynamic tensor dimensions, which prevents statically compiled \gls{mlir} benchmarks from successfully executing.
@@ -51,70 +52,68 @@ To overcome this, we implemented an automatic dimension handler that resolves an
 
 \subsection{Single-Operation Extraction}
 
-The pipeline extracts isolated Linalg operations from raw model \texttt{\_linalg.mlir} files. Each output file wraps a single operation in a timed \texttt{@main} function with \texttt{@nanoTime()} calls, producing self-contained executable benchmarks. To balance fidelity and training efficiency, two extraction variants are produced. The full-fidelity variant retains all operations from every model, including element-wise \texttt{linalg.generic} operations, yielding a comprehensive coverage of 952 single-operation benchmarks. The train-efficient variant limits the proportion of element-wise generics per model to 25\% via a configurable ratio flag, prioritizing generic operations that contain reductions. The resulting 405 benchmarks maintain the structural diversity of the full set while removing redundant element-wise operations that offer limited scheduling surface.
+The pipeline extracts isolated Linalg operations from raw model files. Each output file wraps a single operation in a timed \texttt{@main} function with \texttt{@nanoTime()} calls, producing self-contained executable benchmarks. The extraction retains all Linalg operations from every model, including element-wise \texttt{linalg.generic} operations, to ensure comprehensive coverage of the structural diversity present in real-world neural network computation graphs. The final single-operation pool combines our 382 extracted benchmarks with 1335 synthetic benchmarks from previous team dataset \cite{tirichine2025reinforcement}, yielding a total of 1{,}517 benchmarks.
 
+\newpage
 \subsection{Block Extraction from Computation Graphs}
 
-To capture producer-consumer relationships, the pipeline extracts operation blocks by traversing the computation graph along data-flow paths. A sliding window of five operations with stride three is applied along each consumer-to-producer chain, producing overlapping sub-graphs with continuous dependency chains. Each extracted block is a self-contained timed benchmark that preserves the semantic data-flow relations between producer and consumer operations. A training-efficient variant discards blocks where every operation is an element-wise \texttt{linalg.generic}, ensuring each retained block contains at least one computationally meaningful scheduling target (matmul, convolution, pooling, or reduction). This filtering yields 7{,}393 blocks from the original 10{,}198 extracted.
-
-Importantly, extracting blocks does not mean the agent is restricted to optimizing isolated blocks. Full neural network models are still supported: they are decomposed into their constituent operation blocks, and each block is optimized independently by the agent. The per-block schedules are then applied back to the original model, producing a fully optimized end-to-end program. This block-by-block optimization strategy enables the agent to handle models of arbitrary size while keeping the state representation compact (the agent perceives two operations at a time).
+To capture producer-consumer relationships, the pipeline extracts operation blocks by traversing the computation graph along data-flow paths. A sliding window of five operations with stride three is applied along each consumer-to-producer chain, producing overlapping sub-graphs with continuous dependency chains. Each extracted block is a self-contained timed benchmark that preserves the semantic data-flow relations between producer and consumer operations. The extraction process produces 3{,}131 blocks in total. Combined with legacy 3{,}736 synthetic blocks, all blocks are assigned entirely to the training set.
 
 \subsection{Dataset Composition}
 
-The final dataset merges the extracted neural network benchmarks with a pool of 3{,}972 legacy synthetic benchmarks from the baseline environment. Table~\ref{tab:dataset-models} lists the 18 supported architectures grouped by their eight model families.
+The final dataset merges the extracted neural network benchmarks with the legacy pool of synthetic benchmarks. Table~\ref{tab:dataset-models} lists the 18 supported architectures grouped by their 7 model families.
 
 \begin{table}[H]
     \centering
     \caption{Supported neural network architectures grouped by family.}
     \label{tab:dataset-models}
+    \vspace{0.2cm}
     \begin{tabularx}{\textwidth}{l X}
         \toprule
         \textbf{Family} & \textbf{Models} \\
         \midrule
-        Encoder Transformers & BERT, ALBERT, DistilBERT \\
+        Encoder-only Transformers & ALBERT, BERT, DistilBERT \\
         \addlinespace
-        Decoder / Seq2Seq & GPT-2 Medium, BART, T5 \\
+        Decoder-only Transformers & GPT-2 Medium, Llama~3.2~1B \\
         \addlinespace
-        Vision & ViT-B/16, ResNet-50, ResNeXt-50, MobileNetV3-Small, EfficientNet-B0, ConvNeXt-Tiny, VGG-16 \\
+        Encoder--Decoder Transformers & BART, T5 \\
+        \addlinespace
+        Audio Transformers & Whisper-base \\
+        \addlinespace
+        Vision Transformers & ViT-B/16 \\
+        \addlinespace
+        Convolutional Neural Networks & ConvNeXt-Tiny, EfficientNet-B0, MobileNetV3-Small, ResNet-50, ResNeXt-50, VGG-16, YOLOv8m \\
         \addlinespace
         Graph Neural Networks & GAT, GIN \\
-        \addlinespace
-        Audio Transformer & Whisper-base (encoder) \\
-        \addlinespace
-        Object Detection & YOLOv8m (backbone) \\
-        \addlinespace
-        Modern \gls{llm} & Llama~3.2~1B \\
-        \addlinespace
-        Legacy / Synthetic & Synthesized programs and single operations \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
-All sources are combined and partitioned into training and evaluation sets via an 80/20 stratified split with a fixed random seed (42) for reproducibility. Stratification by model name for the neural network pool and by operation family for the legacy pool ensures that every category is proportionally represented in both the training and evaluation sets. This is essential given the heterogeneity of the benchmark sources: a naive random split could, by chance, underrepresent a smaller model family (such as GNNs with only two models) in the evaluation set, producing unreliable performance estimates for that category. Stratification guarantees that each family's share of the evaluation set mirrors its share of the full dataset, enabling fair per-category comparisons. The fixed seed ensures that the split is deterministic and can be exactly reproduced across experiments and by other researchers.
-
-The stratification strategy also serves a second, critical purpose: preventing data leakage between training and evaluation. The block extraction process uses a sliding 5-operation window with stride~3, which means that consecutive blocks extracted from the same model share overlapping operations. If blocks were split randomly across training and evaluation sets, a model's operations could appear in both splits through different blocks, inflating evaluation performance and undermining the validity of the results. Stratifying by model name avoids this: all blocks originating from a given model (e.g., all blocks extracted from BERT) are assigned entirely to either the training set or the evaluation set, never both. Consequently, the evaluation set contains benchmarks whose underlying operations were never observed during training, providing a true measure of the agent's ability to generalize to unseen code. The legacy synthetic pool is stratified by operation family following the same principle: all benchmarks belonging to a given operation type are kept together in one split. Table~\ref{tab:dataset-splits} summarizes the final dataset size across the train, evaluation, and full-fidelity evaluation sets.
+Table~\ref{tab:dataset-stats} provides a detailed breakdown of the dataset by split and source type.
 
 \begin{table}[H]
     \centering
-    \caption{Final dataset composition across training and evaluation splits.}
-    \label{tab:dataset-splits}
-    \begin{tabularx}{\textwidth}{l r X}
+    \caption{Dataset file details.}
+    \label{tab:dataset-stats}
+    \vspace{0.2cm}
+    \begin{tabularx}{\textwidth}{l X X X X X}
         \toprule
-        \textbf{Split} & \textbf{Files} & \textbf{Description} \\
+        \textbf{Split} & \textbf{Legacy ops} & \textbf{Legacy blocks} & \textbf{NN ops} & \textbf{NN blocks} & \textbf{Total} \\
         \midrule
-        Train & 9{,}407 & 80\% stratified sample for policy training \\
-        Evaluation & 2{,}363 & 20\% held-out sample for evaluation \\
-        Evaluation (full fidelity) & 952 & All single-operation benchmarks; unfiltered coverage \\
-        \midrule
-        \textbf{Total} & \textbf{12{,}722} & \\
+        Train & 908 & 3{,}736 & 311 & 3{,}131 & 8{,}086 \\
+        \addlinespace
+        Eval & 227 & / & 71 & / & 298 \\
+        \addlinespace
+        Total & 1{,}135 & 3{,}736 & 382 & 3{,}131 & 8{,}384 \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
-All files within each directory are flat (no subdirectory nesting), following the naming convention \texttt{\{model\}\_\{op\}\_N.mlir} for single operations and \texttt{\{model\}\_block\_N.mlir} for extracted blocks. A detailed per-model breakdown of benchmark counts is provided in the Appendix.
+Single operations (both legacy and extracted from neural network models) are partitioned between the training and evaluation sets via an 80/20 stratified split with a fixed random seed (42) for reproducibility. The extracted single operations are stratified by model name, and the legacy single operations are stratified by operation type; this ensures that every category is proportionally represented in both splits.
 
-\subsection{Parallelized Evaluation Pipeline}
-To manage the computational overhead of generating baselines and evaluating learned policies on such an extensive dataset, we implemented a parallelized execution pipeline. The framework divides the dataset into smaller, independent chunks that are processed concurrently across the computing cluster. Once execution times and traces are collected for each chunk, a merging step aggregates the results into a unified dataset. This parallelization fundamentally accelerates the iterative research process.
+All operation blocks (both legacy and extracted) are assigned entirely to the training set. This design prevents data leakage between training and evaluation: the block extraction process uses a sliding 5-operation window with stride~3, meaning that consecutive blocks from the same model share overlapping operations. The evaluation set contains only single operations whose underlying code was never observed during training, providing a true measure of the agent's ability to generalize to unseen code.
+
+In addition to the operation-level benchmarks described above, full end-to-end neural network models are supported as a separate evaluation modality. Chapter~5 evaluates our agent on 18 full-model \texttt{.mlir} files representing complete computation graphs selected from the architectures listed in Table~\ref{tab:dataset-models}.
 
 \section{Hardware-Aware Observation}
 Prior systems operated without visibility into the underlying hardware, forcing the policy to implicitly memorize hardware-specific heuristics. This blindness limits cross-platform portability; a policy that has optimally learned scheduling permutations for a quad-core laptop processor will generate suboptimal execution paths when deployed on a 64-core enterprise server, primarily due to high cache miss rates and thread under-utilization.
@@ -123,29 +122,30 @@ To resolve this bottleneck, we inject explicit hardware specifications directly 
 
 \begin{table}[H]
     \centering
-    \caption{The seven-element hardware feature vector, with auto-detection sources and normalization divisors.}
+    \caption{The seven hardware features fed to the observation vector.}
     \label{tab:hw-features}
-    \begin{tabularx}{\textwidth}{c X X c}
+    \vspace{0.2cm}
+    \begin{tabular}{l l}
         \toprule
-        \textbf{Idx} & \textbf{Feature} & \textbf{Auto-Detection Source} & \textbf{Normalization} \\
+        \textbf{Feature} & \textbf{Normalization} \\
         \midrule
-        0 & L1 data cache (KB) & \texttt{/sys/.../cpu0/cache/index0/size} & $\div$ 256 \\
-        1 & L2 cache (KB) & \texttt{/sys/.../cpu0/cache/index1/size} & $\div$ 4{,}096 \\
-        2 & L3 cache (KB) & \texttt{/sys/.../cpu0/cache/index2/size} & $\div$ 65{,}536 \\
-        3 & Physical cores & \texttt{/proc/cpuinfo} unique (phys\_id, core\_id) pairs & $\div$ 256 \\
-        4 & Logical cores & \texttt{os.cpu\_count()} & $\div$ 512 \\
-        5 & \gls{simd} width (bits) & \texttt{/proc/cpuinfo} flags: avx512f~$\to$~512, avx2~$\to$~256, sse~$\to$~128 & $\div$ 1{,}024 \\
-        6 & Clock frequency (MHz) & \texttt{/proc/cpuinfo} \texttt{cpu MHz} field & $\div$ 6{,}000 \\
+        L1 data cache (KB) & $\div$ 256 \\
+        L2 cache (KB) & $\div$ 4{,}096 \\
+        L3 cache (KB) & $\div$ 65{,}536 \\
+        Physical cores & $\div$ 256 \\
+        Logical cores & $\div$ 512 \\
+        \gls{simd} width (bits) & $\div$ 1{,}024 \\
+        Clock frequency (MHz) & $\div$ 6{,}000 \\
         \bottomrule
-    \end{tabularx}
+    \end{tabular}
 \end{table}
 
-Each normalization divisor represents an approximate upper bound on practical values (L3 at 64~MB, 256 physical cores, 512 logical cores under two-way \gls{smt}, \gls{avx}-512 at 1024 bits with safety margin, 6~GHz clock), mapping each feature to approximately the $[0, 1]$ interval. Features are auto-detected at module import time. When the configuration parameter \texttt{hardware\_auto\_detect} is set to \texttt{true} (the default), each feature is read from the operating system. Any feature can be manually overridden by setting the corresponding configuration field (\texttt{hardware\_l1\_kb}, \texttt{hardware\_l2\_kb}, etc.) to a positive value. Setting \texttt{hardware\_auto\_detect} to \texttt{false} with all fields at zero produces a zero vector, enabling a hardware-agnostic ablation.
+Each feature is extracted from information exposed by the operating system (e.g., cache sizes from \texttt{/sys/devices/system/cpu} and core counts from \texttt{/proc/cpuinfo}). The normalization divisors map each feature to roughly the $[0, 1]$ interval. Features are auto-detected at module import time and can be manually overridden via configuration fields. Setting all fields to zero produces a zero vector, enabling a hardware-agnostic ablation.
 
 By grounding the observation in architectural realities, the policy learns to dynamically adjust tile sizes and parallelization strategies based on available cache capacity and threading limits. This effectively decouples the learned policy from the training hardware, promoting wide-ranging cross-hardware generalization.
 
 \begin{figure}[H]
-    \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/hardware_specification_feature.png}
+    \centering    \includegraphics[width=0.9\textwidth]{ressources/chapter4/hardware_specification_feature.png}
     \caption{Integration of the hardware specification feature vector into the agent's observation space.}
     \label{fig:hardware_aware}
 \end{figure}
@@ -160,38 +160,40 @@ For each observation sample, the encoder constructs a sequence of 17 tokens: a l
 
 \begin{table}[H]
     \centering
-    \caption{Token composition of the transformer encoder input. The total token count is $3 + 2 \times \text{max\_num\_loops} = 17$ per observation.}
+
+    \caption[Token composition of the transformer encoder input.]{Token composition of the transformer encoder input. The total token count is $3 + 2 \times \text{max\_num\_loops} = 17$ per observation.}
+
     \label{tab:transformer-tokens}
-    \begin{tabularx}{\textwidth}{l c c c c X}
+    \vspace{0.2cm}
+    \begin{tabularx}{\textwidth}{l c l l X}
         \toprule
-        \textbf{Token} & \textbf{Count} & \textbf{Role} & \textbf{Type} & \textbf{Depth} & \textbf{Source} \\
+        \textbf{Token} & \textbf{Count} & \textbf{Role} & \textbf{Type} & \textbf{Source} \\
         \midrule
-        \texttt{[CLS]} & 1 & global & cls & 0 & Learned parameter, $\mathcal{N}(0,0.02)$ \\
-        Consumer summary & 1 & consumer & summary & 0 & 2-layer MLP: 711~$\to$~256, \gls{gelu}, dropout~0.1 \\
-        Producer summary & 1 & producer & summary & 0 & Same MLP as consumer \\
-        Consumer loop $k$ & $\leq$~7 & consumer & loop & $k+1$ & 2-layer MLP: 111~$\to$~256, \gls{gelu}, dropout~0.1 \\
-        Producer loop $k$ & $\leq$~7 & producer & loop & $k+1$ & Same loop\_proj MLP \\
+        \texttt{[CLS]} & 1 & global & cls & Learned parameter, $\mathcal{N}(0,0.02)$ \\
+        Consumer summary & 1 & consumer & summary & 2-layer MLP: 711~$\to$~256, \gls{gelu}, dropout~0.1 \\
+        Producer summary & 1 & producer & summary & Same MLP as consumer \\
+        Consumer loop $k$ & $\leq$~7 & consumer & loop & 2-layer MLP: 111~$\to$~256, \gls{gelu}, dropout~0.1 \\
+        Producer loop $k$ & $\leq$~7 & producer & loop & Same loop\_proj MLP \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
-The summary tokens are produced by projecting the full operation feature vector (711 dimensions, encoding operation type, loop bounds, iterator types, access matrices, and arithmetic counts) through a two-layer MLP. The per-loop tokens are produced by projecting a 111-dimensional raw loop feature vector (composed of 1 upper bound, 1 iterator type, $2 \times 7 \times 7 = 98$ access coefficients, 6 operation-type one-hot entries, and 5 arithmetic operation counts) through a separate two-layer MLP. When fewer than the maximum number of loops are present, the unused token positions are masked with a validity flag, preventing the attention mechanism from attending to them.
-
-In computation graphs with multiple producers, the current implementation selects the textually last (nearest) producer as the representative. This choice follows from the Linalg fusion transformation's semantics: fusing a modified producer is not supported, and processing the computation graph from consumers backward to producers preserves the maximum number of fusion opportunities. When no producer exists, the producer tokens are zero vectors. Extending the encoder to support multiple producer tokens simultaneously is a natural next step.
+The summary tokens project the full 711-dimensional operation feature vector through a two-layer MLP. The per-loop tokens project a 111-dimensional raw loop feature vector (loop bounds, iterator types, access coefficients, operation-type one-hot, and arithmetic counts) through a separate two-layer MLP. Unused token positions are masked, preventing the attention mechanism from attending to absent loops. When no producer exists, the producer tokens are zero vectors.
 
 \subsection{Structural Embeddings}
 Transformers are permutation-invariant and do not inherently process sequence order. To preserve the hierarchical context of the loop nest and the computational data-flow, three learned additive embeddings are applied to each token vector before the attention layers. Table~\ref{tab:structural-embeddings} details their vocabulary sizes.
 
 \begin{table}[H]
     \centering
-    \caption{Structural embeddings added to each token before the transformer encoder. All are implemented as \texttt{nn.Embedding(vocabulary, 256)}.}
+    \caption{Structural embeddings added to each token before the transformer encoder.}
     \label{tab:structural-embeddings}
+    \vspace{0.2cm}
     \begin{tabularx}{\textwidth}{l c X}
         \toprule
         \textbf{Embedding} & \textbf{Vocabulary} & \textbf{Description} \\
         \midrule
         Role & 3 & global (\texttt{[CLS]}), consumer (summary + loop tokens), producer (summary + loop tokens) \\
-        Token type & 4 & cls, summary, loop, action-history \\
+        Token type & 3 & cls, summary, loop \\
         Depth & 8 & 0 for non-loop tokens; $1$--$7$ for loops at that nesting level \\
         \bottomrule
     \end{tabularx}
@@ -202,7 +204,7 @@ The role embedding distinguishes which part of the computation graph each token 
 After the transformer encoder, the output corresponding to the \texttt{[CLS]} token is taken as the pooled representation (CLS pooling). The action history---a multi-hot encoding of the five most recent transformation steps, totaling 1{,}085 dimensions ($5 \times 7 \times 8 \times 3$ for three tiling variant histories plus $5 \times 7 \times 7$ for interchange history)---is concatenated with the pooled CLS vector. The seven-element hardware feature vector is then concatenated, producing a final embedding of $256 + 1{,}085 + 7 = 1{,}348$ dimensions. This embedding is passed to the policy and value networks, each consisting of three fully connected layers with 512 neurons and \gls{relu} activation, followed by the action-specific output heads.
 
 \begin{figure}[H]
-    \centering    \includegraphics[width=0.8\textwidth]{ressources/chapter4/transformer_encoder_architecture.png}
+    \centering    \includegraphics[width=0.7\textwidth]{ressources/chapter4/transformer_encoder_architecture.png}
     \caption{Architecture of the Transformer loop-nest encoder}
     \label{fig:transformer_encoder}
 \end{figure}
@@ -218,51 +220,35 @@ At step $t$, the agent applies an action $a_t$ that transforms the operation fea
 
 \subsection{Static Efficiency Score: Three Complementary Heuristics}
 
-The static efficiency score $S(f)$ aggregates three heuristics that capture distinct aspects of a loop nest's amenability to optimization. Each term targets a different dimension of code quality, and their weights reflect their relative importance as learning signals.
+The static efficiency score $S(f)$ combines three heuristics, each weighted to reflect its importance:
 
 \begin{equation}
     S(f) = w_\text{ai} \cdot \log_{10}\!\bigl(1 + \text{AI}(f)\bigr) \;+\; w_\text{vec} \cdot \mathbb{I}_\text{vec}(f) \;+\; w_\text{par} \cdot \frac{N_\text{parallel}}{\max(1, N_\text{total})}
     \label{eq:efficiency-score}
 \end{equation}
 
-\textbf{Arithmetic intensity ($\text{AI}(f)$)} measures the ratio of compute operations to data movement. It is estimated by dividing the total number of floating-point operations by the total bytes moved across all load and store accesses:
+\textbf{Arithmetic intensity} ($\text{AI}(f)$, weight $w_\text{ai} = 1.0$) is the ratio of floating-point operations to bytes transferred. We estimate it from the iteration space volume (the product of all loop upper bounds) multiplied by the number of arithmetic operations per iteration, divided by the total bytes accessed across all load and store patterns. To handle the wide range of values (from $< 1$ for element-wise operations to $> 100$ for large matrix multiplications), we apply $\log_{10}$ compression, which also keeps the signal in the same numerical regime as the terminal $\log_{10}$ speedup reward. Higher arithmetic intensity generally indicates better cache reuse and lower memory bandwidth pressure.
 
-\begin{equation}
-    \text{AI}(f) = \frac{\max\!\bigl(1,\; \prod_{i} \max(1, \text{ub}_i) \times \max(1, |\text{ops}|)\bigr)}{\max\!\bigl(1,\; \sum_\text{access}\; \prod_{\text{dim}}\; \max\!\bigl(1, \prod_{i \in \text{dim}} \max(1, \text{ub}_i)\bigr) \times 4 \bigr)}
-    \label{eq:arithmetic-intensity}
-\end{equation}
+\textbf{Vectorizability} ($\mathbb{I}_\text{vec}(f)$, weight $w_\text{vec} = 0.1$) is a binary flag that equals $1.0$ when the operation satisfies \gls{mlir}'s vectorization preconditions. A transformation that turns a non-vectorizable operation into a vectorizable one receives a positive delta. The weight is modest because vectorizability is a necessary but not sufficient condition for speedup.
 
-where $\text{ub}_i$ is the upper bound of loop $i$, and $|\text{ops}|$ sums all arithmetic operations (addition, subtraction, multiplication, division, exponential) extracted from the operation's op-count vector. The numerator approximates the total flops by multiplying the iteration space volume by the operations per iteration. The denominator estimates the total bytes transferred by summing, across all load and store accesses, the number of array elements touched by each access pattern multiplied by 4 bytes (assuming 32-bit data types). The $\max(1, \cdot)$ clamping prevents degenerate zero values in either term.
+\textbf{Parallel-loop ratio} ($N_\text{parallel} / N_\text{total}$, weight $w_\text{par} = 0.1$) is the fraction of loops without loop-carried dependencies. Transformations that expose parallelism (e.g., interchanging a reduction loop to an outer position) increase this ratio. Like vectorizability, the weight is modest because actual parallel speedup depends on factors captured only by the terminal execution reward.
 
-We apply $\log_{10}(1 + \text{AI})$ rather than using $\text{AI}$ directly for two reasons. First, arithmetic intensity for typical deep learning operations spans several orders of magnitude (from $< 1$ for memory-bandwidth-bound element-wise operations to $> 100$ for large batch matrix multiplications), and the logarithm compresses this range into a more uniform scale. Second, the logarithmic form matches the terminal reward's $\log_{10}$ speedup, keeping both signals in the same numerical regime. The $+1$ inside the logarithm ensures the score is always defined and non-negative.
+\subsection{Per-Step Shaped Reward}
 
-The arithmetic intensity term carries the highest weight ($w_\text{ai} = 1.0$) because it is the most direct proxy for computational efficiency: transformations that increase arithmetic intensity (e.g., tiling, fusion) tend to improve cache reuse and reduce memory bandwidth pressure, which are the primary optimization objectives on modern processors.
-
-\textbf{Vectorizability ($\mathbb{I}_\text{vec}(f)$)} is a binary signal: it equals $1.0$ when the \gls{ast} dumper reports that the operation satisfies \gls{mlir}'s vectorization preconditions and $0.0$ otherwise. This flag is extracted from the \texttt{\#START\_VECTORIZABLE} block in the \gls{ast} output. A transformation that makes an operation vectorizable (e.g., interchange that brings a contiguous-access loop to the innermost position) receives a positive delta from this term, encouraging the agent to create states amenable to \gls{simd} execution. The weight is set modestly ($w_\text{vec} = 0.1$) because vectorizability alone is a necessary but not sufficient condition for performance gains; actual speedup depends on whether the agent subsequently applies vectorization and whether the resulting vector code maps efficiently to the target \gls{simd} width.
-
-\textbf{Parallel-loop ratio} measures the fraction of loops that carry no loop-carried dependencies and can therefore be parallelized. It is computed as $N_\text{parallel} / \max(1, N_\text{total})$, where $N_\text{parallel}$ counts loops with iterator type \texttt{parallel} and $N_\text{total}$ counts all loops in the nest. The $\max(1, \cdot)$ in the denominator handles edge cases with zero loops. Transformations that convert reduction loops to parallel form (e.g., interchange that moves a reduction to an outer position, enabling inner parallelism) increase this ratio and receive positive intermediate feedback. The weight ($w_\text{par} = 0.1$) mirrors that of vectorizability: parallelism is a structural prerequisite for performance, but the actual gain depends on the parallelization mechanism, thread count, and workload balance, factors captured only by the terminal execution reward.
-
-\subsection{Per-Step Shaped Reward with Clipping and Bonus}
-
-The per-step shaped reward $r_t^\text{shaped}$ is the scaled delta of the efficiency score, with an additional bonus for the vectorization action:
+The per-step shaped reward is the scaled change in the efficiency score, clipped to prevent any single step from dominating the episode:
 
 \begin{equation}
     r_t^\text{shaped} = \text{clip}\!\Bigl( \bigl(S(f_t) - S(f_{t-1})\bigr) \times \lambda_\text{scale} \;+\; \lambda_\text{vec\_bonus} \cdot \mathbb{I}[a_t = \text{V}],\; -C,\; +C \Bigr)
     \label{eq:per-step-reward}
 \end{equation}
 
-where $\lambda_\text{scale} = 1.0$ is a global scaling factor, $C = 2.0$ is the symmetric clipping bound, and $\lambda_\text{vec\_bonus} = 0.2$ is an extra reward granted when the agent selects the Vectorization action ($a_t = \text{V}$).
-
-The clipping bound $C = 2.0$ serves an important stabilization role. Without clipping, a transformation that dramatically changes a single static metric (e.g., turning an operation from non-vectorizable to vectorizable via interchange) could produce a large score delta that overwhelms the learning signal from subsequent steps. Clipping ensures that no single intermediate step dominates the episode's cumulative shaped reward, encouraging the agent to learn balanced transformation sequences rather than chasing a single metric.
-
-The vectorization bonus ($\lambda_\text{vec\_bonus} = 0.2$) addresses a specific asymmetry in the action space. Vectorization is a terminal action: once applied, no further transformations can be applied to that operation. The terminal nature of vectorization means that the static efficiency score after vectorization cannot be further improved, creating a disincentive for the agent to vectorize early when it could instead continue optimizing other metrics. The bonus counterbalances this, providing a small positive signal for committing to vectorization when the code is in a suitable state.
-
-Table~\ref{tab:reward-weights} lists all reward shaping weights and constants used in our implementation.
+Clipping ($C = 2.0$) stabilizes training by preventing a single transformation that sharply changes one metric from overwhelming the cumulative reward. A small vectorization bonus ($\lambda_\text{vec\_bonus} = 0.2$) offsets the fact that vectorization is a terminal action after which the score cannot further improve, counterbalancing the agent's incentive to delay it. Table~\ref{tab:reward-weights} lists all parameters.
 
 \begin{table}[H]
     \centering
     \caption{Reward shaping weights and constants.}
     \label{tab:reward-weights}
+    \vspace{0.2cm}
     \begin{tabularx}{\textwidth}{l c X}
         \toprule
         \textbf{Parameter} & \textbf{Value} & \textbf{Role} \\
@@ -290,22 +276,22 @@ The shaped rewards are accumulated during the trajectory. At episode completion,
     \label{eq:terminal-reward}
 \end{equation}
 
-The penalty values are asymmetric by design. A transformation failure ($-5.0$) is a recoverable event: the agent may have selected a valid but poorly-parameterized action. An execution failure ($-20.0$) is more severe, indicating that the resulting code either produces incorrect results or fails to complete within a timeout window, and the agent should strongly avoid such sequences.
+The penalty values are asymmetric by design. A transformation failure ($-5.0$) is a recoverable event: the agent may have selected a valid but poorly-parameterized action. An execution failure ($-20.0$) is more penalized, indicating that the resulting code either produces incorrect results or fails to complete within a timeout window, and the agent should strongly avoid such sequences.
 
-A critical safety mechanism, which we term \textit{success-contingent negation}, prevents the agent from exploiting the shaped reward in undesirable ways. If the final execution of the transformed code fails, all intermediate shaped rewards accumulated during the episode are zeroed. Without this mechanism, the agent could learn to maximize static efficiency scores through transformations that ultimately produce code that crashes during lowering or execution---a form of reward hacking where the agent optimizes the proxy metric (the static score) at the expense of the true objective (successful execution). By conditioning intermediate rewards on final execution success, we ensure that the agent is only rewarded for transformation paths that lead to compilable and executable code.
+A critical safety mechanism prevents the agent from exploiting the shaped reward in undesirable ways. If the final execution of the transformed code fails, all intermediate shaped rewards accumulated during the episode are zeroed out. Without this mechanism, the agent could learn to maximize static efficiency scores through transformations that ultimately produce code that crashes during lowering or execution, a form of reward hacking where the agent optimizes the proxy metric (the static score) at the expense of the true objective (successful execution). By conditioning intermediate rewards on final execution success, we ensure that the agent is only rewarded for transformation paths that lead to compilable and executable code.
 
 When execution succeeds, the agent receives the full shaped reward trajectory plus the log-speedup terminal reward. This combination provides dense per-step guidance during training while keeping the terminal execution speedup as the ultimate arbiter of schedule quality.
 
 \begin{figure}[H]
     \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/reward_blending.png}
-    \caption{Mechanism for computing and blending the shaped intermediate reward with the terminal speedup signal.}
+    \caption{Mechanism for computing and blending the shaped intermediate reward with
+the terminal speedup signal}
     \label{fig:shaped_reward}
 \end{figure}
 
 \section{Integrated Combined Architecture}
-Our final system formulation fuses the aforementioned modular enhancements into a singular, unified optimization engine. The isolated enhancements individually address distinct layers of the reinforcement learning paradigm: the Observation Space (Hardware Awareness), the Reinforcement Signal (Shaped Rewards), and the Deep Neural Architecture (Transformer Encoder). 
-
-Combining these modules yields potent synergistic properties. The highly expressive Transformer encoder is able to learn complex hierarchical program embeddings, which are then structurally bounded and guided by the injection of the hardware capability limits. Concurrently, the intermediate shaped reward pipeline provides the dense, step-by-step reward signals that are required to stabilize and converge the heavily parameterized Transformer network from random state initialization. This integrated architecture forms a highly configurable pipeline accessible via native \gls{mlir} Python bindings, managing dataset orchestration and PyTorch learning loops seamlessly across slurm-managed high-performance computing clusters.
+Our final system combines all the modular improvements into one unified optimization engine. Each improvement targets a specific part of the reinforcement learning pipeline: the Observation Space (Hardware Awareness), the Reward Signal (Shaped Rewards), and the Neural Network (Transformer Encoder).
+Combining these modules produces strong synergistic effects. The Transformer encoder learns rich program representations, which are kept within bounds by the hardware constraints. At the same time, the shaped reward pipeline provides frequent, step-by-step feedback signals that help train and stabilize the Transformer network from the start.
 
 \begin{figure}[H]
     \centering    \includegraphics[width=1.0\textwidth]{ressources/chapter4/system_architecture.png}
@@ -326,19 +312,19 @@ The implementation of our system relies on a stack of open-source tools and libr
 Python is the primary implementation language of our framework. Its extensive ecosystem of scientific computing and machine learning libraries, combined with its accessibility and rapid prototyping capabilities, makes it well suited for reinforcement learning research. All agent logic, environment interaction, training loops, and evaluation pipelines are implemented in Python~3.11. \\ 
 
 \textbf{PyTorch} \\
-PyTorch~\cite{paszke2019pytorch} is the deep learning framework used to construct and train all neural network components of our system, including the policy and value networks of the \gls{ppo} agent and the \gls{lstm} and Transformer encoders. PyTorch provides dynamic computation graphs, automatic differentiation via its autograd engine, and \gls{gpu} acceleration. In our work, all training and inference runs on \gls{cpu} nodes, as the primary computational bottleneck is the compilation and execution of \gls{mlir} code rather than neural network forward and backward passes. \\ 
+PyTorch~\cite{paszke2019pytorch} is the deep learning framework used to construct and train all neural network components of our system, including the policy and value networks of the \gls{ppo} agent and the \gls{lstm} and Transformer encoders. PyTorch provides dynamic computation graphs, automatic differentiation via its autograd engine. \\
 
 \textbf{MLIR} \\
 The \gls{mlir} compiler infrastructure~\cite{lattner2021mlir} is the foundation on which our optimization environment operates. The \gls{mlir} framework provides the Linalg dialect for representing structured linear algebra operations, the transform dialect for encoding transformation schedules, and the progressive lowering pipeline that translates high-level operations into executable machine code. The \gls{mlir} tree used in this work is built from source at the \texttt{release/19.x} branch, enabling direct access to the latest compiler passes and Python bindings. \\ 
 
-\textbf{ONNX} \\
-The Open Neural Network Exchange (\gls{onnx})\footnote{\url{https://onnx.ai}} is an open format for representing machine learning models. We use \gls{onnx} as the routing mechanism in our dataset generation pipeline (Section~4.2) to export neural network architectures from PyTorch into a standardized graph representation before lowering them to \gls{mlir}. The \gls{onnx} intermediate representation preserves the computational graph structure and operator semantics, enabling systematic extraction of operation sub-graphs across diverse model families. \\ 
+\gls{onnx} \\
+The Open Neural Network Exchange \footnote{\url{https://onnx.ai}} is an open format for representing machine learning models. We use \gls{onnx} as the routing mechanism in our dataset generation pipeline to export neural network architectures from PyTorch into a standardized graph representation before lowering them to \gls{mlir}. The \gls{onnx} intermediate representation preserves the computational graph structure and operator semantics, enabling systematic extraction of operation sub-graphs across diverse model families. \\ 
 
 \textbf{Streamlit} \\
-Streamlit\footnote{\url{https://streamlit.io}} is an open-source Python framework for building interactive data applications. We developed a custom evaluation dashboard using Streamlit that visualizes the performance of our \gls{rl} agents against multiple baselines. The dashboard loads evaluation results from the standard results directory structure, parses benchmark metadata (model family, operation type, batch size), and renders interactive charts using Plotly. Key views include execution time comparisons across implementations and PyTorch baselines (eager, compile, and \gls{jit} modes), cumulative speedup distribution curves, per-model-family speedup heatmaps, training convergence plots, transformation schedule inspection, head-to-head statistical comparisons with standard deviation error bars, and correlation analysis. The dashboard supports filtering by benchmark category, model family, operation type, and batch size, enabling rapid qualitative assessment across the four agent versions and the baseline. Results can be exported in CSV and JSON formats for further analysis. \\ 
+Streamlit\footnote{\url{https://streamlit.io}} is an open-source Python framework for building interactive data applications. We developed a custom evaluation dashboard that visualizes the performance of our \gls{rl} agents against multiple baselines. \\
 
-\textbf{SLURM} \\
-The Simple Linux Utility for Resource Management (\gls{slurm})~\cite{yoo2003slurm} is the workload manager that orchestrates job submission, scheduling, and execution on the computing cluster. Training and evaluation jobs are submitted as \gls{slurm} batch scripts that handle environment activation (Conda environment, \texttt{.env} variable sourcing), dataset splitting, model checkpointing, and log management. \gls{slurm} array jobs enable parallel execution of multiple implementation versions within a single submission. \\ 
+\gls{slurm} \\
+The Simple Linux Utility for Resource Management~\cite{yoo2003slurm} is the workload manager that orchestrates job submission, scheduling, and execution on the computing cluster. Training and evaluation jobs are submitted as \gls{slurm} batch scripts that handle environment activation (Conda environment, \texttt{.env} variable sourcing), dataset splitting, model checkpointing, and log management. \\ 
 
 \begin{figure}[H]
     \centering
@@ -348,25 +334,21 @@ The Simple Linux Utility for Resource Management (\gls{slurm})~\cite{yoo2003slur
     \includegraphics[height=1.5cm]{ressources/chapter4/logos/ONNX_logo.png}\hspace{0.6cm}
     \includegraphics[height=1.5cm]{ressources/chapter4/logos/streamlit_logo.png}\hspace{0.6cm}
     \includegraphics[height=1.5cm]{ressources/chapter4/logos/slurm_logo.png}
-    \caption{Logos of the main tools and frameworks used in the implementation (from left to right: Python, PyTorch, \gls{mlir}, \gls{onnx}, Streamlit, \gls{slurm}).}
+    \caption{Main tools and frameworks used in implementation.}
     \label{fig:tools-logos}
 \end{figure}
 
-\subsection{\gls{mlir} Python Bindings}
+\subsection{MLIR Python Bindings}
 
-A critical component of our implementation is the bridge between Python and the \gls{mlir} C++ compiler infrastructure. The \gls{mlir} project provides comprehensive Python bindings~\cite{lattner2021mlir} that expose the full \gls{mlir} API to Python code. These bindings are generated from the C++ API using a combination of SWIG and pybind11-style wrappers, and they ship as part of the in-tree \gls{mlir} build.
-
-In our workflow, the Python bindings serve three essential functions. First, they enable the construction and manipulation of \gls{mlir} modules from Python: the agent loads benchmark programs as \gls{mlir} text, parses them into in-memory \gls{mlir} modules, and progressively applies transformations using the transform dialect interpreter. Second, they provide the execution engine: the \texttt{mlir.execution\_engine} module \gls{jit}-compiles the lowered \gls{llvm} dialect code to native machine code and exposes a callable function that operates on input and output memory buffers. Third, they expose the C++ diagnostic infrastructure, allowing Python code to catch and handle compilation errors gracefully---an essential capability given that the agent may attempt transformation sequences that are semantically invalid or crash during lowering.
-
-The bindings are accessed by setting \texttt{PYTHONPATH} to the build directory of the compiled \gls{mlir} tree. This path, along with the \texttt{LD\_LIBRARY\_PATH} to the Conda environment and a GCC-14 \texttt{libstdc++} required by the cluster, is configured through a \texttt{.env} file sourced before any script runs.
+The \gls{mlir} project provides Python bindings~\cite{lattner2021mlir} that expose the \gls{mlir} API to Python. In our workflow, they serve three functions: constructing and manipulating \gls{mlir} modules from Python via the transform dialect interpreter; \gls{jit}-compiling lowered code through the \texttt{mlir.execution\_engine} module; and catching compilation errors gracefully when the agent attempts invalid transformation sequences. The bindings are accessed by setting \texttt{PYTHONPATH} to the in-tree \gls{mlir} build directory, configured through a \texttt{.env} file sourced before any script runs.
 
 \subsection{Computing Infrastructure}
 
-All experiments in this work were conducted on the Bergamo partition of the High-Performance Computing (HPC) cluster at New York University Abu Dhabi (NYUAD), unless otherwise specified. Bergamo nodes are equipped with two AMD EPYC 9754 processors (Zen 4, 128 cores each, 2.25~GHz base clock), providing 256 physical cores and 1~TB of RAM per node. The EPYC 9754 features a 32~KB L1 cache per core, 1~MB L2 cache per core, and a shared 256~MB L3 cache per socket.
+All experiments in this work were conducted on the Bergamo partition of the \gls{hpc} cluster at New York University Abu Dhabi (NYUAD), unless otherwise specified. Bergamo nodes are equipped with two AMD EPYC 9754 processors (Zen 4, 128 cores each, 2.25~GHz base clock), providing 256 physical cores and 1~TB of RAM per node. The EPYC 9754 features a 32~KB L1 cache per core, 1~MB L2 cache per core, and a shared 256~MB L3 cache per socket.
 
 For the multi-hardware portability experiments (Section~5.4), two additional cluster partitions are used: Jubail, equipped with AMD EPYC 7742 processors (Zen 2, 128 cores, 512~GB RAM, 256~MB L3), and Dalma, equipped with Intel Xeon E5-2680~v4 processors (Broadwell, 28 cores, 112~GB RAM, 35~MB L3). All training and default evaluation runs use individual Bergamo nodes allocated exclusively to each job, ensuring no interference from co-located workloads on execution time measurements.
 
 Jobs are submitted to the cluster via the \gls{slurm} workload manager. The Conda environment located at \texttt{\textasciitilde/envs/mlir} provides Python~3.11 and all required dependencies, including PyTorch, NumPy, Plotly, and Streamlit. The \texttt{.env} file configures the paths to the \gls{mlir} build artifacts, shared libraries, and external C++ tools (\gls{ast} dumper, vectorizer) used during dataset generation and baseline extraction.
 
 \section{Conclusion}
-The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a robust optimization foundation. We also described the implementation details---the tools and frameworks (PyTorch, \gls{mlir}, Streamlit, \gls{slurm}), the \gls{mlir} Python bindings that bridge high-level agent logic with low-level compilation,the Bergamo HPC computing infrastructure---that make the system practical at scale. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups---and detailing the rigorous evaluation protocols applied to benchmarking their true utility---is the primary focus of the succeeding chapter, \textit{Experiments and Results}.
+The architectural refinements detailed in this chapter successfully adapt \gls{rl} for the complexities of modern compiler construction. By leveraging parallel dataset extraction spanning diverse deep learning families, integrating strict hardware-bound limits within the observation, deploying a hierarchical transformer encoder, and introducing localized shaped rewards, the framework establishes a robust optimization foundation. We also described the implementation details---the tools and frameworks (PyTorch, \gls{mlir}, Streamlit, \gls{slurm}), the \gls{mlir} Python bindings that bridge high-level agent logic with low-level compilation, the Bergamo \gls{hpc}---that make the system practical at scale. Working in tandem, these modules navigate the expansive combinatorial search space of loop transformations precisely and stably. Exploring how these innovations translate theoretical improvements into pragmatic, empirical execution speedups---and detailing the rigorous evaluation protocols applied to benchmarking their true utility---is the primary focus of the succeeding chapter, \textit{Experiments and Results}.

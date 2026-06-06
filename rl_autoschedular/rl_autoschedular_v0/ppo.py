@@ -165,6 +165,29 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         f", cache miss rate: {cache_miss_rate:.2f}%"
     ))
 
+    # Save training results to train/results.json (cumulative, per-benchmark)
+    train_results: dict = {}
+    if os.path.exists(fl.train_results_file):
+        with open(fl.train_results_file) as f:
+            try:
+                train_results = json.load(f)
+            except json.JSONDecodeError:
+                pass
+    for state, rewards, speedup, exec_time, cache_miss in zip(states, all_rewards, all_speedups, all_exec_times, cache_misses):
+        train_results[state.bench_name] = {
+            'rewards': list(rewards) if not isinstance(rewards, list) else rewards,
+            'speedup': speedup,
+            'exec_time': exec_time,
+            'cache_miss': cache_miss,
+        }
+    with open(fl.train_results_file, 'w') as f:
+        json.dump(train_results, f, indent=2)
+    # Snapshot every 100 iterations
+    if step % 100 == 0:
+        import shutil
+        ckpt_path = os.path.join(fl.train_dir, f'checkpoint_{step}.json')
+        shutil.copy2(fl.train_results_file, ckpt_path)
+
     return tc.to_trajectory()
 
 
@@ -394,27 +417,10 @@ def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchma
     print(f"Handling bench: {state.bench_name}...", end=' ', file=sys.stderr)
     worker_start = time()
 
-    # Check if this benchmark was already completed in a previous crashed run
-    import json as _json
-    marker_dir = os.path.join(os.path.dirname(exec_data_file), 'eval', 'markers')
-    os.makedirs(marker_dir, exist_ok=True)
-    marker_file = os.path.join(marker_dir, state.bench_name)
-    if os.path.exists(marker_file):
-        with open(marker_file) as f:
-            cached = _json.load(f)
-        print('Skipped (cached)', file=sys.stderr)
-        return cached['rewards'], cached['speedup'], cached['exec_time'], cached.get('cache_miss', True), time() - worker_start
-
     Execution(exec_data_file, main_exec_data)
     env = Env()
     env.reset(benchs, state.bench_idx)
     rewards, speedup, new_exec_time, cache_miss = env.apply_and_run_sequence(state.transformation_history)
-
-    # Save result atomically so crash-resilient
-    tmp_file = marker_file + '.tmp'
-    with open(tmp_file, 'w') as f:
-        _json.dump({'rewards': rewards, 'speedup': speedup, 'exec_time': new_exec_time, 'cache_miss': cache_miss}, f)
-    os.rename(tmp_file, marker_file)
 
     worker_end = time()
     worker_time = worker_end - worker_start

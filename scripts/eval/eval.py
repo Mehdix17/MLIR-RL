@@ -21,6 +21,8 @@ from utils.log import print_info, print_success
 from utils.implementation import get_agent_runs_root, get_autoschedular_impl, import_autoschedular_module
 from datetime import timedelta
 from time import time
+import json
+import shutil
 
 AUTOSCHEDULER_IMPL = get_autoschedular_impl()
 Execution = import_autoschedular_module("execution", AUTOSCHEDULER_IMPL).Execution
@@ -205,3 +207,49 @@ for step, model_file in enumerate(pending_files):
     # Mark checkpoint as completed for resumption
     with open(completed_file, 'a') as f:
         f.write(model_file + '\n')
+
+# Post-process: if --checkpoint mode, save results to agent_dir/eval/checkpoint_<N>.json
+_ckpt = os.getenv("EVAL_CHECKPOINT")
+if _ckpt:
+    _label = os.getenv("EVAL_LABEL")
+    _suffix = f"_{_label}" if _label else ""
+    _agent_dir = os.path.dirname(eval_dir)  # eval_dir = agent/models/ → _agent_dir = agent/
+    eval_root = os.path.join(_agent_dir, "eval")
+    ckpt_file = os.path.join(eval_root, f"checkpoint_{_ckpt}{_suffix}.json")
+    if os.path.exists(ckpt_file):
+        print_info(f"checkpoint_{_ckpt}{_suffix}.json already exists, skipping post-process")
+    else:
+        os.makedirs(eval_root, exist_ok=True)
+        src_eval = os.path.join(fl.logs_dir, "eval", "eval_exec_times.json")
+        if os.path.exists(src_eval):
+            shutil.copy2(src_eval, ckpt_file)
+            print_success(f"Saved eval results to {_run_dir}/eval/checkpoint_{_ckpt}{_suffix}.json")
+
+        # Copy markers
+        src_markers = os.path.join(fl.run_dir, "eval", "markers")
+        if os.path.isdir(src_markers) and os.listdir(src_markers):
+            dst_markers = os.path.join(eval_root, "markers", f"{_ckpt}{_suffix}")
+            os.makedirs(os.path.dirname(dst_markers), exist_ok=True)
+            if os.path.exists(dst_markers):
+                shutil.rmtree(dst_markers)
+            shutil.copytree(src_markers, dst_markers)
+            print_info(f"Copied markers to eval/markers/{_ckpt}{_suffix}/")
+
+        # Copy key log files
+        src_logs = os.path.join(fl.logs_dir, "eval")
+        if os.path.isdir(src_logs):
+            dst_logs = os.path.join(eval_root, "logs", f"{_ckpt}{_suffix}")
+            os.makedirs(os.path.dirname(dst_logs), exist_ok=True)
+            if os.path.exists(dst_logs):
+                shutil.rmtree(dst_logs)
+            os.makedirs(dst_logs)
+            for log_file in ("final_speedup", "average_speedup", "arithmetic_mean_speedup"):
+                src = os.path.join(src_logs, log_file)
+                if os.path.exists(src):
+                    shutil.copy2(src, os.path.join(dst_logs, log_file))
+            print_info(f"Copied logs to eval/logs/{_ckpt}{_suffix}/")
+
+    # Remove the temp run directory created by FileLogger
+    if os.path.isdir(fl.run_dir):
+        shutil.rmtree(fl.run_dir)
+        print_info(f"Cleaned up temp run dir: {fl.run_dir}")

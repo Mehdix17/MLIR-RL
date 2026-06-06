@@ -21,19 +21,15 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 VERSION_REGISTRY = {
     "v4_6": {
         "results_dir": "results/new_dataset_results/v4_6_agent",
-        "agent_subdir": "v4_5_agent",
     },
     "v4_7": {
         "results_dir": "results/new_dataset_results/v4_7_agent",
-        "agent_subdir": "v4_5_agent",
     },
     "v4_8": {
         "results_dir": "results/new_dataset_results/v4_8_agent",
-        "agent_subdir": "v4_5_agent",
     },
     "v0_v2": {
         "results_dir": "results/new_dataset_results/v0_agent_v2",
-        "agent_subdir": "old_agent",
     },
 }
 
@@ -101,75 +97,65 @@ def get_log_data(version: str, job_id: str):
     }
 
 
-def find_latest_marker(version: str):
-    """Find the latest iteration marker directory."""
+def find_latest_checkpoint_file(version: str):
+    """Find the latest training checkpoint JSON file."""
     reg = VERSION_REGISTRY.get(version)
     if not reg:
         return None
 
     results = os.path.join(PROJECT_ROOT, reg["results_dir"])
+    train_dir = os.path.join(results, "run_0", "train")
+    if not os.path.isdir(train_dir):
+        return None
 
-    # Try V4.5-style: global_markers/training/iter_N/
-    gm_path = os.path.join(results, "global_markers", "training")
-    if os.path.isdir(gm_path):
-        dirs = sorted(os.listdir(gm_path), key=lambda x: int(x.split("_")[1]))
-        return os.path.join(gm_path, dirs[-1]) if dirs else None
-
-    # Try V0-style: agent_subdir/run_0/eval/markers_iter_N/
-    eval_path = os.path.join(results, reg["agent_subdir"], "run_0", "eval")
-    if os.path.isdir(eval_path):
-        markers = sorted(
-            [d for d in os.listdir(eval_path) if d.startswith("markers_iter_")],
-            key=lambda x: int(x.split("_")[2]),
-        )
-        return os.path.join(eval_path, markers[-1]) if markers else None
-
-    return None
+    ckpts = sorted(
+        [f for f in os.listdir(train_dir) if f.startswith("checkpoint_") and f.endswith(".json")],
+        key=lambda x: int(x.split("_")[1].split(".")[0])
+    )
+    return os.path.join(train_dir, ckpts[-1]) if ckpts else None
 
 
-def get_marker_speedups(marker_dir: str):
-    """Extract speedup data from marker files."""
-    if not marker_dir or not os.path.isdir(marker_dir):
+def get_checkpoint_speedups(ckpt_file: str):
+    """Extract speedup data from a checkpoint JSON file."""
+    if not ckpt_file or not os.path.isfile(ckpt_file):
         return []
 
     speedups = []
-    for name in os.listdir(marker_dir):
-        fpath = os.path.join(marker_dir, name)
-        if name == "_eval_meta.json" or not os.path.isfile(fpath):
-            continue
-        try:
-            with open(fpath) as f:
-                data = json.load(f)
-            if isinstance(data, dict) and "speedup" in data and data["speedup"] is not None and data["speedup"] > 0:
-                speedups.append(data["speedup"])
-        except Exception:
-            pass
+    try:
+        with open(ckpt_file) as f:
+            data = json.load(f)
+        for bench_name, bench_data in data.items():
+            if isinstance(bench_data, dict) and "speedup" in bench_data:
+                spd = bench_data["speedup"]
+                if spd is not None and spd > 0:
+                    speedups.append(spd)
+    except Exception:
+        pass
 
     return speedups
 
 
-def get_marker_history(version: str, n=5):
-    """Get speedup trend from the last N marker iterations."""
+def get_checkpoint_history(version: str, n=5):
+    """Get speedup trend from the last N training checkpoints."""
     reg = VERSION_REGISTRY.get(version)
     if not reg:
         return []
 
     results = os.path.join(PROJECT_ROOT, reg["results_dir"])
+    train_dir = os.path.join(results, "run_0", "train")
+    if not os.path.isdir(train_dir):
+        return []
 
-    gm_path = os.path.join(results, "global_markers", "training")
-    if os.path.isdir(gm_path):
-        dirs = sorted(os.listdir(gm_path), key=lambda x: int(x.split("_")[1]))
-        return [(d.split("_")[1], get_marker_speedups(os.path.join(gm_path, d))) for d in dirs[-n:]]
-
-    eval_path = os.path.join(results, reg["agent_subdir"], "run_0", "eval")
-    if os.path.isdir(eval_path):
-        markers = sorted(
-            [d for d in os.listdir(eval_path) if d.startswith("markers_iter_")],
-            key=lambda x: int(x.split("_")[2]),
-        )
-        return [(m.split("_")[2], get_marker_speedups(os.path.join(eval_path, m))) for m in markers[-n:]]
-
-    return []
+    ckpts = sorted(
+        [f for f in os.listdir(train_dir) if f.startswith("checkpoint_") and f.endswith(".json")],
+        key=lambda x: int(x.split("_")[1].split(".")[0])
+    )
+    history = []
+    for ckpt in ckpts[-n:]:
+        iter_num = ckpt.split("_")[1].split(".")[0]
+        spds = get_checkpoint_speedups(os.path.join(train_dir, ckpt))
+        history.append((iter_num, spds))
+    return history
 
 
 def format_table(data: list[dict]):
@@ -284,12 +270,12 @@ def main():
                 print(f"  {version}: log not found")
                 continue
 
-            marker_dir = find_latest_marker(version)
-            speedups = get_marker_speedups(marker_dir)
-            history = get_marker_history(version, n=5)
+            ckpt_file = find_latest_checkpoint_file(version)
+            speedups = get_checkpoint_speedups(ckpt_file)
+            history = get_checkpoint_history(version, n=5)
             log_data["marker_speedups"] = speedups
             log_data["marker_history"] = history
-            log_data["marker_dir"] = marker_dir
+            log_data["marker_file"] = ckpt_file
             data.append(log_data)
 
         if not data:

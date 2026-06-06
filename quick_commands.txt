@@ -58,4 +58,8 @@ rsync -avh --progress dataset_final/ $SCRATCH/MLIR-RL/
 
 # ---------- Get number of files of a folder ----------
 
-find . -maxdepth 3 -type f | wc -l
+find folder/path/ -type f | wc -l
+
+# ---------- Check user quota (disk space and files count) ----------
+
+lfs quota -u $USER directory/path

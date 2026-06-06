@@ -1,0 +1,11 @@
+cluster,agent,group,group_type,geo_mean,avg,count
+dalma,No-Reward (HW),block,op_type,3.1546,5.7513,1335
+dalma,No-Reward (HW),conv2d,op_type,1.4747,2.2671,70
+dalma,No-Reward (HW),generic,op_type,0.3425,0.4136,106
+dalma,No-Reward (HW),matmul,op_type,0.4718,0.5076,232
+dalma,No-Reward (HW),pooling,op_type,0.3756,0.429,309
+dalma,No-Reward (No-HW),block,op_type,3.3063,6.3915,1306
+dalma,No-Reward (No-HW),conv2d,op_type,1.7121,2.5734,70
+dalma,No-Reward (No-HW),generic,op_type,0.5638,0.6957,103
+dalma,No-Reward (No-HW),matmul,op_type,0.418,0.4687,222
+dalma,No-Reward (No-HW),pooling,op_type,0.6181,0.7277,297

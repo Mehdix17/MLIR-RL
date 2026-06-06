@@ -159,14 +159,14 @@ class Env:
             if (self.benchmark_data.root_exec_time / new_exec_time) < 1.0:
                 if len(rewards) > 1:
                     rewards[:-1] = [0.0] * (len(rewards) - 1)
-        speedup = (self.benchmark_data.root_exec_time / new_exec_time) if new_exec_time is not None else 1.0
+        speedup = (self.benchmark_data.root_exec_time / new_exec_time) if new_exec_time is not None else 0.0
 
         return rewards, speedup, new_exec_time, cache_miss
 
     def failed_seq(self, seq: list[list[Action]]) -> tuple[list[float], float, Optional[int], bool]:
         rewards = [0.0 for op_seq in reversed(seq) for action in op_seq for _ in range(len(action.sub_actions) + 1)]
         rewards[-1] = self.__action_reward(True, False)
-        return rewards, 1.0, None, True
+        return rewards, 0.0, None, True
 
     def __init_op_state(self, operation_idx: int) -> OperationState:
         """Create a new operation state.
@@ -268,6 +268,8 @@ class Env:
         #     return math.log(old / (new * 2))
         # else:
         #     return old / (new * 2) - 1
+        new = max(new, 1)
+        old = max(old, 1)
         return math.log10(old / new)
 
     def __update_state_infos(self, state: OperationState, action: Action):

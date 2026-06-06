@@ -116,8 +116,8 @@ def get_base_prefix(implementation: Optional[str] = None) -> str:
 
 
 def get_agent_runs_root(results_dir: str, implementation: Optional[str] = None) -> Path:
-    """Return results/<experiment>/<impl_agent_subdir>."""
-    return Path(results_dir) / get_agent_subdir(implementation)
+    """Return results/<experiment>/ directly — no impl subdir nesting."""
+    return Path(results_dir)
 
 
 def get_base_file_path(results_dir: str, implementation: Optional[str] = None) -> Path:
