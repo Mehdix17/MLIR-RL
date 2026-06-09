@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read the CSV file
-df = pd.read_csv('/scratch/mb10856/MLIR-RL/plots/ablation_study/comparison_faked.csv')
+df = pd.read_csv('/scratch/mb10856/MLIR-RL/plots/ablation_study/comparison.csv')
 
 # Remove single_bench (legacy)
 df = df[df['model'] != 'single_bench (legacy)']
@@ -32,9 +32,9 @@ bars3 = ax.bar(x + 0.5*width, nhw_speedup, width, label='No-HW-Features Agent', 
 bars4 = ax.bar(x + 1.5*width, nrw_speedup, width, label='No-Reward-Shaping Agent', color='orange', alpha=0.8)
 
 # Customize the plot
-ax.set_xlabel('Models', fontsize=20, fontweight='bold')
-ax.set_ylabel('Geometric Mean Speedup', fontsize=20, fontweight='bold')
-ax.set_title('Ablation Study - Per-Model Speedup Comparison', fontsize=24, fontweight='bold')
+ax.set_xlabel('Models', fontsize=18, fontweight='bold')
+ax.set_ylabel('Geometric Mean Speedup', fontsize=18, fontweight='bold')
+ax.set_title('Ablation Study - Per-Model Speedup Comparison', fontsize=22, fontweight='bold')
 ax.set_xticks(x)
 ax.set_xticklabels(models, rotation=45, ha='right', fontsize=15)
 ax.tick_params(axis='y', labelsize=15)
@@ -48,15 +48,8 @@ ax.axhline(y=1, color='black', linestyle='--', linewidth=1, alpha=0.5)
 plt.tight_layout()
 
 # Save the plot
-output_path = '/scratch/mb10856/MLIR-RL/plots/ablation_study/ablation_study_comparison.png'
+output_path = '/scratch/mb10856/MLIR-RL/plots/ablation_study/ablation_study.png'
 plt.savefig(output_path, dpi=300, bbox_inches='tight')
 print(f"Plot saved to: {output_path}")
-
-# Also display some statistics
-print("\nStatistics Summary:")
-print(f"Our Agent (v45) - Mean: {v45_speedup.mean():.2f}, Min: {v45_speedup.min():.2f}, Max: {v45_speedup.max():.2f}")
-print(f"No-Transformer - Mean: {ntr_speedup.mean():.2f}, Min: {ntr_speedup.min():.2f}, Max: {ntr_speedup.max():.2f}")
-print(f"No-HW-Features - Mean: {nhw_speedup.mean():.2f}, Min: {nhw_speedup.min():.2f}, Max: {nhw_speedup.max():.2f}")
-print(f"No-Reward-Shaping - Mean: {nrw_speedup.mean():.2f}, Min: {nrw_speedup.min():.2f}, Max: {nrw_speedup.max():.2f}")
 
 plt.show()

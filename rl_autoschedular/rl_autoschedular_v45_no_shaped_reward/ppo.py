@@ -144,7 +144,9 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         eval_json[state.bench_name] = exec_time
     eval_dir = os.path.join(fl.logs_dir, 'eval')
     os.makedirs(eval_dir, exist_ok=True)
-    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
+    _ckpt = os.getenv("EVAL_CHECKPOINT", "")
+    _eval_file = f"eval_exec_times_{_ckpt}.json" if _ckpt else "eval_exec_times.json"
+    with open(os.path.join(eval_dir, _eval_file), 'w') as f:
         json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 
@@ -377,36 +379,13 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
                     states[i] = next_op_state
                     observations[i] = Observation.from_state(next_op_state)
 
-    # Eval crash resilience: skip benchmarks with existing markers
-    eval_markers_dir = os.path.join(fl.eval_dir, 'markers')
-    os.makedirs(eval_markers_dir, exist_ok=True)
     bench_results: dict[str, tuple] = {}
-    pending_indices = []
-    for i, state in enumerate(states):
-        marker_file = os.path.join(eval_markers_dir, state.bench_name)
-        if os.path.exists(marker_file):
-            with open(marker_file) as f:
-                cached = json.load(f)
-            bench_results[state.bench_name] = (cached['rewards'], cached['speedup'],
-                                                cached['exec_time'], cached.get('cache_miss', True))
+    new_results = dm.map_states(__execute_states, states, data, exe.main_exec_data, training=False)
+    for state, r in zip(states, new_results):
+        if r:
+            bench_results[state.bench_name] = r
         else:
-            pending_indices.append(i)
-    if len(pending_indices) < len(states):
-        print_info(f"Skipped {len(states) - len(pending_indices)} cached benchmarks")
-
-    if pending_indices:
-        pending_states = [states[i] for i in pending_indices]
-        new_results = dm.map_states(__execute_states, pending_states, data, exe.main_exec_data, training=False)
-        for state, r in zip(pending_states, new_results):
-            if r:
-                bench_results[state.bench_name] = r
-                marker_file = os.path.join(eval_markers_dir, state.bench_name)
-                tmp = marker_file + '.tmp'
-                with open(tmp, 'w') as f:
-                    json.dump({'rewards': r[0], 'speedup': r[1], 'exec_time': r[2], 'cache_miss': r[3]}, f)
-                os.rename(tmp, marker_file)
-            else:
-                bench_results[state.bench_name] = None
+            bench_results[state.bench_name] = None
 
     results = [bench_results[s.bench_name] for s in states]
     results = [
@@ -443,7 +422,9 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
         eval_json[state.bench_name] = exec_time
     eval_dir = os.path.join(fl.logs_dir, 'eval')
     os.makedirs(eval_dir, exist_ok=True)
-    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
+    _ckpt = os.getenv("EVAL_CHECKPOINT", "")
+    _eval_file = f"eval_exec_times_{_ckpt}.json" if _ckpt else "eval_exec_times.json"
+    with open(os.path.join(eval_dir, _eval_file), 'w') as f:
         json.dump(eval_json, f, indent=2)
 
     eval_end = time()

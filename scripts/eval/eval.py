@@ -220,20 +220,11 @@ if _ckpt:
         print_info(f"checkpoint_{_ckpt}{_suffix}.json already exists, skipping post-process")
     else:
         os.makedirs(eval_root, exist_ok=True)
-        src_eval = os.path.join(fl.logs_dir, "eval", "eval_exec_times.json")
+        _eval_file = f"eval_exec_times_{_ckpt}.json"
+        src_eval = os.path.join(fl.logs_dir, "eval", _eval_file)
         if os.path.exists(src_eval):
             shutil.copy2(src_eval, ckpt_file)
-            print_success(f"Saved eval results to {_run_dir}/eval/checkpoint_{_ckpt}{_suffix}.json")
-
-        # Copy markers
-        src_markers = os.path.join(fl.run_dir, "eval", "markers")
-        if os.path.isdir(src_markers) and os.listdir(src_markers):
-            dst_markers = os.path.join(eval_root, "markers", f"{_ckpt}{_suffix}")
-            os.makedirs(os.path.dirname(dst_markers), exist_ok=True)
-            if os.path.exists(dst_markers):
-                shutil.rmtree(dst_markers)
-            shutil.copytree(src_markers, dst_markers)
-            print_info(f"Copied markers to eval/markers/{_ckpt}{_suffix}/")
+            print_success(f"Saved eval results to eval/checkpoint_{_ckpt}{_suffix}.json")
 
         # Copy key log files
         src_logs = os.path.join(fl.logs_dir, "eval")
@@ -249,7 +240,4 @@ if _ckpt:
                     shutil.copy2(src, os.path.join(dst_logs, log_file))
             print_info(f"Copied logs to eval/logs/{_ckpt}{_suffix}/")
 
-    # Remove the temp run directory created by FileLogger
-    if os.path.isdir(fl.run_dir):
-        shutil.rmtree(fl.run_dir)
-        print_info(f"Cleaned up temp run dir: {fl.run_dir}")
+    print_info("Evaluation done.")

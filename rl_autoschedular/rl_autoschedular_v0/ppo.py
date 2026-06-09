@@ -405,7 +405,9 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
         eval_json[state.bench_name] = exec_time
     eval_dir = os.path.join(fl.logs_dir, 'eval')
     os.makedirs(eval_dir, exist_ok=True)
-    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
+    _ckpt = os.getenv("EVAL_CHECKPOINT", "")
+    _eval_file = f"eval_exec_times_{_ckpt}.json" if _ckpt else "eval_exec_times.json"
+    with open(os.path.join(eval_dir, _eval_file), 'w') as f:
         json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 

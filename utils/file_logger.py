@@ -16,18 +16,6 @@ class FileLogger(metaclass=Singleton):
         self.run_dir = str(get_agent_runs_root(cfg.results_dir, implementation))
         os.makedirs(self.run_dir, exist_ok=True)
 
-        # Safety: refuse to start fresh training if results already exist
-        self._train_results = os.path.join(self.run_dir, "train", "results.json")
-        resume_from = os.getenv("RESUME_FROM")
-        force_new = os.getenv("FORCE_NEW")
-        if (resume_from is None and force_new is None
-                and os.path.isfile(self._train_results)
-                and os.path.getsize(self._train_results) > 2):
-            raise RuntimeError(
-                f"Experiment at {self.run_dir} already has training results. "
-                "Use --resume to continue training, or set FORCE_NEW=1 to overwrite."
-            )
-
         self._setup_dirs()
 
     def _setup_dirs(self):

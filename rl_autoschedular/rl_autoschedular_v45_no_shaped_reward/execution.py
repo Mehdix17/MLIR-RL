@@ -158,16 +158,21 @@ class Execution(metaclass=Singleton):
         if not self.exec_data_file:
             raise Exception("Execution data file not provided")
 
-        with open(self.exec_data_file, "r") as file:
-            data: dict[str, dict[str, int]] = json.load(file)
-
-        for bench_name, bench_data in new_data.items():
-            if bench_name not in data:
-                data[bench_name] = {}
-            data[bench_name].update(bench_data)
-
-        with open(self.exec_data_file, "w") as file:
+        import fcntl
+        with open(self.exec_data_file, "r+") as file:
+            fcntl.flock(file, fcntl.LOCK_EX)
+            try:
+                data: dict[str, dict[str, int]] = json.load(file)
+            except json.JSONDecodeError:
+                data = {}
+            for bench_name, bench_data in new_data.items():
+                if bench_name not in data:
+                    data[bench_name] = {}
+                data[bench_name].update(bench_data)
+            file.seek(0)
+            file.truncate()
             json.dump(data, file, indent=4)
+            fcntl.flock(file, fcntl.LOCK_UN)
 
     def get_code_cache_key(self, seq: list[list['Action']]) -> str:
         """Get the code cache key for the given operation state.

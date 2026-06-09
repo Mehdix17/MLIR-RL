@@ -49,6 +49,17 @@ cfg = Config()
 fl = FileLogger()
 dm = DaskManager()
 
+# Safety: refuse fresh training if experiment already has results
+resume_from = os.getenv("RESUME_FROM")
+force_new = os.getenv("FORCE_NEW")
+if (resume_from is None and force_new is None
+        and os.path.isfile(fl.train_results_file)
+        and os.path.getsize(fl.train_results_file) > 2):
+    raise RuntimeError(
+        f"Experiment at {fl.run_dir} already has training results. "
+        "Use --resume to continue training, or set FORCE_NEW=1 to overwrite."
+    )
+
 
 # Data loading
 def load_train_data():

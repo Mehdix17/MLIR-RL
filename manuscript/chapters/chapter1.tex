@@ -43,6 +43,7 @@ The middle-end operates on the \gls{ir} and is where the majority of optimizatio
 
 Automated optimization research and modern machine learning compilation frameworks predominantly focus on this middle-end level, leveraging structured abstractions like the \gls{mlir} Linalg dialect to apply structural optimizations to tensor and algebra pipelines before downstream code generation.
 
+\newpage
 \subsection{Back-End}
 
 The back-end translates the optimized \gls{ir} into machine code for a specific target architecture. This phase includes:
@@ -69,6 +70,7 @@ Machine-independent optimizations include constant folding (evaluating constant 
 
 Machine-dependent optimizations, by contrast, require knowledge of the target processor. Examples include selecting vector instructions matching the \gls{simd} width of the \gls{cpu}, choosing tile sizes that fit within a specific cache level, and scheduling instructions to match the pipeline depth of a particular micro-architecture.
 
+\newpage
 \subsection{Static vs.\ Dynamic Optimization}
 
 Optimizations can also be classified by when they are applied. \textit{Static optimization} occurs at compile time, before the program executes. The compiler analyzes the source code or \gls{ir} and applies transformations based on information available statically. Most traditional compiler optimizations fall into this category.
@@ -108,7 +110,7 @@ This section describes the primary loop nest transformations used in modern opti
 
 Parallelization distributes the iterations of a loop across multiple processing units, such as \gls{cpu} cores or hardware threads, so that they execute concurrently rather than sequentially. This is achieved by verifying that iterations are completely independent, meaning no iteration reads from or writes to a memory location that is modified by a separate, concurrent iteration. 
 
-In the \gls{mlir}-\gls{rl} framework established in prior work~\cite{bendib2024reinforcement}, this optimization is represented by the \gls{tp} action or the composite \gls{tpf} action.
+In the \gls{mlir}-\gls{rl} framework established in prior work~\cite{bendib2024reinforcement}, this optimization is represented by the \gls{tp} action or the composite \gls{tf} action.
 
 \begin{itemize}
     \item \textbf{Accelerated Wall-Clock Time:} Exploits multi-core processing architectures to scale execution throughput linearly with available hardware threads.
@@ -128,11 +130,12 @@ In \gls{mlir}-\gls{rl} of prior works, this transformation corresponds to the \g
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{ressources/chapter1/memory_access_patterns.png}    
+    \includegraphics[width=1.0\textwidth]{ressources/chapter1/memory_access_patterns.png}    
     \caption{Effect of loop interchange on memory access patterns.}
     \label{fig:loop-interchange}
 \end{figure}
 
+\newpage
 \subsection{Tiling}
 
 Tiling partitions a large, multi-dimensional iteration space into smaller, localized blocks or sub-matrices called tiles. This structural change converts a deep loop nest of depth $D$ into a $2D$ structure composed of outer tile-traversal loops and inner point-execution loops.
@@ -155,7 +158,7 @@ In \gls{mlir}-\gls{rl}, this optimization is modeled as the \gls{t} action, wher
 
 Loop fusion merges two or more separate loops that share identical iteration bounds into a single, unified loop nest containing the bodies of all source loops. The transformation is legally valid only when there are no backward data dependencies between the distinct loops, ensuring the consumer loop does not require values computed by the producer in a future iteration.
 
-In \gls{mlir}-\gls{rl}, this multi-operation optimization is mapped directly to the \gls{f} action or combined into the multi-tier \gls{tpf} action. The structural contraction of separate loop bodies into a localized execution pipeline is presented in Figure~\ref{fig:fusion-before}.
+In \gls{mlir}-\gls{rl}, this multi-operation optimization is mapped directly to the fusion action or combined into the multi-tier \gls{tf} action. The structural contraction of separate loop bodies into a localized execution pipeline is presented in Figure~\ref{fig:fusion-before}.
 
 \begin{itemize}
     \item \textbf{Elimination of Intermediate Storage Overhead:} Replaces massive global memory buffers with temporary registers or L1 lines for direct producer-to-consumer data transfers.
@@ -165,7 +168,7 @@ In \gls{mlir}-\gls{rl}, this multi-operation optimization is mapped directly to 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{ressources/chapter1/loop_fusion_comparison.png}
-    \caption{Loop fusion: eliminating intermediate storage by merging producer and consumer loops.}
+    \caption[Loop fusion]{Loop fusion: eliminating intermediate storage by merging producer and consumer loops.}
     \label{fig:fusion-before}
 \end{figure}
 
@@ -250,7 +253,7 @@ The diversity and rapid evolution of hardware platforms add another dimension of
 
 \section{MLIR Compiler Infrastructure}
 
-The Multi-Level Intermediate Representation is a compiler infrastructure project within the \gls{llvm} compiler ecosystem, introduced by Lattner et al.~\cite{lattner2021mlir}. \gls{mlir} addresses a key limitation of traditional compiler IRs: the assumption of a single, fixed level of abstraction. Traditional \gls{ir}s operate at one level (e.g., \gls{llvm} \gls{ir} operates close to machine code, while abstract syntax trees operate close to source code), making it difficult to express transformations that span multiple levels. \gls{mlir} instead supports a \textit{multi-level} \gls{ir}, where different \textit{dialects} define operations, types, and attributes at different levels of abstraction, all coexisting within the same representation.
+The Multi-Level Intermediate Representation is a compiler infrastructure project within the \gls{llvm} compiler ecosystem, introduced by Lattner et al.~\cite{lattner2021mlir}. \gls{mlir} addresses a key limitation of traditional compiler \gls{ir}s: the assumption of a single, fixed level of abstraction. Traditional \gls{ir}s operate at one level (e.g., \gls{llvm} \gls{ir} operates close to machine code, while abstract syntax trees operate close to source code), making it difficult to express transformations that span multiple levels. \gls{mlir} instead supports a \textit{multi-level} \gls{ir}, where different \textit{dialects} define operations, types, and attributes at different levels of abstraction, all coexisting within the same representation.
 
 \subsection{Dialects and Core Concepts}
 

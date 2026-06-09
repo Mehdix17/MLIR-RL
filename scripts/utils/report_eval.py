@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Report evaluation progression from run_i/eval/ checkpoint files.
+"""Report evaluation progression from eval/ checkpoint files.
 
 Usage:
   python scripts/utils/report_eval.py                     # all agents, all checkpoints
   python scripts/utils/report_eval.py -v v4_6 v4_7        # specific agents
   python scripts/utils/report_eval.py --missing            # show missing evals
   python scripts/utils/report_eval.py --best               # show only best per agent
+  python scripts/utils/report_eval.py --corrupted          # show corrupted checkpoints
   python scripts/utils/report_eval.py -c 500               # show only checkpoint 500
+  python scripts/utils/report_eval.py --json out.json      # export results as JSON
 """
 
 import argparse
@@ -20,10 +22,14 @@ from collections import defaultdict
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 AGENT_REGISTRY = {
+    "v0": {"results_dir": "results/new_dataset_results/v0_agent", "display": "V0"},
+    "v4_5": {"results_dir": "results/new_dataset_results/v4_5_agent", "display": "V4.5"},
     "v4_6": {"results_dir": "results/new_dataset_results/v4_6_agent", "display": "V4.6"},
     "v4_7": {"results_dir": "results/new_dataset_results/v4_7_agent", "display": "V4.7"},
     "v4_8": {"results_dir": "results/new_dataset_results/v4_8_agent", "display": "V4.8"},
-    "v0_v2": {"results_dir": "results/new_dataset_results/v0_agent_v2", "display": "V0 v2"},
+    "no_hw": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_hw_agent", "display": "No-HW"},
+    "no_shaped_reward": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_shaped_reward_agent", "display": "No-ShapedRwd"},
+    "no_transformer": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_transformer_agent", "display": "No-Transformer"},
 }
 
 BASELINE_PATH = "results/new_dataset_results/baselines/mlir/eval_base.json"
@@ -57,7 +63,7 @@ def get_model_checkpoint_indices(models_dir: str) -> set[int]:
         m = re.match(r"model_(\d+)\.pt", f)
         if m:
             idx = int(m.group(1))
-            if idx >= 100 and idx % 100 == 0:
+            if idx >= 50 and idx % 50 == 0:
                 indices.add(idx)
     return indices
 
@@ -143,8 +149,14 @@ def main():
                         help="Show only the best checkpoint per agent")
     parser.add_argument("--min-benchs", type=int, default=100,
                         help="Minimum benchmarks for --best mode (default: 100)")
+    parser.add_argument("--corrupted", action="store_true",
+                        help="Show checkpoints with fewer than --corrupted-threshold benchmarks")
+    parser.add_argument("--corrupted-threshold", type=int, default=2000,
+                        help="Benchmark count threshold for corruption detection (default: 2000)")
     parser.add_argument("-c", "--checkpoint", type=int,
                         help="Show only a specific checkpoint (e.g. -c 500)")
+    parser.add_argument("--json", metavar="FILE",
+                        help="Export results as JSON to file")
     args = parser.parse_args()
 
     agents = args.agents if args.agents else sorted(AGENT_REGISTRY.keys())
@@ -221,15 +233,34 @@ def main():
                 best_by_agent[key] = row
         all_rows = list(best_by_agent.values())
 
+    # Corrupted checkpoint detection
+    corrupted_rows = [r for r in all_rows if r["benchmarks"] < args.corrupted_threshold]
+
     if all_rows:
         columns = ["agent", "checkpoint", "benchmarks", "failed", "arith", "geo", "best", "worst"]
         print_table(all_rows, columns)
         print(f"\nTotal: {len(all_rows)} checkpoint evals")
 
+    if args.corrupted and corrupted_rows:
+        print(f"\n=== Potentially Corrupted Checkpoints ({len(corrupted_rows)}) ===")
+        print(f"  (fewer than {args.corrupted_threshold} benchmarks)\n")
+        columns = ["agent", "checkpoint", "benchmarks", "failed", "arith", "geo"]
+        print_table(corrupted_rows, columns)
+
     if args.missing and missing_list:
         print(f"\n=== Missing Evaluations ({len(missing_list)}) ===")
         columns = ["agent", "checkpoint", "status"]
         print_table(missing_list, columns)
+
+    if args.json and all_rows:
+        export = {
+            "checkpoints": all_rows,
+            "corrupted": corrupted_rows,
+            "missing": missing_list,
+        }
+        with open(args.json, "w") as f:
+            json.dump(export, f, indent=2)
+        print(f"\nExported to {args.json}")
 
     if not all_rows and not missing_list:
         print("No evaluation data found.")

@@ -86,6 +86,47 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
+## Datasets
+
+Two datasets exist under `data/`:
+
+| Dataset | Files | Dtype | Format | Purpose |
+|---------|-------|-------|--------|---------|
+| `new_dataset/all/` | 12K+ | f32 | `{model}_{op}_{idx}.mlir` | Primary training/eval (24 NN models) |
+| `paper_dataset/new_single_ops/` | 405 | f32 | `{model}_{op}_{idx}.mlir` | Paper single-op benchmarks (18 models) |
+| `paper_dataset/old_paper_dataset/` | 1,202 | f64 | `{op}_{dims}.mlir` | Legacy paper data (matmul, add, conv, pooling, relu) |
+| `data/lqcd/` | 155 | f64 | `{op}_{dims}.mlir` | Lattice QCD kernels + full models (moved from old_paper_dataset) |
+
+**`new_dataset`** is the active dataset for training. Splits: `all/train/` (9,443), `all/eval/` (2,372), `all/eval_full/` (948).
+
+**`paper_dataset`** is for paper-specific experiments. No baseline JSONs exist yet — must generate before training.
+
+### Creating / Extending Datasets
+
+Pipeline: `raw model → MLIR → extract blocks → baseline timing → train/eval split`
+
+```bash
+# 1. Convert model to MLIR (vision example)
+python data_utils/vision2mlir.py --model resnet18 --output-dir data/new_dataset/nn/raw_bench/
+
+# 2. Extract operation blocks
+python data_utils/extract_blocks.py \
+  --input data/new_dataset/nn/raw_bench/resnet18_linalg.mlir \
+  --output-dir data/new_dataset/nn/code_files/bench_train/ \
+  --window 5 --stride 3
+
+# 3. Generate baseline timings
+python scripts/baseline/get_base.py --benchmarks-dir data/new_dataset/all/train \
+  --output results/new_dataset_results/baselines/mlir/train_base.json
+
+# 4. Split into train/eval
+python scripts/data/split_json.py config/new_dataset/train/v4_7.json
+```
+
+Key scripts: `data_utils/orchestrate.py` (unified CLI), `data_utils/extract_blocks.py`, `data_utils/extract_ops.py`, `scripts/baseline/get_base.py`.
+
+**MLIR file requirements:** Must have `{tag = "operation_NNN"}` on linalg ops, `@nanoTime()` wrapper, weights as function args, `@main` returning `(tensor, i64)`.
+
 ## Results Directory Architecture (flat)
 
 ```

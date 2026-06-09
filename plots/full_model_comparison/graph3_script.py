@@ -16,7 +16,7 @@ our_speedup   = df["No-Reward_total_speedup"].tolist()  # green bars (Our Agent)
 x = np.arange(len(models))
 width = 0.35
 
-fig, ax = plt.subplots(figsize=(32, 12))
+fig, ax = plt.subplots(figsize=(18, 6))
 
 # Draw bars; skip NaN for prior agent
 for i, (p, o) in enumerate(zip(prior_speedup, our_speedup)):
@@ -30,10 +30,10 @@ ax.axhline(y=1.0, color="gray", linestyle="--", linewidth=1.0, zorder=2)
 
 # Axes formatting
 ax.set_xticks(x)
-ax.set_xticklabels(models, rotation=45, ha="right", fontsize=20)
+ax.set_xticklabels(models, rotation=45, ha="right", fontsize=15)
 ax.set_xlabel('Models', fontsize=18, fontweight='bold')
 ax.set_ylabel("Total Model Speedup", fontsize=18, fontweight='bold')
-ax.set_title("Full Model Speedup (Prior Agent vs Our Agent)", fontsize=24, fontweight='bold')
+ax.set_title("Full Model Speedup (Prior Agent vs Our Agent)", fontsize=22, fontweight='bold')
 ax.set_xlim(-0.6, len(models) - 0.4)
 ax.set_ylim(0, None)
 

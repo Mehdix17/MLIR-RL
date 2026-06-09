@@ -70,7 +70,7 @@
   "reward_shaping_weight_vectorizable": 0.1,
   "reward_shaping_weight_parallel": 0.1,
   "reward_shaping_vectorization_bonus": 0.2,
-  "eval_runs": 5,
-  "eval_aggregation": "median",
+  "eval_runs": 1,
+  "eval_aggregation": "min",
   "value_batch_size": 32
 }

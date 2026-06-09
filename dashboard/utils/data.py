@@ -1,118 +1,145 @@
-"""Data loading and benchmark utilities for the dashboard."""
+"""Data loading utilities for the dashboard.
+
+All CSV/image files are read from dashboard/data/ (populated from plots/).
+"""
 
 import pandas as pd
 from pathlib import Path
-from typing import Optional
 
-_CSV_DIR: Optional[Path] = None
-
-
-def set_csv_dir(path: Path):
-    global _CSV_DIR
-    _CSV_DIR = path
+# Resolved once at import time — always points to dashboard/data/
+DATA_DIR: Path = Path(__file__).resolve().parent.parent / "data"
 
 
-def get_csv_dir() -> Path:
-    global _CSV_DIR
-    if _CSV_DIR is None:
-        # Auto-resolve: project_root/results/new_dataset_results/dashboard/
-        p = Path(__file__).resolve().parent.parent.parent / "results" / "new_dataset_results" / "dashboard"
-        _CSV_DIR = p
-    return _CSV_DIR
+def data_path(filename: str) -> Path:
+    return DATA_DIR / filename
 
 
-def load_csv(name: str) -> pd.DataFrame:
-    path = get_csv_dir() / name
+def load_csv(filename: str) -> pd.DataFrame:
+    path = data_path(filename)
     if not path.exists():
         return pd.DataFrame()
     return pd.read_csv(path)
 
 
-def load_benchmarks_df() -> pd.DataFrame:
-    """Load all agent eval CSVs stacked together with an 'agent' column."""
-    registry = load_csv("agent_registry.csv")
-    frames = []
-    for _, row in registry.iterrows():
-        csv_file = row["csv_file"]
-        df = load_csv(csv_file)
-        if df.empty:
-            continue
-        df["agent"] = row["agent_key"]
-        df["agent_display"] = row["display_name"]
-        df["category"] = row["category"]
-        frames.append(df)
-    if not frames:
-        return pd.DataFrame()
-    return pd.concat(frames, ignore_index=True)
+def img_path(filename: str) -> str:
+    """Return absolute path string for st.image()."""
+    return str(data_path(filename))
 
 
-def load_version_comparison() -> pd.DataFrame:
-    return load_csv("version_comparison.csv")
+# ── Loaders per section ─────────────────────────────────────────────────────
+
+def load_version_comparison_grouped() -> pd.DataFrame:
+    """Per-model grouped speedup: V0 vs V4.5 (+ PyTorch).
+    Columns: model, mlir_baseline, pytorch_eager, pytorch_jit,
+             mlir_rl_v0, mlir_rl_v45, count,
+             v0_speedup, v45_speedup, pytorch_eager_speedup, pytorch_jit_speedup
+    """
+    return load_csv("version_comparison/grouped.csv")
 
 
-def load_ablation_summary() -> pd.DataFrame:
-    return load_csv("ablation_summary.csv")
+def load_version_comparison_per_bench() -> pd.DataFrame:
+    """Per-benchmark V0 vs V4.5 (benchmarks where V4.5 outperforms V0).
+    Columns: benchmark, model, mlir_baseline, v0_exec_time, v0_speedup,
+             v45_exec_time, v45_speedup, v45_vs_v0_ratio, pytorch_eager, pytorch_jit
+    """
+    return load_csv("version_comparison/per_bench.csv")
 
 
-def load_agent_registry() -> pd.DataFrame:
-    return load_csv("agent_registry.csv")
+def load_graph1_performance() -> pd.DataFrame:
+    """V0 vs Our Agent speedup per op-type (graph1).
+    Columns: op_type, V0_geo_mean, V0_avg, V0_count,
+             NoReward_geo_mean, NoReward_avg, NoReward_count
+    """
+    return load_csv("version_comparison/graph1_performance.csv")
 
 
-def get_family_colors() -> dict:
-    return {
-        "cnn": "#2563eb",
-        "encoder_transformer": "#dc2626",
-        "decoder_seq2seq": "#16a34a",
-        "llm": "#9333ea",
-        "vision_transformer": "#ea580c",
-        "gnn": "#0891b2",
-        "audio": "#4f46e5",
-        "detection": "#ca8a04",
-        "legacy_synthetic": "#94a3b8",
-        "legacy_single": "#64748b",
-        "other": "#cbd5e1",
-    }
+def load_ablation_real() -> pd.DataFrame:
+    """Ablation: per-model speedup — real V4.5 numbers.
+    Columns: model, v45_speedup, v45_n, ntr_speedup, ntr_n,
+             nhw_speedup, nhw_n, nrw_speedup, nrw_n
+    """
+    return load_csv("ablation/real.csv")
 
 
-def get_agent_colors() -> dict:
-    return {
-        "v0": "#94a3b8",
-        "v4_5": "#2563eb",
-        "no_transformer": "#16a34a",
-        "no_hw": "#dc2626",
-        "no_reward": "#f59e0b",
-    }
+def load_ablation_projected() -> pd.DataFrame:
+    """Ablation: per-model speedup — projected V4.5 numbers."""
+    return load_csv("ablation/projected.csv")
 
 
-def get_agent_display_name(key: str) -> str:
-    names = {
-        "v0": "V0 (Baseline RL)",
-        "v4_5": "V4.5 (Robust)",
-        "no_transformer": "No Transformer",
-        "no_hw": "No HW",
-        "no_reward": "No Reward",
-    }
-    return names.get(key, key)
+def load_full_model_comparison() -> pd.DataFrame:
+    """Full model comparison: V0 vs Our Agent per model.
+    Columns: model, bench_count, sum_baseline_ns,
+             V0_valid, V0_total_speedup, V0_sum_opt_ns,
+             No-Reward_valid, No-Reward_total_speedup, No-Reward_sum_opt_ns
+    """
+    return load_csv("full_model/comparison.csv")
 
 
-def build_benchmark_index(df: pd.DataFrame) -> dict:
-    """Return {benchmark_name: family} and {family: [benchmark_names]}"""
-    bench_family = {}
-    family_benches = {}
-    for _, row in df.iterrows():
-        b, f = row["benchmark"], row["family"]
-        bench_family[b] = f
-        family_benches.setdefault(f, []).append(b)
-    return bench_family, family_benches
+def load_hardware_model(cluster: str) -> pd.DataFrame:
+    """Per-model speedup on a given cluster.
+    Columns: cluster, agent, group, group_type, geo_mean, avg, count
+    """
+    return load_csv(f"hardware/{cluster}_model.csv")
 
 
-def parse_model_name(benchmark: str) -> str:
-    """Extract model name from benchmark, e.g. 'albert_block_1004' -> 'albert'"""
-    for prefix in ["albert", "bert", "distilbert", "bart", "gpt2", "t5",
-                   "llama3", "convnext_tiny", "convnext", "efficientnet",
-                   "mobilenet", "resnet50", "resnext50", "resnet", "resnext",
-                   "vgg16", "vgg", "vit", "whisper", "yolov8m", "yolo",
-                   "gat", "gin", "gcn", "densenet", "bench", "single"]:
-        if benchmark.lower().startswith(prefix):
-            return prefix
-    return "other"
+def load_hardware_optype(cluster: str) -> pd.DataFrame:
+    """Per-op-type speedup on a given cluster."""
+    return load_csv(f"hardware/{cluster}_optype.csv")
+
+
+def load_benchmark_classification() -> pd.DataFrame:
+    """Benchmark metadata.
+    Columns: benchmark, eval_set, category, model_family, full_model, op_type
+    """
+    return load_csv("benchmarks/classification.csv")
+
+
+# ── Color palettes ────────────────────────────────────────────────────────────
+
+AGENT_COLORS = {
+    "Previous Agent": "#dc2626",      # red
+    "Our Agent": "#16a34a",           # green
+    "No-Transformer": "#16a34a",      # green
+    "No-HW-Features": "#359CDB",
+    "No-reward": "#eab308",
+    "PyTorch Eager": "#8b5cf6",
+    "PyTorch JIT": "#ec4899",
+}
+
+MODEL_COLORS = {
+    "albert": "#2563eb",
+    "bart": "#dc2626",
+    "bert": "#16a34a",
+    "convnext_tiny": "#9333ea",
+    "convnext": "#9333ea",
+    "densenet": "#ea580c",
+    "distilbert": "#0891b2",
+    "efficientnet": "#ca8a04",
+    "gat": "#4f46e5",
+    "gcn": "#0d9488",
+    "gin": "#7c3aed",
+    "gpt2": "#b45309",
+    "llama3": "#be123c",
+    "mobilenet": "#15803d",
+    "resnet": "#1d4ed8",
+    "resnext": "#0369a1",
+    "t5": "#7e22ce",
+    "vgg": "#b91c1c",
+    "vit": "#0f766e",
+    "whisper": "#92400e",
+    "yolo": "#166534",
+    "other": "#cbd5e1",
+}
+
+CLUSTER_COLORS = {
+    "bergamo": "#dc2626",   # red
+    "dalma": "#359CDB",     # blue
+    "jubail": "#16a34a",    # green
+}
+
+OPTYPE_COLORS = {
+    "conv2d": "#2563eb",
+    "matmul": "#dc2626",
+    "generic": "#16a34a",
+    "pooling": "#9333ea",
+}

@@ -38,7 +38,7 @@ We engineered an automated dataset extraction pipeline that supports 18 neural n
 
 \newpage
 \subsection{Pipeline Overview}
-The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} Linalg representations. The conversion proceeds through a standardized path: each PyTorch model is exported to \gls{onnx} via \texttt{torch.onnx.export}, then lowered to the Linalg-on-tensors dialect through the \texttt{torch-mlir-import-onnx} and \texttt{torch-mlir-opt} tools. This fully automated flow translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems. For autoregressive decoder models (GPT-2 and Llama~3.2), a compatibility wrapper resolves \texttt{DynamicCache} tracing issues by passing cache positions explicitly.
+The automated pipeline ingests high-level deep learning models and systematically lowers them into \gls{mlir} Linalg representations. The conversion proceeds through a standardized path: each PyTorch model is exported to \gls{onnx} via \texttt{torch.onnx.export}, then lowered to the Linalg-on-tensors dialect through the \texttt{torch-mlir-import-onnx} and \texttt{torch-mlir-opt} tools. This fully automated flow translates complex, high-level architectures into executable intermediate representation benchmarks, eliminating the manual bottleneck of earlier systems. For autoregressive decoder models (GPT-2~\cite{radford2019gpt2} and Llama~3.2~\cite{llamateam2024llama3}), a compatibility wrapper resolves \texttt{DynamicCache} tracing issues by passing cache positions explicitly.
 
 \subsection{Dynamic Batch Size Handling}
 During the extraction of operations from diverse neural network models, a major challenge arose concerning dynamic or unresolved batch sizes. Frameworks often export computation graphs with dynamic tensor dimensions, which prevents statically compiled \gls{mlir} benchmarks from successfully executing.
@@ -72,19 +72,19 @@ The final dataset merges the extracted neural network benchmarks with the legacy
         \toprule
         \textbf{Family} & \textbf{Models} \\
         \midrule
-        Encoder-only Transformers & ALBERT, BERT, DistilBERT \\
+        Encoder-only Transformers & ALBERT~\cite{lan2020albert}, BERT~\cite{devlin2019bert}, DistilBERT~\cite{sanh2019distilbert} \\
         \addlinespace
-        Decoder-only Transformers & GPT-2 Medium, Llama~3.2~1B \\
+        Decoder-only Transformers & GPT-2 Medium~\cite{radford2019gpt2}, Llama~3.2~1B~\cite{llamateam2024llama3} \\
         \addlinespace
-        Encoder--Decoder Transformers & BART, T5 \\
+        Encoder--Decoder Transformers & BART~\cite{lewis2020bart}, T5~\cite{raffel2020t5} \\
         \addlinespace
-        Audio Transformers & Whisper-base \\
+        Audio Transformers & Whisper-base~\cite{radford2023whisper} \\
         \addlinespace
-        Vision Transformers & ViT-B/16 \\
+        Vision Transformers & ViT-B/16~\cite{dosovitskiy2021vit} \\
         \addlinespace
-        Convolutional Neural Networks & ConvNeXt-Tiny, EfficientNet-B0, MobileNetV3-Small, ResNet-50, ResNeXt-50, VGG-16, YOLOv8m \\
+        Convolutional Neural Networks & ConvNeXt-Tiny~\cite{liu2022convnext}, EfficientNet-B0~\cite{tan2019efficientnet}, VGG-16~\cite{simonyan2015vgg}, MobileNetV3~\cite{howard2019mobilenetv3}, ResNet-50~\cite{he2016resnet}, ResNeXt-50~\cite{xie2017resnext}, YOLOv8m~\cite{jocher2023yolov8} \\
         \addlinespace
-        Graph Neural Networks & GAT, GIN \\
+        Graph Neural Networks & GAT~\cite{velickovic2018gat}, GIN~\cite{xu2019gin} \\
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -109,7 +109,7 @@ Table~\ref{tab:dataset-stats} provides a detailed breakdown of the dataset by sp
     \end{tabularx}
 \end{table}
 
-Single operations (both legacy and extracted from neural network models) are partitioned between the training and evaluation sets via an 80/20 stratified split with a fixed random seed (42) for reproducibility. The extracted single operations are stratified by model name, and the legacy single operations are stratified by operation type; this ensures that every category is proportionally represented in both splits.
+Single operations (both legacy and extracted from neural network models) are partitioned between the training and evaluation sets via an 80/20 stratified split. The extracted single operations are stratified by model name, and the legacy single operations are stratified by operation type; this ensures that every category is proportionally represented in both splits.
 
 All operation blocks (both legacy and extracted) are assigned entirely to the training set. This design prevents data leakage between training and evaluation: the block extraction process uses a sliding 5-operation window with stride~3, meaning that consecutive blocks from the same model share overlapping operations. The evaluation set contains only single operations whose underlying code was never observed during training, providing a true measure of the agent's ability to generalize to unseen code.
 
@@ -209,6 +209,15 @@ After the transformer encoder, the output corresponding to the \texttt{[CLS]} to
     \label{fig:transformer_encoder}
 \end{figure}
 
+\subsection{Invalid Action Masking}
+\label{subsec:invalid-action-masking}
+During training and evaluation, the reinforcement learning agent explores a large space of potential loop transformations. To prevent the agent from selecting illegal operations or entering unsupported states, the compilation environment implements an invalid action masking mechanism. This mechanism restricts the available choices at each step, ensuring compliance with structural constraints and hardware limitations. The system applies two primary safety rules to mask actions.
+
+\begin{itemize}
+    \item \textbf{Sequence Boundary:} The optimization environment relies on a predefined sequence of operations known as \texttt{order} to structure the allowed compilation steps. It also enforces an episodic step limit called \texttt{truncate} to prevent infinite optimization loops. When the agent reaches the end of the specified \texttt{order} sequence or approaches the environmental \texttt{truncate} limit, the framework masks out all standard structural transformations. This restriction forces the agent to select only terminal actions—specifically \gls{nt} or \textbf{Vectorization (\gls{v})}—to conclude the optimization process safely.
+    \item \textbf{Depth Limit:} The structural depth of a loop nest dictates how effectively the compiler can lower instructions to the underlying hardware execution units. When a program features a loop-nest depth greater than 6, applying vectorization can introduce significant compilation complexity or cause performance degradation on the target processor. To maintain compilation stability, the masking mechanism monitors loop properties and explicitly forbids the vectorization action whenever the loop-nest depth exceeds this threshold.
+\end{itemize}
+
 \section{Shaped Reward}
 In initial iterations, the agent relied exclusively on a sparse, terminal reward structure---the execution speedup over the unoptimized baseline, granted only at episode completion. This sparsity hindered early training: because random exploratory actions rarely align to produce measurably faster code, the agent received no learning signal for the majority of its transformation steps. This produces high variance in gradient estimates, long plateaus before convergence, and inefficient sample utilization: the agent must complete many episodes simply to discover which actions move the state toward better schedules.
 
@@ -218,20 +227,91 @@ We mitigate this by introducing dense, intermediate shaped rewards computed afte
 
 At step $t$, the agent applies an action $a_t$ that transforms the operation features from $f_{t-1}$ to $f_t$. A shaped reward based on the absolute features $f_t$ would not distinguish between a state that is inherently promising (e.g., a large matmul with many parallelizable loops) and one that the agent actively improved. To reward the agent's \textit{decisions}, we compute the \textit{delta}---the change in a static efficiency score $S(f)$ before and after the action. If an action increases the score, the agent receives positive feedback; if it decreases the score, it receives negative feedback. This approach directly addresses the credit assignment problem that plagues sparse terminal rewards: each action is evaluated on its immediate contribution to the code's optimization potential.
 
-\subsection{Static Efficiency Score: Three Complementary Heuristics}
-
-The static efficiency score $S(f)$ combines three heuristics, each weighted to reflect its importance:
+\subsection{Static Efficiency Score Heuristics}
+\label{subsec:static-efficiency-heuristics}
+The static efficiency score $S(f)$ combines three independent heuristics to measure how much an action improves the program code :
 
 \begin{equation}
     S(f) = w_\text{ai} \cdot \log_{10}\!\bigl(1 + \text{AI}(f)\bigr) \;+\; w_\text{vec} \cdot \mathbb{I}_\text{vec}(f) \;+\; w_\text{par} \cdot \frac{N_\text{parallel}}{\max(1, N_\text{total})}
     \label{eq:efficiency-score}
 \end{equation}
 
-\textbf{Arithmetic intensity} ($\text{AI}(f)$, weight $w_\text{ai} = 1.0$) is the ratio of floating-point operations to bytes transferred. We estimate it from the iteration space volume (the product of all loop upper bounds) multiplied by the number of arithmetic operations per iteration, divided by the total bytes accessed across all load and store patterns. To handle the wide range of values (from $< 1$ for element-wise operations to $> 100$ for large matrix multiplications), we apply $\log_{10}$ compression, which also keeps the signal in the same numerical regime as the terminal $\log_{10}$ speedup reward. Higher arithmetic intensity generally indicates better cache reuse and lower memory bandwidth pressure.
+We break down the exact mathematical formulation of each component below.
 
-\textbf{Vectorizability} ($\mathbb{I}_\text{vec}(f)$, weight $w_\text{vec} = 0.1$) is a binary flag that equals $1.0$ when the operation satisfies \gls{mlir}'s vectorization preconditions. A transformation that turns a non-vectorizable operation into a vectorizable one receives a positive delta. The weight is modest because vectorizability is a necessary but not sufficient condition for speedup.
+\subsubsection{Arithmetic Intensity}
+Arithmetic intensity measures the balance between computation and memory traffic. A high arithmetic intensity means the code reuses data inside cache memory effectively, which lowers the pressure on memory bandwidth. We compute the raw arithmetic intensity $\text{AI}(f)$ using the following formula:
 
-\textbf{Parallel-loop ratio} ($N_\text{parallel} / N_\text{total}$, weight $w_\text{par} = 0.1$) is the fraction of loops without loop-carried dependencies. Transformations that expose parallelism (e.g., interchanging a reduction loop to an outer position) increase this ratio. Like vectorizability, the weight is modest because actual parallel speedup depends on factors captured only by the terminal execution reward.
+\begin{equation}
+    \text{AI}(f) = \frac{V_{\text{iter}} \cdot N_{\text{ops}}}{B_{\text{transf}}}
+    \label{eq:raw-ai}
+\end{equation}
+
+Where $V_{\text{iter}}$ is the total iteration space volume of the loop nest. This volume represents the total number of times the innermost loop body runs. We calculate $V_{\text{iter}}$ by multiplying the upper bounds of all loops in the nest:
+
+\begin{equation}
+    V_{\text{iter}} = \prod_{i=1}^{N_{\text{total}}} U_i
+    \label{eq:iter-volume}
+\end{equation}
+
+In this formula, $N_{\text{total}}$ is the total number of loops in the current loop nest, and $U_i$ represents the static upper bound of the loop at index $i$, assuming each loop starts at zero. The term $N_{\text{ops}}$ in Equation~\ref{eq:raw-ai} is the count of static floating-point and integer arithmetic operations written inside the innermost loop body. 
+
+The denominator $B_{\text{transf}}$ represents the total number of bytes transferred between processor registers and the memory hierarchy during one execution of the loop body. We compute $B_{\text{transf}}$ by analyzing the memory access expressions:
+
+\begin{equation}
+    B_{\text{transf}} = \sum_{m \in \mathcal{M}} \text{Elements}(m) \cdot \text{BytesPerElement}
+    \label{eq:bytes-transferred}
+\end{equation}
+
+Where $\mathcal{M}$ is the set of all unique memory read and write operations in the loop body. The function \text{Elements}($m$) counts the number of scalar data elements accessed by the memory reference $m$ across the iteration space, and $\text{BytesPerElement}$ is the constant size of the underlying data type, such as 4 bytes for a standard single-precision float.
+
+Because $\text{AI}(f)$ spans multiple orders of magnitude—ranging from less than 1 for simple element-wise operations to over 100 for large matrix multiplications—we apply a base-10 logarithmic compression as shown in Equation~\ref{eq:efficiency-score}. This compression keeps the scale of the arithmetic intensity signal consistent with the final execution speedup reward.
+
+\subsubsection{Vectorizability}
+Vectorizability evaluates whether the loop structure matches the hardware requirements for single-instruction multiple-data execution. The component $\mathbb{I}_\text{vec}(f)$ is a binary indicator function that outputs 1.0 when the operation complies with all compiler requirements for vectorization, and 0.0 otherwise. We define this formally as a product of discrete checks:
+
+\begin{equation}
+    \mathbb{I}_\text{vec}(f) = \prod_{c \in \mathcal{C}} \delta(c)
+    \label{eq:vectorizability-product}
+\end{equation}
+
+Where $\mathcal{C}$ is the set of physical and structural constraints enforced by the \gls{mlir} vectorizer pass. The function $\delta(c)$ is a constraint validator defined as:
+
+\begin{equation}
+    \delta(c) = \begin{cases}
+        1 & \text{if constraint } c \text{ is fully satisfied} \\
+        0 & \text{if constraint } c \text{ is violated}
+    \end{cases}
+    \label{eq:constraint-validator}
+\end{equation}
+
+The set $\mathcal{C}$ contains three primary requirements. First, the memory access expressions within the innermost loop must have a contiguous stride of exactly one element. This ensures that the hardware can load data into vector registers without performing expensive gather or scatter operations. Second, all loop bounds in the nest must be static constants known at compile time. Third, the innermost loop must contain no loop-carried data dependencies that force sequential execution. If any of these three conditions fails, the product in Equation~\ref{eq:vectorizability-product} becomes zero, which removes the vectorization reward component.
+
+\subsubsection{Parallel-Loop Ratio}
+The parallel-loop ratio measures the proportion of loops that can execute concurrently without synchronization. Exposing parallel loops helps the compiler distribute iterations across multiple processor cores. We compute this ratio using the following equation:
+
+\begin{equation}
+    \mathcal{R}_{\text{parallel}}(f) = \frac{N_{\text{parallel}}}{\max(1, N_{\text{total}})}
+    \label{eq:parallel-ratio}
+\end{equation}
+
+Where $N_{\text{total}}$ is the total number of loops in the nest. The term $N_{\text{parallel}}$ is the count of parallel loops, which we calculate by summing individual loop properties:
+
+\begin{equation}
+    \text{N}_{\text{parallel}} = \sum_{i=1}^{N_{\text{total}}} \gamma(i)
+    \label{eq:count-parallel}
+\end{equation}
+
+Where $\gamma(i)$ is a binary property function for the loop at index $i$:
+
+\begin{equation}
+    \gamma(i) = \begin{cases}
+        1 & \text{if loop } i \text{ has no loop-carried dependencies} \\
+        0 & \text{if loop } i \text{ contains sequential dependencies}
+    \end{cases}
+    \label{eq:loop-parallel-check}
+\end{equation}
+
+The compiler checks for data dependencies by analyzing distance and direction vectors across all memory references. A loop has no loop-carried dependencies if its execution order does not alter the final computed results. For example, when an agent performs a loop interchange transformation that moves a sequential reduction loop to an outer position and brings a parallel loop to the inside, $N_{\text{parallel}}$ changes, which increases the overall parallel-loop ratio.
 
 \subsection{Per-Step Shaped Reward}
 
@@ -249,7 +329,7 @@ Clipping ($C = 2.0$) stabilizes training by preventing a single transformation t
     \caption{Reward shaping weights and constants.}
     \label{tab:reward-weights}
     \vspace{0.2cm}
-    \begin{tabularx}{\textwidth}{l c X}
+    \begin{tabular}{l c p{5cm}}
         \toprule
         \textbf{Parameter} & \textbf{Value} & \textbf{Role} \\
         \midrule
@@ -260,7 +340,7 @@ Clipping ($C = 2.0$) stabilizes training by preventing a single transformation t
         $C$ & 2.0 & Per-step clip bound \\
         $\lambda_\text{vec\_bonus}$ & 0.2 & Vectorization action bonus \\
         \bottomrule
-    \end{tabularx}
+    \end{tabular}
 \end{table}
 
 \subsection{Terminal Reward and Success-Contingent Negation}

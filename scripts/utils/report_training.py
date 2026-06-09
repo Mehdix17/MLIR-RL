@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Report training progression across versions from the new run_i/ architecture.
+"""Report training progression across versions.
 
 Usage:
   python scripts/utils/report_training.py                    # auto-detect all
   python scripts/utils/report_training.py -v v4_6 v4_7       # specific versions
   python scripts/utils/report_training.py -w 300             # watch mode, refresh every 300s
+  python scripts/utils/report_training.py --json out.json    # export results as JSON
 """
 
 import argparse
@@ -21,10 +22,14 @@ from collections import defaultdict
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 VERSION_REGISTRY = {
+    "v0": {"results_dir": "results/new_dataset_results/v0_agent"},
+    "v4_5": {"results_dir": "results/new_dataset_results/v4_5_agent"},
     "v4_6": {"results_dir": "results/new_dataset_results/v4_6_agent"},
     "v4_7": {"results_dir": "results/new_dataset_results/v4_7_agent"},
     "v4_8": {"results_dir": "results/new_dataset_results/v4_8_agent"},
-    "v0_v2": {"results_dir": "results/new_dataset_results/v0_agent_v2"},
+    "no_hw": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_hw_agent"},
+    "no_shaped_reward": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_shaped_reward_agent"},
+    "no_transformer": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_transformer_agent"},
 }
 
 
@@ -262,8 +267,11 @@ def format_table(data: list[dict]):
         trend_str = ""
         for it, sps in trend:
             if sps:
-                avg_sp = sum(sps) / len(sps)
-                trend_str += f"@{it}:{avg_sp:.2f} "
+                try:
+                    geo_sp = math.exp(sum(math.log(max(s, 1e-12)) for s in sps) / len(sps))
+                except (ValueError, OverflowError):
+                    geo_sp = 0.0
+                trend_str += f"@{it}:{geo_sp:.2f} "
         trend_str = trend_str.strip() or "-"
 
         if d.get("ckpt_file") == "results.json":
@@ -296,6 +304,8 @@ def main():
                         help="Explicit job_id:version pairs (e.g. 16157399:v4_6)")
     parser.add_argument("-n", "--trend-n", type=int, default=5,
                         help="Number of checkpoints for trend (default: 5)")
+    parser.add_argument("--json", metavar="FILE",
+                        help="Export results as JSON to file")
     args = parser.parse_args()
 
     if args.jobs:
@@ -357,6 +367,32 @@ def main():
             print("No training data found.")
             return
         format_table(data)
+
+        if getattr(args, 'json', None):
+            export = []
+            for d in data:
+                row = {
+                    "version": d.get("version"),
+                    "job_id": d.get("job_id"),
+                    "iteration": d.get("iteration"),
+                    "total": d.get("total"),
+                    "status": d.get("status"),
+                    "model_index": d.get("model_index"),
+                }
+                spds = d.get("train_speedups", [])
+                if spds:
+                    try:
+                        row["geo_mean"] = math.exp(sum(math.log(max(s, 1e-12)) for s in spds) / len(spds))
+                    except (ValueError, OverflowError):
+                        row["geo_mean"] = 0.0
+                    row["best"] = max(spds)
+                    row["worst"] = min(spds)
+                    row["n_benchmarks"] = len(spds)
+                row["failed"] = d.get("train_failed", 0)
+                export.append(row)
+            with open(args.json, "w") as f:
+                json.dump(export, f, indent=2)
+            print(f"\nExported to {args.json}")
 
     if args.watch:
         try:
