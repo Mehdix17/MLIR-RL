@@ -7,7 +7,7 @@
 
 V4.6, V4.7, and V4.8 all fail to learn on the single_ops_dataset due to **entropy collapse** — the policy becomes deterministic mid-training, producing identical actions for every benchmark on every subsequent iteration. V0 (baseline, no HW features, no shaped reward) does not suffer this problem and continues learning throughout training.
 
-**Key finding:** The combination of shaped reward + transformer encoder + high learning rate (0.001) causes the policy to converge prematurely to a local optimum with zero entropy. Once entropy reaches zero, PPO's policy gradient vanishes, making recovery impossible.
+**Key finding:** The combination of shaped reward + transformer encoder causes the policy to converge prematurely to a local optimum with zero entropy. Once entropy reaches zero, PPO's policy gradient vanishes, making recovery impossible.
 
 ---
 
@@ -19,6 +19,8 @@ V4.6, V4.7, and V4.8 all fail to learn on the single_ops_dataset due to **entrop
 | **V4.6** | rl_autoschedular_v4_5 (Transformer) | d=256, 8 heads, 3 layers | Yes | Yes (scale=0.05) | 0.001 | **Yes** — iter 6599 |
 | **V4.7** | rl_autoschedular_v4_5 (Transformer) | d=64, 2 heads, 2 layers | Yes | Yes (scale=0.05) | 0.001 | **Yes** — iter 9462 |
 | **V4.8** | rl_autoschedular_v4_5 (Transformer) | d=256, 8 heads, 3 layers | Yes | Yes (scale=0.05) | 0.001 | **Yes** — iter 8333 |
+
+All agents use the same lr=0.001. Learning rate is NOT a differentiating factor.
 
 ### Config Differences (V0 vs V4.6)
 
@@ -32,7 +34,7 @@ V4.6, V4.7, and V4.8 all fail to learn on the single_ops_dataset due to **entrop
 | `transformer_d_model` | N/A | `256` |
 | `lr` | `0.001` | `0.001` |
 
-The only architectural differences between V0 and V4.6 are: (1) Transformer vs LSTM, (2) HW feature observations enabled, (3) shaped reward enabled. V4.7 differs only in a smaller Transformer (d=64 vs d=256).
+The key differences between V0 and V4.6 are: (1) Transformer vs LSTM, (2) HW feature observations enabled, (3) shaped reward enabled. V4.7 differs only in a smaller Transformer (d=64 vs d=256). Learning rate (0.001) is identical.
 
 ---
 
@@ -129,7 +131,7 @@ All agents show flat per-iteration training speedup (~12.5-13x) throughout train
 
 ### Why entropy collapse happens in V4.x but not V0
 
-**V4.x has three factors that V0 lacks:**
+**V4.x has two factors that V0 lacks:**
 
 1. **Shaped reward** provides strong, consistent gradients that push the policy toward a specific local optimum. The shaped reward (scale=0.05, clip=0.1) gives intermediate feedback for improving arithmetic intensity and parallelism. This creates a gradient signal that is:
    - Much stronger than the sparse terminal reward
@@ -137,8 +139,6 @@ All agents show flat per-iteration training speedup (~12.5-13x) throughout train
    - Easy to exploit with a deterministic policy (just apply the same high-reward actions)
 
 2. **Transformer encoder** has higher capacity than LSTM. The transformer can represent complex state-action mappings more precisely, which means it can overfit to the shaped reward signal more efficiently. Once it finds a "good enough" policy for the shaped reward, the advantage of exploration drops to zero.
-
-3. **High learning rate (0.001)** accelerates both learning AND collapse. With a transformer's gradient magnitudes, 0.001 is aggressive. The policy gradient becomes very large early in training, pushing the policy toward the nearest local optimum rapidly.
 
 ### The collapse mechanism
 
@@ -199,27 +199,7 @@ if entropy.mean() < 0.01:
 "entropy_coef": 0.05
 ```
 
-### Fix 2: Cosine learning rate schedule (prevents aggressive early updates)
-
-**Problem:** Constant `lr=0.001` is too high for transformer with shaped reward.
-
-**Solution:** Use cosine annealing from 0.001 to 0.0001 over training.
-
-```python
-# In training loop
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-    optimizer, T_max=config.nb_iterations, eta_min=1e-4
-)
-```
-
-**Config change:**
-```json
-"lr": 0.001,
-"lr_scheduler": "cosine",
-"lr_min": 0.0001
-```
-
-### Fix 3: KL divergence penalty (prevents policy from moving too fast)
+### Fix 2: KL divergence penalty (prevents policy from moving too fast)
 
 **Problem:** PPO's clipped objective doesn't prevent the policy from collapsing if the clipped region is consistently hit.
 
@@ -242,7 +222,7 @@ total_loss = policy_loss + value_loss + kl_loss
 "kl_target": 0.01
 ```
 
-### Fix 4: Periodic entropy injection (nuclear option)
+### Fix 3: Periodic entropy injection (nuclear option)
 
 **Problem:** Once entropy reaches zero, standard PPO cannot recover.
 
@@ -259,7 +239,7 @@ if entropy.mean() < 0.05:
         param_group['lr'] *= 0.5
 ```
 
-### Fix 5: Disable shaped reward (nuclear option — proven to work)
+### Fix 4: Disable shaped reward (nuclear option — proven to work)
 
 **Problem:** Shaped reward is the primary driver of collapse.
 
@@ -273,9 +253,9 @@ This is equivalent to V0's training regime but with a transformer. Based on the 
 
 ### Recommended priority
 
-1. **Fix 1 + Fix 2** (entropy bonus + cosine LR) — minimal risk, addresses the most likely cause
-2. **Fix 5** (disable shaped reward) — proven to work, but removes HW features' contribution signal
-3. **Fix 3 + Fix 4** (KL penalty + entropy injection) — more complex, for robustness
+1. **Fix 1 + Fix 2** (entropy bonus + KL penalty) — minimal risk, addresses the most likely cause
+2. **Fix 4** (disable shaped reward) — proven to work, but removes HW features' contribution signal
+3. **Fix 3** (entropy injection) — nuclear option, use only if other fixes fail
 
 ---
 
