@@ -60,6 +60,10 @@ if (resume_from is None and force_new is None
         "Use --resume to continue training, or set FORCE_NEW=1 to overwrite."
     )
 
+# Clear per-iteration log files on fresh start to prevent accumulation
+if resume_from is None:
+    fl.clear_per_iter_logs()
+
 
 # Data loading
 def load_train_data():

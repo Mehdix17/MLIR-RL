@@ -21,16 +21,36 @@ from collections import defaultdict
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+DATASET_DIRS = {
+    "new": "results/new_dataset_results",
+    "single_ops": "results/single_ops_dataset_results",
+}
+
 VERSION_REGISTRY = {
     "v0": {"results_dir": "results/new_dataset_results/v0_agent"},
     "v4_5": {"results_dir": "results/new_dataset_results/v4_5_agent"},
     "v4_6": {"results_dir": "results/new_dataset_results/v4_6_agent"},
     "v4_7": {"results_dir": "results/new_dataset_results/v4_7_agent"},
     "v4_8": {"results_dir": "results/new_dataset_results/v4_8_agent"},
+    "v4_9_small": {"results_dir": "results/single_ops_dataset_results/v4_9_small_agent"},
+    "v4_9_large": {"results_dir": "results/single_ops_dataset_results/v4_9_large_agent"},
     "no_hw": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_hw_agent"},
     "no_shaped_reward": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_shaped_reward_agent"},
     "no_transformer": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_transformer_agent"},
 }
+
+
+def build_registry(dataset: str):
+    """Build version registry for a specific dataset."""
+    base = DATASET_DIRS.get(dataset, DATASET_DIRS["new"])
+    return {
+        "v0": {"results_dir": f"{base}/v0_agent"},
+        "v4_6": {"results_dir": f"{base}/v4_6_agent"},
+        "v4_7": {"results_dir": f"{base}/v4_7_agent"},
+        "v4_8": {"results_dir": f"{base}/v4_8_agent"},
+        "v4_9_small": {"results_dir": f"{base}/v4_9_small_agent"},
+        "v4_9_large": {"results_dir": f"{base}/v4_9_large_agent"},
+    }
 
 
 def _parse_config_version(config_path: str) -> str:
@@ -298,6 +318,8 @@ def format_table(data: list[dict]):
 def main():
     parser = argparse.ArgumentParser(description="Report training progression")
     parser.add_argument("-v", "--versions", nargs="*", help="Version names (e.g. v4_6 v4_7)")
+    parser.add_argument("-d", "--dataset", choices=["new", "single_ops"], default="new",
+                        help="Dataset to report (default: new)")
     parser.add_argument("-w", "--watch", type=int, nargs="?", const=300, metavar="SECS",
                         help="Auto-refresh every SECS seconds (default: 300)")
     parser.add_argument("-j", "--jobs", nargs="*",
@@ -308,6 +330,8 @@ def main():
                         help="Export results as JSON to file")
     args = parser.parse_args()
 
+    version_registry = build_registry(args.dataset)
+
     if args.jobs:
         version_jobs = dict(pair.split(":") for pair in args.jobs)
     else:
@@ -316,7 +340,7 @@ def main():
     if args.versions:
         versions = args.versions
     else:
-        versions = sorted(set(list(VERSION_REGISTRY.keys()) + list(version_jobs.keys())))
+        versions = sorted(set(list(version_registry.keys()) + list(version_jobs.keys())))
 
     versions = [v for v in versions if v in version_jobs]
     if not versions:
@@ -326,7 +350,8 @@ def main():
     running_jobs = get_running_jobs()
 
     def print_report():
-        print(f"\n=== Training Progress @ {time.strftime('%Y-%m-%d %H:%M:%S')} ===\n")
+        print(f"\n=== Training Progress @ {time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+        print(f"Dataset: {args.dataset}\n")
         data = []
         for version in versions:
             job_id = version_jobs.get(version)
@@ -337,7 +362,7 @@ def main():
             if not log_data:
                 continue
 
-            reg = VERSION_REGISTRY.get(version, {})
+            reg = version_registry.get(version, {})
             results_dir = reg.get("results_dir", "")
             agent_dir = os.path.join(PROJECT_ROOT, results_dir)
             train_dir = os.path.join(agent_dir, "train")

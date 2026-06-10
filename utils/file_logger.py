@@ -47,6 +47,27 @@ class FileLogger(metaclass=Singleton):
 
         self.files_dict: dict[str, FileInstance] = {}
 
+    def clear_per_iter_logs(self):
+        """Clear per-iteration log files (entropy, reward, speedup, etc.).
+
+        Call this on fresh training start to prevent accumulation across
+        resume runs. Each FileInstance will recreate its file on next write.
+        """
+        per_iter_files = [
+            'train/entropy', 'train/reward', 'train/final_speedup',
+            'train_ppo/policy_loss', 'train_ppo/value_loss',
+            'train_ppo/approx_kl', 'train_ppo/clip_frac',
+            'train_ppo/clip_factor', 'train_ppo/entropy_loss',
+            'eval/entropy', 'eval/reward', 'eval/cumulative_reward',
+            'eval/average_speedup', 'eval/arithmetic_mean_speedup',
+        ]
+        for path in per_iter_files:
+            full_path = os.path.join(self.logs_dir, path)
+            if os.path.exists(full_path):
+                os.remove(full_path)
+        # Clear cached FileInstance objects so they recreate files
+        self.files_dict.clear()
+
     def __getitem__(self, path: str):
         if path not in self.files_dict:
             full_path = os.path.join(self.logs_dir, path)

@@ -335,7 +335,7 @@ Notes/limitations:
 
 
 ### V4.6 — Reward-Fixed Classic Transformer
-- Status: complete (trained to iter 155, timed out at 5h; resumed, training at iter ~50)
+- Status: complete
 - Date completed: 2026-05-31
 - Novelty scope: Corrected reward shaping + optimizer checkpointing (same Classic Transformer as V4.5)
 - Package: `rl_autoschedular_v4_5` (shared with V4.5)
@@ -358,12 +358,16 @@ Architecture:
 
 Results (at iter 153, 5h timeout): avg speedup **1.82x**, best **16.69x**
 
+Config mismatch discovered (2026-06-10):
+- **Eval config** (`v4_6_eval.json`) used old reward values (scale=1.0, clip=2.0, vec_bonus=0.2)
+- **Train config** (`v4_6.json`) used corrected values (scale=0.05, clip=0.1, vec_bonus=0.0)
+- **Impact: None** — reward shaping only affects logged metrics during eval, not action selection or exec times
+
 Notes:
-- Eval config (`v4_6_eval.json`) still uses old reward values (scale=1.0, clip=2.0) — discrepancy with training
 - Training resumed after timeout, 72h time limit applied
 
 ### V4.7 — Reward-Fixed Small Transformer
-- Status: complete (trained to iter 238, timed out at 5h; resumed, training at iter ~58)
+- Status: complete
 - Date completed: 2026-05-31
 - Novelty scope: Same reward fixes as V4.6 but with reduced transformer for faster training
 - Package: `rl_autoschedular_v4_5` (shared with V4.5)
@@ -380,14 +384,19 @@ Results (at iter 238, 5h timeout):
 - Best: **7.66x**
 - Hypothesis: Smaller model converges faster initially but lacks capacity to sustain improvement — gradient noise or shaped reward exploitation causes regression
 
+Config mismatch discovered (2026-06-10):
+- **Eval config** (`v4_7_eval.json`) used old reward values (scale=1.0, clip=2.0, vec_bonus=0.2)
+- **Train config** (`v4_7.json`) used corrected values (scale=0.05, clip=0.1, vec_bonus=0.0)
+- **Impact: None** — same reason as V4.6
+
 Notes:
 - Peaked early (2.59x at iter 102) then degraded — classic overfitting to bad schedules
 - Valuable as an ablation: confirms d_model≥256 needed for stable convergence
 
 ### V4.8 — Reward-Fixed Classic Transformer (Eval-Corrected)
-- Status: complete (trained to iter 155, timed out at 5h; resumed, training at iter ~50)
+- Status: complete
 - Date completed: 2026-06-01
-- Novelty scope: Identical architecture to V4.6 with corrected eval config
+- Novelty scope: Identical architecture to V4.6 with corrected eval config (fixes V4.6 eval config mismatch)
 - Package: `rl_autoschedular_v4_5` (shared with V4.5)
 - Config selector: `"implementation": "rl_autoschedular_v4_5"`
 - Config file: `config/new_dataset/train/v4_8.json`
@@ -403,25 +412,46 @@ Notes:
 - Second run confirms Classic Transformer with reward fixes is viable
 - Eval config correction ensures fair comparison with train-era rewards
 
-### V4.9 — Pre-Seeded Execution Cache (Abandoned)
-- Status: **abandoned**
-- Date: 2026-06-01
-- Novelty scope: Offline schedule cache to accelerate early training iterations
-- Package: `rl_autoschedular_v4_5`
-- Config file: `config/new_dataset/train/v4_9.json`
+### V4.9 — No Shaped Reward (Entropy Collapse Fix)
+- Status: complete
+- Date completed: 2026-06-10
+- Novelty scope: Entropy collapse fix by removing shaped reward
+- Package: `rl_autoschedular_v4_9`
+- Config selector: `"implementation": "rl_autoschedular_v4_9"`
 
-Approach:
-- Generate N random schedules per training benchmark offline
-- Execute and cache results in `schedule_cache.json`
-- Training references cache via `main_exec_data_file` — cache hits skip execution
+Discovery (2026-06-10):
+- During single_ops_dataset experimentations, V4.6/V4.7/V4.8 all suffered **entropy collapse** mid-training
+- Entropy dropped to zero (from healthy 1.0-3.0), causing policy to freeze and produce identical actions
+- Root cause: shaped reward + transformer encoder → policy converges to deterministic local optimum
+- V0 (no shaped reward, LSTM) survived — entropy healthy throughout 14K+ iterations
 
-Why abandoned:
-- Random schedules overwhelmingly bad → timeout at 30s+ each
-- At N=20: 176K schedule executions, ~46h estimated vs 4h Slurm timeout
-- At N=5: only ~2.3% expected cache hit rate per trajectory step (5/216 possible sequences)
-- Pre-seeded cache delivers negligible training speedup for this dataset
+Key code changes:
+- `rl_autoschedular_v4_9/*`: full standalone copy of `rl_autoschedular_v4_5` with internal imports redirected to `rl_autoschedular_v4_9`
+- `rl_autoschedular_v4_9/env.py`:
+  - `__shaped_reward()` hardcoded to return 0.0 (shaped reward disabled)
+  - All helper methods (`__static_efficiency_score`, `__estimate_arithmetic_intensity`, etc.) kept as dead code
 
-Lesson: Pre-execution cache only viable when the schedule search space is small or when a strong prior (not uniform random) exists for schedule quality.
+Variants (config-driven):
+- **V4.9 small** (`config/single_ops_dataset/train/v4_9_small.json`): V4.7 transformer (d=64, 2 heads, 2 layers, ffn=128)
+- **V4.9 large** (`config/single_ops_dataset/train/v4_9_large.json`): V4.8 transformer (d=256, 8 heads, 3 layers, ffn=1024)
+
+Config files:
+- `config/single_ops_dataset/train/v4_9_small.json` — training config for small variant
+- `config/single_ops_dataset/train/v4_9_large.json` — training config for large variant
+- `config/single_ops_dataset/eval/v4_9_small_eval.json` — eval config for small variant
+- `config/single_ops_dataset/eval/v4_9_large_eval.json` — eval config for large variant
+
+Validation:
+- All 15 Python files compile successfully (`python -m py_compile`)
+- All 4 config files are valid JSON
+- No v4_5 references remain in V4.9 package
+- `reward_shaping_enabled: false` in both train and eval configs
+
+Notes/limitations:
+- V4.9 keeps all V4.5 reliability features (process isolation, dynamic timeouts, stability rails)
+- Shaped reward code kept as dead code (not deleted) for reference
+- Expected: entropy stays > 0.1 throughout training (like V0)
+- Expected: eval speedup improves over training (not flat like V4.6/V4.7/V4.8)
 
 
 - Status: planned (future work)

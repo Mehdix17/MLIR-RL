@@ -21,6 +21,16 @@ from collections import defaultdict
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+DATASET_DIRS = {
+    "new": "results/new_dataset_results",
+    "single_ops": "results/single_ops_dataset_results",
+}
+
+DATASET_BASELINES = {
+    "new": "results/new_dataset_results/baselines/mlir/eval_base.json",
+    "single_ops": "results/single_ops_dataset_results/baselines/mlir/base_eval.json",
+}
+
 AGENT_REGISTRY = {
     "v0": {"results_dir": "results/new_dataset_results/v0_agent", "display": "V0"},
     "v4_5": {"results_dir": "results/new_dataset_results/v4_5_agent", "display": "V4.5"},
@@ -35,12 +45,34 @@ AGENT_REGISTRY = {
 BASELINE_PATH = "results/new_dataset_results/baselines/mlir/eval_base.json"
 
 
+def build_agent_registry(dataset: str):
+    """Build agent registry for a specific dataset."""
+    base = DATASET_DIRS.get(dataset, DATASET_DIRS["new"])
+    return {
+        "v0": {"results_dir": f"{base}/v0_agent", "display": "V0"},
+        "v4_6": {"results_dir": f"{base}/v4_6_agent", "display": "V4.6"},
+        "v4_7": {"results_dir": f"{base}/v4_7_agent", "display": "V4.7"},
+        "v4_8": {"results_dir": f"{base}/v4_8_agent", "display": "V4.8"},
+        "v4_9_small": {"results_dir": f"{base}/v4_9_small_agent", "display": "V4.9-S"},
+        "v4_9_large": {"results_dir": f"{base}/v4_9_large_agent", "display": "V4.9-L"},
+    }
+
+
 def load_baseline():
     """Load baseline execution times."""
     path = os.path.join(PROJECT_ROOT, BASELINE_PATH)
     if not os.path.isfile(path):
         return {}
     with open(path) as f:
+        return json.load(f)
+
+
+def load_baseline_from_path(path: str):
+    """Load baseline execution times from a specific path."""
+    full_path = os.path.join(PROJECT_ROOT, path) if not os.path.isabs(path) else path
+    if not os.path.isfile(full_path):
+        return {}
+    with open(full_path) as f:
         return json.load(f)
 
 
@@ -143,6 +175,8 @@ def main():
     parser = argparse.ArgumentParser(description="Report evaluation progression")
     parser.add_argument("-v", "--agents", nargs="*",
                         help="Agent keys (e.g. v4_6 v4_7)")
+    parser.add_argument("-d", "--dataset", choices=["new", "single_ops"], default="new",
+                        help="Dataset to report (default: new)")
     parser.add_argument("--missing", action="store_true",
                         help="Show checkpoints that have models but no eval")
     parser.add_argument("--best", action="store_true",
@@ -159,19 +193,22 @@ def main():
                         help="Export results as JSON to file")
     args = parser.parse_args()
 
-    agents = args.agents if args.agents else sorted(AGENT_REGISTRY.keys())
+    agent_registry = build_agent_registry(args.dataset)
+    baseline_path = DATASET_BASELINES.get(args.dataset, DATASET_BASELINES["new"])
 
-    baseline = load_baseline()
+    agents = args.agents if args.agents else sorted(agent_registry.keys())
+
+    baseline = load_baseline_from_path(baseline_path)
     if baseline:
-        print(f"Baseline: {len(baseline)} benchmarks")
+        print(f"Baseline: {len(baseline)} benchmarks ({baseline_path})")
     else:
-        print("Warning: Baseline not found, showing raw exec times")
+        print(f"Warning: Baseline not found at {baseline_path}, showing raw exec times")
 
     all_rows = []
     missing_list = []
 
     for agent_key in agents:
-        reg = AGENT_REGISTRY.get(agent_key)
+        reg = agent_registry.get(agent_key)
         if not reg:
             continue
         agent_dir = os.path.join(PROJECT_ROOT, reg["results_dir"])
