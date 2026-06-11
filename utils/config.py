@@ -130,6 +130,12 @@ class Config(metaclass=Singleton):
     """Number of execution runs per benchmark during evaluation (default 1 = single run)."""
     eval_aggregation: Literal['min', 'median', 'mean'] = 'min'
     """Aggregation method for multiple eval runs: min, median, or mean."""
+    ppo_clip_range: float = 0.2
+    """PPO policy ratio clipping bound."""
+    gae_lambda: float = 0.95
+    """GAE (Generalized Advantage Estimation) lambda discount factor."""
+    max_grad_norm: float = 0.5
+    """Maximum gradient norm for clipping."""
 
     def __init__(self):
         """Load the configuration from the JSON file

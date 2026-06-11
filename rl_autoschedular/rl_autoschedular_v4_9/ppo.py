@@ -252,7 +252,7 @@ def ppo_update(trajectory: TrajectoryData, model: Model, optimizer: torch.optim.
             optimizer.zero_grad()
             try:
                 loss.backward()
-                clip_factor = torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+                clip_factor = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
                 optimizer.step()
             except Exception as e:
                 print_error(
@@ -308,7 +308,7 @@ def value_update(trajectory: TrajectoryData, model: Model, optimizer: torch.opti
             optimizer.zero_grad()
             try:
                 loss.backward()
-                clip_factor = torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+                clip_factor = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
                 optimizer.step()
             except Exception as e:
                 print_error(

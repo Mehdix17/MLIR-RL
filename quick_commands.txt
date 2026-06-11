@@ -63,3 +63,5 @@ find folder/path/ -type f | wc -l
 # ---------- Check user quota (disk space and files count) ----------
 
 lfs quota -u $USER directory/path
+
+lfs quota -u $USER .

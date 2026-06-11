@@ -173,7 +173,7 @@ class PolicyModel(nn.Module):
 
         return ActionSpace.distributions(obs, *actions_logits)
 
-    def loss(self, actions_log_p: torch.Tensor, actions_bev_log_p: torch.Tensor, off_policy_rates: torch.Tensor, advantages: torch.Tensor, clip_range: float = 0.2) -> tuple[torch.Tensor, torch.Tensor]:
+    def loss(self, actions_log_p: torch.Tensor, actions_bev_log_p: torch.Tensor, off_policy_rates: torch.Tensor, advantages: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Calculate the policy loss.
 
         Args:
@@ -181,12 +181,12 @@ class PolicyModel(nn.Module):
             actions_bev_log_p (torch.Tensor): The log probabilities of the actions under the behavior policy.
             off_policy_rates (torch.Tensor): The rate between the old policy and the behavioral (mu) policy.
             advantages (torch.Tensor): The advantages of the actions.
-            clip_range (float): The clipping range for the policy loss.
 
         Returns:
             torch.Tensor: The policy loss.
             float: The ratio clip fraction (for logging purposes)
         """
+        clip_range = Config().ppo_clip_range
         ratios = torch.exp(torch.clamp(actions_log_p - actions_bev_log_p, -80.0, 80.0))
         surr1 = ratios * advantages
         surr2 = torch.clamp(ratios, (1 - clip_range) * off_policy_rates, (1 + clip_range) * off_policy_rates) * advantages

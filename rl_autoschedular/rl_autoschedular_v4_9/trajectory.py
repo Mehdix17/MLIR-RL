@@ -301,17 +301,17 @@ class TrajectoryData(Dataset):
 
             self.returns[t] = last_return
 
-    def __compute_gae(self, gamma: float = 1.0, lambda_: float = 0.95) -> torch.Tensor:
+    def __compute_gae(self, gamma: float = 1.0) -> torch.Tensor:
         """Compute the Generalized Advantage Estimation.
 
         Args:
             gamma (float): discount factor.
-            lambda_ (float): GAE factor.
 
         Returns:
             torch.Tensor: advantages.
             torch.Tensor: returns.
         """
+        lambda_ = Config().gae_lambda
         self.advantages = torch.zeros(len(self), dtype=torch.float32)
         last_advantage = 0
 

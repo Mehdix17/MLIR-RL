@@ -60,5 +60,8 @@
   "transformer_activation": "gelu",
   "transformer_pooling": "cls",
   "transformer_use_action_history_token": false,
-  "value_batch_size": 32
+  "value_batch_size": 32,
+  "ppo_clip_range": 0.2,
+  "gae_lambda": 0.95,
+  "max_grad_norm": 0.5
 }
