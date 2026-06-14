@@ -93,13 +93,9 @@ Two datasets exist under `data/`:
 | Dataset | Files | Dtype | Format | Purpose |
 |---------|-------|-------|--------|---------|
 | `new_dataset/all/` | 12K+ | f32 | `{model}_{op}_{idx}.mlir` | Primary training/eval (24 NN models) |
-| `paper_dataset/new_single_ops/` | 405 | f32 | `{model}_{op}_{idx}.mlir` | Paper single-op benchmarks (18 models) |
-| `paper_dataset/old_paper_dataset/` | 1,202 | f64 | `{op}_{dims}.mlir` | Legacy paper data (matmul, add, conv, pooling, relu) |
+| `single_ops_dataset/new_single_ops/` | 405 | f32 | `{model}_{op}_{idx}.mlir` | Paper single-op benchmarks (18 models) |
+| `single_ops_dataset/old_paper_dataset/` | 1,202 | f64 | `{op}_{dims}.mlir` | Legacy paper data (matmul, add, conv, pooling, relu) |
 | `data/lqcd/` | 155 | f64 | `{op}_{dims}.mlir` | Lattice QCD kernels + full models (moved from old_paper_dataset) |
-
-**`new_dataset`** is the active dataset for training. Splits: `all/train/` (9,443), `all/eval/` (2,372), `all/eval_full/` (948).
-
-**`paper_dataset`** is for paper-specific experiments. No baseline JSONs exist yet — must generate before training.
 
 ### Creating / Extending Datasets
 
@@ -136,7 +132,6 @@ results/new_dataset_results/<agent_dir>/
 │   └── checkpoint_100.json       # Snapshot every 100 iters
 ├── eval/
 │   ├── checkpoint_100.json       # {bench: exec_time_ns} per eval checkpoint
-│   └── markers/<ckpt>/           # Eval crash-resilience markers
 ├── logs/
 │   ├── exec_data.json            # Execution time cache
 │   ├── tags
@@ -183,9 +178,8 @@ FORCE_NEW=1 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
 `/scratch` has **500K file soft limit**, **1M hard limit**. Training + evals can consume files quickly:
 - Each model checkpoint = 1 file (~45MB)
 - `train/results.json` accumulates ~8K entries across training
-- Eval markers create 2K+ files per checkpoint eval
 
-Before submitting many eval jobs, check `lfs quota -u $USER /scratch`. If near limit, clean with `scripts/utils/cleanup_quota.py` (thins model checkpoints, removes obsolete markers).
+Before submitting many eval jobs, check `lfs quota -u $USER /scratch`. If near limit, notify user
 
 ## Implementation Packages
 
@@ -232,7 +226,6 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessibl
 - **SIGABRT handler** catches MLIR crashes so training continues past bad schedules.
 - **BindingsProcess.ENABLED must stay False** — fork corrupts MLIR C++ state.
 - **Model checkpoints saved every 50 iterations** (not every iteration) to limit disk usage.
-- **Eval crash resilience**: markers in `run_N/eval/markers/<ckpt>/`. Restarting eval auto-skips completed benchmarks.
 
 ## Key Docs
 

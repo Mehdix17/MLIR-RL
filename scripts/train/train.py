@@ -204,4 +204,8 @@ for step in range(start_step, cfg.nb_iterations):
         print_info(f"Iteration {step} crashed (MLIR SIGABRT): {e}", flush=True)
         continue
 
-
+# Save final model
+torch.save(
+    {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': step},
+    os.path.join(fl.models_dir, f'model_{step + 1}.pt')
+)
