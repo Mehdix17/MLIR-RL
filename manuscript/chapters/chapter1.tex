@@ -100,6 +100,15 @@ Before applying any transformation, the compiler must analyze the program to det
 
 These analyses are typically formulated as iterative fixed-point computations over a lattice of data-flow facts. In modern multi-level intermediate representations, dependency analyses for loop transformations are frequently augmented by specialized multi-dimensional infrastructure or polyhedral representation abstractions.
 
+
+
+\subsection{Automatic Code Optimization}
+
+
+A large body of research in the compiler community has focused on automatic code optimization. Prominent approaches include polyhedral compilation and deep-learning-based optimization methods.
+The polyhedral model~\cite{Feautrier2011} provides a mathematical framework for representing programs and code transformations. It enables sophisticated iteration-space, data-locality, and memory-management optimizations~\cite{Iri88,feautrier_array_1988,wolf1991loop,lefebvre_automatic_1998,Qui00,thies_unified_2001,Darte_contraction_2005,bondhugula_practical_2008, baghdadi2015PhD,baghdadi2019tiramisu,baghdadi2018tiramisu1,trifunovic_graphite_2010,polly,tobias_hexagonal_cgo13,Vasilache2018TensorCF,baghdadi2011speculation,merouani2020deep, pouchet.11.popl,baghdadi2020tiramisuDNNDenseSparse}. More recent approaches use deep learning to complement and automate compiler optimization. These approaches learn predictive models that estimate transformation costs, guide optimization search, and recommend profitable transformations, thereby improving performance portability and reducing exploration time~\cite{adams2019learning,baghdadi2021deep,merouani2020deep,chen2018learning,zheng2020ansor,mendis2019ithemal,polygym,merouani2024looper,hakimi2023hybrid,mezdour2023deep,mlirlr,pearl,compilot,autophase2019,mlgo,compilergym,felix,looper_data_arxiv25,predictivepolyhedral,huanting2022ss,rl_hsl}.
+
+
 \section{Loop Nest Optimization}
 
 Loops account for the vast majority of execution time in compute-intensive programs, particularly in scientific computing and machine learning workloads. A \textit{loop nest} is a set of loops where one loop is contained within the body of another. For example, matrix multiplication involves three nested loops iterating over rows, columns, and the inner product dimension. Optimizing loop nests is therefore one of the most impactful activities an optimizing compiler can perform.

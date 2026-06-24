@@ -1,5 +1,6 @@
-\chapter*{General Introduction}
+\chapter*{General Introduction} % Added * to prevent numbering if desired
 \addcontentsline{toc}{chapter}{General Introduction}
+\markboth{GENERAL INTRODUCTION}{GENERAL INTRODUCTION} % Updates the header
 \label{ch:introduction}
 
 Code optimization is a fundamental area of computer science concerned with transforming programs to improve their execution time, memory usage, and energy consumption. Automatically applying code optimizations at the compiler level involves selecting and parameterizing sequences of transformations such as loop tiling, interchange, fusion, vectorization, and parallelization. Traditionally, compilers rely on hand-crafted heuristics developed by domain experts, a process that is slow, fragile across architectures, and difficult to generalize to new program patterns. The core difficulty is the \textbf{phase ordering problem}: transformations interact in non-linear ways, and a locally beneficial decision can result in a worse global configuration~\cite{touati2014phase}. These challenges have motivated a growing interest in automated, data-driven approaches to compiler optimization.
