@@ -18,7 +18,7 @@
 #   sbatch --array=0-19 scripts/optimize_full_model.sh config/my.json /path/to/model.pt
 #
 #   # Process specific models by name:
-#   sbatch scripts/optimize_full_model.sh config/full_model/full_model_optim.json /path/to/model.pt gcn distilbert
+#   sbatch scripts/optimize_full_model.sh config/old_dataset/full_model/full_model_optim.json /path/to/model.pt gcn distilbert
 #
 #   # Submit + monitor:
 #   scripts/submit_and_monitor.sh scripts/optimize_full_model.sh
@@ -67,7 +67,7 @@ ALL_MODELS=(
 )
 
 # ---- config ----------------------------------------------------------------
-CONFIG_FILE="${1:-$PROJECT_ROOT/config/full_model/full_model_optim.json}"
+CONFIG_FILE="${1:-$PROJECT_ROOT/config/old_dataset/full_model/full_model_optim.json}"
 if [[ "$CONFIG_FILE" != /* ]]; then
     CONFIG_FILE="$PROJECT_ROOT/$CONFIG_FILE"
 fi

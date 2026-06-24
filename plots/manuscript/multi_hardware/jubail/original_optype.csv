@@ -1,0 +1,11 @@
+cluster,agent,group,group_type,geo_mean,avg,count
+jubail,No-Reward (HW),block,op_type,5.3986,10.3816,1335
+jubail,No-Reward (HW),conv2d,op_type,4.6384,6.4888,71
+jubail,No-Reward (HW),generic,op_type,0.9508,1.1335,106
+jubail,No-Reward (HW),matmul,op_type,0.3117,0.3737,208
+jubail,No-Reward (HW),pooling,op_type,0.9774,1.1075,315
+jubail,No-Reward (No-HW),block,op_type,5.2503,10.0678,1335
+jubail,No-Reward (No-HW),conv2d,op_type,4.2957,6.0311,71
+jubail,No-Reward (No-HW),generic,op_type,0.9935,1.1614,106
+jubail,No-Reward (No-HW),matmul,op_type,0.2968,0.3572,190
+jubail,No-Reward (No-HW),pooling,op_type,0.9599,1.1066,315

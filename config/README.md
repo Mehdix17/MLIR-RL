@@ -1,105 +1,93 @@
 # config/ — MLIR-RL Configuration
 
-No files at root. Organized by purpose into subfolders.
+Two datasets, each with purpose-specific subfolders.
 
 ## Directory Layout
 
 ```
 config/
-├── train/                  Training/version configs (auto-selected by Slurm scripts)
-├── ablation/               Ablation study configs (V4.5 minus one feature)
-├── ablation_full_model/    Ablation full-model eval variants
-├── eval/                   Per-checkpoint eval configs (Dalma cluster)
-├── eval_bergamo/           Per-checkpoint eval configs (Bergamo cluster)
-├── full_model/             Full-model end-to-end optimization
-├── test/                   Sanity/minimal test configs
-└── misc/                   One-off / special-purpose configs
+├── old_dataset/              # Original experiment configs (V0–V4.5, ablations, multi-cluster)
+│   ├── train/                (8)  Version training configs
+│   ├── ablation/             (6)  Ablation study configs
+│   ├── ablation_full_model/  (3)  Ablation full-model variants
+│   ├── eval/                 (15) Per-checkpoint Dalma eval
+│   ├── eval_bergamo/         (14) Per-checkpoint Bergamo eval
+│   ├── full_model/           (1)  Full-model optimization
+│   ├── test/                 (3)  Sanity configs
+│   └── misc/                 (3)  One-off special-purpose
+│
+├── new_dataset/              # New dataset experiments (18 models, 11,770 blocks)
+│   ├── train/                (5)  Bergamo training configs
+│   ├── eval/                 (5)  Bergamo eval (overall perf + ablation)
+│   ├── eval_dalma/           (2)  Multi-hardware: Dalma
+│   ├── eval_jubail/          (2)  Multi-hardware: Jubail
+│   ├── full_model/           (2)  Full-model eval (all ops)
+│   └── test/                 (1)  Sanity
+│
+└── README.md
 ```
 
-## Subfolder Details
+## `old_dataset/` — Original Experiments
 
-### `train/` — Version Configs (8 files)
-Used for training and evaluation. Auto-selected by `train.sh` and `eval.sh` via array job mode: `config/train/${VERSION}.json`.
+Used by all existing shell scripts. Auto-selection: `config/old_dataset/train/${VERSION}.json`.
 
-| File | Implementation | Key Features |
-|------|---------------|--------------|
-| `baseline.json` | `rl_autoschedular` | Baseline LSTM policy |
-| `v1.json` | `rl_autoschedular_v1` | Hardware-aware observation |
-| `v2.json` | `rl_autoschedular_v2` | Shaped reward |
-| `v2_5.json` | `rl_autoschedular_v2_5` | Hardened shaped reward |
-| `v3.json` | `rl_autoschedular_v3` | Transformer encoder |
-| `v4.json` | `rl_autoschedular_v4` | Integrated V1+V2+V3 |
-| `v4_5.json` | `rl_autoschedular_v4_5` | Robust Integrated (trained) |
-| `train1.json` | `rl_autoschedular` | Shorter baseline training run |
+| Subfolder | Files | Purpose |
+|-----------|-------|---------|
+| `train/` | 8 | baseline, v1, v2, v2_5, v3, v4, v4_5, train1 |
+| `ablation/` | 6 | v45_no_hw, v45_no_shaped_reward, v45_no_transformer (block-based) |
+| `ablation_full_model/` | 3 | Full-model ablation variants |
+| `eval/` | 15 | Per-checkpoint eval (700–1999) on Dalma |
+| `eval_bergamo/` | 14 | Per-checkpoint eval (800–1999) on Bergamo |
+| `full_model/` | 1 | full_model_optim.json |
+| `test/` | 3 | test, v3_sanity, v4_sanity |
+| `misc/` | 3 | albert, example, hardware_eval |
 
-### `ablation/` — Ablation Study (6 files)
-Each disables exactly one novelty from V4.5. All use `results/ablation_no_*` dirs.
+## `new_dataset/` — New Dataset Experiments
 
-| File | Disabled Feature |
-|------|-----------------|
-| `v45_no_hw.json` / `v45_no_hw_blocks.json` | Hardware-awareness |
-| `v45_no_shaped_reward.json` / `v45_no_reward_blocks.json` | Shaped reward |
-| `v45_no_transformer.json` / `v45_no_trans_blocks.json` | Transformer (uses LSTM) |
+18-model dataset (9,407 train / 2,363 eval / 952 eval_full). All training on Bergamo.
 
-The `_blocks` variants are identical to base but with different tags. Used for block-based eval (`data/all`).
+### `train/` — Training Configs (5)
 
-### `ablation_full_model/` — Ablation Full-Model (3 files)
-Same ablations but pointing at `data/full_model` for full-model evaluation.
+| Config | Impl | Features |
+|--------|------|----------|
+| `v0.json` | `rl_autoschedular_v0` | Baseline LSTM policy |
+| `v4_5.json` | `rl_autoschedular_v4_5` | HW-aware + shaped reward + transformer |
+| `v45_no_hw.json` | `rl_autoschedular_v45_no_hw` | Ablation: no hardware-awareness |
+| `v45_no_shaped_reward.json` | `rl_autoschedular_v45_no_shaped_reward` | Ablation: no shaped reward |
+| `v45_no_transformer.json` | `rl_autoschedular_v45_no_transformer` | Ablation: LSTM instead of transformer |
 
-| File | Ablation |
-|------|---------|
-| `v45_full_model.json` | None (full V4.5 for full-model) |
-| `v45_no_hw_full_model.json` | No hardware |
-| `v45_no_trans_full_model.json` | No transformer |
+All point to: `benchmarks_folder_path: data/new_dataset/all/train`
+Baseline: `results/new_dataset_results/baselines/exec_times/train_base.json`
 
-### `eval/` — Per-Checkpoint Dalma Eval (15 files)
-V4.5 evaluation on Dalma cluster, one config per checkpoint (700–1999).
+### `eval/` — Bergamo Eval (5)
 
-Naming: `v4_5_eval_<ckpt>.json` → writes to `results/V4_5_agent_ckpt<ckpt>/`.
-`v4_5_eval.json` is the scan-mode variant (all checkpoints).
+5-run median eval on `data/new_dataset/all/eval/` (2,363 files). Results → `results/new_dataset_results/`.
 
-### `eval_bergamo/` — Per-Checkpoint Bergamo Eval (14 files)
-Same structure but for Bergamo cluster (AMD EPYC 9754). Checkpoints 800–1999 only.
+### `eval_dalma/` + `eval_jubail/` — Multi-Hardware (4)
 
-Naming: `v4_5_bergamo_<ckpt>.json` → writes to `results/V4_5_agent_bergamo_ckpt<ckpt>/`.
-`v4_5_eval_bergamo.json` is the scan-mode variant.
+Cross-hardware eval: V4.5 (with HW) and V45-no-HW (without) on Dalma + Jubail.
 
-### `full_model/` — Full-Model Optimization (1 file)
-| File | Purpose |
-|------|---------|
-| `full_model_optim.json` | V4.5 full-model end-to-end optimization |
+### `full_model/` — Full Model Eval (2)
 
-### `test/` — Sanity / Test (3 files)
-Reduced-scale configs for quick validation.
+Eval V0 + V4.5 on `data/new_dataset/all/eval_full/` (952 files). Post-process: sum per-model times, geometric mean speedup.
 
-| File | Scale |
-|------|-------|
-| `test.json` | Minimal: 5 benches, 5 replays, 5 iters |
-| `v3_sanity.json` | V3 small transformer: d_model=64, 15 benches |
-| `v4_sanity.json` | V4 medium transformer: d_model=128, 15 benches |
+### `test/` — Sanity (1)
 
-### `misc/` — Special Purpose (3 files)
-| File | Purpose |
-|------|---------|
-| `albert.json` | ALBERT-specific baseline |
-| `example.json` | Template with all features enabled (reference) |
-| `hardware_eval.json` | Cross-hardware evaluation (V4.5) |
+Minimal 5-bench, 5-iter test run.
 
-## Usage
+## Baseline Pipeline
 
 ```bash
-# Training
-sbatch scripts/train/train.sh config/train/v4_5.json
+# Generate baseline timing JSONs
+python scripts/baseline/get_base.py --config config/new_dataset/train/v4_5.json
+# → results/new_dataset_results/baselines/exec_times/train_base.json
+# Repeat for eval and eval_full directories
+```
 
-# Evaluation
-sbatch scripts/eval/eval.sh config/train/v4_5.json
+## Shell Script Usage
 
-# Array job (auto-selects from config/train/)
-sbatch --array=0-6 scripts/train/train.sh
-
-# Ablation eval
-sbatch scripts/eval/eval.sh config/ablation/v45_no_hw.json
-
-# Per-checkpoint eval
-sbatch scripts/eval/eval.sh config/eval/v4_5_eval_800.json
+All existing shell scripts point to `config/old_dataset/`. For new dataset:
+```bash
+sbatch scripts/train/train.sh config/new_dataset/train/v4_5.json
+sbatch scripts/eval/eval.sh config/new_dataset/eval/v4_5_eval.json
 ```

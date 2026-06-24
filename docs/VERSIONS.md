@@ -334,7 +334,126 @@ Notes/limitations:
 - Success-Contingent rewards may initially slow down learning but ensure the final policy is 100% runnable.
 
 
-### V5 - Action Space Expansion (Pad + Pack + Unroll)
+### V4.6 — Reward-Fixed Classic Transformer
+- Status: complete
+- Date completed: 2026-05-31
+- Novelty scope: Corrected reward shaping + optimizer checkpointing (same Classic Transformer as V4.5)
+- Package: `rl_autoschedular_v4_5` (shared with V4.5)
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+- Config file: `config/new_dataset/train/v4_6.json`
+
+Key fixes from V4.5:
+- **Reward shaping scale**: 1.0 → **0.05** (shaped reward = 10% of terminal, not 20×)
+- **Reward shaping clip**: 2.0 → **0.1**
+- **Vectorization bonus**: 0.2 → **0.0** (scaled with `reward_shaping_scale`)
+- **Slowdown penalty**: Zero intermediate rewards when speedup < 1.0
+- **Hardware cores**: Prefers `SLURM_CPUS_PER_TASK` over `os.cpu_count()`
+- **Optimizer checkpointing**: Adam state saved with model (dict format: `{'model': ..., 'optimizer': ..., 'step': ...}`)
+- **Execution timeout**: Min reduced 30s → 2s, multiplier 10x → 5x (`MIN_EXEC_TIMEOUT` env var, default 2)
+
+Architecture:
+- Transformer: d_model=256, nhead=8, num_layers=3, ffn_dim=1024
+- New dataset: 18-model block benchmarks, 8822 train / 2163 eval
+- Training: nb_iterations=10000, bench_count=64, batch_size=32
+
+Results (at iter 153, 5h timeout): avg speedup **1.82x**, best **16.69x**
+
+Config mismatch discovered (2026-06-10):
+- **Eval config** (`v4_6_eval.json`) used old reward values (scale=1.0, clip=2.0, vec_bonus=0.2)
+- **Train config** (`v4_6.json`) used corrected values (scale=0.05, clip=0.1, vec_bonus=0.0)
+- **Impact: None** — reward shaping only affects logged metrics during eval, not action selection or exec times
+
+Notes:
+- Training resumed after timeout, 72h time limit applied
+
+### V4.7 — Reward-Fixed Small Transformer
+- Status: complete
+- Date completed: 2026-05-31
+- Novelty scope: Same reward fixes as V4.6 but with reduced transformer for faster training
+- Package: `rl_autoschedular_v4_5` (shared with V4.5)
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+- Config file: `config/new_dataset/train/v4_7.json`
+
+Key differences from V4.6:
+- **Transformer**: d_model=**64**, nhead=**2**, num_layers=**2**, ffn_dim=**128** (3.6× fewer params)
+- **Training speed**: ~62s/iter vs V4.6's 97s/iter (36% faster per iteration)
+- All reward fixes and timeout improvements identical to V4.6
+
+Results (at iter 238, 5h timeout):
+- Avg speedup: **1.42x** (regressed from earlier peak of **2.59x** at iter 102)
+- Best: **7.66x**
+- Hypothesis: Smaller model converges faster initially but lacks capacity to sustain improvement — gradient noise or shaped reward exploitation causes regression
+
+Config mismatch discovered (2026-06-10):
+- **Eval config** (`v4_7_eval.json`) used old reward values (scale=1.0, clip=2.0, vec_bonus=0.2)
+- **Train config** (`v4_7.json`) used corrected values (scale=0.05, clip=0.1, vec_bonus=0.0)
+- **Impact: None** — same reason as V4.6
+
+Notes:
+- Peaked early (2.59x at iter 102) then degraded — classic overfitting to bad schedules
+- Valuable as an ablation: confirms d_model≥256 needed for stable convergence
+
+### V4.8 — Reward-Fixed Classic Transformer (Eval-Corrected)
+- Status: complete
+- Date completed: 2026-06-01
+- Novelty scope: Identical architecture to V4.6 with corrected eval config (fixes V4.6 eval config mismatch)
+- Package: `rl_autoschedular_v4_5` (shared with V4.5)
+- Config selector: `"implementation": "rl_autoschedular_v4_5"`
+- Config file: `config/new_dataset/train/v4_8.json`
+
+Key differences from V4.6:
+- **Eval config**: Uses corrected reward values (scale=0.05, clip=0.1, vec_bonus=0.0) matching training config — fixes V4.6's eval config discrepancy
+- Training config: Identical to V4.6 (Classic Transformer, same reward fixes)
+
+Results (at iter 155, 5h timeout): avg speedup **1.98x**, best **14.59x**
+
+Notes:
+- Slightly better than V4.6 (1.98x vs 1.82x at same iteration) — likely noise, not systematic
+- Second run confirms Classic Transformer with reward fixes is viable
+- Eval config correction ensures fair comparison with train-era rewards
+
+### V4.9 — No Shaped Reward (Entropy Collapse Fix)
+- Status: complete
+- Date completed: 2026-06-10
+- Novelty scope: Entropy collapse fix by removing shaped reward
+- Package: `rl_autoschedular_v4_9`
+- Config selector: `"implementation": "rl_autoschedular_v4_9"`
+
+Discovery (2026-06-10):
+- During single_ops_dataset experimentations, V4.6/V4.7/V4.8 all suffered **entropy collapse** mid-training
+- Entropy dropped to zero (from healthy 1.0-3.0), causing policy to freeze and produce identical actions
+- Root cause: shaped reward + transformer encoder → policy converges to deterministic local optimum
+- V0 (no shaped reward, LSTM) survived — entropy healthy throughout 14K+ iterations
+
+Key code changes:
+- `rl_autoschedular_v4_9/*`: full standalone copy of `rl_autoschedular_v4_5` with internal imports redirected to `rl_autoschedular_v4_9`
+- `rl_autoschedular_v4_9/env.py`:
+  - `__shaped_reward()` hardcoded to return 0.0 (shaped reward disabled)
+  - All helper methods (`__static_efficiency_score`, `__estimate_arithmetic_intensity`, etc.) kept as dead code
+
+Variants (config-driven):
+- **V4.9 small** (`config/single_ops_dataset/train/v4_9_small.json`): V4.7 transformer (d=64, 2 heads, 2 layers, ffn=128)
+- **V4.9 large** (`config/single_ops_dataset/train/v4_9_large.json`): V4.8 transformer (d=256, 8 heads, 3 layers, ffn=1024)
+
+Config files:
+- `config/single_ops_dataset/train/v4_9_small.json` — training config for small variant
+- `config/single_ops_dataset/train/v4_9_large.json` — training config for large variant
+- `config/single_ops_dataset/eval/v4_9_small_eval.json` — eval config for small variant
+- `config/single_ops_dataset/eval/v4_9_large_eval.json` — eval config for large variant
+
+Validation:
+- All 15 Python files compile successfully (`python -m py_compile`)
+- All 4 config files are valid JSON
+- No v4_5 references remain in V4.9 package
+- `reward_shaping_enabled: false` in both train and eval configs
+
+Notes/limitations:
+- V4.9 keeps all V4.5 reliability features (process isolation, dynamic timeouts, stability rails)
+- Shaped reward code kept as dead code (not deleted) for reference
+- Expected: entropy stays > 0.1 throughout training (like V0)
+- Expected: eval speedup improves over training (not flat like V4.6/V4.7/V4.8)
+
+
 - Status: planned (future work)
 - Date completed: N/A
 - Novelty scope: Expanded transformation action space only

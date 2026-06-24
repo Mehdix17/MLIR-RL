@@ -22,6 +22,7 @@ from utils.implementation import get_autoschedular_impl, import_autoschedular_mo
 from typing import Optional
 from time import time
 from datetime import timedelta
+import shutil
 
 AUTOSCHEDULER_IMPL = get_autoschedular_impl()
 Benchmarks = import_autoschedular_module("benchmarks", AUTOSCHEDULER_IMPL).Benchmarks
@@ -47,6 +48,21 @@ logging.basicConfig(
 cfg = Config()
 fl = FileLogger()
 dm = DaskManager()
+
+# Safety: refuse fresh training if experiment already has results
+resume_from = os.getenv("RESUME_FROM")
+force_new = os.getenv("FORCE_NEW")
+if (resume_from is None and force_new is None
+        and os.path.isfile(fl.train_results_file)
+        and os.path.getsize(fl.train_results_file) > 2):
+    raise RuntimeError(
+        f"Experiment at {fl.run_dir} already has training results. "
+        "Use --resume to continue training, or set FORCE_NEW=1 to overwrite."
+    )
+
+# Clear per-iteration log files on fresh start to prevent accumulation
+if resume_from is None:
+    fl.clear_per_iter_logs()
 
 
 # Data loading
@@ -90,17 +106,44 @@ optimizer = torch.optim.Adam(
 )
 print_success("Model initialized")
 
-# Check for existing models to resume training
-start_step = 0
-import re
-models_list = [f for f in os.listdir(fl.models_dir) if f.startswith('model_') and f.endswith('.pt')]
-if models_list:
+# Check for --resume flag (external checkpoint path)
+start_step = 1
+resume_from = os.getenv("RESUME_FROM")
+if resume_from:
+    import re
     import builtins
-    latest_model_file = builtins.max(models_list, key=lambda f: int(re.search(r'model_(\d+)\.pt', f).group(1)))
-    latest_step = int(re.search(r'model_(\d+)\.pt', latest_model_file).group(1))
-    model.load_state_dict(torch.load(os.path.join(fl.models_dir, latest_model_file), map_location=device, weights_only=True))
-    start_step = latest_step + 1
-    print_success(f"Resumed model from checkpoint {latest_model_file} (Start step: {start_step})")
+    resume_models_dir = os.path.join(resume_from, "models")
+    if os.path.isdir(resume_models_dir):
+        resume_models_list = [
+            f for f in os.listdir(resume_models_dir)
+            if f.startswith('model_') and f.endswith('.pt')
+        ]
+        if resume_models_list:
+            latest_model_file = builtins.max(
+                resume_models_list,
+                key=lambda f: int(re.search(r'model_(\d+)\.pt', f).group(1))
+            )
+            latest_step = int(re.search(r'model_(\d+)\.pt', latest_model_file).group(1))
+            checkpoint = torch.load(
+                os.path.join(resume_models_dir, latest_model_file),
+                map_location=device,
+                weights_only=False
+            )
+            model.load_state_dict(checkpoint['model'])
+            try:
+                optimizer.load_state_dict(checkpoint['optimizer'])
+                print_success(
+                    f"Resumed model + optimizer from --resume {resume_from}/models/{latest_model_file}"
+                )
+            except Exception:
+                print_success(
+                    f"Resumed model from --resume {resume_from}/models/{latest_model_file} (no optimizer)"
+                )
+            start_step = latest_step + 1
+        else:
+            print_info(f"Warning: --resume {resume_from} has no model files in models/")
+    else:
+        print_info(f"Warning: --resume {resume_from}/models/ directory not found")
 
 print_info(f"Training loop: start={start_step}, end={cfg.nb_iterations}, steps={cfg.nb_iterations - start_step}")
 
@@ -142,11 +185,12 @@ for step in range(start_step, cfg.nb_iterations):
         # Update policy model with PPO
         ppo_update(trajectory, model, optimizer)
 
-        # Save the model every iteration for crash resilience
-        torch.save(
-            model.state_dict(),
-            os.path.join(fl.models_dir, f'model_{step}.pt')
-        )
+        # Save model + optimizer state every 50 iterations
+        if step % 50 == 0:
+            torch.save(
+                {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': step},
+                os.path.join(fl.models_dir, f'model_{step}.pt')
+            )
 
         main_end = time()
         iter_time = main_end - main_start
@@ -160,4 +204,8 @@ for step in range(start_step, cfg.nb_iterations):
         print_info(f"Iteration {step} crashed (MLIR SIGABRT): {e}", flush=True)
         continue
 
-
+# Save final model
+torch.save(
+    {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': step},
+    os.path.join(fl.models_dir, f'model_{step + 1}.pt')
+)

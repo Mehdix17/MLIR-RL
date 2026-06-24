@@ -1,0 +1,5 @@
+op_type,V0_geo_mean,V0_avg,V0_count,NoReward_geo_mean,NoReward_avg,NoReward_count
+conv2d,2.6269,6.5504,71,6.1992,9.1371,71
+generic,0.1202,0.2961,106,1.0787,1.2105,106
+matmul,10.6189,17.9974,232,0.3991,0.5008,233
+pooling,0.2758,0.474,315,1.1991,1.367,315

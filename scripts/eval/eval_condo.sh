@@ -10,9 +10,9 @@
 #
 # Usage:
 #   sbatch scripts/eval.sh                           # array mode: auto-picks version
-#   sbatch scripts/eval.sh config/train/baseline.json       # single version from config
-#   sbatch scripts/eval.sh config/train/baseline.json v1    # explicit version
-#   sbatch scripts/eval.sh config/train/baseline.json v1 v2 v3  # space-separated versions
+#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json       # single version from config
+#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json v1    # explicit version
+#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json v1 v2 v3  # space-separated versions
 #
 # Array mode: sbatch --array=0-2 scripts/eval.sh     # v1, v2, v3
 
@@ -41,11 +41,11 @@ elif [[ $# -ge 2 ]]; then
     shift
     VERSIONS=("$@")
 else
-    CONFIG_FILE="${1:-$PROJECT_ROOT/config/train/baseline.json}"
+    CONFIG_FILE="${1:-$PROJECT_ROOT/config/old_dataset/train/baseline.json}"
     VERSIONS=()
 fi
 
-CONFIG="${CONFIG_FILE:-$PROJECT_ROOT/config/train/baseline.json}"
+CONFIG="${CONFIG_FILE:-$PROJECT_ROOT/config/old_dataset/train/baseline.json}"
 if [[ "$CONFIG" != /* ]]; then
     CONFIG="$PROJECT_ROOT/$CONFIG"
 fi

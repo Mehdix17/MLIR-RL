@@ -19,7 +19,7 @@
 #   sbatch scripts/ckpt_scan_all.sh
 #
 #   # Override config or checkpoint range:
-#   sbatch scripts/ckpt_scan_all.sh config/full_model/full_model_optim.json
+#   sbatch scripts/ckpt_scan_all.sh config/old_dataset/full_model/full_model_optim.json
 #
 #   # Monitor:
 #   tail -f logs/ckpt_scan_<jobid>.out
@@ -43,7 +43,7 @@ export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
 # ---- config ----------------------------------------------------------------
-CONFIG_FILE="${1:-$PROJECT_ROOT/config/full_model/full_model_optim.json}"
+CONFIG_FILE="${1:-$PROJECT_ROOT/config/old_dataset/full_model/full_model_optim.json}"
 if [[ "$CONFIG_FILE" != /* ]]; then
     CONFIG_FILE="$PROJECT_ROOT/$CONFIG_FILE"
 fi

@@ -562,13 +562,13 @@ def main():
             formatted_entry = {}
             for k, v in entry.items():
                 if isinstance(v, int):
-                    formatted_entry[k] = v // 1000
+                    formatted_entry[k] = v
                 else:
                     formatted_entry[k] = "N/A"
             results[bench_name] = formatted_entry
             print(f"[{i+1}/{len(remaining_files)}] {bench_name}: "
-                  f"eager={formatted_entry.get('eager')}µs  "
-                  f"jit={formatted_entry.get('jit')}µs", flush=True)
+                  f"eager={formatted_entry.get('eager')}ns  "
+                  f"jit={formatted_entry.get('jit')}ns", flush=True)
 
             if (i+1) % 10 == 0:
                 output_path.parent.mkdir(parents=True, exist_ok=True)

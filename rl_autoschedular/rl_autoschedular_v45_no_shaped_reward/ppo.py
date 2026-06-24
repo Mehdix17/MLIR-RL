@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import timedelta
+import math
 from statistics import mean
 import sys
 import torch
@@ -18,6 +19,7 @@ from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
 from utils.dask_manager import DaskManager
 from time import time
+import math
 from typing import Optional
 
 
@@ -142,7 +144,9 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         eval_json[state.bench_name] = exec_time
     eval_dir = os.path.join(fl.logs_dir, 'eval')
     os.makedirs(eval_dir, exist_ok=True)
-    with open(os.path.join(eval_dir, 'eval_exec_times.json'), 'w') as f:
+    _ckpt = os.getenv("EVAL_CHECKPOINT", "")
+    _eval_file = f"eval_exec_times_{_ckpt}.json" if _ckpt else "eval_exec_times.json"
+    with open(os.path.join(eval_dir, _eval_file), 'w') as f:
         json.dump(eval_json, f, indent=2)
     exe.update_execution_cache(new_cache_data)
 
@@ -164,15 +168,28 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int):
         f", cache miss rate: {cache_miss_rate:.2f}%"
     ))
 
-    # Clear markers granularly after successful iteration to avoid race conditions
-    marker_dir = os.path.join(cfg.results_dir, 'global_markers')
-    for state in states:
-        marker_file = os.path.join(marker_dir, state.bench_name)
-        if os.path.exists(marker_file):
+    # Save training results to train/results.json (cumulative, per-benchmark)
+    train_results: dict = {}
+    if os.path.exists(fl.train_results_file):
+        with open(fl.train_results_file) as f:
             try:
-                os.remove(marker_file)
-            except OSError:
+                train_results = json.load(f)
+            except json.JSONDecodeError:
                 pass
+    for state, rewards, speedup, exec_time, cache_miss in zip(states, all_rewards, all_speedups, all_exec_times, cache_misses):
+        train_results[state.bench_name] = {
+            'rewards': list(rewards) if not isinstance(rewards, list) else rewards,
+            'speedup': speedup,
+            'exec_time': exec_time,
+            'cache_miss': cache_miss,
+        }
+    with open(fl.train_results_file, 'w') as f:
+        json.dump(train_results, f, indent=2)
+    # Snapshot every 100 iterations
+    if step % 100 == 0:
+        import shutil
+        ckpt_path = os.path.join(fl.train_dir, f'checkpoint_{step}.json')
+        shutil.copy2(fl.train_results_file, ckpt_path)
 
     return tc.to_trajectory()
 
@@ -362,11 +379,19 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
                     states[i] = next_op_state
                     observations[i] = Observation.from_state(next_op_state)
 
-    results = dm.map_states(__execute_states, states, data, exe.main_exec_data, training=False)
+    bench_results: dict[str, tuple] = {}
+    new_results = dm.map_states(__execute_states, states, data, exe.main_exec_data, training=False)
+    for state, r in zip(states, new_results):
+        if r:
+            bench_results[state.bench_name] = r
+        else:
+            bench_results[state.bench_name] = None
+
+    results = [bench_results[s.bench_name] for s in states]
     results = [
-        (*e.failed_seq(s.transformation_history), float(dm.batch_timeout))
+        (*envs[i].failed_seq(s.transformation_history), float(dm.batch_timeout))
         if not r else r
-        for r, s, e in zip(results, states, envs)
+        for i, (r, s) in enumerate(zip(results, states))
     ]
     all_rewards, all_speedups, all_exec_times, _, _ = tuple(zip(*results))
     new_cache_data: dict[str, dict[str, int]] = {}
@@ -386,65 +411,34 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
         print_info(str(state.transformation_history), add_label=False)
 
     if len(all_speedups) > 0:
-        fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
+        geo_mean = math.exp(sum(math.log(max(s, 1e-12)) for s in all_speedups) / len(all_speedups))
+        fl['eval/average_speedup'].append(geo_mean)
+        fl['eval/arithmetic_mean_speedup'].append(sum(all_speedups) / len(all_speedups))
     exe.update_execution_cache(new_cache_data)
+
+    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
+    eval_json: dict[str, Optional[int]] = {}
+    for state, exec_time in zip(states, all_exec_times):
+        eval_json[state.bench_name] = exec_time
+    eval_dir = os.path.join(fl.logs_dir, 'eval')
+    os.makedirs(eval_dir, exist_ok=True)
+    _ckpt = os.getenv("EVAL_CHECKPOINT", "")
+    _eval_file = f"eval_exec_times_{_ckpt}.json" if _ckpt else "eval_exec_times.json"
+    with open(os.path.join(eval_dir, _eval_file), 'w') as f:
+        json.dump(eval_json, f, indent=2)
 
     eval_end = time()
     print_info(f"Evaluation time: {timedelta(seconds=eval_end - eval_start)}")
-
-    # Clear markers granularly after successful evaluation to avoid race conditions
-    marker_dir = os.path.join(Config().results_dir, 'global_markers')
-    for state in states:
-        marker_file = os.path.join(marker_dir, state.bench_name)
-        if os.path.exists(marker_file):
-            try:
-                os.remove(marker_file)
-            except OSError:
-                pass
 
 
 def __execute_states(state: OperationState, exec_data_file: str, benchs: Benchmarks, main_exec_data: Optional[dict[str, dict[str, int]]]):
     print(f"Handling bench: {state.bench_name}...", end=' ', file=sys.stderr)
     worker_start = time()
 
-    # Check if this benchmark was already completed in a previous crashed run
-    import json as _json
-    # Use a persistent marker directory across runs for the same experiment
-    cfg = Config()
-    marker_dir = os.path.join(cfg.results_dir, 'global_markers')
-    # Robust directory creation (handles race conditions)
-    if not os.path.exists(marker_dir):
-        try:
-            os.makedirs(marker_dir, exist_ok=True)
-        except OSError:
-            pass
-
-    marker_file = os.path.join(marker_dir, state.bench_name)
-    if os.path.exists(marker_file):
-        with open(marker_file) as f:
-            cached = _json.load(f)
-        print('Skipped (cached)', file=sys.stderr)
-        return cached['rewards'], cached['speedup'], cached['exec_time'], cached.get('cache_miss', True), time() - worker_start
-
     Execution(exec_data_file, main_exec_data)
     env = Env()
     env.reset(benchs, state.bench_idx)
     rewards, speedup, new_exec_time, cache_miss = env.apply_and_run_sequence(state.transformation_history)
-
-    # Save result atomically so crash-resilient
-    import os as _os
-    tmp_file = marker_file + f'.tmp.{_os.getpid()}'
-    # Ensure dir exists before writing tmp
-    tmp_dir = _os.path.dirname(tmp_file)
-    if not os.path.exists(tmp_dir):
-        try:
-            os.makedirs(tmp_dir, exist_ok=True)
-        except OSError:
-            pass
-
-    with open(tmp_file, 'w') as f:
-        _json.dump({'rewards': rewards, 'speedup': speedup, 'exec_time': new_exec_time, 'cache_miss': cache_miss}, f)
-    os.rename(tmp_file, marker_file)
 
     worker_end = time()
     worker_time = worker_end - worker_start

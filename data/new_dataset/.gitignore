@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# But do not ignore directories
+!*/
+
+# Allow placeholder files so Git can track the directories
+!.gitkeep
+
+# Always track this .gitignore file
+!.gitignore

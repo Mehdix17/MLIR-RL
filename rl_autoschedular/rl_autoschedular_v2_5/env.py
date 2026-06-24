@@ -8,6 +8,7 @@ from utils.config import Config
 import random
 import math
 import traceback
+import statistics
 
 
 class Env:
@@ -102,14 +103,32 @@ class Env:
         # Evaluate the code (since the operation is done)
         try:
             # Pass root_exec_time to allow profiling-based timeout safeguard
-            new_exec_time, exec_succeeded, cache_miss, error_msg = Execution().execute_code(
-                transformed_code, 
-                self.benchmark_data.bench_name, 
-                seq,
-                root_exec_time=self.benchmark_data.root_exec_time
-            )
-            if not exec_succeeded:
-                raise Exception(error_msg or "Unknown execution failure")
+            cfg = Config()
+            num_runs = cfg.eval_runs if hasattr(cfg, 'eval_runs') else 1
+            run_times = []
+            for run_idx in range(num_runs):
+                run_time, run_ok, run_miss, run_err = Execution().execute_code(
+                    transformed_code, 
+                    self.benchmark_data.bench_name, 
+                    seq,
+                    root_exec_time=self.benchmark_data.root_exec_time
+                )
+                if run_ok:
+                    run_times.append(run_time)
+            
+            if run_times:
+                aggr = cfg.eval_aggregation if hasattr(cfg, 'eval_aggregation') else 'min'
+                if aggr == 'median':
+                    new_exec_time = statistics.median(run_times)
+                elif aggr == 'mean':
+                    new_exec_time = sum(run_times) / len(run_times)
+                else:
+                    new_exec_time = min(run_times)
+                exec_succeeded = True
+                cache_miss = run_miss
+                error_msg = None
+            else:
+                raise Exception(run_err or "All execution runs failed")
         except Exception as e:
             seq_str = '\n'.join([str(list(map(str, op_seq))) for op_seq in seq])
             print_error(
@@ -135,14 +154,14 @@ class Env:
             rewards = [0.0] * len(rewards)
         
         rewards[-1] += final_reward
-        speedup = (self.benchmark_data.root_exec_time / new_exec_time) if new_exec_time is not None else 1.0
+        speedup = (self.benchmark_data.root_exec_time / new_exec_time) if new_exec_time is not None else 0.0
 
         return rewards, speedup, new_exec_time, cache_miss
 
     def failed_seq(self, seq: list[list[Action]]) -> tuple[list[float], float, Optional[int], bool]:
         rewards = [0.0 for op_seq in reversed(seq) for action in op_seq for _ in range(len(action.sub_actions) + 1)]
         rewards[-1] = self.__action_reward(True, False)
-        return rewards, 1.0, None, True
+        return rewards, 0.0, None, True
 
     def __init_op_state(self, operation_idx: int) -> OperationState:
         """Create a new operation state.
@@ -244,6 +263,8 @@ class Env:
         #     return math.log(old / (new * 2))
         # else:
         #     return old / (new * 2) - 1
+        new = max(new, 1)
+        old = max(old, 1)
         return math.log10(old / new)
 
     def __update_state_infos(self, state: OperationState, action: Action):

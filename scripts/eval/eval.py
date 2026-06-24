@@ -21,6 +21,8 @@ from utils.log import print_info, print_success
 from utils.implementation import get_agent_runs_root, get_autoschedular_impl, import_autoschedular_module
 from datetime import timedelta
 from time import time
+import json
+import shutil
 
 AUTOSCHEDULER_IMPL = get_autoschedular_impl()
 Execution = import_autoschedular_module("execution", AUTOSCHEDULER_IMPL).Execution
@@ -112,7 +114,7 @@ eval_files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 # Filter and sort checkpoints
 import re
 EVAL_LAST_ONLY = os.getenv("EVAL_LAST_ONLY", "").strip().lower() in ("1", "true", "yes")
-EVAL_STRIDE = 100
+EVAL_STRIDE = int(os.getenv("EVAL_STRIDE", "100"))
 EVAL_START = int(os.getenv("EVAL_START", "0"))
 EVAL_END = int(os.getenv("EVAL_END", "999999"))
 
@@ -186,7 +188,11 @@ for step, model_file in enumerate(pending_files):
     if not os.path.exists(model_path):
         print_info(f"Model file {model_path} does not exist. Skipping.")
         continue
-    model.load_state_dict(torch.load(model_path, weights_only=True))
+    checkpoint = torch.load(model_path, weights_only=False)
+    if isinstance(checkpoint, dict) and 'model' in checkpoint:
+        model.load_state_dict(checkpoint['model'])
+    else:
+        model.load_state_dict(checkpoint)
 
     evaluate_benchmarks(model, eval_data)
 
@@ -201,3 +207,37 @@ for step, model_file in enumerate(pending_files):
     # Mark checkpoint as completed for resumption
     with open(completed_file, 'a') as f:
         f.write(model_file + '\n')
+
+# Post-process: if --checkpoint mode, save results to agent_dir/eval/checkpoint_<N>.json
+_ckpt = os.getenv("EVAL_CHECKPOINT")
+if _ckpt:
+    _label = os.getenv("EVAL_LABEL")
+    _suffix = f"_{_label}" if _label else ""
+    _agent_dir = os.path.dirname(eval_dir)  # eval_dir = agent/models/ → _agent_dir = agent/
+    eval_root = os.path.join(_agent_dir, "eval")
+    ckpt_file = os.path.join(eval_root, f"checkpoint_{_ckpt}{_suffix}.json")
+    if os.path.exists(ckpt_file):
+        print_info(f"checkpoint_{_ckpt}{_suffix}.json already exists, skipping post-process")
+    else:
+        os.makedirs(eval_root, exist_ok=True)
+        _eval_file = f"eval_exec_times_{_ckpt}.json"
+        src_eval = os.path.join(fl.logs_dir, "eval", _eval_file)
+        if os.path.exists(src_eval):
+            shutil.copy2(src_eval, ckpt_file)
+            print_success(f"Saved eval results to eval/checkpoint_{_ckpt}{_suffix}.json")
+
+        # Copy key log files
+        src_logs = os.path.join(fl.logs_dir, "eval")
+        if os.path.isdir(src_logs):
+            dst_logs = os.path.join(eval_root, "logs", f"{_ckpt}{_suffix}")
+            os.makedirs(os.path.dirname(dst_logs), exist_ok=True)
+            if os.path.exists(dst_logs):
+                shutil.rmtree(dst_logs)
+            os.makedirs(dst_logs)
+            for log_file in ("final_speedup", "average_speedup", "arithmetic_mean_speedup"):
+                src = os.path.join(src_logs, log_file)
+                if os.path.exists(src):
+                    shutil.copy2(src, os.path.join(dst_logs, log_file))
+            print_info(f"Copied logs to eval/logs/{_ckpt}{_suffix}/")
+
+    print_info("Evaluation done.")

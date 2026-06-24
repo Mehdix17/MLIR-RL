@@ -83,24 +83,58 @@ class Execution(metaclass=Singleton):
         self.exec_data_file = exec_data_file
         self.main_exec_data = main_exec_data
 
-    def execute_code(self, code: str, bench_name: str, seq: list[list['Action']]) -> tuple[int, bool, bool]:
-        """Evaluates the given MLIR code with a timeout.
+    def execute_code(self, code: str, bench_name: str, seq: list[list['Action']], root_exec_time: Optional[int] = None) -> tuple[int, bool, bool, Optional[str]]:
+        """Evaluates the given MLIR code with bindings first, cmd fallback."""
+        if os.getenv("SKIP_MLIR_BINDINGS") == "1":
+            return -1, False, False, "Execution disabled via SKIP_MLIR_BINDINGS"
 
-        Args:
-            state (OperationState): The operation state to evaluate.
-            tmp_exec_data_file (str): The path to the temporary execution data file.
-
-        Returns:
-            tuple[int,bool,bool]: (execution time in nanoseconds, assertion result, cache miss flag)
-        """
         code_cache_key = self.get_code_cache_key(seq)
         cache_exec_time = self.__check_execution_cache(bench_name, code_cache_key)
         if cache_exec_time is not None:
-            return cache_exec_time, True, False
+            return cache_exec_time, True, False, None
+
+        timeout_s = 300
+        if root_exec_time and root_exec_time > 0:
+            min_timeout = int(os.environ.get("MIN_EXEC_TIMEOUT", "2"))
+            timeout_s = min(300, max(min_timeout, int((root_exec_time / 1e9) * 5)))
 
         bufferized_code = transform_bufferize_and_lower_v(code)
-        real_exec_time, success = self.__execute_bufferized_code(bufferized_code)
-        return real_exec_time, success, True
+        real_exec_time, success, error_msg = self.__execute_bufferized_code(bufferized_code, timeout_s)
+
+        if not success:
+            real_exec_time, success = self.__execute_code_with_cmd(code, timeout_s)
+            if success:
+                error_msg = None
+            else:
+                error_msg = error_msg or "Both bindings and mlir-cpu-runner failed"
+
+        return real_exec_time, success, True, error_msg
+
+    def __execute_code_with_cmd(self, code: str, timeout_s: int) -> tuple[int, bool]:
+        """Lowers and runs the given MLIR code using MLIR opt and MLIR CPU Runner."""
+        import tempfile
+        import subprocess
+        import sys as _sys
+
+        tmp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.mlir', delete=False)
+        tmp_file.write(code)
+        tmp_file.close()
+
+        try:
+            command_1 = f"{os.getenv('LLVM_BUILD_PATH')}/bin/mlir-opt -loop-invariant-code-motion -canonicalize -eliminate-empty-tensors -empty-tensor-to-alloc-tensor -one-shot-bufferize='bufferize-function-boundaries function-boundary-type-conversion=identity-layout-map' -convert-vector-to-scf -convert-linalg-to-loops -buffer-deallocation-pipeline -scf-forall-to-parallel -convert-scf-to-openmp -expand-strided-metadata -finalize-memref-to-llvm -convert-scf-to-cf -lower-affine -convert-arith-to-llvm -convert-openmp-to-llvm -convert-vector-to-llvm -convert-cf-to-llvm -convert-func-to-llvm -convert-math-to-llvm -convert-math-to-libm -finalize-memref-to-llvm -reconcile-unrealized-casts -canonicalize -cse"
+            command_2 = f"{os.getenv('LLVM_BUILD_PATH')}/bin/mlir-cpu-runner -e main -entry-point-result=void -shared-libs={os.getenv('MLIR_SHARED_LIBS', '')}"
+
+            cmd = f"{command_1} {tmp_file.name} | {command_2} /dev/stdin"
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout_s)
+
+            if result.returncode == 0 and result.stdout:
+                return int(result.stdout.strip().split('\n')[-1]), True
+            return -1, False
+        except Exception:
+            return -1, False
+        finally:
+            if os.path.exists(tmp_file.name):
+                os.remove(tmp_file.name)
 
     def update_execution_cache(self, new_data: dict[str, dict[str, int]]):
         """Update the temp execution cache with the new data.
@@ -112,16 +146,21 @@ class Execution(metaclass=Singleton):
         if not self.exec_data_file:
             raise Exception("Execution data file not provided")
 
-        with open(self.exec_data_file, "r") as file:
-            data: dict[str, dict[str, int]] = json.load(file)
-
-        for bench_name, bench_data in new_data.items():
-            if bench_name not in data:
-                data[bench_name] = {}
-            data[bench_name].update(bench_data)
-
-        with open(self.exec_data_file, "w") as file:
+        import fcntl
+        with open(self.exec_data_file, "r+") as file:
+            fcntl.flock(file, fcntl.LOCK_EX)
+            try:
+                data: dict[str, dict[str, int]] = json.load(file)
+            except json.JSONDecodeError:
+                data = {}
+            for bench_name, bench_data in new_data.items():
+                if bench_name not in data:
+                    data[bench_name] = {}
+                data[bench_name].update(bench_data)
+            file.seek(0)
+            file.truncate()
             json.dump(data, file, indent=4)
+            fcntl.flock(file, fcntl.LOCK_UN)
 
     def get_code_cache_key(self, seq: list[list['Action']]) -> str:
         """Get the code cache key for the given operation state.
@@ -140,76 +179,84 @@ class Execution(metaclass=Singleton):
 
         return '|'.join(ops_codes)
 
-    def __execute_bufferized_code(self, code: str) -> tuple[int, bool]:
-        """Lowers and runs the given MLIR code using Python bindings, then returns the execution time and assertion
-        result (if the executed code returns the correct result).
+    def __execute_bufferized_code(self, code: str, timeout_s: int = 300) -> tuple[int, bool, Optional[str]]:
+        """Lowers and runs the given MLIR code using Python bindings in an isolated process."""
+        if os.getenv("SKIP_MLIR_BINDINGS") == "1":
+            return -1, False, "Bindings disabled via SKIP_MLIR_BINDINGS"
 
-        Args:
-            code (str): The MLIR code to run.
+        import multiprocessing
 
-        Returns:
-            Optional[float]: the execution time in seconds.
-            bool: the assertion result.
-        """
+        pass_pipeline = """builtin.module(
+            canonicalize,
+            buffer-deallocation-pipeline,
+            convert-bufferization-to-memref,
+            convert-linalg-to-loops,
+            scf-forall-to-parallel,
+            convert-scf-to-openmp,
+            expand-strided-metadata,
+            finalize-memref-to-llvm,
+            convert-scf-to-cf,
+            lower-affine,
 
-        def execute_bind_call():
-            pass_pipeline = """builtin.module(
-                canonicalize,
-                buffer-deallocation-pipeline,
-                convert-bufferization-to-memref,
-                convert-linalg-to-loops,
-                scf-forall-to-parallel,
-                convert-scf-to-openmp,
-                expand-strided-metadata,
-                finalize-memref-to-llvm,
-                convert-scf-to-cf,
-                lower-affine,
+            convert-openmp-to-llvm,
+            convert-vector-to-llvm,
+            convert-math-to-llvm,
+            convert-math-to-libm,
+            finalize-memref-to-llvm,
+            convert-func-to-llvm,
+            convert-index-to-llvm,
+            convert-arith-to-llvm,
+            convert-cf-to-llvm,
 
-                convert-openmp-to-llvm,
-                convert-vector-to-llvm,
-                convert-math-to-llvm,
-                convert-math-to-libm,
-                finalize-memref-to-llvm,
-                convert-func-to-llvm,
-                convert-index-to-llvm,
-                convert-arith-to-llvm,
-                convert-cf-to-llvm,
+            reconcile-unrealized-casts,
+            canonicalize,
+            cse
+        )"""
 
-                reconcile-unrealized-casts,
-                canonicalize,
-                cse
-            )"""
-
+        def worker(code_str, result_dict):
             try:
                 with Context():
-                    module = Module.parse(code)
+                    module = Module.parse(code_str)
                     pm = PassManager.parse(pass_pipeline)
 
-                inputs, outs_struct = self.__create_params(module)
-                args = self.__convert_to_args(inputs, outs_struct)
+                    inputs, outs_struct = self.__create_params(module)
+                    args = self.__convert_to_args(inputs, outs_struct)
 
-                pm.run(module.operation)
-                execution_engine = ExecutionEngine(
-                    module,
-                    opt_level=3,
-                    shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
-                )
+                    pm.run(module.operation)
+                    execution_engine = ExecutionEngine(
+                        module,
+                        opt_level=3,
+                        shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
+                    )
 
-                try:
-                    for _ in range(2):
-                        execution_engine.invoke("main", *args)
-                        # If output tensors are needed call `get_results` before `free_outputs`
+                    try:
+                        for _ in range(2):
+                            execution_engine.invoke("main", *args)
+                            outs_struct.free_outputs()
+                    finally:
                         outs_struct.free_outputs()
-                finally:
-                    outs_struct.free_outputs()
 
-                return outs_struct.delta, True
-            except StopIteration:
-                raise Exception("No main function found in MLIR module")
-            except AssertionError as e:
-                raise Exception(f"Type assertion failed: {e}")
+                    result_dict['delta'] = outs_struct.delta
+                    result_dict['success'] = True
+            except Exception as e:
+                result_dict['success'] = False
+                result_dict['error'] = str(e)
 
-        return BindingsProcess.call(execute_bind_call, timeout=int(os.environ.get("EXEC_TIMEOUT", 15)), enabled=True)
+        manager = multiprocessing.Manager()
+        result_dict = manager.dict()
+        process = multiprocessing.Process(target=worker, args=(code, result_dict))
+        process.start()
+        process.join(timeout=timeout_s)
+
+        if process.is_alive():
+            process.terminate()
+            process.join()
+            return -1, False, f"Execution timed out (isolated, {timeout_s}s)"
+
+        if result_dict.get('success'):
+            return result_dict['delta'], True, None
+
+        return -1, False, result_dict.get('error', 'Unknown execution error')
 
     def __check_execution_cache(self, bench_name: str, cache_key: str) -> Optional[int]:
         """Check the execution cache for the given operation state.

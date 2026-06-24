@@ -99,22 +99,41 @@ scripts/
 
 ## Standard Workflow
 
+### Old Dataset
+
 ```bash
 # 1. MLIR baseline
-sbatch scripts/baseline/get_base.sh config/train/v4_5.json
+sbatch scripts/baseline/get_base.sh config/old_dataset/train/v4_5.json
 
 # 2. PyTorch baseline
-sbatch scripts/baseline/get_pytorch_times.sh config/train/v4_5.json
+sbatch scripts/baseline/get_pytorch_times.sh config/old_dataset/train/v4_5.json
 
 # 3. Split train/eval
-python scripts/data/split_json.py config/train/v4_5.json
+python scripts/data/split_json.py config/old_dataset/train/v4_5.json
 
 # 4. Train
-sbatch scripts/train/train.sh config/train/v4_5.json
+sbatch scripts/train/train.sh config/old_dataset/train/v4_5.json
 
 # 5. Evaluate
-sbatch scripts/eval/eval.sh config/train/v4_5.json
+sbatch scripts/eval/eval.sh config/old_dataset/train/v4_5.json
 
 # Or one-shot:
-bash scripts/pipeline/pipeline.sh config/train/baseline.json
+bash scripts/pipeline/pipeline.sh config/old_dataset/train/baseline.json
+```
+
+### New Dataset
+
+```bash
+# 1. MLIR baselines (3 directories)
+python scripts/baseline/get_base.py --config config/new_dataset/train/v4_5.json
+# Repeat for eval and eval_full
+
+# 2. Train V4.5 on Bergamo
+sbatch scripts/train/train.sh config/new_dataset/train/v4_5.json
+
+# 3. Eval V4.5 on Bergamo (5-run median)
+sbatch scripts/eval/eval.sh config/new_dataset/eval/v4_5_eval.json
+
+# 4. Full model eval (all ops)
+sbatch scripts/eval/eval.sh config/new_dataset/full_model/v4_5_eval_full.json
 ```

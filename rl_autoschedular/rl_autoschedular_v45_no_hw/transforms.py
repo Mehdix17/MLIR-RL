@@ -542,32 +542,43 @@ def transform_pre_vec(code: str, operation_tag: str):
 
 
 def __run_transform_code(code: str, transform_code: str):
-    import multiprocessing
+    import tempfile
+    import subprocess
+    import sys as _sys
 
-    def worker(code_str, transform_str, result_dict):
-        try:
-            with Context():
-                module = Module.parse(code_str)
-                t_module = Module.parse(transform_str)
-                interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
-                result_dict['code'] = str(module)
-                result_dict['success'] = True
-        except Exception as e:
-            result_dict['success'] = False
-            result_dict['error'] = str(e)
+    code_file = tempfile.NamedTemporaryFile(mode='w', suffix='.mlir', delete=False)
+    code_file.write(code)
+    code_file.close()
+    trans_file = tempfile.NamedTemporaryFile(mode='w', suffix='.mlir', delete=False)
+    trans_file.write(transform_code)
+    trans_file.close()
 
-    manager = multiprocessing.Manager()
-    result_dict = manager.dict()
-    process = multiprocessing.Process(target=worker, args=(code, transform_code, result_dict))
-    process.start()
-    process.join(timeout=300) # Transformer logic can sometimes be slow on large kernels
-
-    if process.is_alive():
-        process.terminate()
-        process.join()
-        raise RuntimeError("Transformation timed out or crashed (isolated, 300s)")
-
-    if result_dict.get('success'):
-        return result_dict['code']
-    else:
-        raise RuntimeError(f"Transformation failed: {result_dict.get('error', 'unknown error')}")
+    try:
+        script = (
+            "import sys\n"
+            "from mlir.ir import Context, Module\n"
+            "from mlir.dialects.transform import interpreter\n"
+            f"with open({code_file.name!r}) as f: code = f.read()\n"
+            f"with open({trans_file.name!r}) as f: trans = f.read()\n"
+            "with Context():\n"
+            "    module = Module.parse(code)\n"
+            "    t_module = Module.parse(trans)\n"
+            "    interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)\n"
+            "    print(str(module))\n"
+        )
+        result = subprocess.run(
+            [_sys.executable, '-c', script],
+            capture_output=True, text=True, timeout=300,
+            env={**os.environ, 'PYTHONUNBUFFERED': '1'},
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"Transform subprocess failed (exit {result.returncode}): "
+                f"{result.stderr[:300]}"
+            )
+        return result.stdout.strip()
+    finally:
+        if os.path.exists(code_file.name):
+            os.remove(code_file.name)
+        if os.path.exists(trans_file.name):
+            os.remove(trans_file.name)

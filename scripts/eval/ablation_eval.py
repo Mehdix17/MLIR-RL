@@ -137,7 +137,11 @@ models_count = len(pending_files)
 
 for step, model_file in enumerate(pending_files):
     print_info(f"- Evaluation {step + 1}/{models_count}", flush=True)
-    model.load_state_dict(torch.load(os.path.join(eval_dir, model_file), weights_only=True))
+    checkpoint = torch.load(os.path.join(eval_dir, model_file), weights_only=False)
+    if isinstance(checkpoint, dict) and 'model' in checkpoint:
+        model.load_state_dict(checkpoint['model'])
+    else:
+        model.load_state_dict(checkpoint)
     evaluate_benchmarks(model, eval_data)
     with open(completed_file, 'a') as f:
         f.write(model_file + '\n')

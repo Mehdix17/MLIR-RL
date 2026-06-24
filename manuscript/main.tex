@@ -26,6 +26,15 @@
 \usepackage{tikz}
 \usepackage{algpseudocode}
 
+% --- Appendix Configuration ---
+\usepackage[title,titletoc]{appendix} 
+
+% --- TOC Layout Customization (Matches classic dotted leader style) ---
+\usepackage{tocloft}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}} % Adds dots for chapters
+\renewcommand{\cftchapfont}{\normalfont\bfseries}
+\renewcommand{\cftchappagefont}{\normalfont}
+
 % --- Hyperlinks Configuration ---
 \usepackage{hyperref}
 
@@ -34,12 +43,12 @@
 \addbibresource{references.bib}
 
 % --- Acronyms ---
-\usepackage[acronym,toc,nonumberlist]{glossaries}
+\usepackage[acronym,toc,nonumberlist]{glossaries} 
 \makeglossaries
 
 \newacronym{mlir}{MLIR}{Multi-Level Intermediate Representation}
 \newacronym{rl}{RL}{Reinforcement Learning}
-\newacronym{drl}{Deep RL}{Deep Reinforcement Learning}
+\newacronym{drl}{DRL}{Deep Reinforcement Learning}
 \newacronym{ppo}{PPO}{Proximal Policy Optimization}
 \newacronym{lstm}{LSTM}{Long Short-Term Memory}
 \newacronym{ast}{AST}{Abstract Syntax Tree}
@@ -47,13 +56,20 @@
 \newacronym{llvm}{LLVM}{Low Level Virtual Machine}
 \newacronym{simd}{SIMD}{Single Instruction Multiple Data}
 \newacronym{scf}{SCF}{Structured Control Flow}
+\newacronym{t}{T}{Tiling}
+\newacronym{tp}{TP}{Tiled Parallelization}
+\newacronym{tf}{TF}{Tiled Fusion}
+\newacronym{i}{I}{Interchange}
+\newacronym{v}{V}{Vectorization}
+\newacronym{nt}{NT}{No Transformation}
 \newacronym{ssa}{SSA}{Static Single Assignment}
 \newacronym{cfg}{CFG}{Control-Flow Graph}
 \newacronym{mdp}{MDP}{Markov Decision Process}
+\newacronym{hpc}{HPC}{High-Performance Computing}
 \newacronym{dqn}{DQN}{Deep Q-Network}
 \newacronym{gae}{GAE}{Generalized Advantage Estimation}
-\newacronym{sgd}{SGD}{Stochastic Gradient Descent}
 \newacronym{rnn}{RNN}{Recurrent Neural Network}
+\newacronym{gnn}{GNN}{Graph Neural Network}
 \newacronym{td}{TD}{Temporal Difference}
 \newacronym{jit}{JIT}{Just-In-Time}
 \newacronym{relu}{ReLU}{Rectified Linear Unit}
@@ -63,21 +79,25 @@
 \newacronym{smt}{SMT}{Simultaneous Multi-Threading}
 \newacronym{cpu}{CPU}{Central Processing Unit}
 \newacronym{gpu}{GPU}{Graphics Processing Unit}
+\newacronym{npu}{NPU}{Neural Processing Unit}
 \newacronym{gelu}{GELU}{Gaussian Error Linear Unit}
 \newacronym{llm}{LLM}{Large Language Model}
 \newacronym{onnx}{ONNX}{Open Neural Network Exchange}
 \newacronym{slurm}{SLURM}{Simple Linux Utility for Resource Management}
+\newacronym{lqcd}{LQCD}{Lattice Quantum Chromodynamics}
+\newacronym{mcts}{MCTS}{Monte Carlo Tree Search}
 \newacronym{pomdp}{POMDP}{Partially Observable Markov Decision Process}
+
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
-    filecolor=blue,      
-    urlcolor=blue,       
-    citecolor=blue,      
+    filecolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
     anchorcolor=blue,
     pdftitle={Master Thesis - Deep Reinforcement Learning for MLIR},
-    pdfpagemode=FullScreen,
-    pdfborder={0 0 0}    
+    pdfpagemode=UseNone,
+    pdfborder={0 0 0}
 }
 
 % --- Custom Semantic Styles ---
@@ -88,7 +108,7 @@
 
 % Branding Logo
 \newcommand{\usthbBranding}{%
-    \includegraphics[width=2.5cm]{ressources/frontpage/USTHB_Logo.png} 
+    \includegraphics[width=2.5cm]{ressources/frontpage/USTHB_Logo.png}
 }
 
 \newcommand{\makeThesisTitle}[1]{%
@@ -112,24 +132,21 @@
 \setlength{\parskip}{6pt}
 \setlength{\headheight}{15pt}
 
-% --- Document Start ---\usepackage{fancyhdr}
+% --- Global Header / Footer Style ---
 \pagestyle{fancy}
-
-% Clear existing header/footer
 \fancyhead{}
 \fancyfoot{}
-
-% Page number centered at the bottom
 \fancyfoot[C]{\thepage}
-
-% Optional: no line at the top
 \renewcommand{\headrulewidth}{0pt}
+
 \begin{document}
 
-% --- TITLE PAGE ---
+% =========================================================================
+% ZONE 1: FRONT TITLE PAGE (Completely unnumbered)
+% =========================================================================
 \begin{titlepage}
     \centering
-    
+
     \begin{minipage}[t]{0.18\textwidth} \centering \usthbBranding \end{minipage}
     \hfill
     \begin{minipage}[t]{0.5\textwidth}
@@ -145,174 +162,130 @@
     {\bfseries\large \univName}\par
     {\large \facultyName}\par
     {\large \deptName}\par
-    
+
     \vspace{1cm}
     {\Large\bfseries Master's Thesis}\par
     {\large Specialization: \specialization}\par
 
-    \vfill
-    \makeThesisTitle{Using Deep Reinforcement Learning for Automatic Code Optimization in the MLIR Compiler}
-    \vfill
+    
+    \makeThesisTitle{An Extended Deep Reinforcement Learning Agent for Automatic Code Optimization of Image Processing DNN Models in the MLIR Compiler}
+    
 
     \begin{minipage}[t]{0.45\textwidth}
         \raggedright
         \textbf{Supervised by:}\\
-        Dr. Riyadh Baghdadi\\[0.8cm]
+        Dr. BAGHDADI Riyadh\\[0.8cm]
         \textbf{Jury Members:}\\
-        Prof. \\
-        Prof.
+        Pr. NACER Hassina   | President \\
+        Dr. CHIKHAOUI Amina | Member
     \end{minipage}
     \hfill
     \begin{minipage}[t]{0.4\textwidth}
         \raggedright
-        \textbf{Presented by:}\\
-        BESSAI Tayeb\\
-        BENCHIKH Mehdi\\[0.8cm]
+        \textbf{Authors:}\\
+        M. BENCHIKH Mehdi\\
+        M. BESSAI Tayeb\\[0.8cm]
         \textbf{Defense Date:}\\
-        15/06/2026
+        ../06/2026
     \end{minipage}
 
     \vfill
-    {\small Project: SII\_09 / 2025}
+    {\small Project No.: SII\_25 / 2026}
 \end{titlepage}
 
-% --- FRONT MATTER ---
+% =========================================================================
+% ZONE 2: FRONT MATTER CHAPTERS (Roman Numerals: i, ii, iii...)
+% =========================================================================
+\clearpage
 \pagenumbering{roman}
+\pagestyle{fancy}
 
+% ---- Acknowledgements ----
 \chapter*{Acknowledgements}
-\thispagestyle{empty} 
+\addcontentsline{toc}{chapter}{Acknowledgements}
 First and foremost, we express our deep gratitude to God Almighty for granting us the strength, patience,
 and perseverance necessary to carry out this work as well as the
 courage to overcome all difficulties and allowed us to successfully complete this project.
 
-We therefore extend our most sincere thanks to our supervisor, Dr. Mohamed Riyadh Baghdadi, for his trust, his listening, and his support, which we were able to benefit from throughout this experience, including the numerous advice and evaluations aimed at improving our work as best as possible.
+We therefore extend our most sincere thanks to our supervisor, Dr.BAGHDADI Mohamed Riyadh, for his trust, his listening and his support, which we were able to benefit from throughout this experience, including the numerous pieces of advice and evaluations aimed at improving our work as best as possible.
 
-We also have a warm thought for all our loved ones, family members and friends who
-have continued to support and encourage us on a daily basis and in difficult times.
+Our gratitude is also extended to Pr.NACER Hassina and Dr.CHIKHAOUI Amina for accepting to evaluate our work.
 
-\chapter*{Abstract}
-\thispagestyle{empty} 
-Code optimization within modern compiler infrastructures is vital for improving the performance of machine learning models, which continue to grow in size and complexity. Traditional manually crafted heuristics are difficult to scale, rigidly designed, and fall short when adapting to diverse hardware architectures. Deep Reinforcement Learning (DRL) provides a compelling alternative by allowing an agent to automatically discover optimal transformation sequences through trial and error. 
+We also have a very warm thought for all our loved ones, family members, friends and especially our parents who have continued to support and encourage us on a daily basis and in difficult times.
 
-In this work, we present an advanced DRL-based framework for automatic code optimization targeting the Multi-Level Intermediate Representation (MLIR) compiler. To overcome the limitations of prior approaches and handle complex, real-world neural network programs, we introduce several novel mechanisms. First, we adopt a Transformer-based architecture to effectively capture the hierarchical structure of deep loop nests. Second, we integrate hardware-aware feature observations, enabling the agent to learn cross-platform generalization strategies. Additionally, we employ custom reward shaping, incorporating metrics such as arithmetic intensity to accelerate training, utilizing a highly scalable and diverse dataset of full neural network models.
-
-Experimental results indicate that our proposed agent achieves noticeable performance improvements and speedups over the standard MLIR heuristics (MLIR-Base) across various hardware platforms. By effectively learning adaptive, hardware-aware optimization policies, this work demonstrates the increasing potential of DRL-guided compilation for modern deep learning workloads.
-
-\vspace{0.5cm}
-\noindent \textbf{Keywords:} Deep Reinforcement Learning, Code Optimization, MLIR, neural networks
-
-\chapter*{Résumé}
-\thispagestyle{empty} 
-L'optimisation de code au sein des infrastructures de compilation modernes est vitale pour améliorer les performances des modèles d'apprentissage automatique, dont la taille et la complexité ne cessent de croître. Les heuristiques traditionnelles conçues manuellement sont difficiles à mettre à l'échelle, de conception rigide et peinent à s'adapter à diverses architectures matérielles. L'apprentissage par renforcement profond (DRL) offre une alternative convaincante en permettant à un agent de découvrir automatiquement des séquences de transformations optimales par essais et erreurs.
-
-Dans ce travail, nous présentons un framework avancé basé sur le DRL pour l'optimisation automatique du code ciblant le compilateur MLIR (Multi-Level Intermediate Representation). Afin de surmonter les limites des approches précédentes et de traiter des programmes de réseaux de neurones complexes et réels, nous introduisons plusieurs mécanismes novateurs. Premièrement, nous adoptons une architecture basée sur les Transformers pour capturer efficacement la structure hiérarchique des nids de boucles profonds. Deuxièmement, nous intégrons des observations de caractéristiques tenant compte du matériel (hardware-aware), permettant à l'agent d'apprendre des stratégies de généralisation multiplateformes. De plus, nous utilisons une fonction de récompense personnalisée (reward shaping), intégrant des métriques telles que l'intensité arithmétique pour accélérer l'entraînement, en utilisant un ensemble de données très évolutif et diversifié de modèles de réseaux de neurones complets.
-
-Les résultats expérimentaux indiquent que l'agent proposé permet d'obtenir des améliorations de performances et des accélérations notables par rapport aux heuristiques standard (MLIR-Base) sur diverses plateformes matérielles. En apprenant efficacement des optimisations adaptatives tenant compte du matériel, ce travail démontre le potentiel croissant de la compilation guidée par le DRL pour les charges de travail modernes de l'apprentissage profond.
-
-
-\vspace{0.5cm}
-\noindent \textbf{Mots-clés~:} Apprentissage par renforcement profond, Optimisation de code, MLIR, réseaux de neurones
-
-% Table of Contents and Lists
-\newpage
-\fancypagestyle{plain}{%
-  \fancyhf{}% Clears everything
-  \fancyfoot[C]{\thepage}% Puts centered page number at the bottom
-  \renewcommand{\headrulewidth}{0pt}% Removes top rule line
-}
-\pagestyle{empty}
-\tableofcontents
-\newpage
-\listoftables
-\newpage
-\listoffigures
-\newpage
-\printglossary[type=\acronymtype,title={List of Acronyms}]
+\textit{"I dedicate this work to the memory of my grandmother, may Allah have mercy on her soul, grant her eternal peace, and admit her into His vast paradise." BESSAI Tayeb.}
 
 % Make acronyms bold and black only in the main text (avoids affecting the TOC and List of Acronyms)
 \renewcommand{\glstextformat}[1]{\textbf{\textcolor{black}{#1}}}
 
-% --- MAIN CONTENT ---
+% ---- Abstract ----
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+Code optimization within modern compiler infrastructures is vital for improving the performance of machine learning models, which continue to grow in size and complexity. Traditional manually crafted heuristics are difficult to scale, rigidly designed, and fall short when adapting to diverse hardware architectures. \gls{drl} provides a compelling alternative by allowing an agent to automatically discover optimal transformation sequences through trial and error.
+
+In this work, we present an advanced \gls{drl}-based framework for automatic code optimization targeting the \gls{mlir} compiler. To overcome the limitations of prior approaches and handle complex, real-world neural network programs, we introduce several novel mechanisms. First, we adopt a Transformer-based architecture to effectively capture the hierarchical structure of deep loop nests. Second, we integrate hardware-aware feature observations, enabling the agent to learn cross-platform generalization strategies. Additionally, we explored a new reward shaping approach, utilizing a diverse dataset of full neural network models.
+
+Experimental results indicate that our proposed agent achieves noticeable performance improvements and speedups over the standard \gls{mlir} heuristics Base across various hardware platforms. By effectively learning adaptive, hardware-aware optimization policies, this work demonstrates the increasing potential of \gls{drl}-guided compilation for modern deep learning workloads.
+
+\vspace{0.5cm}
+\noindent \textbf{Keywords:} Deep Reinforcement Learning, Code Optimization, \gls{mlir}, Neural Networks, Compilers.
+
+% ---- Résumé ----
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+L'optimisation de code au sein des infrastructures de compilation modernes est vitale pour améliorer les performances des modèles d'apprentissage automatique, dont la taille et la complexité ne cessent de croître. Les heuristiques traditionnelles conçues manuellement sont difficiles à mettre à l'échelle, de conception rigide et peinent à s'adapter à diverses architectures matérielles. L'apprentissage par renforcement profond (\gls{drl}) offre une alternative convaincante en permettant à un agent de découvrir automatiquement des séquences de transformations optimales par essais et erreurs.
+
+Dans ce travail, nous présentons un système avancé basé sur le \gls{drl} pour l'optimisation automatique du code dans le cadre du compilateur \gls{mlir}. Afin de surmonter les limites des approches précédentes et de traiter des programmes de réseaux de neurones complexes et réels, nous introduisons plusieurs mécanismes novateurs. Premièrement, nous adoptons une architecture basée sur les Transformers pour capturer efficacement la structure hiérarchique des boucles imbriquées profondes. Deuxièmement, nous incluons des observations de caractéristiques tenant compte des caractéristiques matérielles, permettant à l'agent d'apprendre des stratégies de généralisation multiplateformes. De plus, nous explorons une nouvelle approche de récompense personnalisée, tout en utilisant un ensemble de données diversifié de modèles de réseaux de neurones complets.
+
+Les résultats d'expérimentations indiquent que l'agent proposé permet d'obtenir des améliorations d'accélérations "speedups" notables sur plusieurs modèles, opérations et à travers diverses plateformes matérielles. En apprenant efficacement des optimisations adaptatives tenant compte du matériel, ce travail démontre le potentiel croissant de la compilation guidée par le \gls{drl} pour les charges de travail modernes de l'apprentissage profond.
+
+\vspace{0.5cm}
+\noindent \textbf{Mots-clés~:} Apprentissage par renforcement profond, Optimisation de code, MLIR, Réseaux de neurones, Compilateurs.
+
+% ---- Table of Contents and Lists ----
 \newpage
+\addcontentsline{toc}{chapter}{Contents}
+\tableofcontents
+
+\newpage
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+
+\newpage
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+
+\newpage
+\printglossary[type=\acronymtype,title={List of Acronyms}]
+
+
+% =========================================================================
+% ZONE 3: MAIN TEXT BODY (Arabic Numerals: 1, 2, 3... up to Page 67)
+% =========================================================================
+\clearpage 
 \pagenumbering{arabic}
-\pagestyle{fancy}
-\fancyhf{} % Clears headers and footers
-
-% Headers
+\fancyhf{}
 \fancyhead[L]{\leftmark}
-\fancyhead[R]{} % Keep the top right empty
+\fancyhead[R]{}
+\fancyfoot[C]{\thepage}
 
-% Footers
-\fancyfoot[C]{\thepage} % Centered page number at the bottom
-
-% Chapter 0 – General Introduction (unnumbered chapter, added to TOC)
+% Dynamic modular calling of main structural chapters
 \include{chapters/general_introduction}
-
-% Chapter 1 – Compiler and Code Optimization
 \include{chapters/chapter1}
-
-% Chapter 2 – Reinforcement Learning Technology
 \include{chapters/chapter2}
-
-% Chapter 3 – Related Work on RL for Compiler Optimization
 \include{chapters/chapter3}
-
-% Chapter 4 – System Design and Implementation
 \include{chapters/chapter4}
-
-% Chapter 5 – Experiments and Results
 \include{chapters/chapter5}
-
-% General Conclusion (unnumbered chapter, added to TOC)
 \include{chapters/general_conclusion}
 
-% --- BACK MATTER ---
+
+% =========================================================================
+% ZONE 4: BIBLIOGRAPHY (Continues exactly at Roman numeral 'xi')
+% =========================================================================
+\clearpage 
+\pagenumbering{roman}      % Set display format style back to Roman
+\setcounter{page}{11}     % Force internal counter directly to 11 (xi)
 \printbibliography[heading=bibintoc,title={Bibliography}]
 
-\chapter*{Appendix}
-\addcontentsline{toc}{chapter}{Appendix}
-
-\section*{A. Per-Model Benchmark Distribution}
-
-Table~\ref{tab:appendix-model-counts} provides the detailed breakdown of extracted benchmarks per model, including both single-operation files and operation blocks. Counts represent the combined pool before the 80/20 train-evaluation split. The legacy synthetic pool contributes an additional 3{,}972 benchmarks (3{,}738 synthesized programs and 234 single operations).
-
-\begin{table}[H]
-    \centering
-    \caption{Detailed per-model benchmark counts.}
-    \label{tab:appendix-model-counts}
-    \begin{tabularx}{\textwidth}{l l r}
-        \toprule
-        \textbf{Family} & \textbf{Model} & \textbf{Count} \\
-        \midrule
-        \multirow{3}{*}[-2pt]{Encoder Transformers} & BERT & -- \\
-        & ALBERT & -- \\
-        & DistilBERT & -- \\
-        \hline
-        \multirow{3}{*}[-2pt]{Decoder / Seq2Seq} & GPT-2 Medium & -- \\
-        & BART & -- \\
-        & T5 & -- \\
-        \hline
-        \multirow{7}{*}[-4pt]{Vision} & ViT-B/16 & -- \\
-        & ResNet-50 & -- \\
-        & ResNeXt-50 & -- \\
-        & MobileNetV3-Small & -- \\
-        & EfficientNet-B0 & -- \\
-        & ConvNeXt-Tiny & -- \\
-        & VGG-16 & -- \\
-        \hline
-        \multirow{2}{*}[-2pt]{Graph Neural Networks} & GAT & -- \\
-        & GIN & -- \\
-        \hline
-        Audio Transformer & Whisper-base & -- \\
-        \hline
-        Object Detection & YOLOv8m & -- \\
-        \hline
-        Modern LLM & Llama~3.2~1B & -- \\
-        \hline
-        \multirow{2}{*}[-2pt]{Legacy / Synthetic} & Synthesized programs & 3{,}738 \\
-        & Single operations & 234 \\
-        \bottomrule
-    \end{tabularx}
-\end{table}
 
 \end{document}

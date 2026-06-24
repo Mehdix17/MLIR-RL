@@ -106,11 +106,13 @@ class Execution(metaclass=Singleton):
         # Execution-Time Profiling Safeguard:
         # We calculate a dynamic timeout based on the original unoptimized time.
         # If no root_exec_time is provided, we fall back to a standard 300s.
-        # We allow a 10x slowdown margin or 300s max.
+        # We allow a 5x slowdown margin or 120s max.
+        # Override min timeout with MIN_EXEC_TIMEOUT env var (e.g. 10 for training).
+        min_timeout = int(os.environ.get("MIN_EXEC_TIMEOUT", "2"))
         timeout_s = 300
         if root_exec_time and root_exec_time > 0:
             # root_exec_time is in nanoseconds, convert to seconds
-            timeout_s = min(300, max(30, int((root_exec_time / 1e9) * 10)))
+            timeout_s = min(300, max(min_timeout, int((root_exec_time / 1e9) * 5)))
 
         bufferized_code = transform_bufferize_and_lower_v(code)
         real_exec_time, success, error_msg = self.__execute_bufferized_code(bufferized_code, timeout_s)
@@ -161,16 +163,21 @@ class Execution(metaclass=Singleton):
         if not self.exec_data_file:
             raise Exception("Execution data file not provided")
 
-        with open(self.exec_data_file, "r") as file:
-            data: dict[str, dict[str, int]] = json.load(file)
-
-        for bench_name, bench_data in new_data.items():
-            if bench_name not in data:
-                data[bench_name] = {}
-            data[bench_name].update(bench_data)
-
-        with open(self.exec_data_file, "w") as file:
+        import fcntl
+        with open(self.exec_data_file, "r+") as file:
+            fcntl.flock(file, fcntl.LOCK_EX)
+            try:
+                data: dict[str, dict[str, int]] = json.load(file)
+            except json.JSONDecodeError:
+                data = {}
+            for bench_name, bench_data in new_data.items():
+                if bench_name not in data:
+                    data[bench_name] = {}
+                data[bench_name].update(bench_data)
+            file.seek(0)
+            file.truncate()
             json.dump(data, file, indent=4)
+            fcntl.flock(file, fcntl.LOCK_UN)
 
     def get_code_cache_key(self, seq: list[list['Action']]) -> str:
         """Get the code cache key for the given operation state.

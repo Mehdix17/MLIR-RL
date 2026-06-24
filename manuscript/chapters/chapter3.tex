@@ -1,4 +1,4 @@
-\chapter{Related Work on \gls{rl} for Compiler Optimization}
+\chapter{Reinforcement Learning for Automatic Code Optimization}
 \label{ch:related-work}
 
 \section{Introduction}
@@ -7,7 +7,7 @@ The application of reinforcement learning to compiler optimization sits at the i
 
 The landscape of \gls{rl}-based compiler optimization can be organized into three tiers. First, \gls{rl} has been integrated directly into existing compiler frameworks such as Halide and Tiramisu, where the learning agent replaces or augments hand-crafted scheduling heuristics. Second, general-purpose \gls{rl} environments for compiler research have been developed, with CompilerGym and PolyGym providing standardized benchmarks and interfaces. Third, within the \gls{mlir} ecosystem, work initiated by Bendib et al.~\cite{bendib2024reinforcement} and substantially extended by Tirichine et al.~\cite{tirichine2025reinforcement} has established a growing line of \gls{rl}-based auto-schedulers for \gls{mlir} Linalg operations and full programs.
 
-\section{\gls{rl} in Domain-Specific Compilers}
+\section{Reinforcement Learning in Domain-Specific Compilers}
 
 \subsection{Halide}
 
@@ -19,21 +19,23 @@ Building on this architecture, Pecenin et al.~\cite{pecenin2019halide} replaced 
 
 The agent was trained using \gls{ppo}~\cite{schulman2017ppo} and achieved speedups competitive with the heuristic auto-scheduler, while requiring no manual tuning of the search strategy or hand-crafted cost model features. This result demonstrated that \gls{rl} can learn effective scheduling policies for domain-specific compilers.
 
-\textbf{Limitations.} Halide's action space and cost model are tailored to image processing pipelines, which have a regular structure of stencil computations, upsampling, and downsampling. This heavily restricts the training scope exclusively to synthetic or narrow domains rather than the messy, diverse computation graphs seen in modern machine learning workloads. The scheduling primitives do not seamlessly transfer to the broader set of linear algebra operations. Furthermore, the agent operates entirely hardware-blind; it does not incorporate physical machine characteristics (e.g., caches, cores) into its observation, structurally stunting its ability to generalize and guaranteeing that the policy intimately overfits to the target platform on which it was trained. Lastly, relying almost entirely on terminal execution-time improvement provides a sparse reward signal that fails to reward structurally sound intermediate local schedules.
+\begin{itemize}
+\item \textbf{Limitations :} Halide's action space and cost model are tailored to image processing pipelines, which have a regular structure of stencil computations, upsampling, and downsampling. This heavily restricts the training scope exclusively to synthetic or narrow domains rather than the complex computation graphs seen in modern machine learning workloads. The scheduling primitives do not seamlessly transfer to the broader set of linear algebra operations. Furthermore, the agent operates entirely hardware-blind; it does not incorporate physical machine characteristics (e.g., caches, cores) into its observation, refraining its ability to generalize and guaranteeing that the policy intimately overfits to the target platform on which it was trained. Lastly, relying almost entirely on terminal execution-time improvement provides a sparse reward signal that fails to reward structurally sound intermediate local schedules.
+\end{itemize}
+
 
 \subsection{Tiramisu}
+Tiramisu is a polyhedral compiler for loop nest optimization, introduced by Baghdadi et al.~\cite{baghdadi2018tiramisu}. Like Halide, it separates the algorithm from the schedule. Tiramisu represents loop iterations as integer points within multi-dimensional polyhedra, enabling precise dependence analysis and composite transformations through linear mappings on the iteration space.
 
-Tiramisu is a polyhedral compiler designed for expressing and optimizing loop nests, introduced by Baghdadi et al.~\cite{baghdadi2018tiramisu}. Like Halide, Tiramisu separates the algorithm from the schedule and provides a scheduling language for specifying loop transformations. Tiramisu uses the polyhedral model to represent loop nests and their dependencies, enabling precise dependence analysis and the application of complex composite transformations. The polyhedral model represents loop iterations as integer points within a multi-dimensional polyhedron, and transformations correspond to linear mappings on this iteration space.
+Early automation in Tiramisu relied on a deep learning-based cost model coupled with beam search to evaluate candidate schedules~\cite{baghdadi2021deep}. This approach was later extended by LOOPer~\cite{merouani2024looper}, which broadened the set of supportable affine transformations and achieved a geometric mean speedup of 1.84$\times$ over Tiramisu on PolyBench.
 
-Within the same research group, work by Lamouri and Merad~\cite{lamouri2024tiramisu} explored the use of reinforcement learning to automate schedule selection in Tiramisu. Their agent learned to select sequences of scheduling commands (tiling, interchange, parallelization, vectorization, unrolling) for polyhedral loop nests. The state representation used features extracted from the polyhedral representation: iteration domain sizes, dependence vectors, access functions, and loop nest depth.
+Subsequent work introduced reinforcement learning directly into Tiramisu. Pearl~\cite{lamouri2025pearl} formulates schedule selection as an \gls{mdp}, using a \gls{gnn}-based policy to select transformation sequences and achieving a 2.02$\times$ speedup over Tiramisu. An earlier effort by Hennouni and El Hassane~\cite{henouni2022utilisation} had explored \gls{rl} for Tiramisu with a feedforward policy on single-level loop nests.
 
-The \gls{mdp} formulation treated each scheduling command as an action that transitions the program from one partial schedule to another. The reward was the execution-time speedup achieved by the final schedule. The policy network was an \gls{lstm}-based architecture that processed the sequence of features extracted from the polyhedral representation.
+\begin{itemize}
+\item \textbf{Limitations:} The polyhedral model restricts program representation to affine loop bounds and array indices, limiting applicability to the regular kernels found in scientific computing rather than the dynamic tensor shapes typical of neural network workloads. Even Pearl, which adopts a \gls{gnn}-based policy, remains tied to an affine state representation, making it unsuitable for the irregular computation graphs found in modern deep learning.
+\end{itemize}
 
-An earlier effort by Hennouni and El Hassane~\cite{henouni2022utilisation} had explored \gls{rl} for Tiramisu using a feedforward policy network with a fully observed \gls{mdp}, where the entire state was visible at every step. Lamouri and Merad improved on this by adopting a partially observable \gls{mdp} (\gls{pomdp}) formulation with an \gls{lstm} encoder, which allowed the agent to accumulate knowledge about the program structure across multiple observation steps.
-
-\textbf{Limitations.} The polyhedral model inherently limits program representation: loop bounds and array indices must be affine functions of enclosing iterators and symbolic constants. Because of this affine restriction, Tiramisu evaluates primarily on classical static kernels (e.g., highly regular scientific loops), lacking structural exposure to the dynamic tensor shapes and indirect memory accesses dominant in real-world neural network optimization. Moreover, the state encoders often rely on sequential recurrent units (e.g., LSTMs or feedforward networks). This recursive, sequential processing structurally struggles to connect non-adjacent, global dependencies nested deep within compiler subgraphs, rendering it ill-equipped for deeply nested topologies where an inner loop geometry intimately depends on an arbitrary outer loop.
-
-\section{General-Purpose \gls{rl} Environments for Compilers}
+\section{General-Purpose RL Environments for Compilers}
 
 \subsection{CompilerGym}
 
@@ -43,7 +45,9 @@ CompilerGym exposes two main categories of benchmark tasks. The first is phase o
 
 The observation space consists of program features extracted by \gls{llvm}'s built-in analysis passes: instruction counts by opcode, basic block counts, loop depth histograms, and control-flow graph properties. The reward is typically the reduction in code size or the improvement in execution time relative to a baseline compilation using default optimization flags. CompilerGym ships with a large dataset of programs from diverse sources, including C benchmarks, C++ programs, and the \gls{llvm} test suite.
 
-\textbf{Limitations.} CompilerGym's action space operates at the granularity of entire optimization passes applied to whole translation units. While suitable for coarse-grained phase ordering, it lacks the ability to execute precise structural loop transformations. Furthermore, applying coarse passes to vast compilation units exacerbates the sparse reward dilemma; rewarding the total operation binary size or end-time masks which explicit pass in the long sequence was actually effective, severely raising the variance of learning. While CompilerGym embraces large C/C++ evaluation suites (like the LLVM test suite), these synthetic academic datasets skew far from the densely packed tensor complexities seen in real-world neural network subgraphs.
+\begin{itemize}
+\item \textbf{Limitations :} CompilerGym's action space operates at the granularity of entire optimization passes applied to whole translation units. While suitable for coarse-grained phase ordering, it lacks the ability to execute precise structural loop transformations. Furthermore, applying coarse passes to vast compilation units exacerbates the sparse reward dilemma; rewarding the total operation binary size or end-time masks which explicit pass in the long sequence was actually effective, raising the variance of learning. While CompilerGym embraces large C/C++ evaluation suites (like the \gls{llvm} test suite), these synthetic academic datasets skew far from the densely packed tensor complexities seen in real-world neural network subgraphs.
+\end{itemize}
 
 \subsection{PolyGym}
 
@@ -53,53 +57,58 @@ The PolyGym state representation encodes detailed polyhedral features of the loo
 
 PolyGym supports multiple benchmark suites, including PolyBench (a collection of kernels from linear algebra and scientific computing) and the Rodinia benchmark suite for heterogeneous computing. Its design enables head-to-head comparisons of different \gls{rl} algorithms on the same set of optimization problems.
 
-\textbf{Limitations.} PolyGym shares the fundamental limitation of polyhedral methods: tying its scope severely to static, affine loop arrays and preventing evaluation on large-scale, non-synthetic tensor iterations. In addition to excluding highly diverse ML models from its dataset suite (relying instead on academic kernels like PolyBench), feeding rigid polyhedral numerical bounds into its feedforward policy networks strips the nuanced, hierarchical geometry of the loop layout. Architectures that rely strictly on sequential or fixed-size feedforward ingestion inherently fail to capture the complex, geometric relationships between scattered loop iterators—a bottleneck that points directly toward architectures prioritizing global self-attention.
+\begin{itemize}
+\item \textbf{Limitations :} PolyGym shares the fundamental limitation of polyhedral methods: tying its scope to static, affine loop arrays and preventing evaluation on large-scale, non-synthetic tensor iterations. In addition to excluding highly diverse ML models from its dataset suite (relying instead on academic kernels like PolyBench), feeding rigid polyhedral numerical bounds into its feedforward policy networks strips the nuanced, hierarchical geometry of the loop layout. Architectures that rely strictly on sequential or fixed-size feedforward ingestion inherently fail to capture the complex, geometric relationships between scattered loop iterators—a bottleneck that points directly toward architectures prioritizing global self-attention.
+\end{itemize}
 
-\section{\gls{rl} for \gls{mlir} Optimization}
+\section{Deep Reinforcement Learning for MLIR Optimization}
 
 This section provides an in-depth analysis of reinforcement learning applied to \gls{mlir}-based code optimization. The work in this area originates from a sustained research effort that began with the first \gls{rl} environment for single \gls{mlir} operations and progressed to systems capable of optimizing full computation graphs across multiple domains.
 
-\subsection{Bendib et al. (2024): First \gls{rl} Environment for Single Operations}
+\subsection{Bendib et al. (2024): First RL Environment for Single Operations}
 
 The work by Bendib et al.~\cite{bendib2024reinforcement} established the first reinforcement learning environment for automatic code optimization in the \gls{mlir} compiler. Their system targets individual Linalg operations (matrix multiplications, convolutions, element-wise additions) and extracts structured numerical features from each operation to form the agent's observation.
 
-\textbf{Environment design.} The environment defines a discrete, hierarchical action space. At the top level, the agent selects an action type from among Tiling (\texttt{T}), TiledParallelization (\texttt{TP}), Interchange (\texttt{I}), Vectorization (\texttt{V}), and NoTransformation (\texttt{NT}). Once the action type is chosen, the agent selects the parameters for that action through a type-specific parameter head. For tiling actions, the parameters are tile sizes for each loop in the nest, chosen from a set of powers of two (a tile size of zero indicates that loop should not be tiled). For interchange, the parameter is a permutation of the loop indices, encoded through one of three mechanisms: pre-enumerated candidate permutations, pointer-based sequential selection, or continuous Lehmer-code decoding. Vectorization is a terminal action: once applied, no further transformations can be applied to that operation.
+\begin{itemize}
+\item \textbf{Environment design :} The environment defines a discrete, hierarchical action space. At the top level, the agent selects an action type from among \textbf{Tiling (\gls{t}), TiledParallelization (\gls{tp}), Interchange (\gls{i}), Vectorization (\gls{v}), and \gls{nt}}. Once the action type is chosen, the agent selects the parameters for that action through a type-specific parameter head. For tiling actions, the parameters are tile sizes for each loop in the nest, chosen from a set of powers of two (a tile size of zero indicates that loop should not be tiled). For interchange, the parameter is a permutation of the loop indices, encoded through one of three mechanisms: pre-enumerated candidate permutations, pointer-based sequential selection, or continuous Lehmer-code decoding. Vectorization is a terminal action: once applied, no further transformations can be applied to that operation.
 
 The reward function is the log-speedup relative to the unoptimized baseline execution time. Penalties are applied for invalid transformations (e.g., tile sizes that do not divide loop bounds, a restriction specific to the \gls{mlir} \gls{rl} implementation rather than a general tiling constraint) and for execution failures during the compilation and \gls{jit} execution pipeline.
 
-\textbf{State representation and policy.} The observation space encodes a fixed-size feature vector for each operation: operation type (matmul, conv, add, etc.), loop upper bounds, iterator types (parallel, reduction), load and store access matrices describing which loop iterators index which array dimensions, and arithmetic operation counts. These features are extracted directly from the \gls{mlir} Linalg operation using the \gls{mlir} Python bindings.
+\item \textbf{State representation and policy :} The observation space encodes a fixed-size feature vector for each operation: operation type (matmul, conv, add, etc.), loop upper bounds, iterator types (parallel, reduction), load and store access matrices describing which loop iterators index which array dimensions, and arithmetic operation counts. These features are extracted directly from the \gls{mlir} Linalg operation using the \gls{mlir} Python bindings.
 
 The policy network follows an actor-critic architecture. The operation features are processed through a multi-layer perceptron, producing an intermediate representation that is then passed through an \gls{lstm} to produce a fixed-size embedding vector encapsulating sequential dependencies across loop levels. A shared backbone network processes this embedding before branching into the action-type selection head, per-action parameter heads (one for each action type), and a value head that estimates the expected return from the current state. The \gls{ppo} algorithm~\cite{schulman2017ppo} is used for training, with Generalized Advantage Estimation~\cite{schulman2015gae} for computing advantage estimates.
 
-\textbf{Contributions and limitations.} This work demonstrated that an \gls{rl} agent can learn effective optimization schedules for individual \gls{mlir} Linalg operations, establishing the viability of \gls{rl}-based optimization in the \gls{mlir} ecosystem. However, the system has several important limitations. The agent operates on single operations in isolation, without awareness of producer-consumer relationships or the effect of transformations on the broader computation graph. The observation includes no hardware information, preventing the agent from adapting its decisions to different target platforms. The reward is entirely sparse, received only at episode termination, which slows learning and provides no guidance on intermediate transformation choices. Finally, the \gls{lstm} encoder processes loop features sequentially from innermost to outermost, which may limit its ability to capture dependencies between non-adjacent loop levels in deeply nested structures.
+\item \textbf{Contributions and limitations :} This work demonstrated that an \gls{rl} agent can learn effective optimization schedules for individual \gls{mlir} Linalg operations, establishing the viability of \gls{rl}-based optimization in the \gls{mlir} ecosystem. However, the system has several important limitations. The agent operates on single operations in isolation, without awareness of producer-consumer relationships or the effect of transformations on the broader computation graph. The observation includes no hardware information, preventing the agent from adapting its decisions to different target platforms. The reward is entirely sparse, received only at episode termination, which slows learning and provides no guidance on intermediate transformation choices. Finally, the \gls{lstm} encoder processes loop features sequentially from innermost to outermost, which may limit its ability to capture dependencies between non-adjacent loop levels in deeply nested structures.
+\end{itemize}
 
 \subsection{Tirichine et al. (2025): Extensions and Optimizations}
 
 The work by Tirichine et al.~\cite{tirichine2025reinforcement} represents a substantial extension of the Bendib et al. baseline, advancing the system from single-operation optimization to full-program optimization with enhanced modeling capabilities. It advances the prior system with new methods for state encoding, action space design, and learning algorithms.
 
-\textbf{\gls{ast}-based state representation and recursive \gls{lstm} encoder.} A central contribution of Tirichine et al. is the replacement of the flat per-operation feature vector with a structured \gls{ast}-based state representation. The computation graph is represented as a tree where leaf nodes correspond to individual Linalg operations and internal nodes encode the hierarchical structure of producer-consumer relationships. Each operation node carries the same features as in the Bendib baseline (operation type, loop bounds, iterator types, access matrices).
+\begin{itemize}
+\item \textbf{\gls{ast}-based state representation and recursive \gls{lstm} encoder :} A central contribution of Tirichine et al. is the replacement of the flat per-operation feature vector with a structured \gls{ast}-based state representation. The computation graph is represented as a tree where leaf nodes correspond to individual Linalg operations and internal nodes encode the hierarchical structure of producer-consumer relationships. Each operation node carries the same features as in the Bendib baseline (operation type, loop bounds, iterator types, access matrices).
 
 To encode this tree-structured observation into a fixed-size vector suitable for the policy network, the authors introduce a recursive \gls{lstm} encoder. Beginning at the leaf nodes, the features of each operation are embedded by a multi-layer perceptron. The embeddings of consumer operations are then combined with the embeddings of their producer operations through an \gls{lstm} that processes the \gls{ast} bottom-up, producing an aggregated embedding at the root that summarizes the entire computation graph. This recursive structure naturally captures the dependence chain: the encoding of a consumer reflects not only its own features but also those of all operations whose output it consumes.
 
-\textbf{Fusion action and producer-consumer traversal.} To exploit the producer-consumer relationships captured by the \gls{ast}, Tirichine et al. introduce a new Fusion action, denoted \texttt{TiledFusion} (\texttt{TF}). This action merges a producer operation into its consumer's loop nest using \gls{mlir}'s tiling and fusion mechanisms, eliminating the intermediate buffer that would otherwise store the producer's output. When combined with tiling and parallelization, the action becomes \texttt{TiledParallelFusion} (\texttt{TPF}), which tiles both operations, fuses them, and parallelizes the resulting loop nest.
+\item \textbf{Fusion action and producer-consumer traversal :} To exploit the producer-consumer relationships captured by the \gls{ast}, Tirichine et al. introduce a new Fusion action \gls{tf}. This action merges a producer operation into its consumer's loop nest using \gls{mlir}'s tiling and fusion mechanisms, eliminating the intermediate buffer that would otherwise store the producer's output. When combined with tiling and parallelization, the action becomes \gls{tf}, which tiles both operations, fuses them, and parallelizes the resulting loop nest.
 
 The environment traversal strategy is also redesigned to accommodate fusion decisions. Whereas the Bendib baseline processed operations in isolation, the Tirichine system traverses the computation graph from consumer to producer. This ordering ensures that when the agent visits a given operation, it has already observed and made optimization decisions for all operations that consume its output, providing critical context for fusion decisions. The agent can choose to fuse the current operation with a previously processed consumer, or optimize it independently.
 
-\textbf{Action space innovations.} In addition to fusion, the work introduces two technical improvements to the interchange action. The original baseline offered three interchange encoding modes (enumerated candidates, pointer-based, and Lehmer-code continuous), each with distinct trade-offs between action space compactness and verbosity. Tirichine et al. introduce a pointer network architecture that directly selects a loop permutation from the set of all valid permutations using an attention mechanism over candidate loop positions, achieving more efficient exploration of the permutation space than the enumerated candidate approach while maintaining precision. A levels-pointer variant further improves on this by operating hierarchically, first selecting a coarse ordering and then refining it.
+\item \textbf{Action space innovations :} In addition to fusion, the work introduces two technical improvements to the interchange action. The original baseline offered three interchange encoding modes (enumerated candidates, pointer-based, and Lehmer-code continuous), each with distinct trade-offs between action space compactness and verbosity. Tirichine et al. introduce a pointer network architecture that directly selects a loop permutation from the set of all valid permutations using an attention mechanism over candidate loop positions, achieving more efficient exploration of the permutation space than the enumerated candidate approach while maintaining precision. A levels-pointer variant further improves on this by operating hierarchically, first selecting a coarse ordering and then refining it.
 
-\textbf{Domain generalization: neural networks and LQCD.} A distinctive feature of the Tirichine system is its demonstration of generalization across two fundamentally different computational domains. The first domain consists of neural network operators common in deep learning: matrix multiplications, 2D convolutions, element-wise operations, and their compositions into blocks and full models (VGG, ResNet, MobileNet). The second domain is Lattice Quantum Chromodynamics (LQCD), a field of computational physics involving stencil-like computations on four-dimensional space-time grids.
+\item \textbf{Domain generalization: neural networks and \gls{lqcd}.} A distinctive feature of the Tirichine system is its demonstration of generalization across two fundamentally different computational domains. The first domain consists of neural network operators common in deep learning: matrix multiplications, 2D convolutions, element-wise operations, and their compositions into blocks and full models (VGG-16~\cite{simonyan2015vgg}, ResNet~\cite{he2016resnet}, MobileNet~\cite{howard2019mobilenetv3}). The second domain is \gls{lqcd}, a field of computational physics involving stencil-like computations on four-dimensional space-time grids.
 
-To support LQCD workloads, the authors developed a dedicated compiler frontend that parses LQCD programs and lowers them to \gls{mlir} Linalg operations. This translation enables the same \gls{rl} auto-scheduler, trained on a mixture of neural network and LQCD programs, to optimize code from the physics domain without modification. The LQCD domain introduces computation patterns (stencils, reductions across multiple dimensions, complex index arithmetic) that differ markedly from the dense linear algebra patterns of neural networks, providing a stringent test of generalization.
+To support \gls{lqcd} workloads, the authors developed a dedicated compiler frontend that parses \gls{lqcd} programs and lowers them to \gls{mlir} Linalg operations. This translation enables the same \gls{rl} auto-scheduler, trained on a mixture of neural network and \gls{lqcd} programs, to optimize code from the physics domain without modification. The \gls{lqcd} domain introduces computation patterns (stencils, reductions across multiple dimensions, complex index arithmetic) that differ markedly from the dense linear algebra patterns of neural networks, providing a stringent test of generalization.
 
-\textbf{AlphaZero adaptation.} As an alternative to \gls{ppo}, the authors explore the AlphaZero algorithm~\cite{silver2017alphazero} for the code optimization problem. AlphaZero uses Monte Carlo Tree Search (MCTS) guided by a neural network to plan action sequences, potentially enabling deeper lookahead than the reactive policy of \gls{ppo}. In the adaptation, the MCTS simulates sequences of loop transformations from the current program state, with a learned value network evaluating partial sequences and a policy network proposing promising actions. The AlphaZero-based agent is compared against the \gls{ppo} baseline, revealing that while AlphaZero can discover higher-quality schedules in some settings, the computational cost of MCTS rollouts makes it less practical for large-scale training.
+\item \textbf{AlphaZero adaptation :} As an alternative to \gls{ppo}, the authors explore the AlphaZero algorithm~\cite{silver2017alphazero} for the code optimization problem. AlphaZero uses  \gls{mcts} guided by a neural network to plan action sequences, potentially enabling deeper lookahead than the reactive policy of \gls{ppo}. In the adaptation, the \gls{mcts} simulates sequences of loop transformations from the current program state, with a learned value network evaluating partial sequences and a policy network proposing promising actions. The AlphaZero-based agent is compared against the \gls{ppo} baseline, revealing that while AlphaZero can discover higher-quality schedules in some settings, the computational cost of \gls{mcts} rollouts makes it less practical for large-scale training.
 
-\textbf{Results and limitations.} The evaluation conducted by Tirichine et al. covers both single operations (various matrix multiplication and convolution sizes) and full neural network models (VGG, ResNet, MobileNet). On single operations, the \gls{rl} agent achieved speedups competitive with hand-tuned schedules. On full models, the agent demonstrated notable performance, including a 2.5$\times$ speedup on MobileNetV2 relative to standard PyTorch execution, though it underperformed on architectures with highly regular patterns (VGG, 1.09$\times$) and on ResNet (2.1$\times$ compared to PyTorch's 4.25$\times$).
-
+\item \textbf{Results and limitations :} The evaluation conducted by Tirichine et al. covers both single operations (various matrix multiplication and convolution sizes) and full neural network models (VGG-16~\cite{simonyan2015vgg}, ResNet~\cite{he2016resnet}, MobileNet~\cite{howard2019mobilenetv3}). On single operations, the \gls{rl} agent achieved speedups competitive with hand-tuned schedules. On full models, the agent demonstrated notable performance, including a 2.5$\times$ speedup on MobileNe relative to standard PyTorch execution, though it underperformed on architectures with highly regular patterns (VGG-16~\cite{simonyan2015vgg}, 1.09$\times$) and on ResNet~\cite{he2016resnet} (2.1$\times$ compared to PyTorch's 4.25$\times$).
+\end{itemize}
 Despite these advances, the authors identify several limitations that persist in their system. The observation remains hardware-agnostic: the agent must infer optimal tile sizes and parallelization strategies through trial and error rather than conditioning on known cache and core specifications. The reward function remains entirely sparse, with no intermediate signal guiding the agent toward promising states during an episode. The recursive \gls{lstm} encoder processes loop levels sequentially, which may struggle with deeply nested structures where the relationship between distant levels is not well captured. These limitations define the research space addressed by the present work.
 
-\subsection{Other Efforts}
+\subsection{Other Related Works}
 
-Beyond the USTHB line of research, the broader \gls{mlir} community has begun exploring learning-based optimization approaches, though published results remain limited. Hennouni and El Hassane~\cite{henouni2022utilisation} investigated the use of reinforcement learning for exploring the search space of \gls{mlir} transformations, focusing on loop nest optimization with a simplified action space. Their work confirmed the feasibility of \gls{rl}-guided optimization in \gls{mlir} but was limited to single-level loop nests and did not address the challenges of full computation graphs with producer-consumer dependencies. The \gls{mlir} project itself includes ongoing efforts to develop heuristic-based auto-scheduling capabilities through the transform dialect; these provide the infrastructure on which learning-based schedulers can operate, but the scheduling logic in these efforts remains heuristic-driven rather than learned.
+Beyond the \gls{mlir} ecosystem, learning-based optimization approaches have been explored in other polyhedral and domain-specific compilers. Hennouni and El Hassane~\cite{henouni2022utilisation} investigated the use of reinforcement learning for exploring the combinatorial search space of transformations in the Tiramisu compiler framework. Specifically, they modeled the selection and ordering of polyhedral schedules—such as loop tiling, interchange, and unrolling—as a sequential decision-making problem. By training an \gls{rl} agent to navigate these valid transformation sequences, their approach aimed to discover optimized schedules that minimize code execution time, leveraging empirical speedups to formulate the reward function. While their work successfully demonstrated the viability of \gls{rl}-guided optimization for polyhedral code generation, it was heavily constrained to single-level loop nests and did not scale to handle full computation graphs featuring complex producer-consumer dependencies.
 
 \section{Comparative Synthesis}
 
@@ -109,53 +118,42 @@ This section synthesizes the systems surveyed above, identifying common design p
 
 \begin{table}[H]
     \centering
-    \caption{Comparative synthesis of \gls{rl}-based compiler optimization systems.}
+    \caption{Comparative synthesis of RL-based compiler optimization systems.}
     \label{tab:related-work-synthesis}
-    \begin{tabularx}{\textwidth}{l X X X X}
+    \vspace{0.2cm}
+    \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{3.5cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3cm}}
         \toprule
-        \textbf{System} & \textbf{Optimization Paradigm} & \textbf{State Abstraction} & \textbf{Credit Assignment} & \textbf{HW Adaptability} \\
+        \textbf{System} & \textbf{Targeted Domains} & \textbf{State Elements} & \textbf{Agent Encoder} \\
         \midrule
-        Halide + DRL~\cite{pecenin2019halide}
-        & Schedule parameter search
-        & Flat loop features
-        & Sparse (Execution time)
-        & Implicit (Feedback) \\
+        Halide + \gls{drl} \cite{pecenin2019halide}
+        & Image processing
+        & Loop nest features, buffer sizes
+        & Feedforward / Beam Search \\
         \addlinespace
-        Tiramisu~\cite{lamouri2024tiramisu}
-        & Loop transformations
-        & Polyhedral domains
-        & Sparse (Execution time)
-        & Implicit (Feedback) \\
+        Tiramisu \cite{baghdadi2021deep}
+        & HP, ML Kernels
+        & Iteration domains, dependencies
+        & \gls{lstm} \\
         \addlinespace
-        CompilerGym~\cite{cummins2021compilergym}
-        & Phase ordering
-        & Aggregate graph stats
-        & Sparse (Delta reward)
-        & Implicit (Feedback) \\
+        CompilerGym \cite{cummins2021compilergym}
+        & General purpose (C/C++)
+        & Aggregate program statistics
+        & Feedforward \\
         \addlinespace
-        PolyGym~\cite{brauckmann2021polygym}
-        & Polyhedral scheduling
-        & Matrix representations
-        & Sparse (Execution time)
-        & Implicit (Feedback) \\
+        PolyGym \cite{brauckmann2021polygym}
+        & Affine loop nests
+        & Dependence polyhedra
+        & Feedforward \\
         \addlinespace
-        \gls{mlir}-Base~\cite{bendib2024reinforcement}
-        & Single-op tiling
-        & Flat token arrays
-        & Sparse (Execution time)
-        & Implicit (Feedback) \\
-        \addlinespace
-        \gls{mlir}-\gls{rl}~\cite{tirichine2025reinforcement}
-        & Subgraph restructuring
-        & Sequential \gls{ast}
-        & Sparse (Execution time)
-        & Implicit (Feedback) \\
+        MLIR-RL \cite{tirichine2025reinforcement}
+        & Linalg Operations
+        & \gls{ast} loop structure
+        & \gls{lstm} \\
         \addlinespace
         \textbf{Proposed Agent}
-        & \textbf{HW-aware subgraph sched.}
-        & \textbf{Global \gls{ast} attention}
-        & \textbf{Shaped (Arith. Intensity)}
-        & \textbf{Explicit (Embeddings)} \\
+        & Linalg Operations
+        &  \gls{ast} loop structure + Hardware Characteristics
+        & Transformer \\
         \bottomrule
     \end{tabularx}
 \end{table}
@@ -186,7 +184,7 @@ The contributions of this thesis directly address each of these challenges. The 
 
 This chapter has surveyed the landscape of reinforcement learning applied to compiler optimization. We examined systems that integrate \gls{rl} into existing domain-specific compilers (Halide, Tiramisu), general-purpose \gls{rl} environments for compiler research (CompilerGym, PolyGym), and the specific line of work on \gls{rl}-based optimization in \gls{mlir} (Bendib et al., Tirichine et al., and related efforts).
 
-The \gls{mlir}-based systems received in-depth treatment, reflecting their direct relevance to this thesis. Bendib et al. established the first \gls{rl} environment for single \gls{mlir} Linalg operations. Tirichine et al. extended this to full-program optimization with an \gls{ast}-based state representation, recursive \gls{lstm} encoder, fusion action, domain generalization across neural networks and LQCD, and algorithmic innovations including pointer networks for interchange and an AlphaZero adaptation.
+The \gls{mlir}-based systems received in-depth treatment, reflecting their direct relevance to this thesis. Bendib et al. established the first \gls{rl} environment for single \gls{mlir} Linalg operations. Tirichine et al. extended this to full-program optimization with an \gls{ast}-based state representation, recursive \gls{lstm} encoder, fusion action, domain generalization across neural networks and \gls{lqcd}, and algorithmic innovations including pointer networks for interchange and an AlphaZero adaptation.
 
 The comparative synthesis revealed that while the surveyed systems share common design patterns (structured state representations, discrete transformation action spaces, execution-time-based rewards, and \gls{ppo} as the learning algorithm of choice), important gaps remain. The exclusive reliance on sparse terminal rewards, the absence of hardware awareness, the limitations of sequential \gls{lstm} encoders for hierarchical program structures, the restricted action diversity, and the fragmentation of evaluation protocols represent opportunities for meaningful improvement.
 
