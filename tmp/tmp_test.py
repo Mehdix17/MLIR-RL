@@ -1,41 +1,33 @@
 import sys
+import os
 import mlir.ir as ir
-from mlir.dialects.transform import interpreter
+from rl_autoschedular_paper.transforms import transform_tile, transform_vectorize
 
+# Set up Context
 ctx = ir.Context()
-# Parse a simple valid module
+
+# Simple valid module with tagged operation (tag = "test_op")
 code = """
 module {
-  func.func @main() {
-    return
+  func.func @main(%arg0: tensor<8x8xf32>) -> (tensor<8x8xf32>, i64) {
+    %c0 = arith.constant 0 : i64
+    %0 = linalg.matmul {tag = "test_op"} ins(%arg0, %arg0 : tensor<8x8xf32>, tensor<8x8xf32>) outs(%arg0 : tensor<8x8xf32>) -> tensor<8x8xf32>
+    return %0, %c0 : tensor<8x8xf32>, i64
   }
 }
 """
 module = ir.Module.parse(code, ctx)
 
-# Create a syntactically correct transform sequence that will fail on empty op
-transform_code = """
-module attributes {transform.with_named_sequence} {
-  transform.named_sequence @__transform_main(%arg1: !transform.any_op {transform.readonly}) {
-    %op = transform.structured.match attributes {tag = "non_existent"} in %arg1 : (!transform.any_op) -> !transform.any_op
-    %tiled, %loops = transform.structured.tile_using_for %op tile_sizes [2] : (!transform.any_op) -> (!transform.any_op, !transform.any_op)
-    transform.yield
-  }
-}
-"""
+print("Applying valid tile transform...")
+transform_tile(module, "test_op", [2, 2, 2])
+print("Successfully tiled! Transformed code:")
+print(str(module))
 
+print("Applying vectorization to tiled code (this may fail if not structured correctly, testing error propagation)...")
 try:
-    print("Parsing transform code...")
-    t_module = ir.Module.parse(transform_code, ctx)
-    print("Applying transform code...")
-    interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
+    transform_vectorize(module, "test_op")
+    print("Vectorization completed.")
 except Exception as e:
-    print("Caught transform exception in python:", e)
+    print("Caught expected exception from invalid vectorization:", e)
 
-# Clear variables to trigger garbage collection/destruction
-print("Cleaning up variables...")
-del module
-del t_module
-del ctx
-
-print("Exiting python cleanly...")
+print("Done! Exiting cleanly.")

@@ -302,3 +302,54 @@ This ensures that the Python signal handler is active during benchmark execution
 | `scripts/eval/ablation_eval.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
 | `rl_autoschedular/rl_autoschedular_paper/evaluate.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
 | `rl_autoschedular/rl_autoschedular_paper_transformer/evaluate.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+
+---
+
+## Round 4 — Native C++ Diagnostic Destructor Aborts (2026-06-26)
+
+After Round 3 signal handler adjustments, training jobs still encountered sudden process exits during benchmark trajectory collection.
+
+### Bug 6 — Unchecked Diagnostic Aborts inside C++ Bindings (`CollectDiagnosticsToStringScope`)
+
+**Error**:
+```
+python: /scratch/mb10856/MLIR-RL/llvm-project/mlir/include/mlir/Bindings/Python/PybindAdaptors.h:623: 
+mlir::python::CollectDiagnosticsToStringScope::~CollectDiagnosticsToStringScope(): 
+Assertion `errorMessage.empty() && "unchecked error message"' failed.
+Aborted (core dumped)
+```
+
+**Root Cause**:
+In `rl_autoschedular_paper` and `rl_autoschedular_paper_transformer`, the parent trajectory collection loops call `action.apply(module)` in-process. This function delegates to the C++ bindings function `interpreter.apply_named_sequence`.
+If a pass succeeds but emits any warning/remark diagnostics (common in tiling/vectorization), or if a pass fails and the exception is caught and ignored in Python, the C++ local variable `CollectDiagnosticsToStringScope` is left with a non-empty `errorMessage` (warnings or remarks).
+When the C++ scope ends (upon returning from the bindings function), the destructor asserts that `errorMessage` is empty. Because the diagnostics were not explicitly cleared/taken, this assertion fails and aborts the entire Python training process immediately.
+
+**Fix**:
+Implemented subprocess isolation in the transformation layer:
+- Modified `__run_transform_code` inside [transforms.py](file:///scratch/mb10856/MLIR-RL/rl_autoschedular/rl_autoschedular_paper/transforms.py) and [transforms.py](file:///scratch/mb10856/MLIR-RL/rl_autoschedular/rl_autoschedular_paper_transformer/transforms.py) to serialize the active `Module` to string.
+- Ran a Python subprocess using `subprocess.run` to load the module, parse the transform code, apply the named sequence, and output the resulting module string.
+- Parsed the output string back into a temporary module under the parent process's `Context`, then used `move_module` to copy the operations back in-place into the parent `Module`.
+- Forwarded thread limits (`OPENBLAS_NUM_THREADS=1`, `OMP_NUM_THREADS=1`, `MKL_NUM_THREADS=1`) to avoid resource limits inside the subprocesses.
+
+This isolated execution guarantees that any diagnostic issues (warnings, remarks, or native failures) are entirely confined to short-lived child processes, keeping the parent RL training process completely safe.
+
+---
+
+## Complete Summary of Files Changed (all rounds)
+
+| File | Change |
+|------|--------|
+| `rl_autoschedular/rl_autoschedular_paper/actions/tiled_fusion.py` | `raise` → `continue` for constant store dims (round 1) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/actions/tiled_fusion.py` | Same `raise` → `continue` fix (round 2) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/model.py` | Removed 235-line dead duplicate `TransformerEmbedding` body (round 1) |
+| `rl_autoschedular/rl_autoschedular_paper/benchmarks.py` | `try/except RuntimeError` guard around per-benchmark MLIR parsing (round 2) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/benchmarks.py` | Same `try/except RuntimeError` guard (round 2) |
+| `scripts/train/train.sh` | `--mem=64G` → `--mem=8G`; added `--constraint=bergamo` (round 1) |
+| `scripts/train/train.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `scripts/eval/eval.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `scripts/eval/ablation_eval.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `rl_autoschedular/rl_autoschedular_paper/evaluate.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/evaluate.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `rl_autoschedular/rl_autoschedular_paper/transforms.py` | Subprocess transform isolation implementation (round 4) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/transforms.py` | Same subprocess transform isolation implementation (round 4) |
+
