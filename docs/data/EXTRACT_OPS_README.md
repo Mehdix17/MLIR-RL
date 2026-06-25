@@ -96,7 +96,7 @@ interesting scheduling targets.
 ## CLI Reference
 
 ```
-python data_utils/extract_ops.py [options]
+python data_utils/extract/extract_ops.py [options]
 ```
 
 | Flag | Required | Default | Description |
@@ -115,7 +115,7 @@ python data_utils/extract_ops.py [options]
 ### Single model file
 
 ```bash
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
     --input  data/nn/generated/code_files/resnet18_linalg.mlir \
     --output-dir data/nn/extracted/resnet18/ \
     --batch-size 1 \
@@ -145,7 +145,7 @@ resnet18_generic_0.mlir
 ```bash
 for f in data/nn/generated/code_files/*_linalg.mlir; do
     model=$(basename "$f" _linalg.mlir)
-    python data_utils/extract_ops.py \
+    python data_utils/extract/extract_ops.py \
         --input      "$f" \
         --output-dir "data/nn/extracted/$model" \
         --batch-size 1 \
@@ -166,7 +166,7 @@ If you re-run extraction after modifying the input, stale files from a
 previous run are removed first:
 
 ```bash
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
     --input  data/nn/generated/code_files/bert_linalg.mlir \
     --output-dir data/nn/extracted/bert/ \
     --batch-size 1 \
@@ -179,7 +179,7 @@ Very small element-wise generics (e.g. scalar bias adds) have few parallel
 loops and are rarely interesting.  Raising the threshold prunes them:
 
 ```bash
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
     --input  data/nn/generated/code_files/gpt2_linalg.mlir \
     --output-dir data/nn/extracted/gpt2/ \
     --batch-size 1 \
@@ -193,7 +193,7 @@ dimension is often outer-most; a larger batch size gives more realistic
 data (but may make some ops too large to JIT-compile quickly):
 
 ```bash
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
     --input  data/nn/generated/code_files/bert_linalg.mlir \
     --output-dir data/nn/extracted/bert_b8/ \
     --batch-size 8
@@ -204,7 +204,7 @@ python data_utils/extract_ops.py \
 ```bash
 for f in data/nn/generated/code_files/*_linalg.mlir; do
     model=$(basename "$f" _linalg.mlir)
-    python data_utils/extract_ops.py \
+    python data_utils/extract/extract_ops.py \
         --input "$f" \
         --output-dir "data/nn/extracted/$model" \
         --batch-size 1 &

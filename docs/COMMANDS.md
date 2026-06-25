@@ -177,13 +177,13 @@ bash scripts/eval/submit_checkpoint_evals.sh
 
 ```bash
 # Convert ResNet18 to MLIR
-python data_utils/vision2mlir.py --model resnet18 --output-dir data/generated/code_files
+python data_utils/convert/vision2mlir.py --model resnet18 --output-dir data/generated/code_files
 
 # Convert ViT with ONNX backend
-python data_utils/vision2mlir.py --model vit_b_16 --backend onnx --output-dir data/generated/
+python data_utils/convert/vision2mlir.py --model vit_b_16 --backend onnx --output-dir data/generated/
 
 # Convert with weight stripping
-python data_utils/vision2mlir.py --model efficientnet_b0 --strip-weights
+python data_utils/convert/vision2mlir.py --model efficientnet_b0 --strip-weights
 ```
 
 **Supported models:** resnet18, resnet50, efficientnet_b0, mobilenet_v2, densenet121, vit_b_16, convnext_base, vgg16
@@ -192,13 +192,13 @@ python data_utils/vision2mlir.py --model efficientnet_b0 --strip-weights
 
 ```bash
 # Convert BERT
-python data_utils/transformers2mlir.py --model bert --output-dir data/generated/code_files
+python data_utils/convert/transformers2mlir.py --model bert --output-dir data/generated/code_files
 
 # Convert GPT-2
-python data_utils/transformers2mlir.py --model gpt2 --backend onnx
+python data_utils/convert/transformers2mlir.py --model gpt2 --backend onnx
 
 # Convert DistilBERT
-python data_utils/transformers2mlir.py --model distilbert
+python data_utils/convert/transformers2mlir.py --model distilbert
 ```
 
 **Supported models:** bert, distilbert, roberta, albert, gpt2, t5, bart, lstm
@@ -207,10 +207,10 @@ python data_utils/transformers2mlir.py --model distilbert
 
 ```bash
 # Convert GCN
-python data_utils/gnn2mlir.py --model gcn --output-dir data/generated/
+python data_utils/convert/gnn2mlir.py --model gcn --output-dir data/generated/
 
 # Convert all GNN models
-python data_utils/gnn2mlir.py --model all
+python data_utils/convert/gnn2mlir.py --model all
 ```
 
 **Supported models:** gcn, graphsage, gat, gin
@@ -219,7 +219,7 @@ python data_utils/gnn2mlir.py --model all
 
 ```bash
 # Extract individual operations
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
   --input data/nn/raw/resnet18_linalg.mlir \
   --output-dir data/nn/code_files/resnet18/ \
   --batch-size 1
@@ -229,7 +229,7 @@ python data_utils/extract_ops.py \
 
 ```bash
 # Extract blocks with window=5, stride=3
-python data_utils/extract_blocks.py \
+python data_utils/extract/extract_blocks.py \
   --input data/nn/raw_bench/resnet18_linalg.mlir \
   --output-dir data/nn/code_files/resnet18/ \
   --window 5 --stride 3
@@ -271,21 +271,9 @@ python -m data_utils.orchestrate strip huge_model.mlir --replace
 
 ```bash
 # Generate synthetic MLIR benchmarks
-python data_utils/generate_synthetic.py \
+python data_utils/generate/generate_synthetic.py \
   --num-singles 100 --num-bench 50 \
   --output-dir data/all/code_files
-```
-
-### Create Train/Eval Splits
-
-```bash
-# Stratified split by model family
-python data_utils/create_splits.py \
-  --roots data/nn/code_files \
-  --output splits.json \
-  --mode cross-model \
-  --eval-ratio 0.2 \
-  --seed 42
 ```
 
 ---
@@ -653,11 +641,11 @@ config/
 
 ```bash
 # Convert models to MLIR
-python data_utils/vision2mlir.py --model resnet18 --output-dir data/new_dataset/nn/raw_bench/
-python data_utils/vision2mlir.py --model resnet50 --output-dir data/new_dataset/nn/raw_bench/
+python data_utils/convert/vision2mlir.py --model resnet18 --output-dir data/new_dataset/nn/raw_bench/
+python data_utils/convert/vision2mlir.py --model resnet50 --output-dir data/new_dataset/nn/raw_bench/
 
 # Extract operations
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
   --input data/new_dataset/nn/raw_bench/resnet18_linalg.mlir \
   --output-dir data/new_dataset/all/
 

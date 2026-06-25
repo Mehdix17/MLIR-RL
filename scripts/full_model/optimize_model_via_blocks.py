@@ -45,7 +45,7 @@ OperationState = import_autoschedular_module("state", IMPL).OperationState
 BenchmarkFeatures = import_autoschedular_module("state", IMPL).BenchmarkFeatures
 TiledFusion = import_autoschedular_module("actions.tiled_fusion", IMPL).TiledFusion
 
-from data_utils.extract_blocks import extract_blocks_from_file
+from data_utils.extract.extract_blocks import extract_blocks_from_file
 
 _config = Config()
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

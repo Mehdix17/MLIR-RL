@@ -1,158 +1,167 @@
-# data_utils — Reference
+# data_utils
 
-## File overview
+Data pipeline for MLIR-RL: generate benchmarks, convert models, extract operations.
 
-| File | Purpose |
-|---|---|
-| `mlir_generators.py` | Core library of MLIR op generators (matmul, conv, bert, vgg, …) |
-| `build_benchmark.py` | Build JSON benchmark datasets from the generators |
-| `vision2mlir.py` | Export torchvision models → linalg MLIR |
-| `transformers2mlir.py` | Export HuggingFace transformer models → linalg MLIR |
-| `wrap_mlir.py` | Wrap an existing `.mlir` model file with a timed `@main` function |
-| `strip_mlir.py` | Strip large weight constants from MLIR files (in-place or to new file) |
-| `orchestrate.py` | Single CLI entry point that dispatches all of the above |
-| `tf2mlir.py` | Legacy: TensorFlow → TOSA → linalg MLIR |
+## Directory layout
 
----
-
-## Environment setup
-
-```bash
-# The mlir conda env requires a newer libstdc++ on this cluster:
-export GCC14_LIB=/share/apps/NYUAD6/spack/spack-0.23.0/opt/spack/linux-rocky8-zen/gcc-8.5.0/gcc-14.2.0-wfwb3ds4a5thcsh5w5o23k6wq7ob5ok3/lib64
-export LD_LIBRARY_PATH="$GCC14_LIB:$LD_LIBRARY_PATH"
-export PATH="/home/mb10856/envs/mlir/bin:$PATH"
-# Project must be on PYTHONPATH for relative imports
-export PYTHONPATH="/scratch/mb10856/MLIR-RL:$PYTHONPATH"
+```
+data_utils/
+├── model_catalog.py              # Central model registry
+├── orchestrate.py                # Unified CLI dispatcher
+│
+├── convert/                      # Real model → linalg MLIR
+│   ├── vision2mlir.py            #   torchvision / ultralytics models
+│   ├── transformers2mlir.py      #   HuggingFace transformer models
+│   └── gnn2mlir.py               #   Graph Neural Networks (synthetic inputs)
+│
+├── extract/                      # Full-model MLIR → benchmark fragments
+│   ├── extract_ops.py            #   Single linalg op extraction
+│   ├── extract_blocks.py         #   Multi-op block extraction (via AST dumper)
+│   └── batch_policy.py           #   Batch-size selection for blocks
+│
+├── generate/                     # Synthetic benchmark generation
+│   ├── mlir_generators.py        #   Random linalg op generator library
+│   ├── generate_synthetic.py     #   Generate synthetic .mlir files
+│   └── id_allocator.py           #   Sequential ID allocation across runs
+│
+└── postprocess/                  # MLIR file post-processing
+    ├── wrap_mlir.py              #   Add timed @main entry point
+    └── strip_mlir.py             #   Remove embedded weight constants
 ```
 
 ---
 
-## Generating benchmark datasets (`build_benchmark.py`)
+## Pipelines
 
-Produces JSON files with timed MLIR operation samples (matmul, conv, etc.).
+### 1. Convert a real neural network to linalg MLIR
+
+Each converter takes a pretrained model, exports it through the ONNX route
+(`PyTorch → .onnx → shape inference → torch-mlir → linalg MLIR`), and strips
+the resulting file. Use `--keep-onnx` to preserve intermediate files.
+
+**Vision models** (`convert/vision2mlir.py`):
 
 ```bash
-# Auto-detects bindings vs cmd backend
-python data_utils/build_benchmark.py --output data/benchmarks/out.json
+python -m data_utils.convert.vision2mlir --model resnet18
+python -m data_utils.convert.vision2mlir --model vit_b_16 --output-dir data/nn/raw_bench
+python -m data_utils.convert.vision2mlir --model yolov8m --keep-onnx
 
-# Force a specific backend
-python data_utils/build_benchmark.py --backend bindings --output data/benchmarks/out.json
-python data_utils/build_benchmark.py --backend cmd      --output data/benchmarks/out.json
+# convnext and resnet50 need the direct torch_mlir route
+python -m data_utils.convert.vision2mlir --model convnext_tiny --backend direct
+```
+
+Supported: `resnet18`, `resnet50`, `resnext50`, `efficientnet_b0`, `mobilenet_v2`,
+`mobilenet_v3_small`, `densenet121`, `vit_b_16`, `convnext_tiny/small/base/large`,
+`vgg11`, `vgg16`, `yolov8m`.
+
+**Transformer models** (`convert/transformers2mlir.py`):
+
+```bash
+python -m data_utils.convert.transformers2mlir --model bert
+python -m data_utils.convert.transformers2mlir --model gpt2 --keep-onnx
+python -m data_utils.convert.transformers2mlir --model llama3_2_1b
+```
+
+Supported: `bert`, `distilbert`, `roberta`, `albert`, `gpt2`, `t5`, `bart`,
+`llama3_2_1b`, `whisper_base`, `lstm`.
+
+**GNN models** (`convert/gnn2mlir.py`):
+
+GNNs use synthetic inputs (128 nodes, 64 features) — no pretrained weights.
+
+```bash
+python -m data_utils.convert.gnn2mlir --model gcn
+python -m data_utils.convert.gnn2mlir --model all
+```
+
+Supported: `gcn`, `graphsage`, `gat`, `gin`.
+
+---
+
+### 2. Extract benchmark fragments from full-model MLIR
+
+**Single ops** (`extract/extract_ops.py`):
+
+Extracts individual linalg operations from a full-model MLIR file. Each op is
+wrapped in its own `@main` with concrete batch sizes and function arguments.
+
+```bash
+python -m data_utils.extract.extract_ops \
+    --input data/nn/raw_bench/resnet50_linalg.mlir \
+    --output-dir data/nn/code_files/resnet50/ \
+    --batch-size 1 --model-name resnet50
+```
+
+**Multi-op blocks** (`extract/extract_blocks.py`):
+
+Extracts contiguous multi-op sequences using consumer→producer graph paths
+from an external AST dumper. Requires `AST_DUMPER_BIN_PATH` in your env.
+
+```bash
+python -m data_utils.extract.extract_blocks \
+    --input data/nn/raw_bench/resnet50_linalg.mlir \
+    --output-dir data/nn/code_files/bench_train/ \
+    --window 5 --stride 3
 ```
 
 ---
 
-## Converting vision models (`vision2mlir.py`)
+### 3. Generate synthetic benchmarks
 
-**Pipeline (ONNX route, default):**
-`PyTorch → .onnx → _inferred.onnx → _torch.mlir → _linalg.mlir`
-
-**Supported models:** `resnet18`, `resnet50`, `efficientnet_b0`, `mobilenet_v2`,
-`mobilenet_v3_small`, `densenet121`, `vit_b_16`, `convnext_tiny/small/base/large`, `vgg11`
+`generate/generate_synthetic.py` creates random linalg operations as `.mlir`
+files without requiring any MLIR runtime.
 
 ```bash
-# Basic usage (ONNX route, strip weights, delete ONNX intermediates on success)
-python data_utils/vision2mlir.py --model resnet18
-
-# Choose output directory
-python data_utils/vision2mlir.py --model vit_b_16 --output-dir data/nn/generated/code_files
-
-# Use direct torch_mlir.fx route (bypasses ONNX — needed for convnext_tiny, resnet50)
-python data_utils/vision2mlir.py --model convnext_tiny --backend direct
-
-# Keep .onnx/.onnx.data/_inferred.onnx after success (deleted by default)
-python data_utils/vision2mlir.py --model resnet18 --keep-onnx
-
-# Disable weight stripping
-python data_utils/vision2mlir.py --model resnet18 --no-strip-weights
+python -m data_utils.generate.generate_synthetic \
+    --output-dir data/nn/synthetic/ \
+    --num-singles 200 --num-benchs 50
 ```
 
-**Notes:**
-- On success, ONNX intermediates (`.onnx`, `.onnx.data`, `_inferred.onnx`) are **automatically deleted** unless `--keep-onnx` is passed. On failure they are kept so the pipeline can resume from step 3/4.
-- The unstripped `_linalg.mlir` is automatically copied to `data/nn/non_stripped_models/` before stripping.
-- `convnext_tiny` and `resnet50` require `--backend direct` due to ONNX export limitations (`onnx.Loop` / bias shape bug).
+The generator library (`generate/mlir_generators.py`) provides individual op
+generators (matmul, conv2d, relu, softmax, etc.) and composite sub-graph
+generators (resnet blocks, vgg blocks, bert blocks).
 
 ---
 
-## Converting transformer models (`transformers2mlir.py`)
+### 4. Post-processing
 
-**Pipeline (ONNX route, default):**
-`PyTorch → .onnx → _inferred.onnx → _torch.mlir → _linalg.mlir`
-
-**Supported models:** `bert`, `distilbert`, `roberta`, `albert`, `gpt2`, `t5`, `bart`, `lstm`
+**Wrap with timed `@main`** (`postprocess/wrap_mlir.py`):
 
 ```bash
-# Basic usage
-python data_utils/transformers2mlir.py --model bert
-
-# Choose output directory
-python data_utils/transformers2mlir.py --model distilbert --output-dir data/nn/generated/code_files
-
-# Use direct torch_mlir route (bypasses ONNX)
-python data_utils/transformers2mlir.py --model bert --backend direct
-
-# Keep ONNX intermediates after success
-python data_utils/transformers2mlir.py --model bert --keep-onnx
+python -m data_utils.postprocess.wrap_mlir \
+    --input data/nn/raw_bench/resnet50_linalg.mlir \
+    --model-name resnet50 \
+    --output data/nn/code_files/model_resnet50.mlir
 ```
 
-**Notes:**
-- Same cleanup and backup behaviour as `vision2mlir.py` above.
-- Requires `transformers` (`pip install transformers`).
-
----
-
-## Stripping weights from MLIR files (`strip_mlir.py`)
-
-Removes embedded weight constants from large MLIR files. Handles both
-`dense<"0xHEX...">` (transformer models) and `dense_resource<torch_tensor_*>`
-+ binary `{-# ... #-}` sections (vision models).
+**Strip weight constants** (`postprocess/strip_mlir.py`):
 
 ```bash
-# Strip in-place (overwrites original)
-python data_utils/strip_mlir.py path/to/model_linalg.mlir --replace
-
-# Strip to a new file
-python data_utils/strip_mlir.py path/to/model_linalg.mlir --output path/to/model_stripped.mlir
-
-# Verbose mode (shows reduction %)
-python data_utils/strip_mlir.py path/to/model_linalg.mlir --replace -v
+python -m data_utils.postprocess.strip_mlir model.mlir --replace
+python -m data_utils.postprocess.strip_mlir model.mlir --output stripped.mlir
 ```
 
 ---
 
-## Wrapping models for benchmarking (`wrap_mlir.py`)
+## Unified CLI
 
-Adds a timed `@main` entry-point to a linalg MLIR file so it can be used by the RL evaluation loop.
-
-```bash
-python data_utils/wrap_mlir.py \
-    --input  data/nn/generated/code_files/resnet18_linalg.mlir \
-    --model-name resnet18 \
-    --output data/nn/code_files/model_resnet18.mlir
-```
-
----
-
-## Using the orchestrator (`orchestrate.py`)
-
-Single entry point that dispatches all subcommands.
+`orchestrate.py` dispatches all subcommands:
 
 ```bash
 python -m data_utils.orchestrate vision       --model resnet18
 python -m data_utils.orchestrate transformer  --model bert
-python -m data_utils.orchestrate build-benchmark --output data/benchmarks/out.json
-python -m data_utils.orchestrate strip        path/to/model.mlir --replace
+python -m data_utils.orchestrate gnn          --model gcn
 python -m data_utils.orchestrate wrap         --input model.mlir --model-name foo --output wrapped.mlir
+python -m data_utils.orchestrate strip        model.mlir --replace
 ```
 
 ---
 
-## Output directory layout
+## model_catalog.py
 
-```
-data/nn/
-├── generated/code_files/    # _torch.mlir + _linalg.mlir (stripped) per model
-├── non_stripped_models/     # automatic backup of each _linalg.mlir before stripping
-└── code_files/              # final wrapped .mlir files ready for RL training
+Central registry of all supported models. Each entry specifies a `category`
+(`vision`, `transformer`, `gnn`), a `framework`, and framework-specific keys.
+
+```python
+from data_utils.model_catalog import VISION_MODELS, TRANSFORMER_MODELS, GNN_MODELS
 ```

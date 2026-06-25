@@ -27,7 +27,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from data_utils.batch_policy import (
+from data_utils.extract.batch_policy import (
     BatchPolicyError,
     block_complexity_from_op_counts,
     select_batches,
@@ -35,7 +35,7 @@ from data_utils.batch_policy import (
 
 
 # Import helper utilities from the existing single-op extractor to avoid drift.
-from data_utils.extract_ops import (  # pylint: disable=import-error
+from data_utils.extract.extract_ops import (  # pylint: disable=import-error
     _parse_section,
     _extract_result_type,
     _replace_section_inplace,

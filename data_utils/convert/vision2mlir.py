@@ -1,38 +1,43 @@
+#!/usr/bin/env python3
 """
-_convert_common.py
-------------------
-Shared conversion utilities for vision2mlir, transformers2mlir, and gnn2mlir.
+vision2mlir.py
+--------------
+Convert vision models to linalg-on-tensors MLIR.
 
-Contains the ONNX export → shape-inference → torch-mlir import → linalg lowering
-pipeline, the direct torch_mlir route, file post-processing, and weight stripping.
+Conversion pipeline (primary — ONNX route):
+  PyTorch model → ONNX (torch.onnx.export)
+                → shape inference (onnxruntime symbolic_shape_infer)
+                → torch MLIR (torch-mlir-import-onnx)
+                → linalg MLIR (torch-mlir-opt lowering passes)
 
-Each ``*2mlir.py`` file keeps only its model-specific loading logic and CLI
-entry point; all boilerplate conversion machinery lives here.
+Fallback (when torch-mlir CLI tools are unavailable):
+  PyTorch model → linalg MLIR via torch_mlir.fx.export_and_import (in-process)
+
+Supported models: see data_utils.model_catalog.VISION_MODELS.
 """
 
 from __future__ import annotations
 
+import torch
+import torchvision.models as tv_models
+import argparse
 import os
 import re
 import subprocess
 import sys
-from typing import Sequence
 
-import torch
+from data_utils.model_catalog import VISION_MODELS, MODEL_REGISTRY
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 NON_STRIPPED_DIR = os.path.join(PROJECT_ROOT, "data", "nn", "non_stripped_models")
+DEFAULT_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "generated", "code_files")
 
 
 # ── Post-processing helpers ─────────────────────────────────────────────────
 
 def specialize_tensor_types(content: str, static_batch_size: int) -> tuple[str, int]:
-    """Replace ``?`` dims in tensor types with *static_batch_size*.
-
-    Returns (modified_content, number_of_replacements).
-    """
     replaced = 0
 
     def _repl(m: re.Match) -> str:
@@ -50,8 +55,6 @@ def specialize_tensor_types(content: str, static_batch_size: int) -> tuple[str, 
 
 
 def postprocess_linalg_file(linalg_path: str, static_batch_size: int = 0) -> None:
-    """Normalize entry name (``@main_graph`` → ``@main``) and optionally
-    specialize dynamic ``?`` dimensions with a static batch size."""
     with open(linalg_path, "r") as fh:
         content = fh.read()
 
@@ -77,7 +80,6 @@ def postprocess_linalg_file(linalg_path: str, static_batch_size: int = 0) -> Non
 
 def backup_and_strip(output_path: str, strip_weights: bool,
                      verbose: bool = False) -> None:
-    """Optionally back up the un-stripped file, then strip large weights."""
     import shutil
     os.makedirs(NON_STRIPPED_DIR, exist_ok=True)
     backup_path = os.path.join(NON_STRIPPED_DIR, os.path.basename(output_path))
@@ -89,20 +91,7 @@ def backup_and_strip(output_path: str, strip_weights: bool,
     size_mb = os.path.getsize(output_path) / (1024 * 1024)
     if size_mb > 1:
         print(f"  File is {size_mb:.1f} MB — stripping weights...")
-        from data_utils.strip_mlir import strip_weights as _strip
-        reduction = _strip(output_path, output_path, verbose=verbose)
-        print(f"  Stripped: {reduction:.1f}% reduction.")
-
-
-def strip_only(output_path: str, strip_weights: bool,
-               verbose: bool = False) -> None:
-    """Strip large weights without creating a backup (for GNN pipeline)."""
-    if not strip_weights:
-        return
-    size_mb = os.path.getsize(output_path) / (1024 * 1024)
-    if size_mb > 1:
-        print(f"  File is {size_mb:.1f} MB — stripping weights...")
-        from data_utils.strip_mlir import strip_weights as _strip
+        from data_utils.postprocess.strip_mlir import strip_weights as _strip
         reduction = _strip(output_path, output_path, verbose=verbose)
         print(f"  Stripped: {reduction:.1f}% reduction.")
 
@@ -110,7 +99,6 @@ def strip_only(output_path: str, strip_weights: bool,
 # ── ONNX → linalg pipeline ─────────────────────────────────────────────────
 
 def _cleanup_onnx_intermediates(base: str, keep_onnx: bool) -> None:
-    """Remove intermediate ONNX files unless *keep_onnx* is set."""
     if keep_onnx:
         return
     for ext in (".onnx", ".onnx.data", "_inferred.onnx"):
@@ -120,33 +108,7 @@ def _cleanup_onnx_intermediates(base: str, keep_onnx: bool) -> None:
             print(f"  Removed intermediate: {os.path.basename(p)}")
 
 
-def _shape_infer_subprocess(base: str) -> str:
-    """Run symbolic shape inference as a subprocess (transformers2mlir style).
-
-    Returns the path to the inferred ONNX file on success, or the original
-    path if inference failed.
-    """
-    onnx_input = f"{base}.onnx"
-    result = subprocess.run(
-        [
-            sys.executable, "-m", "onnxruntime.tools.symbolic_shape_infer",
-            "--input", f"{base}.onnx",
-            "--output", f"{base}_inferred.onnx",
-            "--auto_merge",
-        ],
-        capture_output=True, text=True,
-    )
-    if result.returncode == 0:
-        return f"{base}_inferred.onnx"
-    print(f"  Shape inference warning: {result.stderr}")
-    return onnx_input
-
-
 def _shape_infer_inprocess(base: str) -> str:
-    """Run symbolic shape inference in-process (vision2mlir style).
-
-    Returns the path to the inferred ONNX file.
-    """
     import onnx
     try:
         from onnxruntime.tools.symbolic_shape_infer import SymbolicShapeInference
@@ -159,7 +121,6 @@ def _shape_infer_inprocess(base: str) -> str:
         return out
     except ImportError:
         pass
-    # Fallback to onnx.shape_inference
     m = onnx.load(f"{base}.onnx")
     m2 = onnx.shape_inference.infer_shapes(m)
     out = f"{base}_inferred.onnx"
@@ -167,18 +128,9 @@ def _shape_infer_inprocess(base: str) -> str:
     return out
 
 
-def _shape_infer_fallback_copy(base: str) -> str:
-    """Copy .onnx as-is when no shape inference is available (gnn2mlir style)."""
-    import shutil
-    shutil.copy(f"{base}.onnx", f"{base}_inferred.onnx")
-    return f"{base}_inferred.onnx"
-
-
 def _import_onnx(base: str, onnx_input: str, opset: int) -> None:
-    """Import ONNX file to torch MLIR with CLI fallback."""
     torch_mlir_path = f"{base}_torch.mlir"
 
-    # Try torch-mlir-import-onnx first
     result = subprocess.run(
         ["torch-mlir-import-onnx", onnx_input, "-o", torch_mlir_path,
          "--opset-version", str(opset)],
@@ -187,7 +139,6 @@ def _import_onnx(base: str, onnx_input: str, opset: int) -> None:
     if result.returncode == 0:
         return
 
-    # Fallback: python -m torch_mlir.tools.import_onnx
     result2 = subprocess.run(
         [sys.executable, "-m", "torch_mlir.tools.import_onnx",
          onnx_input, "-o", torch_mlir_path,
@@ -201,40 +152,21 @@ def _import_onnx(base: str, onnx_input: str, opset: int) -> None:
 
 
 def _lower_to_linalg(base: str, method: str = "flags") -> None:
-    """Lower torch MLIR to linalg-on-tensors.
-
-    *method* controls the lowering syntax:
-      - ``"flags"``: four separate ``torch-mlir-opt`` flags (vision/transformers)
-      - ``"pipeline"``: ``--pass-pipeline=builtin.module(...)`` (gnn)
-    """
     torch_mlir_path = f"{base}_torch.mlir"
     linalg_path = f"{base}_linalg.mlir"
 
-    if method == "pipeline":
-        torch_mlir_opt = os.path.join(os.path.dirname(sys.executable), "torch-mlir-opt")
-        passes = (
-            "torch-lower-to-backend-contract,"
-            "torch-backend-to-linalg-on-tensors-backend-pipeline"
-        )
-        subprocess.run(
-            [torch_mlir_opt, torch_mlir_path,
-             f"--pass-pipeline=builtin.module({passes})",
-             "-o", linalg_path],
-            check=True,
-        )
-    else:
-        opt_flags = [
-            "--convert-torch-onnx-to-torch",
-            "--torch-decompose-complex-ops",
-            "--convert-torch-to-linalg",
-            "--torch-backend-to-linalg-on-tensors-backend-pipeline",
-        ]
-        result = subprocess.run(
-            ["torch-mlir-opt", torch_mlir_path] + opt_flags + ["-o", linalg_path],
-            capture_output=True, text=True,
-        )
-        if result.returncode != 0:
-            raise RuntimeError(f"torch-mlir-opt failed:\n{result.stderr}")
+    opt_flags = [
+        "--convert-torch-onnx-to-torch",
+        "--torch-decompose-complex-ops",
+        "--convert-torch-to-linalg",
+        "--torch-backend-to-linalg-on-tensors-backend-pipeline",
+    ]
+    result = subprocess.run(
+        ["torch-mlir-opt", torch_mlir_path] + opt_flags + ["-o", linalg_path],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"torch-mlir-opt failed:\n{result.stderr}")
 
 
 def onnx_route(
@@ -252,34 +184,6 @@ def onnx_route(
     lowering_method: str = "flags",
     do_postprocess: bool = True,
 ) -> str:
-    """Full ONNX → linalg conversion pipeline.
-
-    Parameters
-    ----------
-    model : torch.nn.Module
-    model_name : str
-    example_inputs : tensor or tuple of tensors
-    output_dir : str
-    input_names : list[str], optional
-        ONNX input names.  Auto-generated as ``["input_0", ...]`` if *None*.
-    output_names : list[str], optional
-        ONNX output names.  Defaults to ``["output"]``.
-    opset : int
-    keep_onnx : bool
-    static_batch_size : int
-        If > 0, replace ``?`` dims in the output.  0 preserves dynamic shapes.
-    shape_infer : str
-        ``"inprocess"`` | ``"subprocess"`` | ``"fallback_copy"``
-    lowering_method : str
-        ``"flags"`` | ``"pipeline"``
-    do_postprocess : bool
-        Whether to call :func:`postprocess_linalg_file` after lowering.
-
-    Returns
-    -------
-    str
-        Path to the produced ``*_linalg.mlir`` file.
-    """
     base = os.path.join(output_dir, model_name)
     if input_names is None:
         input_names = [f"input_{i}" for i in range(len(example_inputs)
@@ -287,7 +191,6 @@ def onnx_route(
     if output_names is None:
         output_names = ["output"]
 
-    # Step 1 — export to ONNX
     print(f"  Exporting {model_name} to ONNX (opset {opset})...")
     torch.onnx.export(
         model, example_inputs, f"{base}.onnx",
@@ -297,36 +200,24 @@ def onnx_route(
         dynamic_axes=None,
     )
 
-    # Step 2 — shape inference
     print("  Running shape inference...")
-    if shape_infer == "subprocess":
-        onnx_input = _shape_infer_subprocess(base)
-    elif shape_infer == "fallback_copy":
-        onnx_input = _shape_infer_fallback_copy(base)
-    else:
-        onnx_input = _shape_infer_inprocess(base)
+    onnx_input = _shape_infer_inprocess(base)
 
-    # Step 3 — import to torch MLIR
     print("  Importing ONNX to torch-mlir...")
     _import_onnx(base, onnx_input, opset)
 
-    # Step 4 — lower to linalg
     print("  Lowering to linalg MLIR...")
     _lower_to_linalg(base, method=lowering_method)
 
     linalg_path = f"{base}_linalg.mlir"
 
-    # Step 5 — post-process
     if do_postprocess:
         postprocess_linalg_file(linalg_path, static_batch_size)
 
-    # Step 6 — cleanup
     _cleanup_onnx_intermediates(base, keep_onnx)
 
     return linalg_path
 
-
-# ── Direct torch_mlir route ─────────────────────────────────────────────────
 
 def direct_route(
     model: torch.nn.Module,
@@ -339,29 +230,6 @@ def direct_route(
     static_batch_size: int = 0,
     do_postprocess: bool = True,
 ) -> str:
-    """Convert via ``torch_mlir.compile`` (preferred) or ``export_and_import``.
-
-    Parameters
-    ----------
-    model : torch.nn.Module
-    model_name : str
-    example_inputs : tensor or tuple of tensors
-    output_dir : str
-    func_name : str
-        Function name for the MLIR module.
-    try_compile : bool
-        Whether to attempt ``torch_mlir.compile`` before falling back to
-        ``torch_mlir.fx.export_and_import``.
-    static_batch_size : int
-        If > 0, replace ``?`` dims in the output.
-    do_postprocess : bool
-        Whether to call :func:`postprocess_linalg_file`.
-
-    Returns
-    -------
-    str
-        Path to the produced ``*_linalg.mlir`` file.
-    """
     from torch_mlir.compiler_utils import OutputType
 
     print(f"  Using direct torch_mlir route for {model_name}...")
@@ -405,3 +273,120 @@ def direct_route(
         postprocess_linalg_file(linalg_path, static_batch_size)
 
     return linalg_path
+
+
+# ---------------------------------------------------------------------------
+# Model factory
+# ---------------------------------------------------------------------------
+
+_TV_WEIGHTS = {
+    "resnet18":           tv_models.ResNet18_Weights,
+    "resnet50":           tv_models.ResNet50_Weights,
+    "resnext50_32x4d":    tv_models.ResNeXt50_32X4D_Weights,
+    "efficientnet_b0":    tv_models.EfficientNet_B0_Weights,
+    "mobilenet_v2":       tv_models.MobileNet_V2_Weights,
+    "mobilenet_v3_small": tv_models.MobileNet_V3_Small_Weights,
+    "densenet121":        tv_models.DenseNet121_Weights,
+    "vit_b_16":           tv_models.ViT_B_16_Weights,
+    "convnext_tiny":      tv_models.ConvNeXt_Tiny_Weights,
+    "convnext_small":     tv_models.ConvNeXt_Small_Weights,
+    "convnext_base":      tv_models.ConvNeXt_Base_Weights,
+    "convnext_large":     tv_models.ConvNeXt_Large_Weights,
+    "vgg11":              tv_models.VGG11_Weights,
+    "vgg16":              tv_models.VGG16_Weights,
+}
+
+
+def _load_model(model_name: str) -> torch.nn.Module:
+    entry = MODEL_REGISTRY.get(model_name)
+    if entry is None or entry["category"] != "vision":
+        raise ValueError(f"Unknown vision model: {model_name}. Choose from: {VISION_MODELS}")
+
+    framework = entry["framework"]
+
+    if framework == "torchvision":
+        tv_name = entry["torchvision_name"]
+        weights_cls = _TV_WEIGHTS.get(tv_name)
+        loader_fn = getattr(tv_models, tv_name)
+        return loader_fn(weights=weights_cls.DEFAULT).eval()
+
+    if framework == "ultralytics":
+        from ultralytics import YOLO
+        yolo = YOLO(f"{model_name}.pt")
+        return yolo.model.eval()
+
+    raise ValueError(f"Unsupported framework '{framework}' for {model_name}")
+
+
+def _get_dummy_input_size(model_name: str) -> int:
+    entry = MODEL_REGISTRY.get(model_name, {})
+    return entry.get("input_shape", (224, 224))[0]
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Convert vision models to linalg MLIR."
+    )
+    parser.add_argument(
+        "--model", type=str, default="resnet18", choices=VISION_MODELS,
+        help="Vision model to convert.",
+    )
+    parser.add_argument(
+        "--output-dir", type=str, default=DEFAULT_OUTPUT_DIR,
+        help="Directory for generated files.",
+    )
+    parser.add_argument(
+        "--backend", choices=["onnx", "direct"], default="onnx",
+        help="Conversion backend. 'onnx' (default) uses the ONNX route; "
+             "'direct' uses the torch_mlir Python API directly.",
+    )
+    parser.add_argument(
+        "--strip-weights", action="store_true", default=True,
+        help="Strip large weight constants (default: enabled).",
+    )
+    parser.add_argument(
+        "--keep-onnx", action="store_true", default=False,
+        help="Keep intermediate .onnx/.onnx.data/_inferred.onnx files after a "
+             "successful pipeline run (default: delete on success).",
+    )
+    parser.add_argument("--verbose", action="store_true")
+    args = parser.parse_args()
+
+    os.makedirs(args.output_dir, exist_ok=True)
+    print(f"Loading {args.model}...")
+    model = _load_model(args.model)
+    dummy_input_size = _get_dummy_input_size(args.model)
+    dummy_input = torch.randn(1, 3, dummy_input_size, dummy_input_size)
+
+    output_path = None
+    if args.backend == "onnx":
+        try:
+            output_path = onnx_route(
+                model, args.model, dummy_input, args.output_dir,
+                input_names=["input"], output_names=["output"],
+                opset=18, keep_onnx=args.keep_onnx,
+                shape_infer="inprocess",
+            )
+        except Exception as e:
+            print(f"  ONNX route failed: {e}")
+            print("  Falling back to direct torch_mlir route...")
+            output_path = direct_route(
+                model, args.model, dummy_input, args.output_dir,
+                func_name=args.model, try_compile=False,
+            )
+    else:
+        output_path = direct_route(
+            model, args.model, dummy_input, args.output_dir,
+            func_name=args.model, try_compile=False,
+        )
+
+    backup_and_strip(output_path, args.strip_weights, args.verbose)
+    print(f"\nDone: {output_path}")
+
+
+if __name__ == "__main__":
+    main()
