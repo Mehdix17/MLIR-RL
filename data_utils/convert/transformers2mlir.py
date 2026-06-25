@@ -16,21 +16,261 @@ Fallback (when CLI tools are unavailable):
 Supported models: see data_utils.model_catalog.TRANSFORMER_MODELS.
 """
 
+from __future__ import annotations
+
 import torch
 import torch.nn as nn
 import argparse
 import os
+import re
+import subprocess
+import sys
 import traceback
 
 from data_utils.model_catalog import TRANSFORMER_MODELS, MODEL_REGISTRY, TRANSFORMER_INPUT_SPECS
-from data_utils._convert_common import (
-    PROJECT_ROOT,
-    onnx_route,
-    direct_route,
-    backup_and_strip,
-)
 
+# ── Constants ────────────────────────────────────────────────────────────────
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+NON_STRIPPED_DIR = os.path.join(PROJECT_ROOT, "data", "nn", "non_stripped_models")
 DEFAULT_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "generated", "code_files")
+
+
+# ── Post-processing helpers ─────────────────────────────────────────────────
+
+def specialize_tensor_types(content: str, static_batch_size: int) -> tuple[str, int]:
+    replaced = 0
+
+    def _repl(m: re.Match) -> str:
+        nonlocal replaced
+        token = m.group(0)
+        count = token.count("?")
+        if count:
+            replaced += count
+            token = token.replace("?", str(static_batch_size))
+        return token
+
+    content = re.sub(r"tensor<[^>]+>", _repl, content)
+    content = re.sub(r"!torch\.vtensor<\[[^\]]+\],[^>]+>", _repl, content)
+    return content, replaced
+
+
+def postprocess_linalg_file(linalg_path: str, static_batch_size: int = 0) -> None:
+    with open(linalg_path, "r") as fh:
+        content = fh.read()
+
+    changed = False
+    if "@main_graph" in content:
+        content = content.replace("@main_graph", "@main")
+        changed = True
+        print("  Renamed @main_graph -> @main")
+
+    if static_batch_size > 0 and "?" in content:
+        content, replaced = specialize_tensor_types(content, static_batch_size)
+        if replaced:
+            changed = True
+            print(f"  Specialized dynamic dims with static batch="
+                  f"{static_batch_size} ({replaced} replacement(s))")
+
+    if changed:
+        with open(linalg_path, "w") as fh:
+            fh.write(content)
+
+
+# ── Weight stripping / backup ────────────────────────────────────────────────
+
+def backup_and_strip(output_path: str, strip_weights: bool,
+                     verbose: bool = False) -> None:
+    import shutil
+    os.makedirs(NON_STRIPPED_DIR, exist_ok=True)
+    backup_path = os.path.join(NON_STRIPPED_DIR, os.path.basename(output_path))
+    shutil.copy2(output_path, backup_path)
+    print(f"  Non-stripped backup: {backup_path}")
+
+    if not strip_weights:
+        return
+    size_mb = os.path.getsize(output_path) / (1024 * 1024)
+    if size_mb > 1:
+        print(f"  File is {size_mb:.1f} MB — stripping weights...")
+        from data_utils.postprocess.strip_mlir import strip_weights as _strip
+        reduction = _strip(output_path, output_path, verbose=verbose)
+        print(f"  Stripped: {reduction:.1f}% reduction.")
+
+
+# ── ONNX → linalg pipeline ─────────────────────────────────────────────────
+
+def _cleanup_onnx_intermediates(base: str, keep_onnx: bool) -> None:
+    if keep_onnx:
+        return
+    for ext in (".onnx", ".onnx.data", "_inferred.onnx"):
+        p = base + ext
+        if os.path.exists(p):
+            os.remove(p)
+            print(f"  Removed intermediate: {os.path.basename(p)}")
+
+
+def _shape_infer_subprocess(base: str) -> str:
+    onnx_input = f"{base}.onnx"
+    result = subprocess.run(
+        [
+            sys.executable, "-m", "onnxruntime.tools.symbolic_shape_infer",
+            "--input", f"{base}.onnx",
+            "--output", f"{base}_inferred.onnx",
+            "--auto_merge",
+        ],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        return f"{base}_inferred.onnx"
+    print(f"  Shape inference warning: {result.stderr}")
+    return onnx_input
+
+
+def _import_onnx(base: str, onnx_input: str, opset: int) -> None:
+    torch_mlir_path = f"{base}_torch.mlir"
+
+    result = subprocess.run(
+        ["torch-mlir-import-onnx", onnx_input, "-o", torch_mlir_path,
+         "--opset-version", str(opset)],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        return
+
+    result2 = subprocess.run(
+        [sys.executable, "-m", "torch_mlir.tools.import_onnx",
+         onnx_input, "-o", torch_mlir_path,
+         "--opset-version", str(opset)],
+        capture_output=True, text=True,
+    )
+    if result2.returncode != 0:
+        raise RuntimeError(
+            f"ONNX import failed:\n{result.stderr}\n{result2.stderr}"
+        )
+
+
+def _lower_to_linalg(base: str, method: str = "flags") -> None:
+    torch_mlir_path = f"{base}_torch.mlir"
+    linalg_path = f"{base}_linalg.mlir"
+
+    opt_flags = [
+        "--convert-torch-onnx-to-torch",
+        "--torch-decompose-complex-ops",
+        "--convert-torch-to-linalg",
+        "--torch-backend-to-linalg-on-tensors-backend-pipeline",
+    ]
+    result = subprocess.run(
+        ["torch-mlir-opt", torch_mlir_path] + opt_flags + ["-o", linalg_path],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"torch-mlir-opt failed:\n{result.stderr}")
+
+
+def onnx_route(
+    model: torch.nn.Module,
+    model_name: str,
+    example_inputs,
+    output_dir: str,
+    *,
+    input_names: list[str] | None = None,
+    output_names: list[str] | None = None,
+    opset: int = 17,
+    keep_onnx: bool = False,
+    static_batch_size: int = 0,
+    shape_infer: str = "subprocess",
+    lowering_method: str = "flags",
+    do_postprocess: bool = True,
+) -> str:
+    base = os.path.join(output_dir, model_name)
+    if input_names is None:
+        input_names = [f"input_{i}" for i in range(len(example_inputs)
+                      if isinstance(example_inputs, tuple) else 1)]
+    if output_names is None:
+        output_names = ["output"]
+
+    print(f"  Exporting {model_name} to ONNX (opset {opset})...")
+    torch.onnx.export(
+        model, example_inputs, f"{base}.onnx",
+        opset_version=opset,
+        input_names=input_names,
+        output_names=output_names,
+        dynamic_axes=None,
+    )
+
+    print("  Running shape inference...")
+    onnx_input = _shape_infer_subprocess(base)
+
+    print("  Importing ONNX to torch-mlir...")
+    _import_onnx(base, onnx_input, opset)
+
+    print("  Lowering to linalg MLIR...")
+    _lower_to_linalg(base, method=lowering_method)
+
+    linalg_path = f"{base}_linalg.mlir"
+
+    if do_postprocess:
+        postprocess_linalg_file(linalg_path, static_batch_size)
+
+    _cleanup_onnx_intermediates(base, keep_onnx)
+
+    return linalg_path
+
+
+def direct_route(
+    model: torch.nn.Module,
+    model_name: str,
+    example_inputs,
+    output_dir: str,
+    *,
+    func_name: str = "main",
+    try_compile: bool = True,
+    static_batch_size: int = 0,
+    do_postprocess: bool = True,
+) -> str:
+    from torch_mlir.compiler_utils import OutputType
+
+    print(f"  Using direct torch_mlir route for {model_name}...")
+    mlir_module = None
+
+    if try_compile:
+        try:
+            import torch_mlir
+            if hasattr(torch_mlir, "compile") and callable(torch_mlir.compile):
+                try:
+                    mlir_module = torch_mlir.compile(
+                        model, example_inputs,
+                        output_type=OutputType.LINALG_ON_TENSORS,
+                        use_tracing=True, func_name=func_name,
+                    )
+                except TypeError:
+                    mlir_module = torch_mlir.compile(
+                        model, example_inputs,
+                        output_type=OutputType.LINALG_ON_TENSORS,
+                        func_name=func_name,
+                    )
+        except Exception as e:
+            print(f"  torch_mlir.compile failed: {e}")
+
+    if mlir_module is None:
+        from torch_mlir.fx import export_and_import
+        kwargs = dict(
+            output_type=OutputType.LINALG_ON_TENSORS,
+            func_name=func_name,
+        )
+        if isinstance(example_inputs, tuple):
+            mlir_module = export_and_import(model, *example_inputs, **kwargs)
+        else:
+            mlir_module = export_and_import(model, example_inputs, **kwargs)
+
+    linalg_path = os.path.join(output_dir, f"{model_name}_linalg.mlir")
+    with open(linalg_path, "w") as f:
+        f.write(str(mlir_module))
+
+    if do_postprocess:
+        postprocess_linalg_file(linalg_path, static_batch_size)
+
+    return linalg_path
 
 
 # ---------------------------------------------------------------------------
@@ -150,7 +390,7 @@ def _load_model_and_inputs(model_name: str):
         from transformers import AutoTokenizer, AutoModelForCausalLM
         tokenizer = AutoTokenizer.from_pretrained(repo)
         model = AutoModelForCausalLM.from_pretrained(
-            repo, torch_dtype=torch.float32
+            repo, dtype=torch.float32
         ).eval()
         model.config.use_cache = False
         encoded = tokenizer(

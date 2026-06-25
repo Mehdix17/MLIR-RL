@@ -104,13 +104,13 @@ grep -c "bf16" data/new_dataset/nn/raw_bench/llama3_2_1b_linalg.mlir
 ### 4. Re-extract Single Ops
 
 ```bash
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
     --input data/new_dataset/nn/raw_bench/llama3_2_1b_linalg.mlir \
     --output-dir data/new_dataset/nn/code_files/single_bench/ \
     --generic-ratio 0.25 \
     --model-prefix llama3_2_1b
 
-python data_utils/extract_ops.py \
+python data_utils/extract/extract_ops.py \
     --input data/new_dataset/nn/raw_bench/llama3_2_1b_linalg.mlir \
     --output-dir data/new_dataset/nn/code_files/single_bench_full/ \
     --no-require-reduction \
@@ -120,7 +120,7 @@ python data_utils/extract_ops.py \
 ### 5. Re-extract Blocks
 
 ```bash
-python data_utils/extract_blocks.py \
+python data_utils/extract/extract_blocks.py \
     --input data/new_dataset/nn/raw_bench/llama3_2_1b_linalg.mlir \
     --output-dir data/new_dataset/nn/code_files/bench_train/ \
     --skip-pure-elementwise \
@@ -139,16 +139,7 @@ rm data/new_dataset/all/eval_full/llama3_2_1b_*.mlir
 
 Then re-run the stratification/split script to populate them with the new f32 files:
 ```bash
-python data_utils/create_splits.py \
-    --train-dir data/new_dataset/all/train/ \
-    --eval-dir data/new_dataset/all/eval/ \
-    --eval-full-dir data/new_dataset/all/eval_full/ \
-    --single-bench-dir data/new_dataset/nn/code_files/single_bench/ \
-    --single-bench-full-dir data/new_dataset/nn/code_files/single_bench_full/ \
-    --blocks-dir data/new_dataset/nn/code_files/bench_train/ \
-    --legacy-single-dir data/new_dataset/legacy/single_bench/ \
-    --legacy-blocks-dir data/new_dataset/legacy/bench/ \
-    --seed 42
+python scripts/data/split_json.py config/new_dataset/train/v4_7.json
 ```
 
 ### 7. Re-run MLIR Baselines

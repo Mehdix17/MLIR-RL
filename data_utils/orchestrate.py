@@ -5,32 +5,18 @@ orchestrate.py
 Single CLI entry point for the MLIR-RL data pipeline.
 
 Subcommands:
-  build-benchmark     — Generate a synthetic benchmark dataset (JSON).
   vision              — Convert a torchvision model to linalg MLIR.
   transformer         — Convert a HuggingFace transformer model to linalg MLIR.
+  gnn                 — Convert a GNN model to linalg MLIR.
   wrap                — Wrap an existing .mlir file with a timed @main.
   strip               — Strip large weight constants from a .mlir file.
 
-Environment checks:
-  LLVM_BUILD_PATH     — Required for the CMD evaluation backend.
-  MLIR_SHARED_LIBS    — Required for the Python bindings backend.
-  LLVM_BUILD_PATH/bin/mlir-opt, mlir-cpu-runner — Required for CMD backend.
-
 Examples:
-  python -m data_utils.orchestrate build-benchmark \\
-      --input_file config/example.json --output_file data/dataset.json
-
-  python -m data_utils.orchestrate vision \\
-      --model resnet50 --output-dir data/generated/code_files
-
-  python -m data_utils.orchestrate transformer \\
-      --model bert --backend onnx
-
-  python -m data_utils.orchestrate wrap \\
-      --input model.mlir --model-name forward --output model_wrapped.mlir
-
-  python -m data_utils.orchestrate strip \\
-      --input huge_model_linalg.mlir --replace
+  python -m data_utils.orchestrate vision --model resnet18
+  python -m data_utils.orchestrate transformer --model bert
+  python -m data_utils.orchestrate gnn --model gcn
+  python -m data_utils.orchestrate wrap --input model.mlir --model-name foo --output wrapped.mlir
+  python -m data_utils.orchestrate strip huge_model.mlir --replace
 """
 
 import argparse
@@ -77,34 +63,12 @@ def _check_env(require_cmd: bool = False, require_bindings: bool = False):
 
 
 # ---------------------------------------------------------------------------
-# Subcommand: build-benchmark
-# ---------------------------------------------------------------------------
-
-def _cmd_build_benchmark(args):
-    _check_env(
-        require_cmd=args.backend == "cmd",
-        require_bindings=(args.backend in ("bindings", None)),
-    )
-    from data_utils.build_benchmark import main as _main
-    # Reconstruct argv for build_benchmark's argparse
-    extra = [
-        "--input_file",  args.input_file,
-        "--output_file", args.output_file,
-        "--timeout",     str(args.timeout),
-    ]
-    if args.backend:
-        extra += ["--backend", args.backend]
-    sys.argv = ["build_benchmark"] + extra
-    _main()
-
-
-# ---------------------------------------------------------------------------
 # Subcommand: vision
 # ---------------------------------------------------------------------------
 
 def _cmd_vision(args):
     _check_env(require_bindings=(args.backend == "direct"))
-    from data_utils.vision2mlir import main as _main
+    from data_utils.convert.vision2mlir import main as _main
     extra = ["--model", args.model, "--backend", args.backend]
     if args.output_dir:
         extra += ["--output-dir", args.output_dir]
@@ -122,7 +86,7 @@ def _cmd_vision(args):
 
 def _cmd_transformer(args):
     _check_env(require_bindings=(args.backend == "direct"))
-    from data_utils.transformers2mlir import main as _main
+    from data_utils.convert.transformers2mlir import main as _main
     extra = ["--model", args.model, "--backend", args.backend]
     if args.output_dir:
         extra += ["--output-dir", args.output_dir]
@@ -135,11 +99,31 @@ def _cmd_transformer(args):
 
 
 # ---------------------------------------------------------------------------
+# Subcommand: gnn
+# ---------------------------------------------------------------------------
+
+def _cmd_gnn(args):
+    _check_env(require_bindings=(args.backend == "direct"))
+    from data_utils.convert.gnn2mlir import main as _main
+    extra = ["--model", args.model, "--backend", args.backend]
+    if args.output_dir:
+        extra += ["--output-dir", args.output_dir]
+    if args.strip_weights:
+        extra.append("--strip-weights")
+    if args.keep_onnx:
+        extra.append("--keep-onnx")
+    if args.verbose:
+        extra.append("--verbose")
+    sys.argv = ["gnn2mlir"] + extra
+    _main()
+
+
+# ---------------------------------------------------------------------------
 # Subcommand: wrap
 # ---------------------------------------------------------------------------
 
 def _cmd_wrap(args):
-    from data_utils.wrap_mlir import main_wrapper
+    from data_utils.postprocess.wrap_mlir import main_wrapper
     main_wrapper(args.input, args.model_name, args.output)
     print(f"Wrapped '{args.model_name}': {args.input} → {args.output}")
 
@@ -149,7 +133,7 @@ def _cmd_wrap(args):
 # ---------------------------------------------------------------------------
 
 def _cmd_strip(args):
-    from data_utils.strip_mlir import strip_weights
+    from data_utils.postprocess.strip_mlir import strip_weights
     output = args.output
     if args.replace:
         output = args.input + ".tmp"
@@ -173,28 +157,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    # build-benchmark
-    p_bench = sub.add_parser(
-        "build-benchmark",
-        help="Generate a synthetic MLIR benchmark dataset (JSON).",
-    )
-    p_bench.add_argument("--input_file",  required=True,
-                         help="YAML config (shapes, operations, amounts).")
-    p_bench.add_argument("--output_file", required=True,
-                         help="Output JSON dataset file.")
-    p_bench.add_argument("--backend", choices=["bindings", "cmd"], default=None,
-                         help="Evaluation backend (default: auto-detect).")
-    p_bench.add_argument("--timeout", type=float, default=300)
-
     # vision
     p_vis = sub.add_parser(
         "vision",
-        help="Convert a torchvision model to linalg MLIR.",
+        help="Convert a torchvision/ultralytics model to linalg MLIR.",
     )
     VISION_MODELS = [
         "resnet18", "resnet50", "efficientnet_b0",
         "mobilenet_v2", "mobilenet_v3_small", "densenet121", "vit_b_16",
-        "convnext_tiny", "convnext_small", "convnext_base", "convnext_large", "vgg11",
+        "convnext_tiny", "convnext_small", "convnext_base", "convnext_large",
+        "vgg11", "vgg16", "yolov8m",
     ]
     p_vis.add_argument("--model", default="resnet18", choices=VISION_MODELS)
     p_vis.add_argument("--output-dir", default=None,
@@ -210,13 +182,26 @@ def build_parser() -> argparse.ArgumentParser:
     )
     TRANSFORMER_MODELS = [
         "bert", "distilbert", "roberta", "albert",
-        "gpt2", "t5", "bart", "lstm",
+        "gpt2", "t5", "bart", "llama3_2_1b", "whisper_base", "lstm",
     ]
     p_tr.add_argument("--model", default="distilbert", choices=TRANSFORMER_MODELS)
     p_tr.add_argument("--output-dir", default=None)
     p_tr.add_argument("--backend", choices=["onnx", "direct"], default="onnx")
     p_tr.add_argument("--strip-weights", action="store_true", default=True)
     p_tr.add_argument("--verbose", action="store_true")
+
+    # gnn
+    p_gnn = sub.add_parser(
+        "gnn",
+        help="Convert a GNN model to linalg MLIR.",
+    )
+    GNN_MODELS = ["gcn", "graphsage", "gat", "gin"]
+    p_gnn.add_argument("--model", default="gcn", choices=GNN_MODELS + ["all"])
+    p_gnn.add_argument("--output-dir", default=None)
+    p_gnn.add_argument("--backend", choices=["onnx", "direct"], default="onnx")
+    p_gnn.add_argument("--strip-weights", action="store_true", default=False)
+    p_gnn.add_argument("--keep-onnx", action="store_true", default=False)
+    p_gnn.add_argument("--verbose", action="store_true")
 
     # wrap
     p_wrap = sub.add_parser(
@@ -252,11 +237,11 @@ def main():
     args = parser.parse_args()
 
     dispatch = {
-        "build-benchmark": _cmd_build_benchmark,
-        "vision":          _cmd_vision,
-        "transformer":     _cmd_transformer,
-        "wrap":            _cmd_wrap,
-        "strip":           _cmd_strip,
+        "vision":      _cmd_vision,
+        "transformer": _cmd_transformer,
+        "gnn":         _cmd_gnn,
+        "wrap":        _cmd_wrap,
+        "strip":       _cmd_strip,
     }
     dispatch[args.command](args)
 

@@ -425,7 +425,7 @@ def _unpack_generator_result(res: Any):
 
 def _load_shape_config(config_path: str | None):
     """Load optional YAML config that extends mlir_generators shape globals."""
-    from data_utils.mlir_generators import (
+    from data_utils.generate.mlir_generators import (
         BATCH_SIZES, HEIGHTS, CHANNELS, KERNELS, DILATIONS, STRIDES, SIZES,
     )
     if config_path and os.path.isfile(config_path):
@@ -464,7 +464,7 @@ def _generate_single(operation_name: str, generator) -> str | None:
 
 def _generate_bench() -> str | None:
     """Generate one bench block using randomSubGraph; return MLIR text or None."""
-    from data_utils.mlir_generators import randomSubGraph
+    from data_utils.generate.mlir_generators import randomSubGraph
 
     try:
         res = randomSubGraph()
@@ -514,7 +514,7 @@ def _exceeds_tensor_limit(mlir_text: str) -> bool:
 
 def _get_next_ids():
     """Return (next_single_id, next_bench_id)."""
-    from data_utils.id_allocator import build_id_space_state
+    from data_utils.generate.id_allocator import build_id_space_state
 
     state = build_id_space_state(
         legacy_single_dir=os.path.join(PROJECT_ROOT, "data", "all", "code_files", "single_bench"),
@@ -564,7 +564,7 @@ def main():
 
     _load_shape_config(args.config)
 
-    from data_utils.mlir_generators import LINALG_OPERATION_GENERATORS as GEN_MAP
+    from data_utils.generate.mlir_generators import LINALG_OPERATION_GENERATORS as GEN_MAP
 
     # Select generators
     if args.ops:

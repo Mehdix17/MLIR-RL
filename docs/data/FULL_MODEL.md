@@ -123,7 +123,7 @@ for gpt2 (765 ops × ~4 actions). Each action took ~30s → ~25 hours total.
 ### 3.2 Block-Based Baselines (All 20 models)
 
 Block-based baselines measured via `get_base.py` for all models decomposed into operation
-blocks at `data/nn/blocks/`. Extraction via `data_utils/extract_blocks.py`
+blocks at `data/nn/blocks/`. Extraction via `data_utils/extract/extract_blocks.py`
 (window=5, stride=3). Failed blocks (MLIR parse/execution errors) moved to
 `data/nn/failed_blocks/`. Per-block baselines aggregated in `results/full_model/baselines/all_blocks_baselines.json`.
 
