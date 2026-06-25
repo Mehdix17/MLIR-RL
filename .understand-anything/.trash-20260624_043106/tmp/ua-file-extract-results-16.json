@@ -1,0 +1,339 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": ".env.example",
+      "language": "config",
+      "fileCategory": "config",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "definitions": [
+        {
+          "name": "LLVM_BUILD_PATH",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 1,
+          "endLine": 1
+        },
+        {
+          "name": "MLIR_SHARED_LIBS",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 2,
+          "endLine": 2
+        },
+        {
+          "name": "AST_DUMPER_BIN_PATH",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 3,
+          "endLine": 3
+        },
+        {
+          "name": "PRE_VEC_BIN_PATH",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 4,
+          "endLine": 4
+        },
+        {
+          "name": "VECTORIZER_BIN_PATH",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 5,
+          "endLine": 5
+        },
+        {
+          "name": "CONDA_ENV",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 6,
+          "endLine": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 6
+      }
+    },
+    {
+      "path": "AGENTS.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 278,
+      "nonEmptyLines": 200,
+      "sections": [
+        {
+          "heading": "MLIR-RL — Agent Quick-Start",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Must-Do Setup (interactive use only)",
+          "level": 2,
+          "line": 5
+        },
+        {
+          "heading": "Key Rules",
+          "level": 2,
+          "line": 17
+        },
+        {
+          "heading": "Behavioral Guidelines",
+          "level": 2,
+          "line": 26
+        },
+        {
+          "heading": "1. Think Before Coding",
+          "level": 3,
+          "line": 30
+        },
+        {
+          "heading": "2. Simplicity First",
+          "level": 3,
+          "line": 40
+        },
+        {
+          "heading": "3. Surgical Changes",
+          "level": 3,
+          "line": 52
+        },
+        {
+          "heading": "4. Goal-Driven Execution",
+          "level": 3,
+          "line": 68
+        },
+        {
+          "heading": "Datasets",
+          "level": 2,
+          "line": 90
+        },
+        {
+          "heading": "Creating / Extending Datasets",
+          "level": 3,
+          "line": 101
+        },
+        {
+          "heading": "Results Directory Architecture (flat)",
+          "level": 2,
+          "line": 127
+        },
+        {
+          "heading": "Reporting Scripts",
+          "level": 2,
+          "line": 146
+        },
+        {
+          "heading": "Training & Eval Commands",
+          "level": 2,
+          "line": 156
+        },
+        {
+          "heading": "Lustre Quota Awareness",
+          "level": 2,
+          "line": 177
+        },
+        {
+          "heading": "Implementation Packages",
+          "level": 2,
+          "line": 185
+        },
+        {
+          "heading": "Paper Ablation (LSTM vs Transformer)",
+          "level": 3,
+          "line": 203
+        },
+        {
+          "heading": "Paper Safety Mechanisms (ported from V4.9)",
+          "level": 3,
+          "line": 227
+        },
+        {
+          "heading": "Paper FileLogger",
+          "level": 3,
+          "line": 235
+        },
+        {
+          "heading": "Speedup & Reward Gotchas",
+          "level": 2,
+          "line": 239
+        },
+        {
+          "heading": "LLVM Build Gotchas",
+          "level": 2,
+          "line": 245
+        },
+        {
+          "heading": "Operational Gotchas",
+          "level": 2,
+          "line": 263
+        },
+        {
+          "heading": "Key Docs",
+          "level": 2,
+          "line": 270
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 22
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 188,
+      "nonEmptyLines": 162,
+      "sections": [
+        {
+          "heading": "Getting Started",
+          "level": 2,
+          "line": 1
+        },
+        {
+          "heading": "Prerequisites:",
+          "level": 3,
+          "line": 4
+        },
+        {
+          "heading": "Required",
+          "level": 6,
+          "line": 5
+        },
+        {
+          "heading": "Setup",
+          "level": 3,
+          "line": 12
+        },
+        {
+          "heading": "1. Building MLIR :",
+          "level": 4,
+          "line": 13
+        },
+        {
+          "heading": "2. Install python requirements :",
+          "level": 4,
+          "line": 24
+        },
+        {
+          "heading": "3. Setup environment variables :",
+          "level": 4,
+          "line": 28
+        },
+        {
+          "heading": "Documentation",
+          "level": 3,
+          "line": 38
+        },
+        {
+          "heading": "1. Jobs",
+          "level": 4,
+          "line": 39
+        },
+        {
+          "heading": "2. Configuration",
+          "level": 4,
+          "line": 41
+        },
+        {
+          "heading": "Troubleshooting an Inherited LLVM Build",
+          "level": 2,
+          "line": 115
+        },
+        {
+          "heading": "Problem 1: `GLIBCXX_3.4.29` not found",
+          "level": 3,
+          "line": 119
+        },
+        {
+          "heading": "Problem 2: Broken MLIR Python symlinks",
+          "level": 3,
+          "line": 127
+        },
+        {
+          "heading": "Problem 3: Missing environment variables",
+          "level": 3,
+          "line": 152
+        },
+        {
+          "heading": "Problem 4: V4 Reliability and \"experiment3\" Transition",
+          "level": 3,
+          "line": 169
+        },
+        {
+          "heading": "Generating base execution times",
+          "level": 3,
+          "line": 182
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 16
+      }
+    },
+    {
+      "path": "environment.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 239,
+      "nonEmptyLines": 239,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "channels",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "dependencies",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "prefix",
+          "level": 1,
+          "line": 239
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "quick_commands.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 67,
+      "nonEmptyLines": 38,
+      "metrics": {}
+    },
+    {
+      "path": "requirements.txt",
+      "language": "txt",
+      "fileCategory": "docs",
+      "totalLines": 6,
+      "nonEmptyLines": 6,
+      "metrics": {}
+    }
+  ]
+}

@@ -1,0 +1,735 @@
+{
+  "nodes": [
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "summary": "Implements the action logic and checks for loop transformation: __init__.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py:ActionSpace",
+      "type": "class",
+      "name": "ActionSpace",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "lineRange": [
+        15,
+        264
+      ],
+      "summary": "Class defining properties and operations for 'ActionSpace'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "type": "file",
+      "name": "base.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "summary": "Implements the action logic and checks for loop transformation: base.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py:Action",
+      "type": "class",
+      "name": "Action",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "lineRange": [
+        7,
+        248
+      ],
+      "summary": "Class defining properties and operations for 'Action'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "type": "file",
+      "name": "interchange.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "summary": "Implements the action logic and checks for loop transformation: interchange.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py:InterchangeMethod",
+      "type": "class",
+      "name": "InterchangeMethod",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "lineRange": [
+        12,
+        15
+      ],
+      "summary": "Class defining properties and operations for 'InterchangeMethod'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py:Interchange",
+      "type": "class",
+      "name": "Interchange",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "lineRange": [
+        18,
+        253
+      ],
+      "summary": "Class defining properties and operations for 'Interchange'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "type": "file",
+      "name": "no_transformation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "summary": "Implements the action logic and checks for loop transformation: no_transformation.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py:NoTransformation",
+      "type": "class",
+      "name": "NoTransformation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "lineRange": [
+        6,
+        20
+      ],
+      "summary": "Class defining properties and operations for 'NoTransformation'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "type": "file",
+      "name": "tiled_fusion.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "summary": "Implements the action logic and checks for loop transformation: tiled_fusion.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py:TiledFusion",
+      "type": "class",
+      "name": "TiledFusion",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "lineRange": [
+        8,
+        262
+      ],
+      "summary": "Class defining properties and operations for 'TiledFusion'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "type": "file",
+      "name": "tiled_parallelization.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "summary": "Implements the action logic and checks for loop transformation: tiled_parallelization.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py:TiledParallelization",
+      "type": "class",
+      "name": "TiledParallelization",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "lineRange": [
+        6,
+        46
+      ],
+      "summary": "Class defining properties and operations for 'TiledParallelization'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "type": "file",
+      "name": "tiling.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "summary": "Implements the action logic and checks for loop transformation: tiling.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py:Tiling",
+      "type": "class",
+      "name": "Tiling",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "lineRange": [
+        12,
+        132
+      ],
+      "summary": "Class defining properties and operations for 'Tiling'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "type": "file",
+      "name": "vectorization.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "summary": "Implements the action logic and checks for loop transformation: vectorization.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-action"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py:Vectorization",
+      "type": "class",
+      "name": "Vectorization",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "lineRange": [
+        11,
+        124
+      ],
+      "summary": "Class defining properties and operations for 'Vectorization'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "type": "file",
+      "name": "benchmarks.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py:_resolve_bench_file",
+      "type": "function",
+      "name": "_resolve_bench_file",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "lineRange": [
+        11,
+        24
+      ],
+      "summary": "Function implementing the execution logic for '_resolve_bench_file'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py:Benchmarks",
+      "type": "class",
+      "name": "Benchmarks",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "lineRange": [
+        27,
+        77
+      ],
+      "summary": "Class defining properties and operations for 'Benchmarks'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py:ActionSpace",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py:ActionSpace",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py:Action",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py:Action",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py:InterchangeMethod",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py:InterchangeMethod",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py:Interchange",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py:Interchange",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py:NoTransformation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py:NoTransformation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py:TiledFusion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py:TiledFusion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "target": "file:utils/log.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py:TiledParallelization",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py:TiledParallelization",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py:Tiling",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py:Tiling",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py:Vectorization",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py:Vectorization",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py:_resolve_bench_file",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py:_resolve_bench_file",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py:Benchmarks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "class:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py:Benchmarks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "target": "file:utils/implementation.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 10,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "scripts/baseline/get_base.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 70,
+      "nonEmptyLines": 58,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/get_blocks_baseline.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 76,
+      "nonEmptyLines": 64,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/get_blocks_baseline_fresh.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 60,
+      "nonEmptyLines": 48,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/get_new_dataset_base.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 62,
+      "nonEmptyLines": 52,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/get_new_dataset_pytorch.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 64,
+      "nonEmptyLines": 54,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/get_ops_and_blocks_missing.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 51,
+      "nonEmptyLines": 40,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/get_pytorch_times.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 70,
+      "nonEmptyLines": 58,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/run_get_base.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 25,
+      "nonEmptyLines": 21,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/submit_blocks_baselines.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 50,
+      "nonEmptyLines": 40,
+      "functions": [
+        {
+          "name": "submit_tier",
+          "startLine": 27,
+          "endLine": 35,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/baseline/submit_old_models_baselines.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 47,
+      "nonEmptyLines": 40,
+      "functions": [
+        {
+          "name": "submit_model",
+          "startLine": 16,
+          "endLine": 27,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

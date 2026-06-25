@@ -1,0 +1,182 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "plots/version_comparison/single_ops_dataset/v4_9_large/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/v4_9_large/v4_9_large.csv",
+      "language": "csv",
+      "sizeLines": 100,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/v4_9_small/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/v4_9_small/v4_9_small.csv",
+      "language": "csv",
+      "sizeLines": 100,
+      "fileCategory": "data"
+    },
+    {
+      "path": "rl_autoschedular/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_paper_transformer/README.md",
+      "language": "markdown",
+      "sizeLines": 105,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_paper_transformer/utils/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_paper/README.md",
+      "language": "markdown",
+      "sizeLines": 105,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_paper/utils/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "language": "python",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/baseline/get_pytorch_baselines.py",
+      "language": "python",
+      "sizeLines": 381,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/baseline/get_pytorch_times.py",
+      "language": "python",
+      "sizeLines": 587,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/checkpoint/merge_ckpt_scan.py",
+      "language": "python",
+      "sizeLines": 107,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/full_model/add_timing_wrapper.py",
+      "language": "python",
+      "sizeLines": 263,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/full_model/preprocess_model.py",
+      "language": "python",
+      "sizeLines": 103,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/README.md",
+      "language": "markdown",
+      "sizeLines": 139,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/train/train_condo.sh",
+      "language": "shell",
+      "sizeLines": 77,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/train/train.sh",
+      "language": "shell",
+      "sizeLines": 97,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/utils/classify_benchmarks.py",
+      "language": "python",
+      "sizeLines": 182,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "plots/version_comparison/single_ops_dataset/v4_9_large/plot.py": [],
+    "plots/version_comparison/single_ops_dataset/v4_9_large/v4_9_large.csv": [],
+    "plots/version_comparison/single_ops_dataset/v4_9_small/plot.py": [],
+    "plots/version_comparison/single_ops_dataset/v4_9_small/v4_9_small.csv": [],
+    "rl_autoschedular/__init__.py": [],
+    "rl_autoschedular/rl_autoschedular_paper_transformer/README.md": [],
+    "rl_autoschedular/rl_autoschedular_paper_transformer/utils/__init__.py": [],
+    "rl_autoschedular/rl_autoschedular_paper/README.md": [],
+    "rl_autoschedular/rl_autoschedular_paper/utils/__init__.py": [],
+    "rl_autoschedular/rl_autoschedular_v3/ablation.py": [],
+    "rl_autoschedular/rl_autoschedular_v4_5/ablation.py": [],
+    "rl_autoschedular/rl_autoschedular_v4_9/ablation.py": [],
+    "rl_autoschedular/rl_autoschedular_v4/ablation.py": [],
+    "rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py": [],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py": [],
+    "rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py": [],
+    "scripts/baseline/get_pytorch_baselines.py": [],
+    "scripts/baseline/get_pytorch_times.py": [],
+    "scripts/checkpoint/merge_ckpt_scan.py": [],
+    "scripts/full_model/add_timing_wrapper.py": [],
+    "scripts/full_model/preprocess_model.py": [],
+    "scripts/README.md": [],
+    "scripts/train/train_condo.sh": [],
+    "scripts/train/train.sh": [],
+    "scripts/utils/classify_benchmarks.py": []
+  }
+}

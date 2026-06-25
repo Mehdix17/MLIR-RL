@@ -83,7 +83,7 @@ class GPUOccupier(metaclass=Singleton):
 def _gpu_occupier_run(device: 'Device', stop_event: 'Event', gpu_needed_event: 'Event'):
     import torch
     from time import sleep
-    from mlir_rl_artifact.utils.log import print_error, print_info
+    from rl_autoschedular_paper.utils.log import print_error, print_info
 
     print_info("[GPUOccupier] Process started.", flush=True)
 

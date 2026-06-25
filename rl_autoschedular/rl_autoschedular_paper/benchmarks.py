@@ -7,15 +7,15 @@ and optionally applying img2col transformations
 for convolutional operations.
 """
 
-from mlir_rl_artifact.state import BenchmarkFeatures, extract_bench_features_from_code, extract_bench_features_from_file
-from mlir_rl_artifact.transforms import transform_img2col
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.state import BenchmarkFeatures, extract_bench_features_from_code, extract_bench_features_from_file
+from rl_autoschedular_paper.transforms import transform_img2col
+from rl_autoschedular_paper.utils.config import Config
 from mlir._mlir_libs._mlir.ir import Context, Module  # type: ignore
 import json
 from tqdm import tqdm
 import os
 
-from mlir_rl_artifact.utils.log import print_alert
+from rl_autoschedular_paper.utils.log import print_alert
 
 
 class Benchmarks:
@@ -48,7 +48,11 @@ class Benchmarks:
         self.data = []
         for bench_name, root_exec_time in tqdm(benchmarks_json.items(), desc="Extracting benchmark features", unit="bench"):
             bench_file = os.path.join(cfg.benchmarks_folder_path, bench_name + ".mlir")
-            benchmark_data = extract_bench_features_from_file(bench_name, bench_file, root_exec_time)
+            try:
+                benchmark_data = extract_bench_features_from_file(bench_name, bench_file, root_exec_time)
+            except RuntimeError as e:
+                print_alert(f"Skipping {bench_name}: MLIR crashed during feature extraction ({e})")
+                continue
             # NOTE: For now img2col is applied to single operator codes only
             if os.getenv("DISABLE_IMG2COL", "0") != "1" and bench_name.startswith("conv_2d_"):
                 modified = False

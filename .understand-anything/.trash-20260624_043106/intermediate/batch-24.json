@@ -1,0 +1,68 @@
+{
+  "nodes": [
+    {
+      "id": "config:config/old_dataset/test/test.json",
+      "type": "config",
+      "name": "test.json",
+      "filePath": "config/old_dataset/test/test.json",
+      "summary": "Configuration settings for test.json controlling runtime or build parameters.",
+      "tags": [
+        "test",
+        "quality-assurance",
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:config/old_dataset/test/v3_sanity.json",
+      "type": "config",
+      "name": "v3_sanity.json",
+      "filePath": "config/old_dataset/test/v3_sanity.json",
+      "summary": "Configuration settings for v3_sanity.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:config/old_dataset/test/v4_sanity.json",
+      "type": "config",
+      "name": "v4_sanity.json",
+      "filePath": "config/old_dataset/test/v4_sanity.json",
+      "summary": "Configuration settings for v4_sanity.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:config/old_dataset/test/test.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/old_dataset/test/v3_sanity.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/old_dataset/test/v4_sanity.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

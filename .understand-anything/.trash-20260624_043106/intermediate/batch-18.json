@@ -1,0 +1,226 @@
+{
+  "nodes": [
+    {
+      "id": "config:config/new_dataset/train/v0.json",
+      "type": "config",
+      "name": "v0.json",
+      "filePath": "config/new_dataset/train/v0.json",
+      "summary": "Configuration settings for v0.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v0_v2.json",
+      "type": "config",
+      "name": "v0_v2.json",
+      "filePath": "config/new_dataset/train/v0_v2.json",
+      "summary": "Configuration settings for v0_v2.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v45_no_hw.json",
+      "type": "config",
+      "name": "v45_no_hw.json",
+      "filePath": "config/new_dataset/train/v45_no_hw.json",
+      "summary": "Configuration settings for v45_no_hw.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v45_no_shaped_reward.json",
+      "type": "config",
+      "name": "v45_no_shaped_reward.json",
+      "filePath": "config/new_dataset/train/v45_no_shaped_reward.json",
+      "summary": "Configuration settings for v45_no_shaped_reward.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v45_no_transformer.json",
+      "type": "config",
+      "name": "v45_no_transformer.json",
+      "filePath": "config/new_dataset/train/v45_no_transformer.json",
+      "summary": "Configuration settings for v45_no_transformer.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v4_5.json",
+      "type": "config",
+      "name": "v4_5.json",
+      "filePath": "config/new_dataset/train/v4_5.json",
+      "summary": "Configuration settings for v4_5.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v4_5_small.json",
+      "type": "config",
+      "name": "v4_5_small.json",
+      "filePath": "config/new_dataset/train/v4_5_small.json",
+      "summary": "Configuration settings for v4_5_small.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v4_6.json",
+      "type": "config",
+      "name": "v4_6.json",
+      "filePath": "config/new_dataset/train/v4_6.json",
+      "summary": "Configuration settings for v4_6.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v4_7.json",
+      "type": "config",
+      "name": "v4_7.json",
+      "filePath": "config/new_dataset/train/v4_7.json",
+      "summary": "Configuration settings for v4_7.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v4_8.json",
+      "type": "config",
+      "name": "v4_8.json",
+      "filePath": "config/new_dataset/train/v4_8.json",
+      "summary": "Configuration settings for v4_8.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/new_dataset/train/v4_9.json",
+      "type": "config",
+      "name": "v4_9.json",
+      "filePath": "config/new_dataset/train/v4_9.json",
+      "summary": "Configuration settings for v4_9.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:config/new_dataset/train/v0.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v0_v2.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v45_no_hw.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v45_no_shaped_reward.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v45_no_transformer.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v4_5.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v4_5_small.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v4_6.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v4_7.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v4_8.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/new_dataset/train/v4_9.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

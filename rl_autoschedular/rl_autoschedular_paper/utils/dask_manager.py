@@ -16,7 +16,7 @@ from .log import print_alert, print_error, print_info, print_success
 from .bindings_process import ENABLED as BP_ENABLED
 
 if TYPE_CHECKING:
-    from mlir_rl_artifact.benchmarks import Benchmarks
+    from rl_autoschedular_paper.benchmarks import Benchmarks
     from distributed import Future
 
 ENABLED = int(os.getenv('DASK_NODES', '0')) > 0

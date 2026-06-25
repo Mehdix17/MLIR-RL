@@ -28,7 +28,7 @@ source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH
 export PYTHONPATH="$LLVM_BUILD_PATH/tools/mlir/python_packages/mlir_core:$PROJECT_ROOT:$PROJECT_ROOT/rl_autoschedular${PYTHONPATH:+:$PYTHONPATH}"
 
-export MIN_EXEC_TIMEOUT=60
+export MIN_EXEC_TIMEOUT=${MIN_EXEC_TIMEOUT:-300}
 
 # Extract --checkpoint flag before consuming positional args
 EVAL_CHECKPOINT=""

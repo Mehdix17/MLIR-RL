@@ -4,11 +4,11 @@ This module implements the tiling transformation action, which applies loop tili
 to operations with configurable tile sizes.
 """
 
-from mlir_rl_artifact.state import OperationState
-from mlir_rl_artifact.transforms import transform_tile
+from rl_autoschedular_paper.state import OperationState
+from rl_autoschedular_paper.transforms import transform_tile
 from typing import Optional
 
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.utils.config import Config
 from .base import Action
 import torch
 import math

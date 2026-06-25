@@ -1,0 +1,70 @@
+{
+  "nodes": [
+    {
+      "id": "document:manuscript/references/Bendib 2024.md",
+      "type": "document",
+      "name": "Bendib 2024.md",
+      "filePath": "manuscript/references/Bendib 2024.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for Bendib 2024.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:manuscript/references/Nassim & Mohamed 2025.md",
+      "type": "document",
+      "name": "Nassim & Mohamed 2025.md",
+      "filePath": "manuscript/references/Nassim & Mohamed 2025.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for Nassim & Mohamed 2025.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:manuscript/references/Rafik & Djad 2025.md",
+      "type": "document",
+      "name": "Rafik & Djad 2025.md",
+      "filePath": "manuscript/references/Rafik & Djad 2025.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for Rafik & Djad 2025.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:manuscript/references/manuscript_writing_comments.md",
+      "type": "document",
+      "name": "manuscript_writing_comments.md",
+      "filePath": "manuscript/references/manuscript_writing_comments.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for manuscript_writing_comments.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:manuscript/references/mlir-rl-paper.md",
+      "type": "document",
+      "name": "mlir-rl-paper.md",
+      "filePath": "manuscript/references/mlir-rl-paper.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for mlir-rl-paper.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": []
+}

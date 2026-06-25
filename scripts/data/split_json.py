@@ -54,30 +54,43 @@ failed = len(data) - len(valid)
 if failed:
     print(f"Dropped {failed} failed entries (exec_time <= 0)")
 
+KNOWN_MODELS = [
+    "albert", "bart", "bert", "convnext_tiny", "densen121", "deberta", "distilbert",
+    "efficientnet_b0", "gat", "gcn", "gin", "gpt2", "gpt2-large", "gpt2-medium",
+    "llama3_2_1b", "lstm", "mobilenet_v3_small", "resnet18", "resnet50", "resnext50",
+    "roberta", "t5", "vgg11", "vgg16", "vit_b_16", "whisper_base", "yolov8m",
+]
+
 # Group by model family: take longest prefix before first op-type keyword.
 # Benchmark names look like: albert_generic_0, densenet121_sz192_bs4_conv_0, etc.
-OP_KEYWORDS = {"generic", "matmul", "batch_matmul", "conv", "pooling", "relu",
-               "add", "block", "patterns_bench", "pattern", "residual_bench", "resnet_bench"}
+# For single_ops: albert_add_17, bart_batch_matmul_5, add_14_150_15_28, etc.
+OP_KEYWORDS = {"generic", "matmul", "batch_matmul", "conv", "conv_2d", "pooling", "relu",
+               "add", "mul", "sub", "reduce_sum", "block", "patterns_bench", "pattern",
+               "residual_bench", "resnet_bench"}
 
 def model_family(name: str) -> str:
     """Extract model family from benchmark name.
 
-    Names follow pattern: <model>_<op>_<index>.mlir  (e.g. albert_generic_0)
-    Some have size/batch tags: densenet121_sz192_bs4_conv_0
-    Legacy synthetic benchmarks: bench_1334.mlir
+    First checks known model prefixes (longest match first).
+    Then falls back to keyword-based extraction for new_dataset style names.
+    Synthetic benchmarks (no model prefix) are grouped as 'synthetic'.
     """
+    for m in sorted(KNOWN_MODELS, key=len, reverse=True):
+        if name.startswith(m + "_"):
+            return m
+
     parts = name.split("_")
     for i, part in enumerate(parts):
         if part in OP_KEYWORDS:
-            return "_".join(parts[:i]) or "unknown"
+            return "_".join(parts[:i]) or "synthetic"
         if part.startswith("sz") and part[2:].isdigit():
-            return "_".join(parts[:i]) or "unknown"
+            return "_".join(parts[:i]) or "synthetic"
         # bench_NNNN — group all numeric suffixes under "bench"
         if part.isdigit():
-            prefix = "_".join(parts[:i]) or "unknown"
+            prefix = "_".join(parts[:i]) or "synthetic"
             if prefix == "bench":
                 return "bench"
-    return "_".join(parts[:2])  # fallback: first two tokens
+    return "synthetic"
 
 # Stratified split: sample eval_ratio from each family
 random.seed(args.seed)

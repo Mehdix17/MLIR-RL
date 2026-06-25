@@ -1,0 +1,61 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/checkpoint/ckpt_scan_all.sh",
+      "type": "file",
+      "name": "ckpt_scan_all.sh",
+      "filePath": "scripts/checkpoint/ckpt_scan_all.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/checkpoint/run_checkpoint_scan.sh",
+      "type": "file",
+      "name": "run_checkpoint_scan.sh",
+      "filePath": "scripts/checkpoint/run_checkpoint_scan.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/checkpoint/run_ckpt_scan.sh",
+      "type": "file",
+      "name": "run_ckpt_scan.sh",
+      "filePath": "scripts/checkpoint/run_ckpt_scan.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/checkpoint/submit_ckpt_scan.sh",
+      "type": "file",
+      "name": "submit_ckpt_scan.sh",
+      "filePath": "scripts/checkpoint/submit_ckpt_scan.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}

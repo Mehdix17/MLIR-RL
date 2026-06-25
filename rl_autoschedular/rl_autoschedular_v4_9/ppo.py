@@ -13,7 +13,7 @@ from rl_autoschedular_v4_9.observation import Observation, NumLoops
 from rl_autoschedular_v4_9.actions import ActionSpace
 from rl_autoschedular_v4_9.benchmarks import Benchmarks
 from rl_autoschedular_v4_9.execution import Execution
-from rl_autoschedular_v1 import device
+from rl_autoschedular_v4_9 import device
 from utils.config import Config
 from utils.file_logger import FileLogger
 from utils.log import print_error, print_info, print_success
@@ -343,6 +343,8 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
     if os.getenv("EVAL_BENCH_LAST_ONLY", "").strip().lower() in ("1", "true", "yes"):
         indices = [len(data) - 1]
         print_info(f"EVAL_BENCH_LAST_ONLY: evaluating only benchmark {data[indices[0]].bench_name}")
+    bench_names = [data[i].bench_name for i in indices]
+    print_info(f"Benchmarks to evaluate ({len(indices)}): {', '.join(bench_names)}")
 
     envs: list[Env] = []
     states: list[OperationState] = []
@@ -393,10 +395,12 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
     ]
     all_rewards, all_speedups, all_exec_times, _, _ = tuple(zip(*results))
     new_cache_data: dict[str, dict[str, int]] = {}
+    header_printed = False
     for state, rewards, speedup, exec_time in zip(states, all_rewards, all_speedups, all_exec_times):
         fl['eval/reward'].extend(rewards)
         fl['eval/cumulative_reward'].append(sum(rewards))
         fl['eval/final_speedup'].append(speedup)
+        base_time = data[state.bench_idx].root_exec_time
         if exec_time is not None:
             fl[f'eval/exec_time/{state.bench_name}'].append(exec_time)
             fl[f'eval/speedup/{state.bench_name}'].append(speedup)
@@ -405,13 +409,25 @@ def evaluate_benchmarks(model: Model, data: Benchmarks):
                 new_cache_data[state.bench_name] = {}
             new_cache_data[state.bench_name][cache_key] = exec_time
 
-        print_info("Bench: " + state.bench_name, add_label=False)
-        print_info(str(state.transformation_history), add_label=False)
+        if not header_printed:
+            print_info(f"{'Benchmark':<52} {'Baseline(ms)':<14} {'Optimized(ms)':<14} {'Speedup':<10} {'Outcome':<10}")
+            header_printed = True
+        if exec_time is not None and exec_time > 0:
+            outcome = "OK" if speedup >= 0.8 else "SLOW"
+            print_info(f"  {state.bench_name:<50} {base_time/1e6:<14.2f} {exec_time/1e6:<14.2f} {speedup:<10.2f}x {outcome:<10}")
+        else:
+            print_info(f"  {state.bench_name:<50} {base_time/1e6:<14.2f} {'N/A':<14} {'N/A':<10} {'FAIL':<10}", add_label=False)
 
     if len(all_speedups) > 0:
+        valid = [s for s in all_speedups if s > 0]
         geo_mean = math.exp(sum(math.log(max(s, 1e-12)) for s in all_speedups) / len(all_speedups))
         fl['eval/average_speedup'].append(geo_mean)
         fl['eval/arithmetic_mean_speedup'].append(sum(all_speedups) / len(all_speedups))
+        if valid:
+            avg = sum(valid) / len(valid)
+            num_failed = sum(1 for i, s in enumerate(all_speedups) if s <= 0 or all_exec_times[i] is None)
+            print_info(f"  ---  Average speedup (valid): {avg:.2f}x  |  Failed: {num_failed}/{len(all_speedups)}")
+
     exe.update_execution_cache(new_cache_data)
 
     # Save eval exec times as JSON (bench_name -> optimized_time_ns)

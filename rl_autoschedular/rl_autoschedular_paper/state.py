@@ -12,11 +12,11 @@ import re
 import os
 import subprocess
 
-from mlir_rl_artifact.utils.config import Config
-from mlir_rl_artifact.utils.log import print_error
+from rl_autoschedular_paper.utils.config import Config
+from rl_autoschedular_paper.utils.log import print_error
 
 if TYPE_CHECKING:
-    from mlir_rl_artifact.actions.base import Action
+    from rl_autoschedular_paper.actions.base import Action
 
 
 class OperationType(Enum):

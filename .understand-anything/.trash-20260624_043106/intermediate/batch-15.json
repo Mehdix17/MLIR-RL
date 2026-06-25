@@ -1,0 +1,670 @@
+{
+  "nodes": [
+    {
+      "id": "file:dashboard/dashboard.py",
+      "type": "file",
+      "name": "dashboard.py",
+      "filePath": "dashboard/dashboard.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:dashboard/dashboard.py:calculate_geo_mean",
+      "type": "function",
+      "name": "calculate_geo_mean",
+      "filePath": "dashboard/dashboard.py",
+      "lineRange": [
+        47,
+        51
+      ],
+      "summary": "Function implementing the execution logic for 'calculate_geo_mean'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:dashboard/pages/1_version_comparison.py",
+      "type": "file",
+      "name": "1_version_comparison.py",
+      "filePath": "dashboard/pages/1_version_comparison.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:dashboard/pages/2_ablation_study.py",
+      "type": "file",
+      "name": "2_ablation_study.py",
+      "filePath": "dashboard/pages/2_ablation_study.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:dashboard/pages/2_ablation_study.py:_melt",
+      "type": "function",
+      "name": "_melt",
+      "filePath": "dashboard/pages/2_ablation_study.py",
+      "lineRange": [
+        40,
+        46
+      ],
+      "summary": "Function implementing the execution logic for '_melt'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:dashboard/pages/3_multi_hardware.py",
+      "type": "file",
+      "name": "3_multi_hardware.py",
+      "filePath": "dashboard/pages/3_multi_hardware.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:dashboard/pages/4_full_model.py",
+      "type": "file",
+      "name": "4_full_model.py",
+      "filePath": "dashboard/pages/4_full_model.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:dashboard/utils/data.py",
+      "type": "file",
+      "name": "data.py",
+      "filePath": "dashboard/utils/data.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "barrel-module"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:dashboard/utils/data.py:data_path",
+      "type": "function",
+      "name": "data_path",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        13,
+        14
+      ],
+      "summary": "Function implementing the execution logic for 'data_path'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_csv",
+      "type": "function",
+      "name": "load_csv",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        17,
+        21
+      ],
+      "summary": "Function implementing the execution logic for 'load_csv'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:img_path",
+      "type": "function",
+      "name": "img_path",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        24,
+        26
+      ],
+      "summary": "Function implementing the execution logic for 'img_path'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_version_comparison_grouped",
+      "type": "function",
+      "name": "load_version_comparison_grouped",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        31,
+        37
+      ],
+      "summary": "Function implementing the execution logic for 'load_version_comparison_grouped'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_version_comparison_per_bench",
+      "type": "function",
+      "name": "load_version_comparison_per_bench",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        40,
+        45
+      ],
+      "summary": "Function implementing the execution logic for 'load_version_comparison_per_bench'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_graph1_performance",
+      "type": "function",
+      "name": "load_graph1_performance",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        48,
+        53
+      ],
+      "summary": "Function implementing the execution logic for 'load_graph1_performance'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_ablation_real",
+      "type": "function",
+      "name": "load_ablation_real",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        56,
+        61
+      ],
+      "summary": "Function implementing the execution logic for 'load_ablation_real'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_ablation_projected",
+      "type": "function",
+      "name": "load_ablation_projected",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        64,
+        66
+      ],
+      "summary": "Function implementing the execution logic for 'load_ablation_projected'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_full_model_comparison",
+      "type": "function",
+      "name": "load_full_model_comparison",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        69,
+        75
+      ],
+      "summary": "Function implementing the execution logic for 'load_full_model_comparison'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_hardware_model",
+      "type": "function",
+      "name": "load_hardware_model",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        78,
+        82
+      ],
+      "summary": "Function implementing the execution logic for 'load_hardware_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_hardware_optype",
+      "type": "function",
+      "name": "load_hardware_optype",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        85,
+        87
+      ],
+      "summary": "Function implementing the execution logic for 'load_hardware_optype'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/data.py:load_benchmark_classification",
+      "type": "function",
+      "name": "load_benchmark_classification",
+      "filePath": "dashboard/utils/data.py",
+      "lineRange": [
+        90,
+        94
+      ],
+      "summary": "Function implementing the execution logic for 'load_benchmark_classification'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:dashboard/utils/plotting.py",
+      "type": "file",
+      "name": "plotting.py",
+      "filePath": "dashboard/utils/plotting.py",
+      "summary": "Streamlit web dashboard component displaying evaluation runs, training metrics, or ablation plots.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:dashboard/utils/plotting.py:add_baseline_hline",
+      "type": "function",
+      "name": "add_baseline_hline",
+      "filePath": "dashboard/utils/plotting.py",
+      "lineRange": [
+        13,
+        17
+      ],
+      "summary": "Function implementing the execution logic for 'add_baseline_hline'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:dashboard/utils/plotting.py:bar_chart",
+      "type": "function",
+      "name": "bar_chart",
+      "filePath": "dashboard/utils/plotting.py",
+      "lineRange": [
+        20,
+        52
+      ],
+      "summary": "Function implementing the execution logic for 'bar_chart'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:dashboard/dashboard.py",
+      "target": "function:dashboard/dashboard.py:calculate_geo_mean",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/dashboard.py",
+      "target": "function:dashboard/dashboard.py:calculate_geo_mean",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/dashboard.py",
+      "target": "file:dashboard/utils/data.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/dashboard.py",
+      "target": "file:dashboard/utils/plotting.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/1_version_comparison.py",
+      "target": "file:dashboard/utils/data.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/1_version_comparison.py",
+      "target": "file:dashboard/utils/plotting.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/2_ablation_study.py",
+      "target": "function:dashboard/pages/2_ablation_study.py:_melt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/pages/2_ablation_study.py",
+      "target": "function:dashboard/pages/2_ablation_study.py:_melt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/pages/2_ablation_study.py",
+      "target": "file:dashboard/utils/data.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/2_ablation_study.py",
+      "target": "file:dashboard/utils/plotting.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/3_multi_hardware.py",
+      "target": "file:dashboard/utils/data.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/3_multi_hardware.py",
+      "target": "file:dashboard/utils/plotting.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/4_full_model.py",
+      "target": "file:dashboard/utils/data.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/pages/4_full_model.py",
+      "target": "file:dashboard/utils/plotting.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:data_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:data_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_csv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_csv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:img_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:img_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_version_comparison_grouped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_version_comparison_grouped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_version_comparison_per_bench",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_version_comparison_per_bench",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_graph1_performance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_graph1_performance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_ablation_real",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_ablation_real",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_ablation_projected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_ablation_projected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_full_model_comparison",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_full_model_comparison",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_hardware_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_hardware_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_hardware_optype",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_hardware_optype",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_benchmark_classification",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/data.py",
+      "target": "function:dashboard/utils/data.py:load_benchmark_classification",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/plotting.py",
+      "target": "function:dashboard/utils/plotting.py:add_baseline_hline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/plotting.py",
+      "target": "function:dashboard/utils/plotting.py:add_baseline_hline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:dashboard/utils/plotting.py",
+      "target": "function:dashboard/utils/plotting.py:bar_chart",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:dashboard/utils/plotting.py",
+      "target": "function:dashboard/utils/plotting.py:bar_chart",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

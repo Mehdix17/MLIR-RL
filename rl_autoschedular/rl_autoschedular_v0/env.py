@@ -102,10 +102,13 @@ class Env:
             cfg = Config()
             num_runs = cfg.eval_runs if hasattr(cfg, 'eval_runs') else 1
             run_times = []
+            last_error = None
             for run_idx in range(num_runs):
-                run_time, run_ok, run_miss, _ = Execution().execute_code(transformed_code, self.benchmark_data.bench_name, seq, root_exec_time=self.benchmark_data.root_exec_time)
+                run_time, run_ok, run_miss, run_err = Execution().execute_code(transformed_code, self.benchmark_data.bench_name, seq, root_exec_time=self.benchmark_data.root_exec_time)
                 if run_ok:
                     run_times.append(run_time)
+                else:
+                    last_error = run_err
             if run_times:
                 aggr = cfg.eval_aggregation if hasattr(cfg, 'eval_aggregation') else 'min'
                 if aggr == 'median':
@@ -117,7 +120,7 @@ class Env:
                 exec_succeeded = True
                 cache_miss = run_miss
             else:
-                raise Exception("Incorrect results")
+                raise Exception(last_error or "Incorrect results")
         except Exception as e:
             seq_str = '\n'.join([str(list(map(str, op_seq))) for op_seq in seq])
             print_error(

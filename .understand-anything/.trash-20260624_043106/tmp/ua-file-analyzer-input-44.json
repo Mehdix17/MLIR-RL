@@ -1,0 +1,184 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": ".flake8",
+      "language": "unknown",
+      "sizeLines": 1,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "config/new_dataset/eval_dalma/v4_5_eval.json",
+      "language": "json",
+      "sizeLines": 85,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval_dalma/v45_no_hw_eval.json",
+      "language": "json",
+      "sizeLines": 85,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval_jubail/v4_5_eval.json",
+      "language": "json",
+      "sizeLines": 85,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval_jubail/v45_no_hw_eval.json",
+      "language": "json",
+      "sizeLines": 85,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/full_model/v0_eval_full.json",
+      "language": "json",
+      "sizeLines": 76,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/full_model/v4_5_eval_full.json",
+      "language": "json",
+      "sizeLines": 84,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/test/test.json",
+      "language": "json",
+      "sizeLines": 80,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/full_model/full_model_optim.json",
+      "language": "json",
+      "sizeLines": 62,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/paper_mohammed/paper_eval.json",
+      "language": "json",
+      "sizeLines": 56,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/paper_mohammed/paper.json",
+      "language": "json",
+      "sizeLines": 54,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/README.md",
+      "language": "markdown",
+      "sizeLines": 93,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "dashboard/pages/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/requirements.txt",
+      "language": "txt",
+      "sizeLines": 3,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "dashboard/utils/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/build_benchmark.py",
+      "language": "python",
+      "sizeLines": 254,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/create_splits.py",
+      "language": "python",
+      "sizeLines": 210,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/generate_synthetic.py",
+      "language": "python",
+      "sizeLines": 634,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/gnn2mlir.py",
+      "language": "python",
+      "sizeLines": 427,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/id_allocator.py",
+      "language": "python",
+      "sizeLines": 103,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/main_wrapper.py",
+      "language": "python",
+      "sizeLines": 271,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/mlir_generators.py",
+      "language": "python",
+      "sizeLines": 2785,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/model_catalog.py",
+      "language": "python",
+      "sizeLines": 196,
+      "fileCategory": "code"
+    },
+    {
+      "path": "data_utils/orchestrate.py",
+      "language": "python",
+      "sizeLines": 265,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    ".flake8": [],
+    ".understand-anything/.understandignore": [],
+    "config/new_dataset/eval_dalma/v4_5_eval.json": [],
+    "config/new_dataset/eval_dalma/v45_no_hw_eval.json": [],
+    "config/new_dataset/eval_jubail/v4_5_eval.json": [],
+    "config/new_dataset/eval_jubail/v45_no_hw_eval.json": [],
+    "config/new_dataset/full_model/v0_eval_full.json": [],
+    "config/new_dataset/full_model/v4_5_eval_full.json": [],
+    "config/new_dataset/test/test.json": [],
+    "config/old_dataset/full_model/full_model_optim.json": [],
+    "config/paper_mohammed/paper_eval.json": [],
+    "config/paper_mohammed/paper.json": [],
+    "config/README.md": [],
+    "dashboard/pages/__init__.py": [],
+    "dashboard/requirements.txt": [],
+    "dashboard/utils/__init__.py": [],
+    "data_utils/build_benchmark.py": [],
+    "data_utils/create_splits.py": [],
+    "data_utils/generate_synthetic.py": [],
+    "data_utils/gnn2mlir.py": [
+      "data_utils/model_catalog.py"
+    ],
+    "data_utils/id_allocator.py": [],
+    "data_utils/main_wrapper.py": [],
+    "data_utils/mlir_generators.py": [],
+    "data_utils/model_catalog.py": [],
+    "data_utils/orchestrate.py": []
+  }
+}

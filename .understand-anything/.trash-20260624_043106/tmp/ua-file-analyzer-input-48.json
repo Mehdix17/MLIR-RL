@@ -1,0 +1,112 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "scripts/utils/report_eval.py",
+      "language": "python",
+      "sizeLines": 307,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/utils/report_training.py",
+      "language": "python",
+      "sizeLines": 445,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/utils/submit_and_monitor.sh",
+      "language": "shell",
+      "sizeLines": 115,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/utils/test_torch_mlir_compile.py",
+      "language": "python",
+      "sizeLines": 38,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/utils/test_torch_mlir.sh",
+      "language": "shell",
+      "sizeLines": 21,
+      "fileCategory": "script"
+    },
+    {
+      "path": "tmp_reorder.py",
+      "language": "python",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tmp_update_versions.py",
+      "language": "python",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tmp/install_ua.sh",
+      "language": "shell",
+      "sizeLines": 318,
+      "fileCategory": "script"
+    },
+    {
+      "path": "tools/ast_dumper/CMakeLists.txt",
+      "language": "txt",
+      "sizeLines": 96,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tools/ast_dumper/main.cpp",
+      "language": "cpp",
+      "sizeLines": 194,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tools/pre_vec/CMakeLists.txt",
+      "language": "txt",
+      "sizeLines": 96,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tools/pre_vec/main.cpp",
+      "language": "cpp",
+      "sizeLines": 204,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tools/vectorizer/CMakeLists.txt",
+      "language": "txt",
+      "sizeLines": 96,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tools/vectorizer/main.cpp",
+      "language": "cpp",
+      "sizeLines": 229,
+      "fileCategory": "code"
+    },
+    {
+      "path": "utils/gpt2_jit_compat.py",
+      "language": "python",
+      "sizeLines": 117,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "scripts/utils/report_eval.py": [],
+    "scripts/utils/report_training.py": [],
+    "scripts/utils/submit_and_monitor.sh": [],
+    "scripts/utils/test_torch_mlir_compile.py": [],
+    "scripts/utils/test_torch_mlir.sh": [],
+    "tmp_reorder.py": [],
+    "tmp_update_versions.py": [],
+    "tmp/install_ua.sh": [],
+    "tools/ast_dumper/CMakeLists.txt": [],
+    "tools/ast_dumper/main.cpp": [],
+    "tools/pre_vec/CMakeLists.txt": [],
+    "tools/pre_vec/main.cpp": [],
+    "tools/vectorizer/CMakeLists.txt": [],
+    "tools/vectorizer/main.cpp": [],
+    "utils/gpt2_jit_compat.py": []
+  }
+}

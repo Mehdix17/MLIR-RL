@@ -1,0 +1,206 @@
+{
+  "nodes": [
+    {
+      "id": "document:docs/novelties/v0_model_detailed.md",
+      "type": "document",
+      "name": "v0_model_detailed.md",
+      "filePath": "docs/novelties/v0_model_detailed.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v0_model_detailed.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/novelties/v0_original_baseline.md",
+      "type": "document",
+      "name": "v0_original_baseline.md",
+      "filePath": "docs/novelties/v0_original_baseline.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v0_original_baseline.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/novelties/v1_hardware_aware_observation.md",
+      "type": "document",
+      "name": "v1_hardware_aware_observation.md",
+      "filePath": "docs/novelties/v1_hardware_aware_observation.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v1_hardware_aware_observation.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/novelties/v2_5_hardened_shaped_reward.md",
+      "type": "document",
+      "name": "v2_5_hardened_shaped_reward.md",
+      "filePath": "docs/novelties/v2_5_hardened_shaped_reward.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v2_5_hardened_shaped_reward.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/novelties/v2_shaped_reward.md",
+      "type": "document",
+      "name": "v2_shaped_reward.md",
+      "filePath": "docs/novelties/v2_shaped_reward.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v2_shaped_reward.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/novelties/v3_transformer_loop_nest_encoder.md",
+      "type": "document",
+      "name": "v3_transformer_loop_nest_encoder.md",
+      "filePath": "docs/novelties/v3_transformer_loop_nest_encoder.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v3_transformer_loop_nest_encoder.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/novelties/v4_5_reliability_logic.md",
+      "type": "document",
+      "name": "v4_5_reliability_logic.md",
+      "filePath": "docs/novelties/v4_5_reliability_logic.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v4_5_reliability_logic.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/novelties/v4_5_robust_integration.md",
+      "type": "document",
+      "name": "v4_5_robust_integration.md",
+      "filePath": "docs/novelties/v4_5_robust_integration.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v4_5_robust_integration.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/novelties/v4_combined_model.md",
+      "type": "document",
+      "name": "v4_combined_model.md",
+      "filePath": "docs/novelties/v4_combined_model.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v4_combined_model.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/novelties/v5_action_space_expansion.md",
+      "type": "document",
+      "name": "v5_action_space_expansion.md",
+      "filePath": "docs/novelties/v5_action_space_expansion.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for v5_action_space_expansion.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:docs/novelties/v0_model_detailed.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v0_original_baseline.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v1_hardware_aware_observation.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v2_5_hardened_shaped_reward.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v2_shaped_reward.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v3_transformer_loop_nest_encoder.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v4_5_reliability_logic.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v4_5_robust_integration.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v4_combined_model.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/novelties/v5_action_space_expansion.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

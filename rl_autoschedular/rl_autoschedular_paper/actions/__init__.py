@@ -5,7 +5,7 @@ including tiling, parallelization, fusion, interchange, and vectorization. It
 provides the ActionSpace class for action sampling and distribution management.
 """
 
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.utils.config import Config
 from .base import Action
 from .no_transformation import NoTransformation
 from .tiling import Tiling
@@ -13,7 +13,7 @@ from .tiled_parallelization import TiledParallelization
 from .tiled_fusion import TiledFusion
 from .interchange import Interchange
 from .vectorization import Vectorization
-from mlir_rl_artifact.state import OperationState
+from rl_autoschedular_paper.state import OperationState
 import torch
 from torch.distributions import Distribution, Categorical
 from typing import Optional
@@ -175,7 +175,7 @@ class ActionSpace:
         Returns:
             List of distributions for each action.
         """
-        from mlir_rl_artifact.observation import Observation, ActionMask
+        from rl_autoschedular_paper.observation import Observation, ActionMask
 
         actions_mask = Observation.get_part(obs, ActionMask).bool()
         dists_list: list[Optional[Distribution]] = [
@@ -203,7 +203,7 @@ class ActionSpace:
         Returns:
             List of distributions for each action.
         """
-        from mlir_rl_artifact.observation import Observation, ActionMask, NumLoops
+        from rl_autoschedular_paper.observation import Observation, ActionMask, NumLoops
 
         actions_mask = Observation.get_part(obs, ActionMask).bool()
         num_loops = Observation.get_part(obs, NumLoops)
@@ -251,7 +251,7 @@ class ActionSpace:
     @classmethod
     def sample(cls, obs: torch.Tensor, distributions: list[Optional[Distribution]], eps_distributions: list[Optional[Distribution]], uniform: bool = False, greedy: bool = False) -> torch.Tensor:
         assert not uniform or not greedy, "can't sample uniformly and greedily at once"
-        from mlir_rl_artifact.observation import Observation, NumLoops
+        from rl_autoschedular_paper.observation import Observation, NumLoops
 
         num_loops = Observation.get_part(obs, NumLoops)
         selection_dist = distributions[0]

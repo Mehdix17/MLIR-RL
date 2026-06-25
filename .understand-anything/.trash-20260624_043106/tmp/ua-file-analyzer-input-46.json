@@ -1,0 +1,182 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "plots/manuscript/multi_hardware/bergamo/bergamo_operation_script.py",
+      "language": "python",
+      "sizeLines": 75,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/dalma/dalma_model_script.py",
+      "language": "python",
+      "sizeLines": 69,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/dalma/dalma_operation_script.py",
+      "language": "python",
+      "sizeLines": 75,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/jubail/jubail_model_script.py",
+      "language": "python",
+      "sizeLines": 69,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/jubail/jubail_operation_script.py",
+      "language": "python",
+      "sizeLines": 75,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/tayeb/graph1_performance.csv",
+      "language": "csv",
+      "sizeLines": 5,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/tayeb/graph1_script.py",
+      "language": "python",
+      "sizeLines": 71,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/tayeb/original.csv",
+      "language": "csv",
+      "sizeLines": 5,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/generate_csvs.py",
+      "language": "python",
+      "sizeLines": 92,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v0/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v0/v0.csv",
+      "language": "csv",
+      "sizeLines": 56,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v4_6/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v4_6/v4_6.csv",
+      "language": "csv",
+      "sizeLines": 39,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v4_7/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v4_7/v4_7.csv",
+      "language": "csv",
+      "sizeLines": 54,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v4_8/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/new_dataset/v4_8/v4_8.csv",
+      "language": "csv",
+      "sizeLines": 37,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/combined/plot.py",
+      "language": "python",
+      "sizeLines": 38,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/generate_csvs.py",
+      "language": "python",
+      "sizeLines": 235,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/per_model.csv",
+      "language": "csv",
+      "sizeLines": 40,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/per_model/plot.py",
+      "language": "python",
+      "sizeLines": 55,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/per_operation.csv",
+      "language": "csv",
+      "sizeLines": 16,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/per_operation/plot.py",
+      "language": "python",
+      "sizeLines": 62,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/v0/plot.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "plots/version_comparison/single_ops_dataset/v0/v0.csv",
+      "language": "csv",
+      "sizeLines": 91,
+      "fileCategory": "data"
+    }
+  ],
+  "batchImportData": {
+    "plots/manuscript/multi_hardware/bergamo/bergamo_operation_script.py": [],
+    "plots/manuscript/multi_hardware/dalma/dalma_model_script.py": [],
+    "plots/manuscript/multi_hardware/dalma/dalma_operation_script.py": [],
+    "plots/manuscript/multi_hardware/jubail/jubail_model_script.py": [],
+    "plots/manuscript/multi_hardware/jubail/jubail_operation_script.py": [],
+    "plots/manuscript/overall_comparison/tayeb/graph1_performance.csv": [],
+    "plots/manuscript/overall_comparison/tayeb/graph1_script.py": [],
+    "plots/manuscript/overall_comparison/tayeb/original.csv": [],
+    "plots/version_comparison/new_dataset/generate_csvs.py": [],
+    "plots/version_comparison/new_dataset/v0/plot.py": [],
+    "plots/version_comparison/new_dataset/v0/v0.csv": [],
+    "plots/version_comparison/new_dataset/v4_6/plot.py": [],
+    "plots/version_comparison/new_dataset/v4_6/v4_6.csv": [],
+    "plots/version_comparison/new_dataset/v4_7/plot.py": [],
+    "plots/version_comparison/new_dataset/v4_7/v4_7.csv": [],
+    "plots/version_comparison/new_dataset/v4_8/plot.py": [],
+    "plots/version_comparison/new_dataset/v4_8/v4_8.csv": [],
+    "plots/version_comparison/single_ops_dataset/combined/plot.py": [],
+    "plots/version_comparison/single_ops_dataset/generate_csvs.py": [],
+    "plots/version_comparison/single_ops_dataset/per_model.csv": [],
+    "plots/version_comparison/single_ops_dataset/per_model/plot.py": [],
+    "plots/version_comparison/single_ops_dataset/per_operation.csv": [],
+    "plots/version_comparison/single_ops_dataset/per_operation/plot.py": [],
+    "plots/version_comparison/single_ops_dataset/v0/plot.py": [],
+    "plots/version_comparison/single_ops_dataset/v0/v0.csv": []
+  }
+}

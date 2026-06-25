@@ -3,7 +3,7 @@ import ctypes
 import ctypes.util
 import numpy as np
 try:
-    from mlir.ir import Context, Module, MemRefType, IntegerType, F64Type, F32Type
+    from mlir.ir import Context, Module, MemRefType, IntegerType, F64Type, F32Type, BF16Type, F16Type
     from mlir.execution_engine import ExecutionEngine
     from mlir.runtime import get_ranked_memref_descriptor, make_nd_memref_descriptor, as_ctype, ranked_memref_to_numpy
     from mlir.passmanager import PassManager
@@ -24,6 +24,10 @@ except ImportError:
     class F64Type:
         pass
     class F32Type:
+        pass
+    class BF16Type:
+        pass
+    class F16Type:
         pass
     class ExecutionEngine:
         pass
@@ -95,7 +99,7 @@ class Execution(metaclass=Singleton):
 
         timeout_s = 300
         if root_exec_time and root_exec_time > 0:
-            min_timeout = int(os.environ.get("MIN_EXEC_TIMEOUT", "2"))
+            min_timeout = int(os.environ.get("MIN_EXEC_TIMEOUT", "300"))
             timeout_s = min(300, max(min_timeout, int((root_exec_time / 1e9) * 5)))
 
         bufferized_code = transform_bufferize_and_lower_v(code)
@@ -295,6 +299,8 @@ class Execution(metaclass=Singleton):
                     np_dtype = np.float32
                 case F64Type():
                     np_dtype = np.float64
+                case BF16Type() | F16Type():
+                    np_dtype = np.float32
                 case IntegerType():
                     match et.width:
                         case 32:

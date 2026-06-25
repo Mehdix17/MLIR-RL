@@ -1,0 +1,126 @@
+{
+  "nodes": [
+    {
+      "id": "config:config/ops_and_blocks/train/paper_original.json",
+      "type": "config",
+      "name": "paper_original.json",
+      "filePath": "config/ops_and_blocks/train/paper_original.json",
+      "summary": "Configuration settings for paper_original.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/ops_and_blocks/train/paper_transformer_large.json",
+      "type": "config",
+      "name": "paper_transformer_large.json",
+      "filePath": "config/ops_and_blocks/train/paper_transformer_large.json",
+      "summary": "Configuration settings for paper_transformer_large.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/ops_and_blocks/train/paper_transformer_small.json",
+      "type": "config",
+      "name": "paper_transformer_small.json",
+      "filePath": "config/ops_and_blocks/train/paper_transformer_small.json",
+      "summary": "Configuration settings for paper_transformer_small.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/ops_and_blocks/train/v0.json",
+      "type": "config",
+      "name": "v0.json",
+      "filePath": "config/ops_and_blocks/train/v0.json",
+      "summary": "Configuration settings for v0.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/ops_and_blocks/train/v4_9_large.json",
+      "type": "config",
+      "name": "v4_9_large.json",
+      "filePath": "config/ops_and_blocks/train/v4_9_large.json",
+      "summary": "Configuration settings for v4_9_large.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/ops_and_blocks/train/v4_9_small.json",
+      "type": "config",
+      "name": "v4_9_small.json",
+      "filePath": "config/ops_and_blocks/train/v4_9_small.json",
+      "summary": "Configuration settings for v4_9_small.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:config/ops_and_blocks/train/paper_original.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/ops_and_blocks/train/paper_transformer_large.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/ops_and_blocks/train/paper_transformer_small.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/ops_and_blocks/train/v0.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/ops_and_blocks/train/v4_9_large.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/ops_and_blocks/train/v4_9_small.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

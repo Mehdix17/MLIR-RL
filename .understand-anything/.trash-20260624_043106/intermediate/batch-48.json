@@ -1,0 +1,1351 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/utils/report_eval.py",
+      "type": "file",
+      "name": "report_eval.py",
+      "filePath": "scripts/utils/report_eval.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:build_agent_registry",
+      "type": "function",
+      "name": "build_agent_registry",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        48,
+        58
+      ],
+      "summary": "Function implementing the execution logic for 'build_agent_registry'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:load_baseline",
+      "type": "function",
+      "name": "load_baseline",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        61,
+        67
+      ],
+      "summary": "Function implementing the execution logic for 'load_baseline'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:load_baseline_from_path",
+      "type": "function",
+      "name": "load_baseline_from_path",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        70,
+        76
+      ],
+      "summary": "Function implementing the execution logic for 'load_baseline_from_path'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:get_checkpoint_files",
+      "type": "function",
+      "name": "get_checkpoint_files",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        79,
+        86
+      ],
+      "summary": "Function implementing the execution logic for 'get_checkpoint_files'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:get_model_checkpoint_indices",
+      "type": "function",
+      "name": "get_model_checkpoint_indices",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        89,
+        100
+      ],
+      "summary": "Function implementing the execution logic for 'get_model_checkpoint_indices'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:compute_speedups",
+      "type": "function",
+      "name": "compute_speedups",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        103,
+        119
+      ],
+      "summary": "Function implementing the execution logic for 'compute_speedups'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:stats",
+      "type": "function",
+      "name": "stats",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        122,
+        138
+      ],
+      "summary": "Function implementing the execution logic for 'stats'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:print_table",
+      "type": "function",
+      "name": "print_table",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        141,
+        171
+      ],
+      "summary": "Function implementing the execution logic for 'print_table'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/utils/report_eval.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/utils/report_eval.py",
+      "lineRange": [
+        174,
+        303
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/utils/report_training.py",
+      "type": "file",
+      "name": "report_training.py",
+      "filePath": "scripts/utils/report_training.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "barrel-module"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:build_registry",
+      "type": "function",
+      "name": "build_registry",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        44,
+        61
+      ],
+      "summary": "Function implementing the execution logic for 'build_registry'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:_parse_config_version",
+      "type": "function",
+      "name": "_parse_config_version",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        64,
+        66
+      ],
+      "summary": "Function implementing the execution logic for '_parse_config_version'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:auto_detect_versions",
+      "type": "function",
+      "name": "auto_detect_versions",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        69,
+        92
+      ],
+      "summary": "Function implementing the execution logic for 'auto_detect_versions'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:get_log_data",
+      "type": "function",
+      "name": "get_log_data",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        95,
+        136
+      ],
+      "summary": "Function implementing the execution logic for 'get_log_data'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:get_train_stats",
+      "type": "function",
+      "name": "get_train_stats",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        139,
+        180
+      ],
+      "summary": "Function implementing the execution logic for 'get_train_stats'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:get_train_checkpoint_file",
+      "type": "function",
+      "name": "get_train_checkpoint_file",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        183,
+        200
+      ],
+      "summary": "Function implementing the execution logic for 'get_train_checkpoint_file'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:get_train_trend",
+      "type": "function",
+      "name": "get_train_trend",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        203,
+        226
+      ],
+      "summary": "Function implementing the execution logic for 'get_train_trend'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:get_latest_model_index",
+      "type": "function",
+      "name": "get_latest_model_index",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        229,
+        238
+      ],
+      "summary": "Function implementing the execution logic for 'get_latest_model_index'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:get_running_jobs",
+      "type": "function",
+      "name": "get_running_jobs",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        241,
+        258
+      ],
+      "summary": "Function implementing the execution logic for 'get_running_jobs'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:format_table",
+      "type": "function",
+      "name": "format_table",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        261,
+        323
+      ],
+      "summary": "Function implementing the execution logic for 'format_table'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/utils/report_training.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/utils/report_training.py",
+      "lineRange": [
+        326,
+        441
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/utils/submit_and_monitor.sh",
+      "type": "file",
+      "name": "submit_and_monitor.sh",
+      "filePath": "scripts/utils/submit_and_monitor.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/utils/test_torch_mlir_compile.py",
+      "type": "file",
+      "name": "test_torch_mlir_compile.py",
+      "filePath": "scripts/utils/test_torch_mlir_compile.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "test",
+        "quality-assurance",
+        "source-code",
+        "python"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:scripts/utils/test_torch_mlir.sh",
+      "type": "file",
+      "name": "test_torch_mlir.sh",
+      "filePath": "scripts/utils/test_torch_mlir.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "test",
+        "quality-assurance",
+        "scripting",
+        "automation",
+        "shell-script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tmp_reorder.py",
+      "type": "file",
+      "name": "tmp_reorder.py",
+      "filePath": "tmp_reorder.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:tmp_update_versions.py",
+      "type": "file",
+      "name": "tmp_update_versions.py",
+      "filePath": "tmp_update_versions.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:tmp/install_ua.sh",
+      "type": "file",
+      "name": "install_ua.sh",
+      "filePath": "tmp/install_ua.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:platforms_table",
+      "type": "function",
+      "name": "platforms_table",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        29,
+        46
+      ],
+      "summary": "Function implementing the execution logic for 'platforms_table'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:resolve_platform",
+      "type": "function",
+      "name": "resolve_platform",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        50,
+        60
+      ],
+      "summary": "Function implementing the execution logic for 'resolve_platform'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:prompt_platform",
+      "type": "function",
+      "name": "prompt_platform",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        62,
+        91
+      ],
+      "summary": "Function implementing the execution logic for 'prompt_platform'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:list_skills",
+      "type": "function",
+      "name": "list_skills",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        106,
+        118
+      ],
+      "summary": "Function implementing the execution logic for 'list_skills'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:link_skills",
+      "type": "function",
+      "name": "link_skills",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        120,
+        142
+      ],
+      "summary": "Function implementing the execution logic for 'link_skills'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:unlink_skills",
+      "type": "function",
+      "name": "unlink_skills",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        144,
+        170
+      ],
+      "summary": "Function implementing the execution logic for 'unlink_skills'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:cmd_install",
+      "type": "function",
+      "name": "cmd_install",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        181,
+        232
+      ],
+      "summary": "Function implementing the execution logic for 'cmd_install'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:cmd_uninstall",
+      "type": "function",
+      "name": "cmd_uninstall",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        234,
+        255
+      ],
+      "summary": "Function implementing the execution logic for 'cmd_uninstall'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:usage",
+      "type": "function",
+      "name": "usage",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        266,
+        283
+      ],
+      "summary": "Function implementing the execution logic for 'usage'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tmp/install_ua.sh:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "tmp/install_ua.sh",
+      "lineRange": [
+        285,
+        316
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:tools/ast_dumper/CMakeLists.txt",
+      "type": "document",
+      "name": "CMakeLists.txt",
+      "filePath": "tools/ast_dumper/CMakeLists.txt",
+      "summary": "Documentation file containing instructions, guides, or specifications for CMakeLists.txt.",
+      "tags": [
+        "documentation",
+        "reference",
+        "mlir-rl"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tools/ast_dumper/main.cpp",
+      "type": "file",
+      "name": "main.cpp",
+      "filePath": "tools/ast_dumper/main.cpp",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "cpp",
+        "native"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tools/ast_dumper/main.cpp:getLinalgOpTag",
+      "type": "function",
+      "name": "getLinalgOpTag",
+      "filePath": "tools/ast_dumper/main.cpp",
+      "lineRange": [
+        37,
+        44
+      ],
+      "summary": "Function implementing the execution logic for 'getLinalgOpTag'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tools/ast_dumper/main.cpp:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "tools/ast_dumper/main.cpp",
+      "lineRange": [
+        47,
+        188
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:tools/pre_vec/CMakeLists.txt",
+      "type": "document",
+      "name": "CMakeLists.txt",
+      "filePath": "tools/pre_vec/CMakeLists.txt",
+      "summary": "Documentation file containing instructions, guides, or specifications for CMakeLists.txt.",
+      "tags": [
+        "documentation",
+        "reference",
+        "mlir-rl"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tools/pre_vec/main.cpp",
+      "type": "file",
+      "name": "main.cpp",
+      "filePath": "tools/pre_vec/main.cpp",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "cpp",
+        "native"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tools/pre_vec/main.cpp:getLinalgOpTag",
+      "type": "function",
+      "name": "getLinalgOpTag",
+      "filePath": "tools/pre_vec/main.cpp",
+      "lineRange": [
+        35,
+        42
+      ],
+      "summary": "Function implementing the execution logic for 'getLinalgOpTag'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tools/pre_vec/main.cpp:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "tools/pre_vec/main.cpp",
+      "lineRange": [
+        44,
+        198
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:tools/vectorizer/CMakeLists.txt",
+      "type": "document",
+      "name": "CMakeLists.txt",
+      "filePath": "tools/vectorizer/CMakeLists.txt",
+      "summary": "Documentation file containing instructions, guides, or specifications for CMakeLists.txt.",
+      "tags": [
+        "documentation",
+        "reference",
+        "mlir-rl"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tools/vectorizer/main.cpp",
+      "type": "file",
+      "name": "main.cpp",
+      "filePath": "tools/vectorizer/main.cpp",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "cpp",
+        "native"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tools/vectorizer/main.cpp:getLinalgOpTag",
+      "type": "function",
+      "name": "getLinalgOpTag",
+      "filePath": "tools/vectorizer/main.cpp",
+      "lineRange": [
+        62,
+        74
+      ],
+      "summary": "Function implementing the execution logic for 'getLinalgOpTag'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tools/vectorizer/main.cpp:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "tools/vectorizer/main.cpp",
+      "lineRange": [
+        76,
+        223
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:utils/gpt2_jit_compat.py",
+      "type": "file",
+      "name": "gpt2_jit_compat.py",
+      "filePath": "utils/gpt2_jit_compat.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:utils/gpt2_jit_compat.py:make_gpt2_jit_compat",
+      "type": "function",
+      "name": "make_gpt2_jit_compat",
+      "filePath": "utils/gpt2_jit_compat.py",
+      "lineRange": [
+        70,
+        103
+      ],
+      "summary": "Function implementing the execution logic for 'make_gpt2_jit_compat'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:utils/gpt2_jit_compat.py:_make_loader",
+      "type": "function",
+      "name": "_make_loader",
+      "filePath": "utils/gpt2_jit_compat.py",
+      "lineRange": [
+        107,
+        110
+      ],
+      "summary": "Function implementing the execution logic for '_make_loader'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:utils/gpt2_jit_compat.py:GPT2JITCompat",
+      "type": "class",
+      "name": "GPT2JITCompat",
+      "filePath": "utils/gpt2_jit_compat.py",
+      "lineRange": [
+        23,
+        67
+      ],
+      "summary": "Class defining properties and operations for 'GPT2JITCompat'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:build_agent_registry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:build_agent_registry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:load_baseline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:load_baseline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:load_baseline_from_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:load_baseline_from_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:get_checkpoint_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:get_checkpoint_files",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:get_model_checkpoint_indices",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:get_model_checkpoint_indices",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:compute_speedups",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:compute_speedups",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:stats",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:stats",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:print_table",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:print_table",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_eval.py",
+      "target": "function:scripts/utils/report_eval.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:build_registry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:build_registry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:_parse_config_version",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:_parse_config_version",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:auto_detect_versions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:auto_detect_versions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_log_data",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_log_data",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_train_stats",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_train_stats",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_train_checkpoint_file",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_train_checkpoint_file",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_train_trend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_train_trend",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_latest_model_index",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_latest_model_index",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_running_jobs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:get_running_jobs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:format_table",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:format_table",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/report_training.py",
+      "target": "function:scripts/utils/report_training.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:platforms_table",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:resolve_platform",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:prompt_platform",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:list_skills",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:link_skills",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:unlink_skills",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:cmd_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:cmd_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:usage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tmp/install_ua.sh",
+      "target": "function:tmp/install_ua.sh:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/ast_dumper/main.cpp",
+      "target": "function:tools/ast_dumper/main.cpp:getLinalgOpTag",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/ast_dumper/main.cpp",
+      "target": "function:tools/ast_dumper/main.cpp:getLinalgOpTag",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tools/ast_dumper/main.cpp",
+      "target": "function:tools/ast_dumper/main.cpp:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/ast_dumper/main.cpp",
+      "target": "function:tools/ast_dumper/main.cpp:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tools/pre_vec/main.cpp",
+      "target": "function:tools/pre_vec/main.cpp:getLinalgOpTag",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/pre_vec/main.cpp",
+      "target": "function:tools/pre_vec/main.cpp:getLinalgOpTag",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tools/pre_vec/main.cpp",
+      "target": "function:tools/pre_vec/main.cpp:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/pre_vec/main.cpp",
+      "target": "function:tools/pre_vec/main.cpp:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tools/vectorizer/main.cpp",
+      "target": "function:tools/vectorizer/main.cpp:getLinalgOpTag",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/vectorizer/main.cpp",
+      "target": "function:tools/vectorizer/main.cpp:getLinalgOpTag",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tools/vectorizer/main.cpp",
+      "target": "function:tools/vectorizer/main.cpp:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tools/vectorizer/main.cpp",
+      "target": "function:tools/vectorizer/main.cpp:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/gpt2_jit_compat.py",
+      "target": "function:utils/gpt2_jit_compat.py:make_gpt2_jit_compat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/gpt2_jit_compat.py",
+      "target": "function:utils/gpt2_jit_compat.py:make_gpt2_jit_compat",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/gpt2_jit_compat.py",
+      "target": "function:utils/gpt2_jit_compat.py:_make_loader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/gpt2_jit_compat.py",
+      "target": "function:utils/gpt2_jit_compat.py:_make_loader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/gpt2_jit_compat.py",
+      "target": "class:utils/gpt2_jit_compat.py:GPT2JITCompat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/gpt2_jit_compat.py",
+      "target": "class:utils/gpt2_jit_compat.py:GPT2JITCompat",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

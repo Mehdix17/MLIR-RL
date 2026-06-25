@@ -24,6 +24,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 DATASET_DIRS = {
     "new": "results/new_dataset_results",
     "single_ops": "results/single_ops_dataset_results",
+    "ops_and_blocks": "results/ops_and_blocks_results",
 }
 
 VERSION_REGISTRY = {
@@ -43,7 +44,7 @@ VERSION_REGISTRY = {
 def build_registry(dataset: str):
     """Build version registry for a specific dataset."""
     base = DATASET_DIRS.get(dataset, DATASET_DIRS["new"])
-    return {
+    registry = {
         "v0": {"results_dir": f"{base}/v0_agent"},
         "v4_6": {"results_dir": f"{base}/v4_6_agent"},
         "v4_7": {"results_dir": f"{base}/v4_7_agent"},
@@ -51,6 +52,13 @@ def build_registry(dataset: str):
         "v4_9_small": {"results_dir": f"{base}/v4_9_small_agent"},
         "v4_9_large": {"results_dir": f"{base}/v4_9_large_agent"},
     }
+    if dataset == "new":
+        registry.update({
+            "no_hw": {"results_dir": f"{base}/ablation_study/v45_no_hw_agent"},
+            "no_shaped_reward": {"results_dir": f"{base}/ablation_study/v45_no_shaped_reward_agent"},
+            "no_transformer": {"results_dir": f"{base}/ablation_study/v45_no_transformer_agent"},
+        })
+    return registry
 
 
 def _parse_config_version(config_path: str) -> str:
@@ -318,7 +326,7 @@ def format_table(data: list[dict]):
 def main():
     parser = argparse.ArgumentParser(description="Report training progression")
     parser.add_argument("-v", "--versions", nargs="*", help="Version names (e.g. v4_6 v4_7)")
-    parser.add_argument("-d", "--dataset", choices=["new", "single_ops"], default="new",
+    parser.add_argument("-d", "--dataset", choices=["new", "single_ops", "ops_and_blocks"], default="new",
                         help="Dataset to report (default: new)")
     parser.add_argument("-w", "--watch", type=int, nargs="?", const=300, metavar="SECS",
                         help="Auto-refresh every SECS seconds (default: 300)")

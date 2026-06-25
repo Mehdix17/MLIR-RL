@@ -1,0 +1,61 @@
+{
+  "nodes": [
+    {
+      "id": "endpoint:plots/manuscript/multi_hardware/bergamo/graph2_bergamo_model.csv",
+      "type": "endpoint",
+      "name": "graph2_bergamo_model.csv",
+      "filePath": "plots/manuscript/multi_hardware/bergamo/graph2_bergamo_model.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in graph2_bergamo_model.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "endpoint:plots/manuscript/multi_hardware/bergamo/graph2_bergamo_optype.csv",
+      "type": "endpoint",
+      "name": "graph2_bergamo_optype.csv",
+      "filePath": "plots/manuscript/multi_hardware/bergamo/graph2_bergamo_optype.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in graph2_bergamo_optype.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "endpoint:plots/manuscript/multi_hardware/bergamo/original_model.csv",
+      "type": "endpoint",
+      "name": "original_model.csv",
+      "filePath": "plots/manuscript/multi_hardware/bergamo/original_model.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in original_model.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "endpoint:plots/manuscript/multi_hardware/bergamo/original_optype.csv",
+      "type": "endpoint",
+      "name": "original_optype.csv",
+      "filePath": "plots/manuscript/multi_hardware/bergamo/original_optype.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in original_optype.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": []
+}

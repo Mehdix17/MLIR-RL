@@ -1,0 +1,66 @@
+{
+  "nodes": [
+    {
+      "id": "document:docs/hpc/HPC_HARDWARE.md",
+      "type": "document",
+      "name": "HPC_HARDWARE.md",
+      "filePath": "docs/hpc/HPC_HARDWARE.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for HPC_HARDWARE.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/hpc/HPC_SETUP.md",
+      "type": "document",
+      "name": "HPC_SETUP.md",
+      "filePath": "docs/hpc/HPC_SETUP.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for HPC_SETUP.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/hpc/antigravity-hpc-install.md",
+      "type": "document",
+      "name": "antigravity-hpc-install.md",
+      "filePath": "docs/hpc/antigravity-hpc-install.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for antigravity-hpc-install.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:docs/hpc/HPC_HARDWARE.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/hpc/HPC_SETUP.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/hpc/antigravity-hpc-install.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

@@ -1,0 +1,1447 @@
+{
+  "nodes": [
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v4_5/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v4_5/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v4_9/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v4_9/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/baseline/get_pytorch_baselines.py",
+      "type": "file",
+      "name": "get_pytorch_baselines.py",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "barrel-module"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_vision_input",
+      "type": "function",
+      "name": "_vision_input",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        37,
+        38
+      ],
+      "summary": "Function implementing the execution logic for '_vision_input'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_load_vision",
+      "type": "function",
+      "name": "_load_vision",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        41,
+        49
+      ],
+      "summary": "Function implementing the execution logic for '_load_vision'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_load_transformer",
+      "type": "function",
+      "name": "_load_transformer",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        71,
+        99
+      ],
+      "summary": "Function implementing the execution logic for '_load_transformer'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_load_lstm",
+      "type": "function",
+      "name": "_load_lstm",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        106,
+        119
+      ],
+      "summary": "Function implementing the execution logic for '_load_lstm'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_load_gnn",
+      "type": "function",
+      "name": "_load_gnn",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        126,
+        131
+      ],
+      "summary": "Function implementing the execution logic for '_load_gnn'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_load_gpt2_jit",
+      "type": "function",
+      "name": "_load_gpt2_jit",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        138,
+        141
+      ],
+      "summary": "Function implementing the execution logic for '_load_gpt2_jit'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_run_model",
+      "type": "function",
+      "name": "_run_model",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        163,
+        166
+      ],
+      "summary": "Function implementing the execution logic for '_run_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_time_model",
+      "type": "function",
+      "name": "_time_model",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        169,
+        177
+      ],
+      "summary": "Function implementing the execution logic for '_time_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:_time_jit",
+      "type": "function",
+      "name": "_time_jit",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        180,
+        194
+      ],
+      "summary": "Function implementing the execution logic for '_time_jit'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:process_model",
+      "type": "function",
+      "name": "process_model",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        201,
+        240
+      ],
+      "summary": "Function implementing the execution logic for 'process_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_baselines.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        247,
+        377
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:scripts/baseline/get_pytorch_baselines.py:_HFWrapper",
+      "type": "class",
+      "name": "_HFWrapper",
+      "filePath": "scripts/baseline/get_pytorch_baselines.py",
+      "lineRange": [
+        56,
+        68
+      ],
+      "summary": "Class defining properties and operations for '_HFWrapper'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/baseline/get_pytorch_times.py",
+      "type": "file",
+      "name": "get_pytorch_times.py",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:measure_ns",
+      "type": "function",
+      "name": "measure_ns",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        49,
+        56
+      ],
+      "summary": "Function implementing the execution logic for 'measure_ns'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:_normalize",
+      "type": "function",
+      "name": "_normalize",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        63,
+        64
+      ],
+      "summary": "Function implementing the execution logic for '_normalize'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:parse_tensor_shape",
+      "type": "function",
+      "name": "parse_tensor_shape",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        67,
+        72
+      ],
+      "summary": "Function implementing the execution logic for 'parse_tensor_shape'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:parse_main_args",
+      "type": "function",
+      "name": "parse_main_args",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        75,
+        87
+      ],
+      "summary": "Function implementing the execution logic for 'parse_main_args'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:get_linalg_op",
+      "type": "function",
+      "name": "get_linalg_op",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        90,
+        92
+      ],
+      "summary": "Function implementing the execution logic for 'get_linalg_op'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:_parse_dense",
+      "type": "function",
+      "name": "_parse_dense",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        95,
+        106
+      ],
+      "summary": "Function implementing the execution logic for '_parse_dense'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:build_pytorch_fns",
+      "type": "function",
+      "name": "build_pytorch_fns",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        113,
+        416
+      ],
+      "summary": "Function implementing the execution logic for 'build_pytorch_fns'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/baseline/get_pytorch_times.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/baseline/get_pytorch_times.py",
+      "lineRange": [
+        423,
+        583
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/checkpoint/merge_ckpt_scan.py",
+      "type": "file",
+      "name": "merge_ckpt_scan.py",
+      "filePath": "scripts/checkpoint/merge_ckpt_scan.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/checkpoint/merge_ckpt_scan.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/checkpoint/merge_ckpt_scan.py",
+      "lineRange": [
+        17,
+        103
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/full_model/add_timing_wrapper.py",
+      "type": "file",
+      "name": "add_timing_wrapper.py",
+      "filePath": "scripts/full_model/add_timing_wrapper.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/full_model/add_timing_wrapper.py:extract_main_signature",
+      "type": "function",
+      "name": "extract_main_signature",
+      "filePath": "scripts/full_model/add_timing_wrapper.py",
+      "lineRange": [
+        22,
+        60
+      ],
+      "summary": "Function implementing the execution logic for 'extract_main_signature'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/full_model/add_timing_wrapper.py:find_return_line",
+      "type": "function",
+      "name": "find_return_line",
+      "filePath": "scripts/full_model/add_timing_wrapper.py",
+      "lineRange": [
+        63,
+        75
+      ],
+      "summary": "Function implementing the execution logic for 'find_return_line'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/add_timing_wrapper.py:wrap_model",
+      "type": "function",
+      "name": "wrap_model",
+      "filePath": "scripts/full_model/add_timing_wrapper.py",
+      "lineRange": [
+        78,
+        142
+      ],
+      "summary": "Function implementing the execution logic for 'wrap_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/full_model/add_timing_wrapper.py:add_timing_wrapper_whole_body",
+      "type": "function",
+      "name": "add_timing_wrapper_whole_body",
+      "filePath": "scripts/full_model/add_timing_wrapper.py",
+      "lineRange": [
+        145,
+        234
+      ],
+      "summary": "Function implementing the execution logic for 'add_timing_wrapper_whole_body'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/full_model/add_timing_wrapper.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/full_model/add_timing_wrapper.py",
+      "lineRange": [
+        237,
+        259
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/full_model/preprocess_model.py",
+      "type": "file",
+      "name": "preprocess_model.py",
+      "filePath": "scripts/full_model/preprocess_model.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/full_model/preprocess_model.py:run_ast_dumper",
+      "type": "function",
+      "name": "run_ast_dumper",
+      "filePath": "scripts/full_model/preprocess_model.py",
+      "lineRange": [
+        23,
+        41
+      ],
+      "summary": "Function implementing the execution logic for 'run_ast_dumper'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/preprocess_model.py:extract_tagged_code",
+      "type": "function",
+      "name": "extract_tagged_code",
+      "filePath": "scripts/full_model/preprocess_model.py",
+      "lineRange": [
+        44,
+        52
+      ],
+      "summary": "Function implementing the execution logic for 'extract_tagged_code'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/preprocess_model.py:extract_operation_tags",
+      "type": "function",
+      "name": "extract_operation_tags",
+      "filePath": "scripts/full_model/preprocess_model.py",
+      "lineRange": [
+        55,
+        75
+      ],
+      "summary": "Function implementing the execution logic for 'extract_operation_tags'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/preprocess_model.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/full_model/preprocess_model.py",
+      "lineRange": [
+        78,
+        99
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:scripts/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "scripts/README.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for README.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/train/train_condo.sh",
+      "type": "file",
+      "name": "train_condo.sh",
+      "filePath": "scripts/train/train_condo.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/train/train.sh",
+      "type": "file",
+      "name": "train.sh",
+      "filePath": "scripts/train/train.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/utils/classify_benchmarks.py",
+      "type": "file",
+      "name": "classify_benchmarks.py",
+      "filePath": "scripts/utils/classify_benchmarks.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/utils/classify_benchmarks.py:extract_model_name",
+      "type": "function",
+      "name": "extract_model_name",
+      "filePath": "scripts/utils/classify_benchmarks.py",
+      "lineRange": [
+        54,
+        59
+      ],
+      "summary": "Function implementing the execution logic for 'extract_model_name'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/classify_benchmarks.py:classify_op_from_file",
+      "type": "function",
+      "name": "classify_op_from_file",
+      "filePath": "scripts/utils/classify_benchmarks.py",
+      "lineRange": [
+        62,
+        86
+      ],
+      "summary": "Function implementing the execution logic for 'classify_op_from_file'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/classify_benchmarks.py:classify_op_from_name",
+      "type": "function",
+      "name": "classify_op_from_name",
+      "filePath": "scripts/utils/classify_benchmarks.py",
+      "lineRange": [
+        89,
+        103
+      ],
+      "summary": "Function implementing the execution logic for 'classify_op_from_name'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/utils/classify_benchmarks.py:classify",
+      "type": "function",
+      "name": "classify",
+      "filePath": "scripts/utils/classify_benchmarks.py",
+      "lineRange": [
+        106,
+        137
+      ],
+      "summary": "Function implementing the execution logic for 'classify'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/utils/classify_benchmarks.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/utils/classify_benchmarks.py",
+      "lineRange": [
+        140,
+        178
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_5/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_5/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_5/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_5/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_5/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_9/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_9/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_9/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4_9/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4_9/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_transformer/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_vision_input",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_vision_input",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_vision",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_vision",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_transformer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_transformer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_lstm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_lstm",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_gnn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_gnn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_gpt2_jit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_load_gpt2_jit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_run_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_run_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_time_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_time_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_time_jit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:_time_jit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:process_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:process_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "function:scripts/baseline/get_pytorch_baselines.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "class:scripts/baseline/get_pytorch_baselines.py:_HFWrapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_baselines.py",
+      "target": "class:scripts/baseline/get_pytorch_baselines.py:_HFWrapper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:measure_ns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:measure_ns",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:_normalize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:_normalize",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:parse_tensor_shape",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:parse_tensor_shape",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:parse_main_args",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:parse_main_args",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:get_linalg_op",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:get_linalg_op",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:_parse_dense",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:_parse_dense",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:build_pytorch_fns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:build_pytorch_fns",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/baseline/get_pytorch_times.py",
+      "target": "function:scripts/baseline/get_pytorch_times.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/checkpoint/merge_ckpt_scan.py",
+      "target": "function:scripts/checkpoint/merge_ckpt_scan.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/checkpoint/merge_ckpt_scan.py",
+      "target": "function:scripts/checkpoint/merge_ckpt_scan.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:extract_main_signature",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:extract_main_signature",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:find_return_line",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:find_return_line",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:wrap_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:wrap_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:add_timing_wrapper_whole_body",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:add_timing_wrapper_whole_body",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/add_timing_wrapper.py",
+      "target": "function:scripts/full_model/add_timing_wrapper.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:run_ast_dumper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:run_ast_dumper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:extract_tagged_code",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:extract_tagged_code",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:extract_operation_tags",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:extract_operation_tags",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/preprocess_model.py",
+      "target": "function:scripts/full_model/preprocess_model.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:extract_model_name",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:extract_model_name",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:classify_op_from_file",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:classify_op_from_file",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:classify_op_from_name",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:classify_op_from_name",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:classify",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:classify",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/utils/classify_benchmarks.py",
+      "target": "function:scripts/utils/classify_benchmarks.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

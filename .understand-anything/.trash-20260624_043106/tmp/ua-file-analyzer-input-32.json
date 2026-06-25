@@ -1,0 +1,119 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "docs/COMMANDS.md",
+      "language": "markdown",
+      "sizeLines": 691,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/CONFIG.md",
+      "language": "markdown",
+      "sizeLines": 120,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/DASHBOARD.md",
+      "language": "markdown",
+      "sizeLines": 252,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/ENTROPY_COLLAPSE_INVESTIGATION.md",
+      "language": "markdown",
+      "sizeLines": 295,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/FUTURE_WORKS_RL_FULL_MODEL_SUPPORT.md",
+      "language": "markdown",
+      "sizeLines": 296,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/LLVM_DEFENSE.md",
+      "language": "markdown",
+      "sizeLines": 118,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/METHODOLOGY_ALIGNMENT.md",
+      "language": "markdown",
+      "sizeLines": 43,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/NOVELTIES.md",
+      "language": "markdown",
+      "sizeLines": 102,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/PIPELINE.md",
+      "language": "markdown",
+      "sizeLines": 256,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/RESULTS.md",
+      "language": "markdown",
+      "sizeLines": 180,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/RESULTS_ARCHITECTURE.md",
+      "language": "markdown",
+      "sizeLines": 107,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/RL_AGENT_TUTORIAL.md",
+      "language": "markdown",
+      "sizeLines": 90,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/TRAINING_GUIDE.md",
+      "language": "markdown",
+      "sizeLines": 242,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/TRAINING_PROCESS_EXPLAINED.md",
+      "language": "markdown",
+      "sizeLines": 97,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/V4_FAILURE_INVESTIGATION.md",
+      "language": "markdown",
+      "sizeLines": 94,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/VERSIONS.md",
+      "language": "markdown",
+      "sizeLines": 512,
+      "fileCategory": "docs"
+    }
+  ],
+  "batchImportData": {
+    "docs/COMMANDS.md": [],
+    "docs/CONFIG.md": [],
+    "docs/DASHBOARD.md": [],
+    "docs/ENTROPY_COLLAPSE_INVESTIGATION.md": [],
+    "docs/FUTURE_WORKS_RL_FULL_MODEL_SUPPORT.md": [],
+    "docs/LLVM_DEFENSE.md": [],
+    "docs/METHODOLOGY_ALIGNMENT.md": [],
+    "docs/NOVELTIES.md": [],
+    "docs/PIPELINE.md": [],
+    "docs/RESULTS.md": [],
+    "docs/RESULTS_ARCHITECTURE.md": [],
+    "docs/RL_AGENT_TUTORIAL.md": [],
+    "docs/TRAINING_GUIDE.md": [],
+    "docs/TRAINING_PROCESS_EXPLAINED.md": [],
+    "docs/V4_FAILURE_INVESTIGATION.md": [],
+    "docs/VERSIONS.md": []
+  }
+}

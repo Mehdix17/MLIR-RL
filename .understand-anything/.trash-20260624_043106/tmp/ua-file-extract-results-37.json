@@ -1,0 +1,39 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 4,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "plots/manuscript/multi_hardware/dalma/graph2_dalma_model.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 35,
+      "nonEmptyLines": 35,
+      "metrics": {}
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/dalma/graph2_dalma_optype.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 9,
+      "nonEmptyLines": 9,
+      "metrics": {}
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/dalma/original_model.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 37,
+      "nonEmptyLines": 37,
+      "metrics": {}
+    },
+    {
+      "path": "plots/manuscript/multi_hardware/dalma/original_optype.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 11,
+      "nonEmptyLines": 11,
+      "metrics": {}
+    }
+  ]
+}

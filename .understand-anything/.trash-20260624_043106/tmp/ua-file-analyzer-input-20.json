@@ -1,0 +1,28 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/old_dataset/ablation_full_model/v45_full_model.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation_full_model/v45_no_hw_full_model.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation_full_model/v45_no_trans_full_model.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/old_dataset/ablation_full_model/v45_full_model.json": [],
+    "config/old_dataset/ablation_full_model/v45_no_hw_full_model.json": [],
+    "config/old_dataset/ablation_full_model/v45_no_trans_full_model.json": []
+  }
+}

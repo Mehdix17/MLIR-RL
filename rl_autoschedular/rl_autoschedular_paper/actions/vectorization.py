@@ -4,13 +4,13 @@ This module implements the vectorization transformation action, which applies
 vectorization to operations and handles preprocessing steps like transpose and decompose.
 """
 
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.utils.config import Config
 from .base import Action
-from mlir_rl_artifact.transforms import (
+from rl_autoschedular_paper.transforms import (
     move_module, transform_pre_vec, transform_vectorize, transform_tile,
     transform_decompose, transform_transpose_conv_2d
 )
-from mlir_rl_artifact.state import OperationFeatures, OperationState, OperationType
+from rl_autoschedular_paper.state import OperationFeatures, OperationState, OperationType
 from mlir._mlir_libs._mlir.ir import Module  # type: ignore
 from typing import Callable, Optional
 

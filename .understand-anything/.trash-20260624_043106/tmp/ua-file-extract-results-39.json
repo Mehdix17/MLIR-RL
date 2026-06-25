@@ -1,0 +1,39 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 4,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/overall_comparison_all.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 831,
+      "nonEmptyLines": 831,
+      "metrics": {}
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/overall_comparison_grouped.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 18,
+      "nonEmptyLines": 18,
+      "metrics": {}
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 989,
+      "nonEmptyLines": 989,
+      "metrics": {}
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0_single_ops.csv",
+      "language": "csv",
+      "fileCategory": "data",
+      "totalLines": 9,
+      "nonEmptyLines": 9,
+      "metrics": {}
+    }
+  ]
+}

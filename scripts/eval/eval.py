@@ -56,6 +56,7 @@ def load_main_exec_data() -> Optional[dict[str, dict[str, int]]]:
 
 
 eval_data = dm.run_and_register_to_workers(load_eval_data)
+print_info(f"Loaded {len(eval_data)} benchmark(s): {', '.join(d.bench_name for d in eval_data.data)}")
 main_exec_data = dm.run_and_register_to_workers(load_main_exec_data)
 
 # Initialize execution singleton
@@ -156,11 +157,18 @@ else:
     print_info(f"Checkpoints to evaluate: {len(eval_files)} (stride={EVAL_STRIDE}, range=[{EVAL_START}, {EVAL_END}])")
 
 # Resumption: track completed checkpoints in a state file
+EVAL_FORCE = os.getenv("EVAL_FORCE", "").strip().lower() in ("1", "true", "yes")
 eval_logs_dir = os.path.join(fl.logs_dir, 'eval')
 os.makedirs(eval_logs_dir, exist_ok=True)
 completed_file = os.path.join(eval_logs_dir, '_eval_checkpoint.txt')
 completed = set()
-if os.path.exists(completed_file):
+if EVAL_FORCE:
+    if os.path.exists(completed_file):
+        os.remove(completed_file)
+        print_info("EVAL_FORCE: deleted _eval_checkpoint.txt, re-evaluating all")
+    else:
+        print_info("EVAL_FORCE: re-evaluating all checkpoints")
+elif os.path.exists(completed_file):
     with open(completed_file) as f:
         completed = set(line.strip() for line in f if line.strip())
     already = [f for f in eval_files if f in completed]
@@ -216,9 +224,11 @@ if _ckpt:
     _agent_dir = os.path.dirname(eval_dir)  # eval_dir = agent/models/ → _agent_dir = agent/
     eval_root = os.path.join(_agent_dir, "eval")
     ckpt_file = os.path.join(eval_root, f"checkpoint_{_ckpt}{_suffix}.json")
-    if os.path.exists(ckpt_file):
+    if os.path.exists(ckpt_file) and not EVAL_FORCE:
         print_info(f"checkpoint_{_ckpt}{_suffix}.json already exists, skipping post-process")
     else:
+        if os.path.exists(ckpt_file) and EVAL_FORCE:
+            print_info(f"EVAL_FORCE: overwriting {ckpt_file}")
         os.makedirs(eval_root, exist_ok=True)
         _eval_file = f"eval_exec_times_{_ckpt}.json"
         src_eval = os.path.join(fl.logs_dir, "eval", _eval_file)

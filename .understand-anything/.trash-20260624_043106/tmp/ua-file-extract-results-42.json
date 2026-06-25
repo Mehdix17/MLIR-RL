@@ -1,0 +1,241 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 18,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "scripts/eval/ablation_bergamo_eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 71,
+      "nonEmptyLines": 58,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/bergamo_eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 80,
+      "nonEmptyLines": 65,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/bergamo_no_hw_no_reward.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 44,
+      "nonEmptyLines": 35,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/bigmem_bergamo_eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 70,
+      "nonEmptyLines": 58,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/dalma_eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 75,
+      "nonEmptyLines": 61,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/dalma_eval_no_reward.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 56,
+      "nonEmptyLines": 45,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/dalma_no_hw_no_reward.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 41,
+      "nonEmptyLines": 33,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 129,
+      "nonEmptyLines": 112,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/eval_condo.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 108,
+      "nonEmptyLines": 96,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/eval_v4_5.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 59,
+      "nonEmptyLines": 49,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/eval_v4_5_bergamo.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 53,
+      "nonEmptyLines": 44,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/jubail_eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 75,
+      "nonEmptyLines": 61,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/jubail_eval_no_reward.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 56,
+      "nonEmptyLines": 45,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/jubail_no_hw_no_reward.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 41,
+      "nonEmptyLines": 33,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/run_rl_eval.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 83,
+      "nonEmptyLines": 70,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/submit_checkpoint_evals.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 24,
+      "nonEmptyLines": 20,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/v0_eval_full.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 53,
+      "nonEmptyLines": 42,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/eval/v45_no_reward_eval_full.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 53,
+      "nonEmptyLines": 42,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

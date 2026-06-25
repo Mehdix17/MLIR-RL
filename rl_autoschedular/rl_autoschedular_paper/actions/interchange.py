@@ -4,10 +4,10 @@ This module implements the loop interchange transformation action, which reorder
 loop dimensions using different encoding methods (enumerate, pointers, continuous).
 """
 
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.utils.config import Config
 from .base import Action
-from mlir_rl_artifact.state import OperationState, OperationType
-from mlir_rl_artifact.transforms import transform_interchange
+from rl_autoschedular_paper.state import OperationState, OperationType
+from rl_autoschedular_paper.transforms import transform_interchange
 from typing import Optional
 from enum import Enum
 import torch

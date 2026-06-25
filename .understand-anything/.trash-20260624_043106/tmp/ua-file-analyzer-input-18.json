@@ -1,0 +1,84 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/new_dataset/train/v0.json",
+      "language": "json",
+      "sizeLines": 72,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v0_v2.json",
+      "language": "json",
+      "sizeLines": 74,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v45_no_hw.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v45_no_shaped_reward.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v45_no_transformer.json",
+      "language": "json",
+      "sizeLines": 73,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v4_5.json",
+      "language": "json",
+      "sizeLines": 80,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v4_5_small.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v4_6.json",
+      "language": "json",
+      "sizeLines": 82,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v4_7.json",
+      "language": "json",
+      "sizeLines": 83,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v4_8.json",
+      "language": "json",
+      "sizeLines": 82,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/train/v4_9.json",
+      "language": "json",
+      "sizeLines": 70,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/new_dataset/train/v0.json": [],
+    "config/new_dataset/train/v0_v2.json": [],
+    "config/new_dataset/train/v45_no_hw.json": [],
+    "config/new_dataset/train/v45_no_shaped_reward.json": [],
+    "config/new_dataset/train/v45_no_transformer.json": [],
+    "config/new_dataset/train/v4_5.json": [],
+    "config/new_dataset/train/v4_5_small.json": [],
+    "config/new_dataset/train/v4_6.json": [],
+    "config/new_dataset/train/v4_7.json": [],
+    "config/new_dataset/train/v4_8.json": [],
+    "config/new_dataset/train/v4_9.json": []
+  }
+}

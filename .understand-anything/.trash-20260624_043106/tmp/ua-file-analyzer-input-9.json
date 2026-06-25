@@ -1,0 +1,214 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/__init__.py",
+      "language": "python",
+      "sizeLines": 264,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py",
+      "language": "python",
+      "sizeLines": 248,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/interchange.py",
+      "language": "python",
+      "sizeLines": 253,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/no_transformation.py",
+      "language": "python",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_fusion.py",
+      "language": "python",
+      "sizeLines": 262,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_parallelization.py",
+      "language": "python",
+      "sizeLines": 46,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/tiling.py",
+      "language": "python",
+      "sizeLines": 132,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/actions/vectorization.py",
+      "language": "python",
+      "sizeLines": 124,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/benchmarks.py",
+      "language": "python",
+      "sizeLines": 80,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/env.py",
+      "language": "python",
+      "sizeLines": 420,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/execution.py",
+      "language": "python",
+      "sizeLines": 423,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/model.py",
+      "language": "python",
+      "sizeLines": 433,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/observation.py",
+      "language": "python",
+      "sizeLines": 403,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/ppo.py",
+      "language": "python",
+      "sizeLines": 445,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "language": "python",
+      "sizeLines": 393,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/trajectory.py",
+      "language": "python",
+      "sizeLines": 406,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "language": "python",
+      "sizeLines": 588,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/__init__.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/interchange.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/no_transformation.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_fusion.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_parallelization.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/tiling.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/vectorization.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/interchange.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/no_transformation.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_fusion.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_parallelization.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/tiled_parallelization.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/tiling.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/tiling.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/actions/vectorization.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/benchmarks.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "utils/config.py",
+      "utils/implementation.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/env.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/benchmarks.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/execution.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/execution.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/transforms.py",
+      "utils/bindings_process.py",
+      "utils/singleton.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/model.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/observation.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/observation.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/ppo.py": [
+      "rl_autoschedular/rl_autoschedular_v1/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/benchmarks.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/env.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/execution.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/model.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/observation.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/state.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/trajectory.py",
+      "utils/config.py",
+      "utils/dask_manager.py",
+      "utils/file_logger.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/state.py": [
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/trajectory.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v4_5/model.py",
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/transforms.py": [
+      "utils/bindings_process.py"
+    ]
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1000.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1100.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1200.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1300.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1400.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1500.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1600.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1700.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1800.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1900.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1999.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_800.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_900.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_eval_bergamo.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1000.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1100.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1200.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1300.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1400.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1500.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1600.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1700.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1800.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1900.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_1999.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_800.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_bergamo_900.json": [],
+    "config/old_dataset/eval_bergamo/v4_5_eval_bergamo.json": []
+  }
+}

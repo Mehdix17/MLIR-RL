@@ -5,9 +5,9 @@ used by the RL policy and value networks. It includes components for operation f
 producer features, action history, action masks, and loop counts.
 """
 
-from mlir_rl_artifact.actions import ActionSpace
-from mlir_rl_artifact.state import OperationState, OperationType, IteratorType, OperationFeatures
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.actions import ActionSpace
+from rl_autoschedular_paper.state import OperationState, OperationType, IteratorType, OperationFeatures
+from rl_autoschedular_paper.utils.config import Config
 import torch
 import math
 

@@ -11,11 +11,11 @@ Attributes:
 import torch
 from torch.utils.data import Dataset, DataLoader, Sampler, RandomSampler
 from typing import Iterator, Optional
-from mlir_rl_artifact import device
-from mlir_rl_artifact.model import HiearchyModel as Model
+from rl_autoschedular_paper import device
+from rl_autoschedular_paper.model import HiearchyModel as Model
 from time import time
-from mlir_rl_artifact.utils.config import Config
-from mlir_rl_artifact.utils.log import print_info
+from rl_autoschedular_paper.utils.config import Config
+from rl_autoschedular_paper.utils.log import print_info
 
 DYNAMIC_ATTRS: list[str] = ['values', 'next_values', 'actions_old_log_p', 'off_policy_rates', 'returns', 'advantages']
 

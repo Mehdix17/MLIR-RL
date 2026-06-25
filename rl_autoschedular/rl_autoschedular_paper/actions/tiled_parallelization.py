@@ -5,8 +5,8 @@ tiling with parallelization using forall constructs.
 """
 
 from .tiling import Tiling
-from mlir_rl_artifact.transforms import transform_tile, transform_TP
-from mlir_rl_artifact.state import OperationState, IteratorType
+from rl_autoschedular_paper.transforms import transform_tile, transform_TP
+from rl_autoschedular_paper.state import OperationState, IteratorType
 from mlir._mlir_libs._mlir.ir import Module  # type: ignore
 from typing import Optional
 

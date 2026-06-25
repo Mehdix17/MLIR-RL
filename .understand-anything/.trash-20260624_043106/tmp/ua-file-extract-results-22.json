@@ -1,0 +1,2541 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 14,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1000.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1100.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1200.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1300.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1400.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1500.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1600.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1700.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1800.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1900.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_1999.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_800.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_bergamo_900.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    },
+    {
+      "path": "config/old_dataset/eval_bergamo/v4_5_eval_bergamo.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 56,
+      "nonEmptyLines": 56,
+      "sections": [
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 33
+      }
+    }
+  ]
+}

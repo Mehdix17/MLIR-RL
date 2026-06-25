@@ -1,0 +1,146 @@
+{
+  "nodes": [
+    {
+      "id": "config:config/single_ops_dataset/train/paper.json",
+      "type": "config",
+      "name": "paper.json",
+      "filePath": "config/single_ops_dataset/train/paper.json",
+      "summary": "Configuration settings for paper.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/train/v0.json",
+      "type": "config",
+      "name": "v0.json",
+      "filePath": "config/single_ops_dataset/train/v0.json",
+      "summary": "Configuration settings for v0.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/train/v4_6.json",
+      "type": "config",
+      "name": "v4_6.json",
+      "filePath": "config/single_ops_dataset/train/v4_6.json",
+      "summary": "Configuration settings for v4_6.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/train/v4_7.json",
+      "type": "config",
+      "name": "v4_7.json",
+      "filePath": "config/single_ops_dataset/train/v4_7.json",
+      "summary": "Configuration settings for v4_7.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/train/v4_8.json",
+      "type": "config",
+      "name": "v4_8.json",
+      "filePath": "config/single_ops_dataset/train/v4_8.json",
+      "summary": "Configuration settings for v4_8.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/train/v4_9_large.json",
+      "type": "config",
+      "name": "v4_9_large.json",
+      "filePath": "config/single_ops_dataset/train/v4_9_large.json",
+      "summary": "Configuration settings for v4_9_large.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/train/v4_9_small.json",
+      "type": "config",
+      "name": "v4_9_small.json",
+      "filePath": "config/single_ops_dataset/train/v4_9_small.json",
+      "summary": "Configuration settings for v4_9_small.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:config/single_ops_dataset/train/paper.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/train/v0.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/train/v4_6.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/train/v4_7.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/train/v4_8.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/train/v4_9_large.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/train/v4_9_small.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

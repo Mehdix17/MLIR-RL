@@ -5,7 +5,7 @@ the action interface that all concrete transformation actions must implement.
 """
 
 from typing import Optional, overload, Union, Any
-from mlir_rl_artifact.state import OperationState, OperationFeatures
+from rl_autoschedular_paper.state import OperationState, OperationFeatures
 import torch
 from torch.distributions import Distribution
 from mlir._mlir_libs._mlir.ir import Module  # type: ignore

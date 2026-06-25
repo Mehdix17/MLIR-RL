@@ -1,0 +1,49 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/old_dataset/ablation/v45_no_hw.json",
+      "language": "json",
+      "sizeLines": 67,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation/v45_no_hw_blocks.json",
+      "language": "json",
+      "sizeLines": 80,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation/v45_no_reward_blocks.json",
+      "language": "json",
+      "sizeLines": 67,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation/v45_no_shaped_reward.json",
+      "language": "json",
+      "sizeLines": 67,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation/v45_no_trans_blocks.json",
+      "language": "json",
+      "sizeLines": 81,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/ablation/v45_no_transformer.json",
+      "language": "json",
+      "sizeLines": 68,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/old_dataset/ablation/v45_no_hw.json": [],
+    "config/old_dataset/ablation/v45_no_hw_blocks.json": [],
+    "config/old_dataset/ablation/v45_no_reward_blocks.json": [],
+    "config/old_dataset/ablation/v45_no_shaped_reward.json": [],
+    "config/old_dataset/ablation/v45_no_trans_blocks.json": [],
+    "config/old_dataset/ablation/v45_no_transformer.json": []
+  }
+}

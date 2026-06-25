@@ -1,0 +1,35 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/overall_comparison_all.csv",
+      "language": "csv",
+      "sizeLines": 831,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/overall_comparison_grouped.csv",
+      "language": "csv",
+      "sizeLines": 18,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0.csv",
+      "language": "csv",
+      "sizeLines": 989,
+      "fileCategory": "data"
+    },
+    {
+      "path": "plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0_single_ops.csv",
+      "language": "csv",
+      "sizeLines": 9,
+      "fileCategory": "data"
+    }
+  ],
+  "batchImportData": {
+    "plots/manuscript/overall_comparison/mehdi/overall_comparison_all.csv": [],
+    "plots/manuscript/overall_comparison/mehdi/overall_comparison_grouped.csv": [],
+    "plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0.csv": [],
+    "plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0_single_ops.csv": []
+  }
+}

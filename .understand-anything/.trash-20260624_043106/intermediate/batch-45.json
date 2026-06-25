@@ -1,0 +1,1045 @@
+{
+  "nodes": [
+    {
+      "id": "document:data_utils/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "data_utils/README.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for README.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:data_utils/requirements.txt",
+      "type": "document",
+      "name": "requirements.txt",
+      "filePath": "data_utils/requirements.txt",
+      "summary": "Documentation file containing instructions, guides, or specifications for requirements.txt.",
+      "tags": [
+        "documentation",
+        "reference",
+        "mlir-rl"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:data_utils/seed_legacy_dataset.py",
+      "type": "file",
+      "name": "seed_legacy_dataset.py",
+      "filePath": "data_utils/seed_legacy_dataset.py",
+      "summary": "Data processing tool assisting in MLIR loop feature extraction and data preparation.",
+      "tags": [
+        "source-code",
+        "python",
+        "data-processing",
+        "mlir-extraction"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:data_utils/seed_legacy_dataset.py:_copy_matching_files",
+      "type": "function",
+      "name": "_copy_matching_files",
+      "filePath": "data_utils/seed_legacy_dataset.py",
+      "lineRange": [
+        34,
+        58
+      ],
+      "summary": "Function implementing the execution logic for '_copy_matching_files'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/seed_legacy_dataset.py:_count_matching_files",
+      "type": "function",
+      "name": "_count_matching_files",
+      "filePath": "data_utils/seed_legacy_dataset.py",
+      "lineRange": [
+        61,
+        68
+      ],
+      "summary": "Function implementing the execution logic for '_count_matching_files'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/seed_legacy_dataset.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "data_utils/seed_legacy_dataset.py",
+      "lineRange": [
+        71,
+        197
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:data_utils/seed_legacy_dataset.py:CopySummary",
+      "type": "class",
+      "name": "CopySummary",
+      "filePath": "data_utils/seed_legacy_dataset.py",
+      "lineRange": [
+        27,
+        31
+      ],
+      "summary": "Class defining properties and operations for 'CopySummary'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:data_utils/strip_mlir.py",
+      "type": "file",
+      "name": "strip_mlir.py",
+      "filePath": "data_utils/strip_mlir.py",
+      "summary": "Data processing tool assisting in MLIR loop feature extraction and data preparation.",
+      "tags": [
+        "source-code",
+        "python",
+        "data-processing",
+        "mlir-extraction"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:data_utils/strip_mlir.py:strip_weights",
+      "type": "function",
+      "name": "strip_weights",
+      "filePath": "data_utils/strip_mlir.py",
+      "lineRange": [
+        22,
+        88
+      ],
+      "summary": "Function implementing the execution logic for 'strip_weights'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:data_utils/strip_mlir.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "data_utils/strip_mlir.py",
+      "lineRange": [
+        91,
+        123
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:data_utils/transformers2mlir.py",
+      "type": "file",
+      "name": "transformers2mlir.py",
+      "filePath": "data_utils/transformers2mlir.py",
+      "summary": "Data processing tool assisting in MLIR loop feature extraction and data preparation.",
+      "tags": [
+        "source-code",
+        "python",
+        "data-processing",
+        "mlir-extraction"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:data_utils/transformers2mlir.py:_load_model_and_inputs",
+      "type": "function",
+      "name": "_load_model_and_inputs",
+      "filePath": "data_utils/transformers2mlir.py",
+      "lineRange": [
+        41,
+        159
+      ],
+      "summary": "Function implementing the execution logic for '_load_model_and_inputs'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:data_utils/transformers2mlir.py:convert_onnx_route",
+      "type": "function",
+      "name": "convert_onnx_route",
+      "filePath": "data_utils/transformers2mlir.py",
+      "lineRange": [
+        166,
+        265
+      ],
+      "summary": "Function implementing the execution logic for 'convert_onnx_route'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:data_utils/transformers2mlir.py:convert_direct_route",
+      "type": "function",
+      "name": "convert_direct_route",
+      "filePath": "data_utils/transformers2mlir.py",
+      "lineRange": [
+        272,
+        321
+      ],
+      "summary": "Function implementing the execution logic for 'convert_direct_route'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:data_utils/transformers2mlir.py:_backup_and_maybe_strip",
+      "type": "function",
+      "name": "_backup_and_maybe_strip",
+      "filePath": "data_utils/transformers2mlir.py",
+      "lineRange": [
+        328,
+        343
+      ],
+      "summary": "Function implementing the execution logic for '_backup_and_maybe_strip'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/transformers2mlir.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "data_utils/transformers2mlir.py",
+      "lineRange": [
+        350,
+        403
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:data_utils/vision2mlir.py",
+      "type": "file",
+      "name": "vision2mlir.py",
+      "filePath": "data_utils/vision2mlir.py",
+      "summary": "Data processing tool assisting in MLIR loop feature extraction and data preparation.",
+      "tags": [
+        "source-code",
+        "python",
+        "data-processing",
+        "mlir-extraction"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:data_utils/vision2mlir.py:_load_model",
+      "type": "function",
+      "name": "_load_model",
+      "filePath": "data_utils/vision2mlir.py",
+      "lineRange": [
+        47,
+        64
+      ],
+      "summary": "Function implementing the execution logic for '_load_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/vision2mlir.py:convert_onnx_route",
+      "type": "function",
+      "name": "convert_onnx_route",
+      "filePath": "data_utils/vision2mlir.py",
+      "lineRange": [
+        71,
+        144
+      ],
+      "summary": "Function implementing the execution logic for 'convert_onnx_route'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:data_utils/vision2mlir.py:convert_direct_route",
+      "type": "function",
+      "name": "convert_direct_route",
+      "filePath": "data_utils/vision2mlir.py",
+      "lineRange": [
+        151,
+        172
+      ],
+      "summary": "Function implementing the execution logic for 'convert_direct_route'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/vision2mlir.py:_backup_and_maybe_strip",
+      "type": "function",
+      "name": "_backup_and_maybe_strip",
+      "filePath": "data_utils/vision2mlir.py",
+      "lineRange": [
+        179,
+        194
+      ],
+      "summary": "Function implementing the execution logic for '_backup_and_maybe_strip'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/vision2mlir.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "data_utils/vision2mlir.py",
+      "lineRange": [
+        201,
+        253
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:data_utils/wrap_mlir.py",
+      "type": "file",
+      "name": "wrap_mlir.py",
+      "filePath": "data_utils/wrap_mlir.py",
+      "summary": "Data processing tool assisting in MLIR loop feature extraction and data preparation.",
+      "tags": [
+        "source-code",
+        "python",
+        "data-processing",
+        "mlir-extraction"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:data_utils/wrap_mlir.py:_remove_duplicate_args",
+      "type": "function",
+      "name": "_remove_duplicate_args",
+      "filePath": "data_utils/wrap_mlir.py",
+      "lineRange": [
+        24,
+        34
+      ],
+      "summary": "Function implementing the execution logic for '_remove_duplicate_args'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/wrap_mlir.py:_read_file_stream",
+      "type": "function",
+      "name": "_read_file_stream",
+      "filePath": "data_utils/wrap_mlir.py",
+      "lineRange": [
+        37,
+        41
+      ],
+      "summary": "Function implementing the execution logic for '_read_file_stream'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/wrap_mlir.py:_extract_element_shape",
+      "type": "function",
+      "name": "_extract_element_shape",
+      "filePath": "data_utils/wrap_mlir.py",
+      "lineRange": [
+        44,
+        48
+      ],
+      "summary": "Function implementing the execution logic for '_extract_element_shape'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:data_utils/wrap_mlir.py:nn_transform_wrapper",
+      "type": "function",
+      "name": "nn_transform_wrapper",
+      "filePath": "data_utils/wrap_mlir.py",
+      "lineRange": [
+        55,
+        127
+      ],
+      "summary": "Function implementing the execution logic for 'nn_transform_wrapper'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:data_utils/wrap_mlir.py:nn_transform_wrapper_binding",
+      "type": "function",
+      "name": "nn_transform_wrapper_binding",
+      "filePath": "data_utils/wrap_mlir.py",
+      "lineRange": [
+        130,
+        188
+      ],
+      "summary": "Function implementing the execution logic for 'nn_transform_wrapper_binding'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:data_utils/wrap_mlir.py:main_wrapper",
+      "type": "function",
+      "name": "main_wrapper",
+      "filePath": "data_utils/wrap_mlir.py",
+      "lineRange": [
+        195,
+        222
+      ],
+      "summary": "Function implementing the execution logic for 'main_wrapper'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/paper/EVAL_PIPELINE_ANALYSIS.md",
+      "type": "document",
+      "name": "EVAL_PIPELINE_ANALYSIS.md",
+      "filePath": "docs/paper/EVAL_PIPELINE_ANALYSIS.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for EVAL_PIPELINE_ANALYSIS.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:manuscript/chapters/chapter1.tex",
+      "type": "file",
+      "name": "chapter1.tex",
+      "filePath": "manuscript/chapters/chapter1.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:manuscript/chapters/chapter2.tex",
+      "type": "file",
+      "name": "chapter2.tex",
+      "filePath": "manuscript/chapters/chapter2.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:manuscript/chapters/chapter3.tex",
+      "type": "file",
+      "name": "chapter3.tex",
+      "filePath": "manuscript/chapters/chapter3.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:manuscript/chapters/chapter4.tex",
+      "type": "file",
+      "name": "chapter4.tex",
+      "filePath": "manuscript/chapters/chapter4.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:manuscript/chapters/chapter5.tex",
+      "type": "file",
+      "name": "chapter5.tex",
+      "filePath": "manuscript/chapters/chapter5.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:manuscript/chapters/general_conclusion.tex",
+      "type": "file",
+      "name": "general_conclusion.tex",
+      "filePath": "manuscript/chapters/general_conclusion.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:manuscript/chapters/general_introduction.tex",
+      "type": "file",
+      "name": "general_introduction.tex",
+      "filePath": "manuscript/chapters/general_introduction.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:manuscript/main.tex",
+      "type": "file",
+      "name": "main.tex",
+      "filePath": "manuscript/main.tex",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:manuscript/references.bib",
+      "type": "file",
+      "name": "references.bib",
+      "filePath": "manuscript/references.bib",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "mlir-rl",
+        "mlir-rl"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "endpoint:plots/manuscript/ablation_study/comparison.csv",
+      "type": "endpoint",
+      "name": "comparison.csv",
+      "filePath": "plots/manuscript/ablation_study/comparison.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in comparison.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:plots/manuscript/ablation_study/generate_ablation_plot.py",
+      "type": "file",
+      "name": "generate_ablation_plot.py",
+      "filePath": "plots/manuscript/ablation_study/generate_ablation_plot.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "endpoint:plots/manuscript/ablation_study/original.csv",
+      "type": "endpoint",
+      "name": "original.csv",
+      "filePath": "plots/manuscript/ablation_study/original.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in original.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "endpoint:plots/manuscript/benchmark_classification.csv",
+      "type": "endpoint",
+      "name": "benchmark_classification.csv",
+      "filePath": "plots/manuscript/benchmark_classification.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in benchmark_classification.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "endpoint:plots/manuscript/full_model_comparison/graph3_fullmodel.csv",
+      "type": "endpoint",
+      "name": "graph3_fullmodel.csv",
+      "filePath": "plots/manuscript/full_model_comparison/graph3_fullmodel.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in graph3_fullmodel.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:plots/manuscript/full_model_comparison/graph3_script.py",
+      "type": "file",
+      "name": "graph3_script.py",
+      "filePath": "plots/manuscript/full_model_comparison/graph3_script.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "endpoint:plots/manuscript/graph1_performance.csv",
+      "type": "endpoint",
+      "name": "graph1_performance.csv",
+      "filePath": "plots/manuscript/graph1_performance.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in graph1_performance.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:plots/manuscript/multi_hardware/bergamo/bergamo_model_script.py",
+      "type": "file",
+      "name": "bergamo_model_script.py",
+      "filePath": "plots/manuscript/multi_hardware/bergamo/bergamo_model_script.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "function:data_utils/seed_legacy_dataset.py:_copy_matching_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "function:data_utils/seed_legacy_dataset.py:_copy_matching_files",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "function:data_utils/seed_legacy_dataset.py:_count_matching_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "function:data_utils/seed_legacy_dataset.py:_count_matching_files",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "function:data_utils/seed_legacy_dataset.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "function:data_utils/seed_legacy_dataset.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "class:data_utils/seed_legacy_dataset.py:CopySummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "class:data_utils/seed_legacy_dataset.py:CopySummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/seed_legacy_dataset.py",
+      "target": "file:data_utils/id_allocator.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:data_utils/strip_mlir.py",
+      "target": "function:data_utils/strip_mlir.py:strip_weights",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/strip_mlir.py",
+      "target": "function:data_utils/strip_mlir.py:strip_weights",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/strip_mlir.py",
+      "target": "function:data_utils/strip_mlir.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/strip_mlir.py",
+      "target": "function:data_utils/strip_mlir.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:_load_model_and_inputs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:_load_model_and_inputs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:convert_onnx_route",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:convert_onnx_route",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:convert_direct_route",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:convert_direct_route",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:_backup_and_maybe_strip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:_backup_and_maybe_strip",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/transformers2mlir.py",
+      "target": "function:data_utils/transformers2mlir.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:_load_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:_load_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:convert_onnx_route",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:convert_onnx_route",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:convert_direct_route",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:convert_direct_route",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:_backup_and_maybe_strip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:_backup_and_maybe_strip",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/vision2mlir.py",
+      "target": "function:data_utils/vision2mlir.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:_remove_duplicate_args",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:_remove_duplicate_args",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:_read_file_stream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:_read_file_stream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:_extract_element_shape",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:_extract_element_shape",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:nn_transform_wrapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:nn_transform_wrapper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:nn_transform_wrapper_binding",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:nn_transform_wrapper_binding",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:main_wrapper",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:data_utils/wrap_mlir.py",
+      "target": "function:data_utils/wrap_mlir.py:main_wrapper",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "document:docs/paper/EVAL_PIPELINE_ANALYSIS.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

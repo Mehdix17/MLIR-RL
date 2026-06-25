@@ -1,0 +1,49 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/ops_and_blocks/train/paper_original.json",
+      "language": "json",
+      "sizeLines": 59,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/ops_and_blocks/train/paper_transformer_large.json",
+      "language": "json",
+      "sizeLines": 67,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/ops_and_blocks/train/paper_transformer_small.json",
+      "language": "json",
+      "sizeLines": 67,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/ops_and_blocks/train/v0.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/ops_and_blocks/train/v4_9_large.json",
+      "language": "json",
+      "sizeLines": 66,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/ops_and_blocks/train/v4_9_small.json",
+      "language": "json",
+      "sizeLines": 66,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/ops_and_blocks/train/paper_original.json": [],
+    "config/ops_and_blocks/train/paper_transformer_large.json": [],
+    "config/ops_and_blocks/train/paper_transformer_small.json": [],
+    "config/ops_and_blocks/train/v0.json": [],
+    "config/ops_and_blocks/train/v4_9_large.json": [],
+    "config/ops_and_blocks/train/v4_9_small.json": []
+  }
+}

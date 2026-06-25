@@ -1,0 +1,443 @@
+{
+  "nodes": [
+    {
+      "id": "file:plots/version_comparison/single_ops_dataset/v4_9_large/plot.py",
+      "type": "file",
+      "name": "plot.py",
+      "filePath": "plots/version_comparison/single_ops_dataset/v4_9_large/plot.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "endpoint:plots/version_comparison/single_ops_dataset/v4_9_large/v4_9_large.csv",
+      "type": "endpoint",
+      "name": "v4_9_large.csv",
+      "filePath": "plots/version_comparison/single_ops_dataset/v4_9_large/v4_9_large.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in v4_9_large.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:plots/version_comparison/single_ops_dataset/v4_9_small/plot.py",
+      "type": "file",
+      "name": "plot.py",
+      "filePath": "plots/version_comparison/single_ops_dataset/v4_9_small/plot.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "endpoint:plots/version_comparison/single_ops_dataset/v4_9_small/v4_9_small.csv",
+      "type": "endpoint",
+      "name": "v4_9_small.csv",
+      "filePath": "plots/version_comparison/single_ops_dataset/v4_9_small/v4_9_small.csv",
+      "summary": "Data assets containing offline datasets, metrics, or schema definitions in v4_9_small.csv.",
+      "tags": [
+        "data-assets",
+        "schema",
+        "dataset",
+        "csv-data"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "rl_autoschedular/__init__.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "document:rl_autoschedular/rl_autoschedular_paper_transformer/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "rl_autoschedular/rl_autoschedular_paper_transformer/README.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for README.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_paper_transformer/utils/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_paper_transformer/utils/__init__.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-utility"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "document:rl_autoschedular/rl_autoschedular_paper/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "rl_autoschedular/rl_autoschedular_paper/README.md",
+      "summary": "Documentation file containing instructions, guides, or specifications for README.md.",
+      "tags": [
+        "documentation",
+        "reference",
+        "markdown"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_paper/utils/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_paper/utils/__init__.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning",
+        "rl-utility"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v3/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v3/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v4/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v4/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "type": "file",
+      "name": "ablation.py",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "summary": "Autoscheduling core python module defining policies, state mappings, or utilities.",
+      "tags": [
+        "source-code",
+        "python",
+        "autoscheduler",
+        "reinforcement-learning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py:setup_config",
+      "type": "function",
+      "name": "setup_config",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Function implementing the execution logic for 'setup_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py:run_ablation",
+      "type": "function",
+      "name": "run_ablation",
+      "filePath": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "lineRange": [
+        26,
+        64
+      ],
+      "summary": "Function implementing the execution logic for 'run_ablation'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v3/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v3/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v3/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v3/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v3/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v4/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v4/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_hw/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py:setup_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py:setup_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py:run_ablation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py",
+      "target": "function:rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ablation.py:run_ablation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

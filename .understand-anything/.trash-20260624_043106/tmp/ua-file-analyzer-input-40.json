@@ -1,0 +1,77 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "scripts/baseline/get_base.sh",
+      "language": "shell",
+      "sizeLines": 70,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/get_blocks_baseline.sh",
+      "language": "shell",
+      "sizeLines": 76,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/get_blocks_baseline_fresh.sh",
+      "language": "shell",
+      "sizeLines": 60,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/get_new_dataset_base.sh",
+      "language": "shell",
+      "sizeLines": 62,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/get_new_dataset_pytorch.sh",
+      "language": "shell",
+      "sizeLines": 64,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/get_ops_and_blocks_missing.sh",
+      "language": "shell",
+      "sizeLines": 51,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/get_pytorch_times.sh",
+      "language": "shell",
+      "sizeLines": 70,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/run_get_base.sh",
+      "language": "shell",
+      "sizeLines": 25,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/submit_blocks_baselines.sh",
+      "language": "shell",
+      "sizeLines": 50,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/baseline/submit_old_models_baselines.sh",
+      "language": "shell",
+      "sizeLines": 47,
+      "fileCategory": "script"
+    }
+  ],
+  "batchImportData": {
+    "scripts/baseline/get_base.sh": [],
+    "scripts/baseline/get_blocks_baseline.sh": [],
+    "scripts/baseline/get_blocks_baseline_fresh.sh": [],
+    "scripts/baseline/get_new_dataset_base.sh": [],
+    "scripts/baseline/get_new_dataset_pytorch.sh": [],
+    "scripts/baseline/get_ops_and_blocks_missing.sh": [],
+    "scripts/baseline/get_pytorch_times.sh": [],
+    "scripts/baseline/run_get_base.sh": [],
+    "scripts/baseline/submit_blocks_baselines.sh": [],
+    "scripts/baseline/submit_old_models_baselines.sh": []
+  }
+}

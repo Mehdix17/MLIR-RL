@@ -1,0 +1,133 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "scripts/eval/ablation_bergamo_eval.sh",
+      "language": "shell",
+      "sizeLines": 71,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/bergamo_eval.sh",
+      "language": "shell",
+      "sizeLines": 80,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/bergamo_no_hw_no_reward.sh",
+      "language": "shell",
+      "sizeLines": 44,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/bigmem_bergamo_eval.sh",
+      "language": "shell",
+      "sizeLines": 70,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/dalma_eval.sh",
+      "language": "shell",
+      "sizeLines": 75,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/dalma_eval_no_reward.sh",
+      "language": "shell",
+      "sizeLines": 56,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/dalma_no_hw_no_reward.sh",
+      "language": "shell",
+      "sizeLines": 41,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/eval.sh",
+      "language": "shell",
+      "sizeLines": 129,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/eval_condo.sh",
+      "language": "shell",
+      "sizeLines": 108,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/eval_v4_5.sh",
+      "language": "shell",
+      "sizeLines": 59,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/eval_v4_5_bergamo.sh",
+      "language": "shell",
+      "sizeLines": 53,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/jubail_eval.sh",
+      "language": "shell",
+      "sizeLines": 75,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/jubail_eval_no_reward.sh",
+      "language": "shell",
+      "sizeLines": 56,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/jubail_no_hw_no_reward.sh",
+      "language": "shell",
+      "sizeLines": 41,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/run_rl_eval.sh",
+      "language": "shell",
+      "sizeLines": 83,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/submit_checkpoint_evals.sh",
+      "language": "shell",
+      "sizeLines": 23,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/v0_eval_full.sh",
+      "language": "shell",
+      "sizeLines": 53,
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/eval/v45_no_reward_eval_full.sh",
+      "language": "shell",
+      "sizeLines": 53,
+      "fileCategory": "script"
+    }
+  ],
+  "batchImportData": {
+    "scripts/eval/ablation_bergamo_eval.sh": [],
+    "scripts/eval/bergamo_eval.sh": [],
+    "scripts/eval/bergamo_no_hw_no_reward.sh": [],
+    "scripts/eval/bigmem_bergamo_eval.sh": [],
+    "scripts/eval/dalma_eval.sh": [],
+    "scripts/eval/dalma_eval_no_reward.sh": [],
+    "scripts/eval/dalma_no_hw_no_reward.sh": [],
+    "scripts/eval/eval.sh": [],
+    "scripts/eval/eval_condo.sh": [],
+    "scripts/eval/eval_v4_5.sh": [],
+    "scripts/eval/eval_v4_5_bergamo.sh": [],
+    "scripts/eval/jubail_eval.sh": [],
+    "scripts/eval/jubail_eval_no_reward.sh": [],
+    "scripts/eval/jubail_no_hw_no_reward.sh": [],
+    "scripts/eval/run_rl_eval.sh": [],
+    "scripts/eval/submit_checkpoint_evals.sh": [],
+    "scripts/eval/v0_eval_full.sh": [],
+    "scripts/eval/v45_no_reward_eval_full.sh": []
+  }
+}

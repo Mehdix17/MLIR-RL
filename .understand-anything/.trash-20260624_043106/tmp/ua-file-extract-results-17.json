@@ -1,0 +1,3890 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 13,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "config/new_dataset/eval/v0_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 76,
+      "nonEmptyLines": 76,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 75
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 51
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v0_eval_full.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 77,
+      "nonEmptyLines": 77,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 76
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 51
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v0_v2_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 77,
+      "nonEmptyLines": 77,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 76
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 51
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_hw_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 85,
+      "nonEmptyLines": 85,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 83
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 84
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_hw_no_reward_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 66,
+      "nonEmptyLines": 66,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 15
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 16
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 17
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 18
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 19
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 20
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 21
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 22
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 23
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 24
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 25
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 26
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 29
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 30
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 48
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 49
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 50
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 51
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 65
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_shaped_reward_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 85,
+      "nonEmptyLines": 85,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 83
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 84
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_shaped_reward_eval_full.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 86,
+      "nonEmptyLines": 86,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 83
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 84
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 85
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_shaped_reward_eval_multi_hw.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 86,
+      "nonEmptyLines": 86,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 83
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 84
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 85
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_transformer_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 77,
+      "nonEmptyLines": 77,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 76
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 51
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v4_5_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 84,
+      "nonEmptyLines": 84,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 83
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v4_6_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 84,
+      "nonEmptyLines": 84,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 83
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v4_7_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 84,
+      "nonEmptyLines": 84,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 83
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    },
+    {
+      "path": "config/new_dataset/eval/v4_8_eval.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 84,
+      "nonEmptyLines": 84,
+      "sections": [
+        {
+          "heading": "max_num_stores_loads",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "max_num_loops",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "max_num_load_store_dim",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "num_tile_sizes",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "num_pad_multiples",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "num_unroll_factors",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "vect_size_limit",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "order",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "interchange_mode",
+          "level": 1,
+          "line": 27
+        },
+        {
+          "heading": "exploration",
+          "level": 1,
+          "line": 28
+        },
+        {
+          "heading": "init_epsilon",
+          "level": 1,
+          "line": 31
+        },
+        {
+          "heading": "normalize_bounds",
+          "level": 1,
+          "line": 32
+        },
+        {
+          "heading": "normalize_adv",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "reuse_experience",
+          "level": 1,
+          "line": 34
+        },
+        {
+          "heading": "benchmarks_folder_path",
+          "level": 1,
+          "line": 35
+        },
+        {
+          "heading": "bench_count",
+          "level": 1,
+          "line": 36
+        },
+        {
+          "heading": "replay_count",
+          "level": 1,
+          "line": 37
+        },
+        {
+          "heading": "nb_iterations",
+          "level": 1,
+          "line": 38
+        },
+        {
+          "heading": "ppo_epochs",
+          "level": 1,
+          "line": 39
+        },
+        {
+          "heading": "ppo_batch_size",
+          "level": 1,
+          "line": 40
+        },
+        {
+          "heading": "value_epochs",
+          "level": 1,
+          "line": 41
+        },
+        {
+          "heading": "value_clip",
+          "level": 1,
+          "line": 42
+        },
+        {
+          "heading": "value_coef",
+          "level": 1,
+          "line": 43
+        },
+        {
+          "heading": "entropy_coef",
+          "level": 1,
+          "line": 44
+        },
+        {
+          "heading": "lr",
+          "level": 1,
+          "line": 45
+        },
+        {
+          "heading": "truncate",
+          "level": 1,
+          "line": 46
+        },
+        {
+          "heading": "tags",
+          "level": 1,
+          "line": 47
+        },
+        {
+          "heading": "debug",
+          "level": 1,
+          "line": 52
+        },
+        {
+          "heading": "main_exec_data_file",
+          "level": 1,
+          "line": 53
+        },
+        {
+          "heading": "results_dir",
+          "level": 1,
+          "line": 54
+        },
+        {
+          "heading": "implementation",
+          "level": 1,
+          "line": 55
+        },
+        {
+          "heading": "json_file",
+          "level": 1,
+          "line": 56
+        },
+        {
+          "heading": "eval_json_file",
+          "level": 1,
+          "line": 57
+        },
+        {
+          "heading": "hardware_auto_detect",
+          "level": 1,
+          "line": 58
+        },
+        {
+          "heading": "hardware_l1_kb",
+          "level": 1,
+          "line": 59
+        },
+        {
+          "heading": "hardware_l2_kb",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "hardware_l3_kb",
+          "level": 1,
+          "line": 61
+        },
+        {
+          "heading": "hardware_physical_cores",
+          "level": 1,
+          "line": 62
+        },
+        {
+          "heading": "hardware_logical_cores",
+          "level": 1,
+          "line": 63
+        },
+        {
+          "heading": "hardware_simd_width",
+          "level": 1,
+          "line": 64
+        },
+        {
+          "heading": "hardware_clock_mhz",
+          "level": 1,
+          "line": 65
+        },
+        {
+          "heading": "reward_shaping_enabled",
+          "level": 1,
+          "line": 66
+        },
+        {
+          "heading": "reward_shaping_scale",
+          "level": 1,
+          "line": 67
+        },
+        {
+          "heading": "reward_shaping_clip",
+          "level": 1,
+          "line": 68
+        },
+        {
+          "heading": "reward_shaping_weight_ai",
+          "level": 1,
+          "line": 69
+        },
+        {
+          "heading": "reward_shaping_weight_vectorizable",
+          "level": 1,
+          "line": 70
+        },
+        {
+          "heading": "reward_shaping_weight_parallel",
+          "level": 1,
+          "line": 71
+        },
+        {
+          "heading": "reward_shaping_vectorization_bonus",
+          "level": 1,
+          "line": 72
+        },
+        {
+          "heading": "eval_runs",
+          "level": 1,
+          "line": 73
+        },
+        {
+          "heading": "eval_aggregation",
+          "level": 1,
+          "line": 74
+        },
+        {
+          "heading": "transformer_d_model",
+          "level": 1,
+          "line": 75
+        },
+        {
+          "heading": "transformer_nhead",
+          "level": 1,
+          "line": 76
+        },
+        {
+          "heading": "transformer_num_layers",
+          "level": 1,
+          "line": 77
+        },
+        {
+          "heading": "transformer_ffn_dim",
+          "level": 1,
+          "line": 78
+        },
+        {
+          "heading": "transformer_dropout",
+          "level": 1,
+          "line": 79
+        },
+        {
+          "heading": "transformer_activation",
+          "level": 1,
+          "line": 80
+        },
+        {
+          "heading": "transformer_pooling",
+          "level": 1,
+          "line": 81
+        },
+        {
+          "heading": "transformer_use_action_history_token",
+          "level": 1,
+          "line": 82
+        },
+        {
+          "heading": "value_batch_size",
+          "level": 1,
+          "line": 83
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 59
+      }
+    }
+  ]
+}

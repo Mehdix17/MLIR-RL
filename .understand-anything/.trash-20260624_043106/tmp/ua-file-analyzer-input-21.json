@@ -1,0 +1,112 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/old_dataset/eval/v4_5_eval.json",
+      "language": "json",
+      "sizeLines": 40,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1000.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1100.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1200.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1300.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1400.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1500.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1600.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1700.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1800.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1900.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_1999.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_700.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_800.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/eval/v4_5_eval_900.json",
+      "language": "json",
+      "sizeLines": 55,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/old_dataset/eval/v4_5_eval.json": [],
+    "config/old_dataset/eval/v4_5_eval_1000.json": [],
+    "config/old_dataset/eval/v4_5_eval_1100.json": [],
+    "config/old_dataset/eval/v4_5_eval_1200.json": [],
+    "config/old_dataset/eval/v4_5_eval_1300.json": [],
+    "config/old_dataset/eval/v4_5_eval_1400.json": [],
+    "config/old_dataset/eval/v4_5_eval_1500.json": [],
+    "config/old_dataset/eval/v4_5_eval_1600.json": [],
+    "config/old_dataset/eval/v4_5_eval_1700.json": [],
+    "config/old_dataset/eval/v4_5_eval_1800.json": [],
+    "config/old_dataset/eval/v4_5_eval_1900.json": [],
+    "config/old_dataset/eval/v4_5_eval_1999.json": [],
+    "config/old_dataset/eval/v4_5_eval_700.json": [],
+    "config/old_dataset/eval/v4_5_eval_800.json": [],
+    "config/old_dataset/eval/v4_5_eval_900.json": []
+  }
+}

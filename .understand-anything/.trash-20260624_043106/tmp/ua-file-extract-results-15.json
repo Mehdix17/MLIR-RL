@@ -1,0 +1,490 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 7,
+  "filesSkipped": [],
+  "results": [
+    {
+      "path": "dashboard/dashboard.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 165,
+      "nonEmptyLines": 139,
+      "functions": [
+        {
+          "name": "calculate_geo_mean",
+          "startLine": 47,
+          "endLine": 51,
+          "params": [
+            "series"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "calculate_geo_mean",
+          "line": 47,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "calculate_geo_mean",
+          "callee": "series[series > 0].dropna",
+          "lineNumber": 48
+        },
+        {
+          "caller": "calculate_geo_mean",
+          "callee": "len",
+          "lineNumber": 49
+        },
+        {
+          "caller": "calculate_geo_mean",
+          "callee": "np.exp",
+          "lineNumber": 51
+        },
+        {
+          "caller": "calculate_geo_mean",
+          "callee": "np.mean",
+          "lineNumber": 51
+        },
+        {
+          "caller": "calculate_geo_mean",
+          "callee": "np.log",
+          "lineNumber": 51
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "dashboard/pages/1_version_comparison.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 179,
+      "nonEmptyLines": 156,
+      "callGraph": [
+        {
+          "caller": "extract_op_type",
+          "callee": "bench_name.split",
+          "lineNumber": 135
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "dashboard/pages/2_ablation_study.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 68,
+      "nonEmptyLines": 54,
+      "functions": [
+        {
+          "name": "_melt",
+          "startLine": 40,
+          "endLine": 46,
+          "params": [
+            "df"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "_melt",
+          "line": 40,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_melt",
+          "callee": "df[[\"model\"] + cols].copy",
+          "lineNumber": 42
+        },
+        {
+          "caller": "_melt",
+          "callee": "out[\"model\"].str.upper",
+          "lineNumber": 43
+        },
+        {
+          "caller": "_melt",
+          "callee": "out.melt",
+          "lineNumber": 44
+        },
+        {
+          "caller": "_melt",
+          "callee": "out[\"agent\"].map",
+          "lineNumber": 45
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "dashboard/pages/3_multi_hardware.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 126,
+      "nonEmptyLines": 106,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "dashboard/pages/4_full_model.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 47,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "dashboard/utils/data.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 145,
+      "nonEmptyLines": 111,
+      "functions": [
+        {
+          "name": "data_path",
+          "startLine": 13,
+          "endLine": 14,
+          "params": [
+            "filename"
+          ]
+        },
+        {
+          "name": "load_csv",
+          "startLine": 17,
+          "endLine": 21,
+          "params": [
+            "filename"
+          ]
+        },
+        {
+          "name": "img_path",
+          "startLine": 24,
+          "endLine": 26,
+          "params": [
+            "filename"
+          ]
+        },
+        {
+          "name": "load_version_comparison_grouped",
+          "startLine": 31,
+          "endLine": 37,
+          "params": []
+        },
+        {
+          "name": "load_version_comparison_per_bench",
+          "startLine": 40,
+          "endLine": 45,
+          "params": []
+        },
+        {
+          "name": "load_graph1_performance",
+          "startLine": 48,
+          "endLine": 53,
+          "params": []
+        },
+        {
+          "name": "load_ablation_real",
+          "startLine": 56,
+          "endLine": 61,
+          "params": []
+        },
+        {
+          "name": "load_ablation_projected",
+          "startLine": 64,
+          "endLine": 66,
+          "params": []
+        },
+        {
+          "name": "load_full_model_comparison",
+          "startLine": 69,
+          "endLine": 75,
+          "params": []
+        },
+        {
+          "name": "load_hardware_model",
+          "startLine": 78,
+          "endLine": 82,
+          "params": [
+            "cluster"
+          ]
+        },
+        {
+          "name": "load_hardware_optype",
+          "startLine": 85,
+          "endLine": 87,
+          "params": [
+            "cluster"
+          ]
+        },
+        {
+          "name": "load_benchmark_classification",
+          "startLine": 90,
+          "endLine": 94,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "data_path",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "load_csv",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "img_path",
+          "line": 24,
+          "isDefault": false
+        },
+        {
+          "name": "load_version_comparison_grouped",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "load_version_comparison_per_bench",
+          "line": 40,
+          "isDefault": false
+        },
+        {
+          "name": "load_graph1_performance",
+          "line": 48,
+          "isDefault": false
+        },
+        {
+          "name": "load_ablation_real",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "load_ablation_projected",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "load_full_model_comparison",
+          "line": 69,
+          "isDefault": false
+        },
+        {
+          "name": "load_hardware_model",
+          "line": 78,
+          "isDefault": false
+        },
+        {
+          "name": "load_hardware_optype",
+          "line": 85,
+          "isDefault": false
+        },
+        {
+          "name": "load_benchmark_classification",
+          "line": 90,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "load_csv",
+          "callee": "data_path",
+          "lineNumber": 18
+        },
+        {
+          "caller": "load_csv",
+          "callee": "path.exists",
+          "lineNumber": 19
+        },
+        {
+          "caller": "load_csv",
+          "callee": "pd.DataFrame",
+          "lineNumber": 20
+        },
+        {
+          "caller": "load_csv",
+          "callee": "pd.read_csv",
+          "lineNumber": 21
+        },
+        {
+          "caller": "img_path",
+          "callee": "str",
+          "lineNumber": 26
+        },
+        {
+          "caller": "img_path",
+          "callee": "data_path",
+          "lineNumber": 26
+        },
+        {
+          "caller": "load_version_comparison_grouped",
+          "callee": "load_csv",
+          "lineNumber": 37
+        },
+        {
+          "caller": "load_version_comparison_per_bench",
+          "callee": "load_csv",
+          "lineNumber": 45
+        },
+        {
+          "caller": "load_graph1_performance",
+          "callee": "load_csv",
+          "lineNumber": 53
+        },
+        {
+          "caller": "load_ablation_real",
+          "callee": "load_csv",
+          "lineNumber": 61
+        },
+        {
+          "caller": "load_ablation_projected",
+          "callee": "load_csv",
+          "lineNumber": 66
+        },
+        {
+          "caller": "load_full_model_comparison",
+          "callee": "load_csv",
+          "lineNumber": 75
+        },
+        {
+          "caller": "load_hardware_model",
+          "callee": "load_csv",
+          "lineNumber": 82
+        },
+        {
+          "caller": "load_hardware_optype",
+          "callee": "load_csv",
+          "lineNumber": 87
+        },
+        {
+          "caller": "load_benchmark_classification",
+          "callee": "load_csv",
+          "lineNumber": 94
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 12,
+        "functionCount": 12,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "dashboard/utils/plotting.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 52,
+      "nonEmptyLines": 46,
+      "functions": [
+        {
+          "name": "add_baseline_hline",
+          "startLine": 13,
+          "endLine": 17,
+          "params": [
+            "fig",
+            "y",
+            "label"
+          ]
+        },
+        {
+          "name": "bar_chart",
+          "startLine": 20,
+          "endLine": 52,
+          "params": [
+            "df",
+            "x_col",
+            "y_col",
+            "color_col",
+            "color_map",
+            "barmode",
+            "x_label",
+            "y_label",
+            "title",
+            "height",
+            "xangle"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "add_baseline_hline",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "bar_chart",
+          "line": 20,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "add_baseline_hline",
+          "callee": "fig.add_hline",
+          "lineNumber": 14
+        },
+        {
+          "caller": "bar_chart",
+          "callee": "dict",
+          "lineNumber": 33
+        },
+        {
+          "caller": "bar_chart",
+          "callee": "px.bar",
+          "lineNumber": 43
+        },
+        {
+          "caller": "bar_chart",
+          "callee": "fig.update_layout",
+          "lineNumber": 44
+        },
+        {
+          "caller": "bar_chart",
+          "callee": "dict",
+          "lineNumber": 48
+        },
+        {
+          "caller": "bar_chart",
+          "callee": "dict",
+          "lineNumber": 49
+        },
+        {
+          "caller": "bar_chart",
+          "callee": "fig.update_traces",
+          "lineNumber": 51
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    }
+  ]
+}

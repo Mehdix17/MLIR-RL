@@ -1,0 +1,98 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/new_dataset/eval/v0_eval.json",
+      "language": "json",
+      "sizeLines": 75,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v0_eval_full.json",
+      "language": "json",
+      "sizeLines": 77,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v0_v2_eval.json",
+      "language": "json",
+      "sizeLines": 77,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_hw_eval.json",
+      "language": "json",
+      "sizeLines": 84,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_hw_no_reward_eval.json",
+      "language": "json",
+      "sizeLines": 66,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_shaped_reward_eval.json",
+      "language": "json",
+      "sizeLines": 84,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_shaped_reward_eval_full.json",
+      "language": "json",
+      "sizeLines": 86,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_shaped_reward_eval_multi_hw.json",
+      "language": "json",
+      "sizeLines": 86,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v45_no_transformer_eval.json",
+      "language": "json",
+      "sizeLines": 76,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v4_5_eval.json",
+      "language": "json",
+      "sizeLines": 83,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v4_6_eval.json",
+      "language": "json",
+      "sizeLines": 83,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v4_7_eval.json",
+      "language": "json",
+      "sizeLines": 83,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/new_dataset/eval/v4_8_eval.json",
+      "language": "json",
+      "sizeLines": 84,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/new_dataset/eval/v0_eval.json": [],
+    "config/new_dataset/eval/v0_eval_full.json": [],
+    "config/new_dataset/eval/v0_v2_eval.json": [],
+    "config/new_dataset/eval/v45_no_hw_eval.json": [],
+    "config/new_dataset/eval/v45_no_hw_no_reward_eval.json": [],
+    "config/new_dataset/eval/v45_no_shaped_reward_eval.json": [],
+    "config/new_dataset/eval/v45_no_shaped_reward_eval_full.json": [],
+    "config/new_dataset/eval/v45_no_shaped_reward_eval_multi_hw.json": [],
+    "config/new_dataset/eval/v45_no_transformer_eval.json": [],
+    "config/new_dataset/eval/v4_5_eval.json": [],
+    "config/new_dataset/eval/v4_6_eval.json": [],
+    "config/new_dataset/eval/v4_7_eval.json": [],
+    "config/new_dataset/eval/v4_8_eval.json": []
+  }
+}

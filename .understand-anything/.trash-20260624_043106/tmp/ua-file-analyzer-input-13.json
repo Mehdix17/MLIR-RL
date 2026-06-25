@@ -1,0 +1,214 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "language": "python",
+      "sizeLines": 264,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "language": "python",
+      "sizeLines": 248,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "language": "python",
+      "sizeLines": 253,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "language": "python",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "language": "python",
+      "sizeLines": 262,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "language": "python",
+      "sizeLines": 46,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "language": "python",
+      "sizeLines": 132,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "language": "python",
+      "sizeLines": 124,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "language": "python",
+      "sizeLines": 77,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/env.py",
+      "language": "python",
+      "sizeLines": 406,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/execution.py",
+      "language": "python",
+      "sizeLines": 412,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/model.py",
+      "language": "python",
+      "sizeLines": 433,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/observation.py",
+      "language": "python",
+      "sizeLines": 399,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ppo.py",
+      "language": "python",
+      "sizeLines": 447,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "language": "python",
+      "sizeLines": 392,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/trajectory.py",
+      "language": "python",
+      "sizeLines": 406,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "language": "python",
+      "sizeLines": 583,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/interchange.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/no_transformation.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_fusion.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiled_parallelization.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/tiling.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/vectorization.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/base.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "utils/config.py",
+      "utils/implementation.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/env.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/execution.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/execution.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py",
+      "utils/bindings_process.py",
+      "utils/singleton.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/model.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/observation.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/observation.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "utils/config.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/ppo.py": [
+      "rl_autoschedular/rl_autoschedular_v1/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/actions/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/benchmarks.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/env.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/execution.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/model.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/observation.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/trajectory.py",
+      "utils/config.py",
+      "utils/dask_manager.py",
+      "utils/file_logger.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/state.py": [
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/trajectory.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/model.py",
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/transforms.py": [
+      "utils/bindings_process.py"
+    ]
+  }
+}

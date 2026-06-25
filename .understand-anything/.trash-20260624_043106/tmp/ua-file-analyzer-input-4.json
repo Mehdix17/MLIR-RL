@@ -1,0 +1,256 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "data_utils/tf2mlir.py",
+      "language": "python",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v0/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v0/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v1/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v1/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v1/trajectory.py",
+      "language": "python",
+      "sizeLines": 406,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v2/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v2/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v2_5/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v2_5/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v3/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v3/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_hw/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_hw/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_transformer/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_transformer/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v45_no_transformer/trajectory.py",
+      "language": "python",
+      "sizeLines": 406,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_5/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_9/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "rl_autoschedular/rl_autoschedular_v4_9/evaluation.py",
+      "language": "python",
+      "sizeLines": 352,
+      "fileCategory": "code"
+    },
+    {
+      "path": "utils/log.py",
+      "language": "python",
+      "sizeLines": 50,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "data_utils/tf2mlir.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v0/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v0/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v0/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v1/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v1/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v1/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v1/trajectory.py": [
+      "rl_autoschedular/rl_autoschedular_v1/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v1/model.py",
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v2/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v2/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v2/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v2_5/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v2_5/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v2_5/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v3/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v3/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v3/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v4/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_hw/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_hw/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_hw/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_shaped_reward/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_transformer/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_transformer/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_transformer/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v45_no_transformer/trajectory.py": [
+      "rl_autoschedular/rl_autoschedular_v45_no_transformer/__init__.py",
+      "rl_autoschedular/rl_autoschedular_v45_no_transformer/model.py",
+      "utils/config.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_5/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v4_5/__init__.py",
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_9/__init__.py": [
+      "utils/log.py"
+    ],
+    "rl_autoschedular/rl_autoschedular_v4_9/evaluation.py": [
+      "rl_autoschedular/rl_autoschedular_v4_9/__init__.py",
+      "utils/log.py"
+    ],
+    "utils/log.py": []
+  }
+}

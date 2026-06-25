@@ -1,0 +1,16 @@
+agent,group,geo_mean,count
+V0,add,0.3879,63
+V4.9-L,add,0.3556,55
+V4.9-S,add,0.4510,63
+V0,conv2d,1.7147,82
+V4.9-L,conv2d,3.5649,79
+V4.9-S,conv2d,2.4299,82
+V0,matmul,14.9407,45
+V4.9-L,matmul,5.9128,45
+V4.9-S,matmul,8.2894,45
+V0,pooling,0.7632,52
+V4.9-L,pooling,0.5526,52
+V4.9-S,pooling,0.9086,53
+V0,relu,0.8401,35
+V4.9-L,relu,0.2229,35
+V4.9-S,relu,0.6875,35

@@ -1,0 +1,1108 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "type": "file",
+      "name": "optimize_model_via_blocks.py",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:_has_compute_heavy",
+      "type": "function",
+      "name": "_has_compute_heavy",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        60,
+        69
+      ],
+      "summary": "Function implementing the execution logic for '_has_compute_heavy'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:infer_greedy_schedule",
+      "type": "function",
+      "name": "infer_greedy_schedule",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        72,
+        126
+      ],
+      "summary": "Function implementing the execution logic for 'infer_greedy_schedule'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:apply_actions_to_code",
+      "type": "function",
+      "name": "apply_actions_to_code",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        129,
+        181
+      ],
+      "summary": "Function implementing the execution logic for 'apply_actions_to_code'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:_build_block_action_body",
+      "type": "function",
+      "name": "_build_block_action_body",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        184,
+        304
+      ],
+      "summary": "Function implementing the execution logic for '_build_block_action_body'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:_worker_process_block",
+      "type": "function",
+      "name": "_worker_process_block",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        307,
+        410
+      ],
+      "summary": "Function implementing the execution logic for '_worker_process_block'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:_worker_init",
+      "type": "function",
+      "name": "_worker_init",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        413,
+        424
+      ],
+      "summary": "Function implementing the execution logic for '_worker_init'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:measure_exec",
+      "type": "function",
+      "name": "measure_exec",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        427,
+        434
+      ],
+      "summary": "Function implementing the execution logic for 'measure_exec'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:process_model",
+      "type": "function",
+      "name": "process_model",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        437,
+        620
+      ],
+      "summary": "Function implementing the execution logic for 'process_model'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        623,
+        678
+      ],
+      "summary": "Function implementing the execution logic for 'main'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/full_model/optimize_model_via_blocks.py:_run_single_checkpoint",
+      "type": "function",
+      "name": "_run_single_checkpoint",
+      "filePath": "scripts/full_model/optimize_model_via_blocks.py",
+      "lineRange": [
+        685,
+        852
+      ],
+      "summary": "Function implementing the execution logic for '_run_single_checkpoint'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/train/train.py",
+      "type": "file",
+      "name": "train.py",
+      "filePath": "scripts/train/train.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:scripts/train/train.py:_sigabrt_handler",
+      "type": "function",
+      "name": "_sigabrt_handler",
+      "filePath": "scripts/train/train.py",
+      "lineRange": [
+        14,
+        15
+      ],
+      "summary": "Function implementing the execution logic for '_sigabrt_handler'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/train/train.py:load_train_data",
+      "type": "function",
+      "name": "load_train_data",
+      "filePath": "scripts/train/train.py",
+      "lineRange": [
+        69,
+        70
+      ],
+      "summary": "Function implementing the execution logic for 'load_train_data'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/train/train.py:load_main_exec_data",
+      "type": "function",
+      "name": "load_main_exec_data",
+      "filePath": "scripts/train/train.py",
+      "lineRange": [
+        75,
+        80
+      ],
+      "summary": "Function implementing the execution logic for 'load_main_exec_data'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:utils/config.py",
+      "type": "file",
+      "name": "config.py",
+      "filePath": "utils/config.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:utils/config.py:Config",
+      "type": "class",
+      "name": "Config",
+      "filePath": "utils/config.py",
+      "lineRange": [
+        8,
+        165
+      ],
+      "summary": "Class defining properties and operations for 'Config'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:utils/dask_manager.py",
+      "type": "file",
+      "name": "dask_manager.py",
+      "filePath": "utils/dask_manager.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:utils/dask_manager.py:DaskManager",
+      "type": "class",
+      "name": "DaskManager",
+      "filePath": "utils/dask_manager.py",
+      "lineRange": [
+        23,
+        279
+      ],
+      "summary": "Class defining properties and operations for 'DaskManager'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:utils/file_logger.py",
+      "type": "file",
+      "name": "file_logger.py",
+      "filePath": "utils/file_logger.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:utils/file_logger.py:FileLogger",
+      "type": "class",
+      "name": "FileLogger",
+      "filePath": "utils/file_logger.py",
+      "lineRange": [
+        8,
+        76
+      ],
+      "summary": "Class defining properties and operations for 'FileLogger'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:utils/file_logger.py:FileInstance",
+      "type": "class",
+      "name": "FileInstance",
+      "filePath": "utils/file_logger.py",
+      "lineRange": [
+        79,
+        91
+      ],
+      "summary": "Class defining properties and operations for 'FileInstance'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:utils/implementation.py",
+      "type": "file",
+      "name": "implementation.py",
+      "filePath": "utils/implementation.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "barrel-module"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "function:utils/implementation.py:_load_impl_from_config",
+      "type": "function",
+      "name": "_load_impl_from_config",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        26,
+        38
+      ],
+      "summary": "Function implementing the execution logic for '_load_impl_from_config'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_autoschedular_impl",
+      "type": "function",
+      "name": "get_autoschedular_impl",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        41,
+        66
+      ],
+      "summary": "Function implementing the execution logic for 'get_autoschedular_impl'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:_implementation_token",
+      "type": "function",
+      "name": "_implementation_token",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        69,
+        83
+      ],
+      "summary": "Function implementing the execution logic for '_implementation_token'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_implementation_meta",
+      "type": "function",
+      "name": "get_implementation_meta",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        86,
+        105
+      ],
+      "summary": "Function implementing the execution logic for 'get_implementation_meta'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_agent_subdir",
+      "type": "function",
+      "name": "get_agent_subdir",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        108,
+        110
+      ],
+      "summary": "Function implementing the execution logic for 'get_agent_subdir'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_base_prefix",
+      "type": "function",
+      "name": "get_base_prefix",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        113,
+        115
+      ],
+      "summary": "Function implementing the execution logic for 'get_base_prefix'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_agent_runs_root",
+      "type": "function",
+      "name": "get_agent_runs_root",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        118,
+        120
+      ],
+      "summary": "Function implementing the execution logic for 'get_agent_runs_root'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_base_file_path",
+      "type": "function",
+      "name": "get_base_file_path",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        123,
+        132
+      ],
+      "summary": "Function implementing the execution logic for 'get_base_file_path'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_split_file_path",
+      "type": "function",
+      "name": "get_split_file_path",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        135,
+        146
+      ],
+      "summary": "Function implementing the execution logic for 'get_split_file_path'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:get_base_eval_files",
+      "type": "function",
+      "name": "get_base_eval_files",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        149,
+        178
+      ],
+      "summary": "Function implementing the execution logic for 'get_base_eval_files'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:utils/implementation.py:import_autoschedular_module",
+      "type": "function",
+      "name": "import_autoschedular_module",
+      "filePath": "utils/implementation.py",
+      "lineRange": [
+        181,
+        196
+      ],
+      "summary": "Function implementing the execution logic for 'import_autoschedular_module'.",
+      "tags": [
+        "function",
+        "logic-block",
+        "helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:utils/singleton.py",
+      "type": "file",
+      "name": "singleton.py",
+      "filePath": "utils/singleton.py",
+      "summary": "Python module contributing to the MLIR RL loop auto-scheduling system.",
+      "tags": [
+        "source-code",
+        "python",
+        "mlir-rl"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Python script executing loop analysis or model training components."
+    },
+    {
+      "id": "class:utils/singleton.py:Singleton",
+      "type": "class",
+      "name": "Singleton",
+      "filePath": "utils/singleton.py",
+      "lineRange": [
+        1,
+        8
+      ],
+      "summary": "Class defining properties and operations for 'Singleton'.",
+      "tags": [
+        "class-definition",
+        "object-oriented",
+        "structure"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_has_compute_heavy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_has_compute_heavy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:infer_greedy_schedule",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:infer_greedy_schedule",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:apply_actions_to_code",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:apply_actions_to_code",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_build_block_action_body",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_build_block_action_body",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_worker_process_block",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_worker_process_block",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_worker_init",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_worker_init",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:measure_exec",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:measure_exec",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:process_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:process_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_run_single_checkpoint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "function:scripts/full_model/optimize_model_via_blocks.py:_run_single_checkpoint",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "file:data_utils/extract_blocks.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/full_model/optimize_model_via_blocks.py",
+      "target": "file:utils/implementation.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "function:scripts/train/train.py:_sigabrt_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "function:scripts/train/train.py:_sigabrt_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "function:scripts/train/train.py:load_train_data",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "function:scripts/train/train.py:load_train_data",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "function:scripts/train/train.py:load_main_exec_data",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "function:scripts/train/train.py:load_main_exec_data",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "file:utils/dask_manager.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "file:utils/file_logger.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "file:utils/implementation.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/train/train.py",
+      "target": "file:utils/log.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/config.py",
+      "target": "class:utils/config.py:Config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/config.py",
+      "target": "class:utils/config.py:Config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/config.py",
+      "target": "file:utils/singleton.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/dask_manager.py",
+      "target": "class:utils/dask_manager.py:DaskManager",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/dask_manager.py",
+      "target": "class:utils/dask_manager.py:DaskManager",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/dask_manager.py",
+      "target": "file:utils/file_logger.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/dask_manager.py",
+      "target": "file:utils/log.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/dask_manager.py",
+      "target": "file:utils/singleton.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "class:utils/file_logger.py:FileLogger",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "class:utils/file_logger.py:FileLogger",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "class:utils/file_logger.py:FileInstance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "class:utils/file_logger.py:FileInstance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "file:utils/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "file:utils/implementation.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/file_logger.py",
+      "target": "file:utils/singleton.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:_load_impl_from_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:_load_impl_from_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_autoschedular_impl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_autoschedular_impl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:_implementation_token",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:_implementation_token",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_implementation_meta",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_implementation_meta",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_agent_subdir",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_agent_subdir",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_base_prefix",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_base_prefix",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_agent_runs_root",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_agent_runs_root",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_base_file_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_base_file_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_split_file_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_split_file_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_base_eval_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:get_base_eval_files",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:import_autoschedular_module",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/implementation.py",
+      "target": "function:utils/implementation.py:import_autoschedular_module",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:utils/singleton.py",
+      "target": "class:utils/singleton.py:Singleton",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:utils/singleton.py",
+      "target": "class:utils/singleton.py:Singleton",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
-#SBATCH --mem=64G
+#SBATCH --mem=8G
 #SBATCH --cpus-per-task=28
+#SBATCH --constraint=bergamo
 #SBATCH --time=3-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/train_%j.err

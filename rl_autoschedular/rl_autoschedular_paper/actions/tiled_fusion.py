@@ -4,10 +4,10 @@ This module implements the tiled fusion transformation action, which applies
 tiling and fusion of producer-consumer operations.
 """
 
-from mlir_rl_artifact.utils.log import print_alert
+from rl_autoschedular_paper.utils.log import print_alert
 from .tiled_parallelization import TiledParallelization
-from mlir_rl_artifact.transforms import transform_TF, transform_tile
-from mlir_rl_artifact.state import BenchmarkFeatures, OperationFeatures, OperationState
+from rl_autoschedular_paper.transforms import transform_TF, transform_tile
+from rl_autoschedular_paper.state import BenchmarkFeatures, OperationFeatures, OperationState
 from typing import Optional, Union, overload
 
 
@@ -262,7 +262,7 @@ class TiledFusion(TiledParallelization):
         for dim_pos, dim_str in enumerate(prod_res_store):
             dim_str = dim_str.strip()
             if dim_str not in prod_args_dims:
-                raise Exception(f"Unsupported producer store [{prod_res_store}] at position {dim_pos}")
+                continue  # constant dimension, not a loop variable
             tile_sizes[prod_args_dims[dim_str]] = prod_res_tile_sizes[dim_pos]
 
         # 3. Add the tiling as a pre-action in the producer

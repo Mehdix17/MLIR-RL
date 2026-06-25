@@ -1,0 +1,146 @@
+{
+  "nodes": [
+    {
+      "id": "config:config/single_ops_dataset/eval/paper_eval.json",
+      "type": "config",
+      "name": "paper_eval.json",
+      "filePath": "config/single_ops_dataset/eval/paper_eval.json",
+      "summary": "Configuration settings for paper_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/eval/v0_eval.json",
+      "type": "config",
+      "name": "v0_eval.json",
+      "filePath": "config/single_ops_dataset/eval/v0_eval.json",
+      "summary": "Configuration settings for v0_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/eval/v4_6_eval.json",
+      "type": "config",
+      "name": "v4_6_eval.json",
+      "filePath": "config/single_ops_dataset/eval/v4_6_eval.json",
+      "summary": "Configuration settings for v4_6_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/eval/v4_7_eval.json",
+      "type": "config",
+      "name": "v4_7_eval.json",
+      "filePath": "config/single_ops_dataset/eval/v4_7_eval.json",
+      "summary": "Configuration settings for v4_7_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/eval/v4_8_eval.json",
+      "type": "config",
+      "name": "v4_8_eval.json",
+      "filePath": "config/single_ops_dataset/eval/v4_8_eval.json",
+      "summary": "Configuration settings for v4_8_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/eval/v4_9_large_eval.json",
+      "type": "config",
+      "name": "v4_9_large_eval.json",
+      "filePath": "config/single_ops_dataset/eval/v4_9_large_eval.json",
+      "summary": "Configuration settings for v4_9_large_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config/single_ops_dataset/eval/v4_9_small_eval.json",
+      "type": "config",
+      "name": "v4_9_small_eval.json",
+      "filePath": "config/single_ops_dataset/eval/v4_9_small_eval.json",
+      "summary": "Configuration settings for v4_9_small_eval.json controlling runtime or build parameters.",
+      "tags": [
+        "configuration",
+        "project-setup",
+        "json-config"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:config/single_ops_dataset/eval/paper_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/eval/v0_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/eval/v4_6_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/eval/v4_7_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/eval/v4_8_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/eval/v4_9_large_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config/single_ops_dataset/eval/v4_9_small_eval.json",
+      "target": "file:rl_autoschedular/rl_autoschedular_paper/train.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

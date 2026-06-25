@@ -1,0 +1,71 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "dashboard/dashboard.py",
+      "language": "python",
+      "sizeLines": 165,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/pages/1_version_comparison.py",
+      "language": "python",
+      "sizeLines": 179,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/pages/2_ablation_study.py",
+      "language": "python",
+      "sizeLines": 68,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/pages/3_multi_hardware.py",
+      "language": "python",
+      "sizeLines": 126,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/pages/4_full_model.py",
+      "language": "python",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/utils/data.py",
+      "language": "python",
+      "sizeLines": 145,
+      "fileCategory": "code"
+    },
+    {
+      "path": "dashboard/utils/plotting.py",
+      "language": "python",
+      "sizeLines": 52,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "dashboard/dashboard.py": [
+      "dashboard/utils/data.py",
+      "dashboard/utils/plotting.py"
+    ],
+    "dashboard/pages/1_version_comparison.py": [
+      "dashboard/utils/data.py",
+      "dashboard/utils/plotting.py"
+    ],
+    "dashboard/pages/2_ablation_study.py": [
+      "dashboard/utils/data.py",
+      "dashboard/utils/plotting.py"
+    ],
+    "dashboard/pages/3_multi_hardware.py": [
+      "dashboard/utils/data.py",
+      "dashboard/utils/plotting.py"
+    ],
+    "dashboard/pages/4_full_model.py": [
+      "dashboard/utils/data.py",
+      "dashboard/utils/plotting.py"
+    ],
+    "dashboard/utils/data.py": [],
+    "dashboard/utils/plotting.py": []
+  }
+}

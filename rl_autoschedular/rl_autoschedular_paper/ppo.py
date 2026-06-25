@@ -7,20 +7,20 @@ interaction between the RL environment and the neural network models.
 
 from datetime import timedelta
 import torch
-from mlir_rl_artifact.env import Env
-from mlir_rl_artifact.model import HiearchyModel as Model
-from mlir_rl_artifact.state import OperationState
-from mlir_rl_artifact.trajectory import TrajectoryCollector, TrajectoryData
-from mlir_rl_artifact.observation import Observation, NumLoops
-from mlir_rl_artifact.actions import ActionSpace
-from mlir_rl_artifact.benchmarks import Benchmarks
-from mlir_rl_artifact.execution import Execution
-from mlir_rl_artifact import device
-from mlir_rl_artifact.utils.config import Config
-from mlir_rl_artifact.utils.file_logger import FileLogger
-from mlir_rl_artifact.utils.gpu_occupier import GPUOccupier
-from mlir_rl_artifact.utils.log import print_error, print_info, print_success
-from mlir_rl_artifact.utils.dask_manager import DaskManager
+from rl_autoschedular_paper.env import Env
+from rl_autoschedular_paper.model import HiearchyModel as Model
+from rl_autoschedular_paper.state import OperationState
+from rl_autoschedular_paper.trajectory import TrajectoryCollector, TrajectoryData
+from rl_autoschedular_paper.observation import Observation, NumLoops
+from rl_autoschedular_paper.actions import ActionSpace
+from rl_autoschedular_paper.benchmarks import Benchmarks
+from rl_autoschedular_paper.execution import Execution
+from rl_autoschedular_paper import device
+from rl_autoschedular_paper.utils.config import Config
+from rl_autoschedular_paper.utils.file_logger import FileLogger
+from rl_autoschedular_paper.utils.gpu_occupier import GPUOccupier
+from rl_autoschedular_paper.utils.log import print_error, print_info, print_success
+from rl_autoschedular_paper.utils.dask_manager import DaskManager
 from time import time
 from typing import Optional
 

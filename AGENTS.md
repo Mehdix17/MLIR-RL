@@ -21,6 +21,7 @@ Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda activation interna
 - `utils.config.Config` is a singleton — reads `CONFIG_FILE_PATH` at first import.
 - Import `dotenv` and load `.env` BEFORE any config imports in custom scripts.
 - Use `python -m py_compile <file>` to verify — no pytest suite exists.
+- `json_file` / `eval_json_file` auto-derive from `results_dir` + implementation when empty in config.
 
 ## Behavioral Guidelines
 
@@ -183,18 +184,57 @@ Before submitting many eval jobs, check `lfs quota -u $USER /scratch`. If near l
 
 ## Implementation Packages
 
+All packages live under `rl_autoschedular/`:
+
 | Package | Purpose |
 |---------|---------|
 | `rl_autoschedular_v0` | Baseline (LSTM, no HW features) |
 | `rl_autoschedular_v4_5` | Integrated (Transformer + HW + shaped reward) |
+| `rl_autoschedular_v4_9` | V4.9 variant (Transformer, pointer interchange, process-isolated execution, mlir-cpu-runner fallback) |
 | `rl_autoschedular_v45_no_hw` | Ablation: HW disabled |
 | `rl_autoschedular_v45_no_shaped_reward` | Ablation: no reward shaping |
 | `rl_autoschedular_v45_no_transformer` | Ablation: LSTM instead of Transformer |
+| `rl_autoschedular_paper` | Paper artifact port (LSTM, pointers interchange, process-isolated execution) |
+| `rl_autoschedular_paper_transformer` | Paper ablation: Transformer encoder instead of LSTM, identical to paper otherwise |
 | `rl_autoschedular_v1` … `v4` | Legacy versions |
 
-V4.6/V4.7/V4.8 all use `rl_autoschedular_v4_5` impl with different configs. Each `vN` is a standalone package — never mix imports between them.
+V4.6/V4.7/V4.8/V4.9 all use `rl_autoschedular_v4_5` impl with different configs (V4.9 adds schedule cache via `main_exec_data_file`). Each `vN` is a standalone package — never mix imports between them.
 
-Configs live in `config/new_dataset/train/` and `config/new_dataset/eval/`.
+### Paper Ablation (LSTM vs Transformer)
+
+`rl_autoschedular_paper` and `rl_autoschedular_paper_transformer` are identical except for the encoder:
+- **paper**: `LSTMEmbedding` (2-layer LSTM over consumer+producer)
+- **paper_transformer**: `TransformerEmbedding` (self-attention over loop tokens, CLS pooling)
+
+Both use the same observation format, action space, reward structure, and execution pipeline (process-isolated with mlir-cpu-runner fallback). Trained on `single_ops_dataset`:
+
+```bash
+# Train paper (LSTM)
+sbatch scripts/train/train.sh config/single_ops_dataset/train/paper.json
+
+# Train paper (Transformer)
+sbatch scripts/train/train.sh config/single_ops_dataset/train/paper_transformer.json
+
+# Eval paper
+sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
+  scripts/eval/eval.sh config/single_ops_dataset/eval/paper_eval.json --checkpoint <step>
+
+# Eval paper_transformer
+sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
+  scripts/eval/eval.sh config/single_ops_dataset/eval/paper_transformer_eval.json --checkpoint <step>
+```
+
+### Paper Safety Mechanisms (ported from V4.9)
+
+The paper packages now share V4.9's execution safety:
+1. **SIGABRT handler** in `evaluate.py` — converts MLIR crashes to catchable Python exceptions
+2. **Process-isolated execution** — `multiprocessing.Process` + `Manager().dict()`, MLIR runs in child process
+3. **Dynamic timeout** — profiling-based `min(300, root_exec_time * 5)` seconds
+4. **mlir-cpu-runner fallback** — subprocess fallback if bindings fail
+
+### Paper FileLogger
+
+Paper packages write directly to `results_dir/` (no `run_N/` subdirectory), matching V4.9's structure.
 
 ## Speedup & Reward Gotchas
 
@@ -235,3 +275,4 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessibl
 - [Full Model](docs/FULL_MODEL.md) — end-to-end model optimization architecture
 - [Dashboard](docs/DASHBOARD.md) — Streamlit comparison dashboard
 - [HPC Setup](docs/HPC%20Setup.md) — cluster-specific Slurm instructions
+- [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison, implemented fixes

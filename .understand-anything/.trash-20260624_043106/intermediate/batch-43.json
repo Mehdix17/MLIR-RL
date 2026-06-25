@@ -1,0 +1,75 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/full_model/fix_jit_times.sh",
+      "type": "file",
+      "name": "fix_jit_times.sh",
+      "filePath": "scripts/full_model/fix_jit_times.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/full_model/fix_jit_times2.sh",
+      "type": "file",
+      "name": "fix_jit_times2.sh",
+      "filePath": "scripts/full_model/fix_jit_times2.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/full_model/get_pytorch_full_times.sh",
+      "type": "file",
+      "name": "get_pytorch_full_times.sh",
+      "filePath": "scripts/full_model/get_pytorch_full_times.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/full_model/merge_full_model_results.sh",
+      "type": "file",
+      "name": "merge_full_model_results.sh",
+      "filePath": "scripts/full_model/merge_full_model_results.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/full_model/optimize_full_model.sh",
+      "type": "file",
+      "name": "optimize_full_model.sh",
+      "filePath": "scripts/full_model/optimize_full_model.sh",
+      "summary": "Script file executing automated training, evaluation, or setup scripts in the workspace.",
+      "tags": [
+        "scripting",
+        "automation",
+        "shell-script",
+        "bash"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}

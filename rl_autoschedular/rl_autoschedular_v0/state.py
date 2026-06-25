@@ -191,7 +191,8 @@ def extract_bench_features_from_code(bench_name: str, code: str, root_execution_
         shell=True,
         input=code.encode('utf-8'),
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stderr=subprocess.PIPE,
+        timeout=300
     )
     raw_ast_info = result.stdout.decode('utf-8')
 
@@ -227,7 +228,7 @@ def extract_bench_features_from_file(bench_name: str, file_path: str, root_execu
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        timeout=60
+        timeout=300
     )
     raw_ast_info = result.stdout.decode('utf-8')
     

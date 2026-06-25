@@ -6,13 +6,13 @@ sequences. The environment tracks operations across benchmarks and evaluates the
 effectiveness of optimizations.
 """
 
-from mlir_rl_artifact.state import OperationState, BenchmarkFeatures
-from mlir_rl_artifact.benchmarks import Benchmarks
+from rl_autoschedular_paper.state import OperationState, BenchmarkFeatures
+from rl_autoschedular_paper.benchmarks import Benchmarks
 from typing import Optional
-from mlir_rl_artifact.execution import Execution
-from mlir_rl_artifact.actions import Action, TiledFusion
-from mlir_rl_artifact.utils.log import print_error
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.execution import Execution
+from rl_autoschedular_paper.actions import Action, TiledFusion
+from rl_autoschedular_paper.utils.log import print_error
+from rl_autoschedular_paper.utils.config import Config
 from mlir._mlir_libs._mlir.ir import Context, Module  # type: ignore
 import random
 import math
@@ -122,7 +122,10 @@ class Env:
 
         # Evaluate the code (since the operation is done)
         try:
-            new_exec_time, exec_succeeded, cache_miss = Execution().execute_code(transformed_module, self.benchmark_data.bench_name, seq)
+            new_exec_time, exec_succeeded, cache_miss, error_msg = Execution().execute_code(
+                transformed_module, self.benchmark_data.bench_name, seq,
+                root_exec_time=self.benchmark_data.root_exec_time
+            )
             if not exec_succeeded:
                 raise Exception("Incorrect results")
         except Exception as e:

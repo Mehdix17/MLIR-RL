@@ -10,9 +10,9 @@ import torch
 import torch.nn as nn
 from torch.distributions import Distribution
 from typing import Optional
-from mlir_rl_artifact.actions import ActionSpace, Interchange
-from mlir_rl_artifact.observation import OpFeatures, ActionHistory, ProducerOpFeatures, Observation
-from mlir_rl_artifact.utils.config import Config
+from rl_autoschedular_paper.actions import ActionSpace, Interchange
+from rl_autoschedular_paper.observation import OpFeatures, ActionHistory, ProducerOpFeatures, Observation
+from rl_autoschedular_paper.utils.config import Config
 
 
 ACTIVATION = nn.ReLU

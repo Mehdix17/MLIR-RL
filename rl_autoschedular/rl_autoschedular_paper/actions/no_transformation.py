@@ -5,7 +5,7 @@ transformation sequence without applying any changes.
 """
 
 from typing import Optional
-from mlir_rl_artifact.state import OperationState
+from rl_autoschedular_paper.state import OperationState
 from .base import Action
 
 

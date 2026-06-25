@@ -9,7 +9,7 @@ import os
 import subprocess
 from mlir._mlir_libs._mlir.ir import Module  # type: ignore
 from mlir.dialects.transform import interpreter
-from mlir_rl_artifact.utils.bindings_process import BindingsProcess
+from rl_autoschedular_paper.utils.bindings_process import BindingsProcess
 
 
 def transform_TP(module: Module, operation_tag: str, tiling_sizes: list[int]):

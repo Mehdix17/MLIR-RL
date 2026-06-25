@@ -1,0 +1,28 @@
+{
+  "projectRoot": "/scratch/mb10856/MLIR-RL",
+  "batchFiles": [
+    {
+      "path": "config/old_dataset/test/test.json",
+      "language": "json",
+      "sizeLines": 41,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/test/v3_sanity.json",
+      "language": "json",
+      "sizeLines": 46,
+      "fileCategory": "config"
+    },
+    {
+      "path": "config/old_dataset/test/v4_sanity.json",
+      "language": "json",
+      "sizeLines": 54,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "config/old_dataset/test/test.json": [],
+    "config/old_dataset/test/v3_sanity.json": [],
+    "config/old_dataset/test/v4_sanity.json": []
+  }
+}
