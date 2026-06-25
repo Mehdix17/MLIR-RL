@@ -46,6 +46,8 @@ from data_utils.extract_ops import (  # pylint: disable=import-error
     _has_elided_tensor,
     _normalized_op_signature,
     _count_reduction_loops,
+    _find_closing_paren,
+    _collect_generic,
 )
 
 
@@ -92,27 +94,6 @@ def _block_has_heavy_op(op_texts: list[str]) -> bool:
         if "linalg.generic" in text and _count_reduction_loops(text) > 0:
             return True
     return False
-
-
-def _find_closing_paren(text: str, start: int) -> int:
-    depth = 0
-    for i in range(start, len(text)):
-        if text[i] == "(":
-            depth += 1
-        elif text[i] == ")":
-            depth -= 1
-            if depth == 0:
-                return i
-    return -1
-
-
-def _collect_generic(lines: list[str], start: int) -> tuple[str, int]:
-    buf = [lines[start]]
-    for i in range(start + 1, len(lines)):
-        buf.append(lines[i])
-        if lines[i].strip().startswith("} ->"):
-            return "\n".join(buf), i
-    return "\n".join(buf), len(lines) - 1
 
 
 def _collect_linalg_ops_from_full_code(full_code: str) -> list[str]:

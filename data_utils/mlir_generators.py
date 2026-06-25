@@ -4,7 +4,7 @@ from random import randint, choice, shuffle, random, seed
 import re
 import string
 
-def __remove_duplicate_args(args: list[str], shapes: list[str]):
+def _remove_duplicate_args(args: list[str], shapes: list[str]):
     """Remove duplicate (arg, shape) pairs while preserving order."""
     seen = set()
     result = []
@@ -15,9 +15,6 @@ def __remove_duplicate_args(args: list[str], shapes: list[str]):
     args = [a for a, _ in result]
     shapes = [s for _, s in result]
     return args, shapes
-
-Max = max
-
 
 def choice_topped(choices, max_value):
     trials_left = 50
@@ -74,7 +71,7 @@ def sub(*args):
     return f"linalg.sub ins(%arg0, %arg1: tensor<{SHAPE}xf32>, tensor<{SHAPE}xf32>) outs(%arg2: tensor<{SHAPE}xf32>) -> tensor<{SHAPE}xf32>"
 
 
-def max(*args):
+def linalg_max(*args):
     SHAPE = "x".join([str(choice(HEIGHTS)) for _ in range(randint(1, 4))])
     return f"linalg.max ins(%arg0, %arg1: tensor<{SHAPE}xf32>, tensor<{SHAPE}xf32>) outs(%arg2: tensor<{SHAPE}xf32>) -> tensor<{SHAPE}xf32>"
 
@@ -84,7 +81,7 @@ def mul(*args):
     return f"linalg.mul ins(%arg0, %arg1: tensor<{SHAPE}xf32>, tensor<{SHAPE}xf32>) outs(%arg2: tensor<{SHAPE}xf32>) -> tensor<{SHAPE}xf32>"
 
 
-def abs(*args):
+def linalg_abs(*args):
     SHAPE = "x".join([str(choice(HEIGHTS)) for _ in range(randint(1, 4))])
     return f"linalg.abs ins(%arg0: tensor<{SHAPE}xf32>) outs(%arg2: tensor<{SHAPE}xf32>) -> tensor<{SHAPE}xf32>"
 
@@ -1181,7 +1178,7 @@ def getShapes_Args(operation):
     fields = re.findall(ins_outs_pattern, operation)
 
     if fields == []:
-	# # TODO: Add shape extraction so that allocation snippet could be replicated
+        # TODO: Add shape extraction so that allocation snippet could be replicated
         fields = re.findall("(?:\(([^(]+)\))(?:\s*\->\s*([^(]+))", operation)[0]
         
         args,shapes = [],[]
@@ -1204,7 +1201,7 @@ def getShapes_Args(operation):
         args = [arg.strip() for arg in args]
         shapes = [shape.strip() for shape in shapes]
 
-        args, shapes = __remove_duplicate_args(args, shapes)
+        args, shapes = _remove_duplicate_args(args, shapes)
 
     return args,shapes
 
@@ -1246,145 +1243,6 @@ def randomSubGraph(verbose=False):
                 iterations.append(iterations_end+1)
                 iterations_end += 1
                 
-                continue
-        else:
-            res = LINALG_OPERATION_GENERATORS[operation_name]()
-        
-        if verbose:
-            print(f"\033[92m{res}\033[0m")
-
-        maps = ""
-        additional_function = ""
-
-        if isinstance(res, tuple):
-            raw_operation, additional_tuple = res
-            if isinstance(additional_tuple, tuple):
-                maps, additional_function = additional_tuple
-                
-            else:
-                maps = additional_tuple
-
-        else:
-            raw_operation = res
-
-        # Handling maps with the same name from different generators
-        maps_identifiers = re.findall(r"#(\w+)[^\w]",maps)
-        for map_id in maps_identifiers:
-            new_map = f"map{''.join([choice(string.digits) for _ in range(5)])}"
-            
-            
-            maps = re.sub(rf'\b{map_id}\b', new_map, maps)
-            additional_function = re.sub(rf"\b{map_id}\b",new_map, additional_function)
-            raw_operation = re.sub(rf"\b{map_id}\b",new_map,raw_operation)
-
-        # Handling additional functions with the same name (same generator called twice or user negligence)
-        functions_identifiers = re.findall(r"@(\w+)[^\w]", additional_function)
-        for func_id in functions_identifiers:
-            new_func = f"{func_id}{''.join([choice(string.digits) for _ in range(5)])}"
-            
-            additional_function = re.sub(rf"\b{func_id}\b",new_func, additional_function)
-            raw_operation = re.sub(rf"\b{func_id}\b",new_func,raw_operation)    
-
-
-        total_maps += "\n" + maps
-        total_additional_function += "\n" + additional_function
-
-        args,args_shape = getShapes_Args(raw_operation)
-
-        # change the input shape
-        if return_vars != []:
-            old_shape = args_shape[0]
-
-            # if any([x in raw_operation for x in ["matmul", "conv"]]):
-                # raw_operation = raw_operation.replace(old_shape, return_shapes[-1], 1)
-                # args_shape[0] = return_shapes[-1]
-
-            if all([x not in raw_operation for x in ["generic", "func.call"]]) and \
-                not any([x in raw_operation for x in ["matmul", "conv","pool"]]):
-                if verbose:
-                    print("\033[91m general shape change executed \033[0m")
-
-                raw_operation = raw_operation.replace(old_shape, return_shapes[-1])
-                args_shape = [return_shapes[-1] for _ in range(len(args_shape))]
-
-
-        # dealing with arguments with the same name from different generators
-        new_args = []
-        for i,arg in enumerate(args):
-            if i == 0 and return_vars != []:
-                new_arg = return_vars[-1]
-                args_shape.pop(0)
-
-            else:
-                new_arg = f"{arg}{''.join([choice(string.digits) for _ in range(5)])}"
-                new_args.append(new_arg)
-
-            raw_operation = raw_operation.replace(arg,new_arg)
-
-        
-        if params == []:
-            params.extend(new_args)
-            shapes.extend(args_shape)
-
-        else:
-            for arg,shape in zip(new_args,args_shape):
-                if "tensor" in shape:
-                    core += f"{arg} = bufferization.alloc_tensor() : {shape}\n"
-                else:
-                    core += f"{arg} = arith.constant 1.00000e+00 : f32\n"
-
-        return_var = f"%var{''.join([choice(string.digits) for _ in range(5)])}" # TODO: prod-cons links
-        return_vars.append(return_var)
-        
-        return_shape = args_shape[-1]
-        
-        if verbose:
-            print(f"\033[90m {return_shape=}\033[0m")
-        return_shapes.append(return_shape)
-
-        core += f"""{return_var} = {raw_operation} \n"""
-
-    core += f"""return {return_vars[-1]} : {return_shapes[-1]}\n"""
-
-    total_additional_function += f"""\nfunc.func private @myFunction({", ".join([f"{p}:{s}" for p,s in zip(params,shapes)])}) -> {return_shapes[-1]} {{        
-        {core}
-    }}"""
-
-    if verbose:
-        print(f'\033[94m{total_additional_function=}\033[0m')
-
-    final_operation = f"""func.call @myFunction({",".join(params)}) : ({",".join(shapes)}) -> {return_shapes[-1]}"""
-
-    return final_operation,(total_maps,total_additional_function)
-
-def randomblocks(operations=[], verbose=False):
-    
-    params = []
-    shapes = []
-    return_vars = []
-    return_shapes = []
-    core = ""
-
-    total_maps = ""
-    total_additional_function = ""
-
-    for operation_name in operations:
-        
-        if verbose:
-            print(f"\033[91m{operation_name=}\033[0m")
-
-        if return_shapes and return_shapes[-1]:
-            shape = list(map(int,return_shapes[-1][len("tensor<"):-1].split('x')[:-1]))
-            
-            if verbose:
-                print(f'\033[33m{shape}\033[0m')
-            
-            try:
-                res = LINALG_OPERATION_GENERATORS[operation_name](shape)
-            except Exception as e:
-                traceback.print_exc()
-                if verbose:
-                    print(f"\033[33mskipped\033[0m")                
                 continue
         else:
             res = LINALG_OPERATION_GENERATORS[operation_name]()
@@ -2729,57 +2587,19 @@ return %55: tensor<{batch_size}x{out_channels}x{(height//stride)}x{(width//strid
 
 LINALG_OPERATION_GENERATORS = {
     "add": add,
-    # "add_nn": add_nn,
-    # "sub": sub,
-    # "max": max,
-    # "mul": mul,
-    # "abs": abs,
-    # "ceil": ceil,
-    # "copy": copy_,
-    # "fill": fill, # problem with the first arg being f32
-    # "transpose": transpose,
-    # "batch_matmul": batch_matmul,
-    # "batch_matmul_transpose_a": batch_matmul_transpose_a,
-    # "batch_matmul_transpose_b": batch_matmul_transpose_b,
-    # "batch_reduce_matmul": batch_reduce_matmul,
     "matmul": matmul,
-    # "matmul_transpose_a": matmul_transpose_a,
-    # "matmul_transpose_b": matmul_transpose_b,
-    # "conv_1d": conv_1d,
-    # "conv_1d_ncw_fcw": conv_1d_ncw_fcw,
-    # "conv_1d_nwc_wcf": conv_1d_nwc_wcf,
-    # "conv_2d": conv_2d, # Integer use
     "conv_2d_nchw_fchw": conv_2d_nchw_fchw,
-    # "conv_2d_ngchw_fgchw": conv_2d_ngchw_fgchw,
-    # "conv_2d_nhwc_fhwc": conv_2d_nhwc_fhwc,
     "conv_2d_nhwc_hwcf": conv_2d_nhwc_hwcf,
-    # "conv_3d": conv_3d, to skip
-    # "conv_3d_ncdhw_fcdhw": conv_3d_ncdhw_fcdhw,
-    # "depthwise_conv_1d_ncw_cw": depthwise_conv_1d_ncw_cw,
-    # "depthwise_conv_1d_nwc_wc": depthwise_conv_1d_nwc_wc,
-    # "depthwise_conv_1d_nwc_wcm": depthwise_conv_1d_nwc_wcm,
-    # "depthwise_conv_2d_nchw_chw": depthwise_conv_2d_nchw_chw,
-    # "depthwise_conv_2d_nhwc_hwc": depthwise_conv_2d_nhwc_hwc,
-    # "depthwise_conv_2d_nhwc_hwcm": depthwise_conv_2d_nhwc_hwcm,
-    # "depthwise_conv_3d_ncdhw_cdhw": depthwise_conv_3d_ncdhw_cdhw,
-    # "depthwise_conv_3d_ndhwc_dhwc": depthwise_conv_3d_ndhwc_dhwc,
-    # "depthwise_conv_3d_ndhwc_dhwcm": depthwise_conv_3d_ndhwc_dhwcm,
     "pooling_nchw_max": pooling_nchw_max,
     "pooling_nchw_sum": pooling_nchw_sum,
     "pooling_ncw_max": pooling_ncw_max,
     "pooling_ncw_sum": pooling_ncw_sum,
-    # "pooling_ndhwc_max": pooling_ndhwc_max,# They result in 276 GiB because of input allocation when execution with buinding
-    # "pooling_ndhwc_min": pooling_ndhwc_min,# They result in 276 GiB because of input allocation when execution with buinding
-    # "pooling_ndhwc_sum": pooling_ndhwc_sum,# They result in 276 GiB because of input allocation when execution with buinding
     "pooling_nhwc_max": pooling_nhwc_max,
     "pooling_nhwc_min": pooling_nhwc_min,
     "pooling_nhwc_sum": pooling_nhwc_sum,
     "pooling_nwc_max": pooling_nwc_max,
     "pooling_nwc_sum": pooling_nwc_sum,
     "relu": relu,
-    # "softmax_1d": lambda: softmax(dim=1),
-    "softmax_2d": lambda *args: softmax(*args,dim=2),
-    # "softmax_3d": lambda *args: softmax(*args, dim=3),
-    # "softmax_4d": lambda *args: softmax(*args, dim=4),
-    "sigmoid": sigmoid
+    "softmax_2d": lambda *args: softmax(*args, dim=2),
+    "sigmoid": sigmoid,
 }

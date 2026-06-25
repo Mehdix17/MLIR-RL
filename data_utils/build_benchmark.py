@@ -165,7 +165,7 @@ def main():
     from data_utils.mlir_generators import (
         LINALG_OPERATION_GENERATORS,
         BATCH_SIZES, HEIGHTS, CHANNELS, KERNELS, DILATIONS, STRIDES, SIZES,
-        randomSubGraph, randomblocks,
+        randomSubGraph,
         generate_resnet_block, generate_residual_block_mlir,
         vgg, bert, convnext,
     )
