@@ -260,14 +260,30 @@ V4.9's safety is split across three layers. Status after all rounds of fixes:
 
 ---
 
-## Final Jobs Resubmitted (round 2)
+## Round 3 — Third Wave of Failures (2026-06-25)
 
-| New SLURM Job | Config | Status at submission |
-|---------------|--------|----------------------|
-| 16407944 | `paper_original.json` | PENDING |
-| 16407945 | `paper_transformer_large.json` | PENDING |
+After Round 2 fixes, jobs 16407944 and 16407945 were submitted. Both still crashed with native SIGABRT during training execution.
 
-(`paper_transformer_small`, job 16407896, was already running and unaffected.)
+### Bug 5 — MLIR Overwriting Custom Python Signal Handlers
+
+**Error**:
+```
+python: mlir/.../PybindAdaptors.h:623: Assertion `errorMessage.empty()' failed.
+Aborted (core dumped)
+```
+
+**Root Cause**:
+Although Python's custom SIGABRT signal handler was registered at import time in `train.py`/`eval.py`/`evaluate.py`, LLVM/MLIR native bindings initialize their own signal handlers (which override Python's `signal.signal` registration) when `MlirContext` is first constructed during benchmark loading (specifically during `Benchmarks` initialization or first C++ call). As a result, the custom SIGABRT handler was unregistered by the time training or evaluation actually executed benchmarks.
+
+**Fix**:
+Re-register the custom SIGABRT signal handler after MLIR context initialization is complete. This is inserted immediately after the `Execution(...)` singleton is constructed in all training and evaluation entry points:
+- `scripts/train/train.py`
+- `scripts/eval/eval.py`
+- `scripts/eval/ablation_eval.py`
+- `rl_autoschedular_paper/evaluate.py`
+- `rl_autoschedular_paper_transformer/evaluate.py`
+
+This ensures that the Python signal handler is active during benchmark execution.
 
 ---
 
@@ -281,3 +297,8 @@ V4.9's safety is split across three layers. Status after all rounds of fixes:
 | `rl_autoschedular/rl_autoschedular_paper/benchmarks.py` | `try/except RuntimeError` guard around per-benchmark MLIR parsing (round 2) |
 | `rl_autoschedular/rl_autoschedular_paper_transformer/benchmarks.py` | Same `try/except RuntimeError` guard (round 2) |
 | `scripts/train/train.sh` | `--mem=64G` → `--mem=8G`; added `--constraint=bergamo` (round 1 + fairness fix) |
+| `scripts/train/train.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `scripts/eval/eval.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `scripts/eval/ablation_eval.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `rl_autoschedular/rl_autoschedular_paper/evaluate.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/evaluate.py` | Reinstalled SIGABRT handler after MLIR context initialization (round 3) |

@@ -86,6 +86,9 @@ main_exec_data = dm.run_and_register_to_workers(load_main_exec_data)
 # Initialize execution singleton
 Execution(fl.exec_data_file, main_exec_data)
 
+# Setup signal handler again (MLIR imports / initialization overrides Python's signal handler)
+signal.signal(signal.SIGABRT, _sigabrt_handler)
+
 print_info(f"Config: {cfg}")
 print_info(f"Autoscheduler implementation: {AUTOSCHEDULER_IMPL}")
 print_success(f'Logging to: {fl.run_dir}')

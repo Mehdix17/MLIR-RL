@@ -7,7 +7,7 @@ Reinforcement-learning auto-scheduler for MLIR loop nests. Python 3.11+, Slurm H
 ```bash
 source ~/envs/mlir/bin/activate
 set -a && source .env && set +a
-export CONFIG_FILE_PATH=config/train/v4_7.json   # always needed
+export CONFIG_FILE_PATH=config/new_dataset/train/v4_7.json   # adjust per task
 ```
 
 `.env` sets `PYTHONPATH`, `LD_LIBRARY_PATH` (conda + GCC-14 libstdc++), `LLVM_BUILD_PATH`, `AST_DUMPER_BIN_PATH`, `VECTORIZER_BIN_PATH`, Neptune credentials.
@@ -22,6 +22,7 @@ Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda activation interna
 - Import `dotenv` and load `.env` BEFORE any config imports in custom scripts.
 - Use `python -m py_compile <file>` to verify — no pytest suite exists.
 - `json_file` / `eval_json_file` auto-derive from `results_dir` + implementation when empty in config.
+- **Never mix imports between packages** — each `rl_autoschedular_vN` is fully standalone.
 
 ## Behavioral Guidelines
 
@@ -87,16 +88,20 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
+---
+
 ## Datasets
 
-Two datasets exist under `data/`:
+Four datasets exist under `data/`:
 
 | Dataset | Files | Dtype | Format | Purpose |
 |---------|-------|-------|--------|---------|
 | `new_dataset/all/` | 12K+ | f32 | `{model}_{op}_{idx}.mlir` | Primary training/eval (24 NN models) |
-| `single_ops_dataset/new_single_ops/` | 405 | f32 | `{model}_{op}_{idx}.mlir` | Paper single-op benchmarks (18 models) |
-| `single_ops_dataset/old_paper_dataset/` | 1,202 | f64 | `{op}_{dims}.mlir` | Legacy paper data (matmul, add, conv, pooling, relu) |
-| `data/lqcd/` | 155 | f64 | `{op}_{dims}.mlir` | Lattice QCD kernels + full models (moved from old_paper_dataset) |
+| `single_ops_dataset/all/` | ~1,569 | f32 | `{model}_{op}_{idx}.mlir` | Paper single-op benchmarks (18 models) |
+| `ops_and_blocks/all/` | ~8,962 | f32 | mixed | Merged single-ops + multi-op blocks |
+| `lqcd/` | 155 | f64 | `{op}_{dims}.mlir` | Lattice QCD kernels + full models |
+
+`single_ops_dataset/old_paper_dataset/` (1,202 f64 files, legacy) is no longer actively used.
 
 ### Creating / Extending Datasets
 
@@ -124,15 +129,68 @@ Key scripts: `data_utils/orchestrate.py` (unified CLI), `data_utils/extract_bloc
 
 **MLIR file requirements:** Must have `{tag = "operation_NNN"}` on linalg ops, `@nanoTime()` wrapper, weights as function args, `@main` returning `(tensor, i64)`.
 
-## Results Directory Architecture (flat)
+---
+
+## Implementation Packages
+
+All packages live under `rl_autoschedular/`:
+
+| Package | Encoder | HW | Shaped Reward | Notes |
+|---------|---------|-----|--------------|-------|
+| `rl_autoschedular_v0` | LSTM | ❌ | ❌ | Baseline |
+| `rl_autoschedular_v1` | LSTM | ✅ | ❌ | Legacy ablation |
+| `rl_autoschedular_v2` | LSTM | ❌ | ✅ | Legacy ablation |
+| `rl_autoschedular_v2_5` | LSTM | ❌ | ✅ | Hardened V2 (fair baseline) |
+| `rl_autoschedular_v3` | Transformer | ❌ | ❌ | Legacy ablation |
+| `rl_autoschedular_v4` | Transformer | ✅ | ✅ | Legacy (high failure rate) |
+| `rl_autoschedular_v4_5` | Transformer | ✅ | ✅ | Integrated + robust isolation |
+| `rl_autoschedular_v4_9` | Transformer | ✅ | ❌ | No shaped reward (entropy collapse fix) |
+| `rl_autoschedular_v45_no_hw` | Transformer | ❌ | ✅ | Ablation: HW disabled |
+| `rl_autoschedular_v45_no_shaped_reward` | Transformer | ✅ | ❌ | Ablation: no reward shaping |
+| `rl_autoschedular_v45_no_transformer` | LSTM | ✅ | ✅ | Ablation: LSTM instead of Transformer |
+| `rl_autoschedular_paper` | LSTM | ❌ | ❌ | Paper artifact (process-isolated) |
+| `rl_autoschedular_paper_transformer` | Transformer | ❌ | ❌ | Paper ablation (Transformer encoder) |
+
+**V4.6/V4.7/V4.8** all use `rl_autoschedular_v4_5` with different configs (corrected reward shaping).
+**V4.9** is its own standalone package — shaped reward hardcoded to 0.0.
+**V1–V4** are legacy; do not actively use or modify unless asked.
+
+### Paper Packages
+
+`rl_autoschedular_paper` and `rl_autoschedular_paper_transformer` are identical except for the encoder:
+- **paper**: `LSTMEmbedding` (2-layer LSTM over consumer+producer)
+- **paper_transformer**: `TransformerEmbedding` (self-attention over loop tokens, CLS pooling)
+
+Both use `interchange_mode = "pointers"`, no HW features, no shaped reward, process-isolated execution.
+
+Paper packages write directly to `results_dir/run_N/` (same `run_N` structure as all other packages — no special flat layout).
+
+---
+
+## Config Structure
+
+Configs live under `config/<dataset>/<train|eval>/`:
+
+| Dataset | Train configs | Eval configs |
+|---------|--------------|-------------|
+| `new_dataset` | `config/new_dataset/train/v0.json`, `v4_6.json`, `v4_7.json`, `v4_8.json`, `v4_9.json`, ablation variants | `config/new_dataset/eval/` |
+| `single_ops_dataset` | `config/single_ops_dataset/train/v0.json`, `v4_9_small.json`, `v4_9_large.json`, `paper.json` | `config/single_ops_dataset/eval/` |
+| `ops_and_blocks` | `config/ops_and_blocks/train/paper_original.json`, `paper_transformer_small.json`, `paper_transformer_large.json`, `v0.json`, `v4_9_small.json`, `v4_9_large.json` | `config/ops_and_blocks/eval/` |
+| `paper` (single_ops) | `config/paper/single_ops_dataset/paper_original_train.json`, `paper_transformer_{small,large}_train.json` | `config/paper/single_ops_dataset/*_eval.json` |
+
+---
+
+## Results Directory Architecture
+
+### Main packages (v0, v4_5, v4_9, ablations, paper, paper_transformer)
 
 ```
-results/new_dataset_results/<agent_dir>/
+results/<experiment>/<agent_dir>/run_N/
 ├── train/
 │   ├── results.json              # Cumulative {bench: {rewards, speedup, exec_time, cache_miss}}
 │   └── checkpoint_100.json       # Snapshot every 100 iters
 ├── eval/
-│   ├── checkpoint_100.json       # {bench: exec_time_ns} per eval checkpoint
+│   └── checkpoint_100.json       # {bench: exec_time_ns} per eval checkpoint
 ├── logs/
 │   ├── exec_data.json            # Execution time cache
 │   ├── tags
@@ -142,6 +200,10 @@ results/new_dataset_results/<agent_dir>/
 └── models/
     └── model_50.pt               # Saved every 50 iterations (not every iter)
 ```
+
+`FORCE_RUN_ID` env var controls run directory: `FORCE_RUN_ID=5` → `run_5/` (reuse), `FORCE_RUN_ID=ckpt_100` → temp dir.
+
+---
 
 ## Reporting Scripts
 
@@ -153,15 +215,17 @@ python scripts/utils/report_eval.py --best                          # best per a
 python scripts/utils/report_eval.py --missing                       # models without eval
 ```
 
+---
+
 ## Training & Eval Commands
 
 ```bash
 # Train from scratch (auto-resumes if models/ exist)
 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
 
-# Resume training from an experiment directory
+# Resume training from a run directory
 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json \
-  --resume results/new_dataset_results/v4_7_agent
+  --resume results/new_dataset_results/v4_7_agent/run_0
 
 # Eval a single checkpoint
 sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
@@ -169,10 +233,21 @@ sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
 
 # Force fresh training (overwrite existing results)
 FORCE_NEW=1 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
+
+# Paper packages (ops_and_blocks dataset)
+sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_original.json
+sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_transformer_small.json
+sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_transformer_large.json
+
+# Paper packages (single_ops_dataset)
+sbatch scripts/train/train.sh config/paper/single_ops_dataset/paper_original_train.json
+sbatch scripts/train/train.sh config/paper/single_ops_dataset/paper_transformer_small_train.json
 ```
 
-`eval.sh` uses `EVAL_DIR=<results_dir>/models/` directly — no run_N auto-discovery.
-`--cpus-per-task=12` targets ~1h per eval for 2163 benchmarks.
+`eval.sh` uses `EVAL_DIR=<results_dir>/run_N/models/` — auto-discovers latest `run_N`.
+`--cpus-per-task=12` targets ~1h per eval for ~1,600–2,163 benchmarks.
+
+---
 
 ## Lustre Quota Awareness
 
@@ -180,67 +255,40 @@ FORCE_NEW=1 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
 - Each model checkpoint = 1 file (~45MB)
 - `train/results.json` accumulates ~8K entries across training
 
-Before submitting many eval jobs, check `lfs quota -u $USER /scratch`. If near limit, notify user
+Before submitting many eval jobs, check `lfs quota -u $USER /scratch`. If near limit, notify user.
 
-## Implementation Packages
-
-All packages live under `rl_autoschedular/`:
-
-| Package | Purpose |
-|---------|---------|
-| `rl_autoschedular_v0` | Baseline (LSTM, no HW features) |
-| `rl_autoschedular_v4_5` | Integrated (Transformer + HW + shaped reward) |
-| `rl_autoschedular_v4_9` | V4.9 variant (Transformer, pointer interchange, process-isolated execution, mlir-cpu-runner fallback) |
-| `rl_autoschedular_v45_no_hw` | Ablation: HW disabled |
-| `rl_autoschedular_v45_no_shaped_reward` | Ablation: no reward shaping |
-| `rl_autoschedular_v45_no_transformer` | Ablation: LSTM instead of Transformer |
-| `rl_autoschedular_paper` | Paper artifact port (LSTM, pointers interchange, process-isolated execution) |
-| `rl_autoschedular_paper_transformer` | Paper ablation: Transformer encoder instead of LSTM, identical to paper otherwise |
-| `rl_autoschedular_v1` … `v4` | Legacy versions |
-
-V4.6/V4.7/V4.8/V4.9 all use `rl_autoschedular_v4_5` impl with different configs (V4.9 adds schedule cache via `main_exec_data_file`). Each `vN` is a standalone package — never mix imports between them.
-
-### Paper Ablation (LSTM vs Transformer)
-
-`rl_autoschedular_paper` and `rl_autoschedular_paper_transformer` are identical except for the encoder:
-- **paper**: `LSTMEmbedding` (2-layer LSTM over consumer+producer)
-- **paper_transformer**: `TransformerEmbedding` (self-attention over loop tokens, CLS pooling)
-
-Both use the same observation format, action space, reward structure, and execution pipeline (process-isolated with mlir-cpu-runner fallback). Trained on `single_ops_dataset`:
-
-```bash
-# Train paper (LSTM)
-sbatch scripts/train/train.sh config/single_ops_dataset/train/paper.json
-
-# Train paper (Transformer)
-sbatch scripts/train/train.sh config/single_ops_dataset/train/paper_transformer.json
-
-# Eval paper
-sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
-  scripts/eval/eval.sh config/single_ops_dataset/eval/paper_eval.json --checkpoint <step>
-
-# Eval paper_transformer
-sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
-  scripts/eval/eval.sh config/single_ops_dataset/eval/paper_transformer_eval.json --checkpoint <step>
-```
-
-### Paper Safety Mechanisms (ported from V4.9)
-
-The paper packages now share V4.9's execution safety:
-1. **SIGABRT handler** in `evaluate.py` — converts MLIR crashes to catchable Python exceptions
-2. **Process-isolated execution** — `multiprocessing.Process` + `Manager().dict()`, MLIR runs in child process
-3. **Dynamic timeout** — profiling-based `min(300, root_exec_time * 5)` seconds
-4. **mlir-cpu-runner fallback** — subprocess fallback if bindings fail
-
-### Paper FileLogger
-
-Paper packages write directly to `results_dir/` (no `run_N/` subdirectory), matching V4.9's structure.
+---
 
 ## Speedup & Reward Gotchas
 
-**Shaped reward misleads the agent** (V4.5 lesson): When intermediate reward dominates terminal speedup, agent optimizes static heuristics instead of execution time. The no-reward ablation outperformed all shaped-reward variants.
+**Entropy collapse** (V4.x lesson): Shaped reward + Transformer causes policy to collapse to zero entropy mid-training. Once entropy = 0, PPO gradient vanishes — no recovery. V0 (LSTM, no shaped reward) does not collapse. **Fix**: disable shaped reward (V4.9) or increase `entropy_coef` to 0.05+.
+
+**Shaped reward misleads the agent**: When intermediate reward dominates terminal speedup, agent optimizes static heuristics (parallelism ratio, vectorizability) instead of actual execution time. The no-shaped-reward ablation outperformed all shaped-reward variants.
 
 **Failed benchmarks:** Execution timeout → `speedup = 0.0` (not 1.0). Failed benchmarks are excluded from speedup means in reporting scripts. RL reward unaffected — it uses a flat -20.0 penalty regardless of speedup.
+
+**Reward shaping scale**: Must be ≤10% of terminal reward magnitude. Correct values: `reward_shaping_scale=0.05`, `reward_shaping_clip=0.1`, `reward_shaping_vectorization_bonus=0.0`.
+
+---
+
+## Execution Safety Mechanisms
+
+All safety features from V4.9 are now ported to the paper packages. Current status:
+
+| Mechanism | V4.9 | paper | paper_transformer |
+|-----------|:----:|:-----:|:-----------------:|
+| SIGABRT handler (train entry point) | ✅ `scripts/train/train.py` | ✅ shared | ✅ shared |
+| SIGABRT handler (eval entry point) | ✅ `scripts/eval/eval.py` | ✅ `evaluate.py` | ✅ `evaluate.py` |
+| Process-isolated MLIR execution | ✅ | ✅ ported | ✅ ported |
+| Dynamic timeout (`root_exec_time × 5`) | ✅ | ✅ ported | ✅ ported |
+| mlir-cpu-runner subprocess fallback | ✅ | ✅ ported | ✅ ported |
+| SIGABRT guard in `Benchmarks.__init__` | ✅ | ✅ | ✅ |
+| TiledFusion constant dim skip (`continue`) | ✅ | ✅ | ✅ |
+
+**`BindingsProcess.ENABLED` must stay `False`** — fork corrupts MLIR C++ state.
+**DaskManager is disabled** (`ENABLED = False`). All execution runs single-process.
+
+---
 
 ## LLVM Build Gotchas
 
@@ -260,19 +308,16 @@ done
 
 Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessible paths.
 
-## Operational Gotchas
-
-- **DaskManager is disabled** (`ENABLED = False`). All execution runs single-process.
-- **SIGABRT handler** catches MLIR crashes so training continues past bad schedules.
-- **BindingsProcess.ENABLED must stay False** — fork corrupts MLIR C++ state.
-- **Model checkpoints saved every 50 iterations** (not every iteration) to limit disk usage.
+---
 
 ## Key Docs
 
-- [Results Architecture](docs/RESULTS_ARCHITECTURE.md) — full run_i/ structure details
+- [Results Architecture](docs/RESULTS_ARCHITECTURE.md) — full `run_N/` structure, FileLogger, crash resilience
 - [Training Guide](docs/TRAINING_GUIDE.md) — comprehensive training walkthrough
 - [Pipeline](docs/PIPELINE.md) — full lifecycle: baseline → split → train → eval
-- [Full Model](docs/FULL_MODEL.md) — end-to-end model optimization architecture
+- [Versions](docs/VERSIONS.md) — version-by-version changelog and validation notes
 - [Dashboard](docs/DASHBOARD.md) — Streamlit comparison dashboard
-- [HPC Setup](docs/HPC%20Setup.md) — cluster-specific Slurm instructions
-- [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison, implemented fixes
+- [Entropy Collapse Investigation](docs/ENTROPY_COLLAPSE_INVESTIGATION.md) — root cause, timeline, recommended fixes
+- [Results](docs/RESULTS.md) — experimental results (single_ops_dataset + ops_and_blocks)
+- [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison
+- [Paper Train Failures 2026-06-24](docs/paper/TRAIN_FAILURES_2026_06_24.md) — ops_and_blocks bugs fixed (TiledFusion, dead code, Benchmarks guard)

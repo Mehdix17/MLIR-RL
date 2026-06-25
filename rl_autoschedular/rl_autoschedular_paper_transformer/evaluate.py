@@ -74,6 +74,9 @@ def main():
     # Initialize execution singleton
     Execution(fl.exec_data_file, main_exec_data)
 
+    # Setup signal handler again (MLIR imports / initialization overrides Python's signal handler)
+    signal.signal(signal.SIGABRT, _sigabrt_handler)
+
     # Prepare logging
     print_success(f'Logging to: {fl.run_dir}')
 

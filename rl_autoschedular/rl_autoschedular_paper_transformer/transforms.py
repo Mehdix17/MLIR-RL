@@ -319,5 +319,57 @@ def __run_transform_code(module: Module, transform_code: str):
         module: The MLIR module to transform.
         transform_code: The MLIR transform dialect code.
     """
-    t_module = Module.parse(transform_code, module.context)
-    interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)
+    import tempfile
+    import sys
+
+    code = str(module)
+
+    code_file = tempfile.NamedTemporaryFile(mode='w', suffix='.mlir', delete=False)
+    code_file.write(code)
+    code_file.close()
+
+    trans_file = tempfile.NamedTemporaryFile(mode='w', suffix='.mlir', delete=False)
+    trans_file.write(transform_code)
+    trans_file.close()
+
+    try:
+        script = (
+            "import sys\n"
+            "from mlir.ir import Context, Module\n"
+            "from mlir.dialects.transform import interpreter\n"
+            f"with open({code_file.name!r}) as f: code = f.read()\n"
+            f"with open({trans_file.name!r}) as f: trans = f.read()\n"
+            "with Context():\n"
+            "    module = Module.parse(code)\n"
+            "    t_module = Module.parse(trans)\n"
+            "    interpreter.apply_named_sequence(module, t_module.body.operations[0], t_module)\n"
+            "    print(str(module))\n"
+        )
+        env = os.environ.copy()
+        env["OPENBLAS_NUM_THREADS"] = "1"
+        env["OMP_NUM_THREADS"] = "1"
+        env["MKL_NUM_THREADS"] = "1"
+
+        result = subprocess.run(
+            [sys.executable, '-c', script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=env
+        )
+
+        if result.returncode != 0:
+            raise Exception(result.stderr or f"Transform failed with exit code {result.returncode}")
+
+        transformed_code = result.stdout
+
+        # Parse and update parent module in-place
+        new_module = Module.parse(transformed_code, module.context)
+        move_module(new_module, module)
+
+    finally:
+        if os.path.exists(code_file.name):
+            os.remove(code_file.name)
+        if os.path.exists(trans_file.name):
+            os.remove(trans_file.name)
+

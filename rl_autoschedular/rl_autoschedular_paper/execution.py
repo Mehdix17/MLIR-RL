@@ -126,7 +126,6 @@ class Execution(metaclass=Singleton):
         if root_exec_time and root_exec_time > 0:
             timeout_s = min(300, max(min_timeout, int((root_exec_time / 1e9) * 5)))
 
-        transform_bufferize_and_lower_v(module)
         real_exec_time, success, error_msg = self.__execute_bufferized_code_wrapper(module, timeout_s)
         return real_exec_time, success, True, error_msg
 
@@ -232,6 +231,7 @@ class Execution(metaclass=Singleton):
             try:
                 with Context():
                     module = Module.parse(code_str)
+                    transform_bufferize_and_lower_v(module)
                     pm = PassManager.parse(pass_pipeline, module.context)
 
                     inputs, outs_struct = Execution.__create_params(module)
