@@ -1,1 +1,0 @@
-/scratch/mb10856/MLIR-RL/data/single_ops_dataset/all/pooling_nchw_max_256_512_120_120_1_60_60.mlir
