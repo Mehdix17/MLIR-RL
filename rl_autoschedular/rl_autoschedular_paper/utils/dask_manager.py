@@ -120,7 +120,14 @@ class DaskManager(metaclass=Singleton):
         """
 
         if not ENABLED or self.num_workers == 0:
-            return [func(o, FileLogger().exec_data_file, benchs, main_exec_data) for o in objs]
+            n_workers = int(os.environ.get("SLURM_CPUS_PER_TASK", 1))
+            if n_workers <= 1:
+                return [func(o, FileLogger().exec_data_file, benchs, main_exec_data) for o in objs]
+            import concurrent.futures
+            exec_file = FileLogger().exec_data_file
+            with concurrent.futures.ThreadPoolExecutor(max_workers=n_workers) as pool:
+                futures = [pool.submit(func, o, exec_file, benchs, main_exec_data) for o in objs]
+                return [f.result() for f in futures]
 
         from distributed import as_completed
 

@@ -377,6 +377,18 @@ def evaluate_benchmarks(model: Model, data: Benchmarks) -> tuple[dict[str, int],
     if len(all_speedups) > 0:
         fl['eval/average_speedup'].append(sum(all_speedups) / len(all_speedups))
     exe.update_execution_cache(new_cache_data)
+    # Save eval exec times as JSON (bench_name -> optimized_time_ns)
+    import os
+    import json
+    eval_json: dict[str, Optional[int]] = {}
+    for state, exec_time in zip(states, all_exec_times):
+        eval_json[state.bench_name] = exec_time
+    eval_logs_dir = os.path.join(fl.logs_dir, 'eval')
+    os.makedirs(eval_logs_dir, exist_ok=True)
+    _ckpt = os.getenv("EVAL_CHECKPOINT", "")
+    _eval_file = f"eval_exec_times_{_ckpt}.json" if _ckpt else "eval_exec_times.json"
+    with open(os.path.join(eval_logs_dir, _eval_file), 'w') as f:
+        json.dump(eval_json, f, indent=2)
 
     eval_end = time()
     print_info(f"Evaluation time: {timedelta(seconds=eval_end - eval_start)}")

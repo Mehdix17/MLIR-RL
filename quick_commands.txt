@@ -66,3 +66,8 @@ find folder/path/ -type f | wc -l
 lfs quota -u $USER directory/path
 
 lfs quota -u $USER .
+
+# ---------- Resubmit Job Example ----------
+
+sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_original.json --resume
+results/ops_and_blocks_results/paper_original_agent

@@ -286,7 +286,7 @@ All safety features from V4.9 are now ported to the paper packages. Current stat
 | TiledFusion constant dim skip (`continue`) | ✅ | ✅ | ✅ |
 
 **`BindingsProcess.ENABLED` must stay `False`** — fork corrupts MLIR C++ state.
-**DaskManager is disabled** (`ENABLED = False`). All execution runs single-process.
+**DaskManager is disabled** (`ENABLED = False`). All execution runs on a single compute node. We enabled a local `ThreadPoolExecutor` parallel fallback in the paper packages (matching other versions) to run benchmark executions in parallel. To prevent Out-Of-Memory (OOM) failures during parallel compilation/execution, jobs must be submitted requesting 12 CPUs and 32 GB memory (`--cpus-per-task=12 --mem=32G`).
 
 ---
 
@@ -312,12 +312,13 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessibl
 
 ## Key Docs
 
-- [Results Architecture](docs/RESULTS_ARCHITECTURE.md) — full `run_N/` structure, FileLogger, crash resilience
-- [Training Guide](docs/TRAINING_GUIDE.md) — comprehensive training walkthrough
-- [Pipeline](docs/PIPELINE.md) — full lifecycle: baseline → split → train → eval
-- [Versions](docs/VERSIONS.md) — version-by-version changelog and validation notes
-- [Dashboard](docs/DASHBOARD.md) — Streamlit comparison dashboard
-- [Entropy Collapse Investigation](docs/ENTROPY_COLLAPSE_INVESTIGATION.md) — root cause, timeline, recommended fixes
-- [Results](docs/RESULTS.md) — experimental results (single_ops_dataset + ops_and_blocks)
+- [Training & Evaluation Guide](docs/pipeline/TRAINING_AND_EVALUATION.md) — end-to-end training and evaluation workflow, resources, and commands
+- [Results Architecture](docs/results/RESULTS_ARCHITECTURE.md) — full `run_N/` structure, FileLogger, crash resilience
+- [Training Guide](docs/pipeline/TRAINING_MANUAL.md) — comprehensive training walkthrough
+- [Pipeline](docs/pipeline/PIPELINE.md) — full lifecycle: baseline → split → train → eval
+- [Versions](docs/design/VERSIONS.md) — version-by-version changelog and validation notes
+- [Dashboard](docs/results/DASHBOARD.md) — Streamlit comparison dashboard
+- [Entropy Collapse Investigation](docs/investigations/ENTROPY_COLLAPSE_INVESTIGATION.md) — root cause, timeline, recommended fixes
+- [Results](docs/results/RESULTS.md) — experimental results (single_ops_dataset + ops_and_blocks)
 - [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison
-- [Paper Train Failures 2026-06-24](docs/paper/TRAIN_FAILURES_2026_06_24.md) — ops_and_blocks bugs fixed (TiledFusion, dead code, Benchmarks guard)
+- [Paper Train Failures 2026-06-24](docs/archive/TRAIN_FAILURES_2026_06_24.md) — ops_and_blocks bugs fixed (TiledFusion, dead code, Benchmarks guard)

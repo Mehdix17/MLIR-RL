@@ -36,8 +36,22 @@ AST_DUMPER_BIN_PATH=tools/ast_dumper/build/bin/AstDumper
 VECTORIZER_BIN_PATH=tools/vectorizer/build/bin/Vectorizer
 ```
 ### Documentation
+
+#### 0. Onboarding Guides
+For new developers, we provide a step-by-step onboarding guide under `docs/onboarding/`:
+* [01_WHAT_IS_MLIR.md](docs/onboarding/01_WHAT_IS_MLIR.md) — Foundational MLIR concepts and loop nests.
+* [02_PROJECT_SETUP.md](docs/onboarding/02_PROJECT_SETUP.md) — Detailed environment setup, LLVM builds, and troubleshooting.
+* [03_ARCHITECTURE_OVERVIEW.md](docs/onboarding/03_ARCHITECTURE_OVERVIEW.md) — High-level code structure and component interactions.
+* [04_RL_AGENT_DEEP_DIVE.md](docs/onboarding/04_RL_AGENT_DEEP_DIVE.md) — Actor-critic models, observation models, and state representations.
+* [05_AGENT_VERSIONS.md](docs/onboarding/05_AGENT_VERSIONS.md) — Version roadmap from baseline (v0) to process-isolated architectures (v4.9).
+* [06_ACTIONS_AND_OPTIMIZATIONS.md](docs/onboarding/06_ACTIONS_AND_OPTIMIZATIONS.md) — Available action spaces (tiling, fusion, interchange, vectorization).
+* [07_CONTRIBUTIONS.md](docs/onboarding/07_CONTRIBUTIONS.md) — Git flows, testing, and pull requests.
+* [08_DATA_PIPELINE.md](docs/onboarding/08_DATA_PIPELINE.md) — Generating benchmarks, block extractions, and data splits.
+* [09_MONITORING_AND_EVALUATION.md](docs/onboarding/09_MONITORING_AND_EVALUATION.md) — Tracking metrics via Neptune and running validation evaluations.
+
 #### 1. Jobs
 For running jobs using slurm script examples are provided in the `scripts/` folder.
+
 #### 2. Configuration
 Configuring the model on a specific case can be done by setting a JSON config file containing all required settings. Configuration JSON file examples are provided in the `config/` folder.
 The following JSON content is an example of a config file:
