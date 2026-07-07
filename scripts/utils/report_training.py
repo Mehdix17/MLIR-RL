@@ -58,6 +58,12 @@ def build_registry(dataset: str):
             "no_shaped_reward": {"results_dir": f"{base}/ablation_study/v45_no_shaped_reward_agent"},
             "no_transformer": {"results_dir": f"{base}/ablation_study/v45_no_transformer_agent"},
         })
+    elif dataset == "ops_and_blocks":
+        registry.update({
+            "paper_original": {"results_dir": f"{base}/paper_original_agent"},
+            "paper_transformer_small": {"results_dir": f"{base}/paper_transformer_small_agent"},
+            "paper_transformer_large": {"results_dir": f"{base}/paper_transformer_large_agent"},
+        })
     return registry
 
 

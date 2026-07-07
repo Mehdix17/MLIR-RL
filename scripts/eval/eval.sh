@@ -2,7 +2,8 @@
 #SBATCH --job-name=mlir-eval
 #SBATCH --partition=compute
 #SBATCH --mem=32G
-#SBATCH --cpus-per-task=28
+#SBATCH --cpus-per-task=12
+#SBATCH --constraint=bergamo
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/eval_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/eval_%j.err
 #SBATCH --mail-type=END,FAIL
