@@ -208,11 +208,16 @@ results/<experiment>/<agent_dir>/run_N/
 ## Reporting Scripts
 
 ```bash
-python scripts/utils/report_training.py -v v4_6 v4_7 v4_8 v0_v2   # training progress
+# Training and Evaluation progress scripts
+python scripts/utils/report_training.py -d ops_and_blocks         # training progress table
+python scripts/utils/report_training.py -v v4_6 v4_7 v4_8 v0_v2   # training progress (v4/v0 configs)
 python scripts/utils/report_training.py -w 300                      # watch mode
 python scripts/utils/report_eval.py                                 # all eval checkpoints
 python scripts/utils/report_eval.py --best                          # best per agent
-python scripts/utils/report_eval.py --missing                       # models without eval
+
+# Unified report-progress skill (AI slash command)
+# Inside the Antigravity TUI, type: /report-progress
+# Runs report_training.py, sync_progress.py, and checks lustre quota in one unified report.
 ```
 
 ---
@@ -227,7 +232,13 @@ sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json \
   --resume results/new_dataset_results/v4_7_agent/run_0
 
-# Eval a single checkpoint
+# Submit a large evaluation batch job for a single agent version (30 checkpoints, time limit 3 days)
+python scripts/eval/submit_eval.py paper_transformer_small 7300 10200 100 --time 3-00:00:00
+
+# Synchronize evaluation progress from Slurm and actual outputs
+python scripts/eval/sync_progress.py
+
+# Eval a single checkpoint manually
 sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
   scripts/eval/eval.sh config/new_dataset/eval/v4_7_eval.json --checkpoint 500
 
@@ -238,10 +249,6 @@ FORCE_NEW=1 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
 sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_original.json
 sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_transformer_small.json
 sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_transformer_large.json
-
-# Paper packages (single_ops_dataset)
-sbatch scripts/train/train.sh config/paper/single_ops_dataset/paper_original_train.json
-sbatch scripts/train/train.sh config/paper/single_ops_dataset/paper_transformer_small_train.json
 ```
 
 `eval.sh` uses `EVAL_DIR=<results_dir>/run_N/models/` — auto-discovers latest `run_N`.
@@ -318,6 +325,7 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessibl
 - [Pipeline](docs/pipeline/PIPELINE.md) — full lifecycle: baseline → split → train → eval
 - [Versions](docs/design/VERSIONS.md) — version-by-version changelog and validation notes
 - [Dashboard](docs/results/DASHBOARD.md) — Streamlit comparison dashboard
+- [Evaluation Tracker](docs/results/eval_progress.md) — Live evaluation progress tracker for Slurm jobs and checkpoints
 - [Entropy Collapse Investigation](docs/investigations/ENTROPY_COLLAPSE_INVESTIGATION.md) — root cause, timeline, recommended fixes
 - [Results](docs/results/RESULTS.md) — experimental results (single_ops_dataset + ops_and_blocks)
 - [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison

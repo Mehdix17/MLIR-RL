@@ -18,6 +18,8 @@ Details on training outputs, cache files, and performance analytics:
 * [RESULTS.md](results/RESULTS.md) — Experimental results tables across datasets.
 * [RESULTS_ARCHITECTURE.md](results/RESULTS_ARCHITECTURE.md) — Layout of `run_N` logs, models, and cumulative training progress JSON outputs.
 * [DASHBOARD.md](results/DASHBOARD.md) — Instructions for launching and utilizing the Streamlit comparison dashboard.
+* [eval_progress.md](results/eval_progress.md) — Live evaluation progress tracker for active Slurm jobs and checkpoints.
+
 
 ### 3. 🧠 [Design & Architecture](design/)
 Theoretical specifications, observation features, action spaces, and config files:
