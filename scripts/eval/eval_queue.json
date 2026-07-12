@@ -12,7 +12,7 @@
     "start": 100,
     "end": 1000,
     "step": 100,
-    "status": "running",
+    "status": "completed",
     "job_id": "16547830"
   },
   {
@@ -20,88 +20,88 @@
     "start": 100,
     "end": 1000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16550239"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_original_eval.json",
     "start": 1100,
     "end": 2000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16590698"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
     "start": 1100,
     "end": 2000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16591403"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
     "start": 1100,
     "end": 2000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16592713"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_original_eval.json",
     "start": 2100,
     "end": 3000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16594269"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
     "start": 2100,
     "end": 3000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16606243"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
     "start": 2100,
     "end": 3000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16617688"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_original_eval.json",
     "start": 3100,
     "end": 4000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16620212"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
     "start": 3100,
     "end": 4000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16623233"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
     "start": 3100,
     "end": 4000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "completed",
+    "job_id": "16623919"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_original_eval.json",
     "start": 4100,
     "end": 5000,
     "step": 100,
-    "status": "pending",
-    "job_id": null
+    "status": "running",
+    "job_id": "16624941"
   },
   {
     "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
@@ -147,6 +147,94 @@
     "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
     "start": 6100,
     "end": 6200,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
+    "start": 4600,
+    "end": 5500,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_original_eval.json",
+    "start": 6600,
+    "end": 7500,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
+    "start": 6300,
+    "end": 7200,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
+    "start": 5600,
+    "end": 6200,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_original_eval.json",
+    "start": 7600,
+    "end": 8500,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
+    "start": 7300,
+    "end": 8200,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_original_eval.json",
+    "start": 8600,
+    "end": 9100,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
+    "start": 8300,
+    "end": 9000,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
+    "start": 6300,
+    "end": 6600,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_original_eval.json",
+    "start": 9200,
+    "end": 9700,
+    "step": 100,
+    "status": "pending",
+    "job_id": null
+  },
+  {
+    "config": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
+    "start": 9100,
+    "end": 9600,
     "step": 100,
     "status": "pending",
     "job_id": null

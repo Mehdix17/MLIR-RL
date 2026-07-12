@@ -27,6 +27,10 @@ DATASET_DIRS = {
     "ops_and_blocks": "results/ops_and_blocks_results",
 }
 
+# How many bytes to read from log file tail/head (avoids full 7-8 MB Lustre reads)
+_TAIL_BYTES = 65536  # 64 KB — enough for many recent iteration lines
+_HEAD_BYTES = 2048   # 2 KB — enough for the resume/config header
+
 VERSION_REGISTRY = {
     "v0": {"results_dir": "results/new_dataset_results/v0_agent"},
     "v4_5": {"results_dir": "results/new_dataset_results/v4_5_agent"},
@@ -38,6 +42,9 @@ VERSION_REGISTRY = {
     "no_hw": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_hw_agent"},
     "no_shaped_reward": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_shaped_reward_agent"},
     "no_transformer": {"results_dir": "results/new_dataset_results/ablation_study/v45_no_transformer_agent"},
+    "paper_original": {"results_dir": "results/ops_and_blocks_results/paper_original_agent"},
+    "paper_transformer_small": {"results_dir": "results/ops_and_blocks_results/paper_transformer_small_agent"},
+    "paper_transformer_large": {"results_dir": "results/ops_and_blocks_results/paper_transformer_large_agent"},
 }
 
 
@@ -73,13 +80,20 @@ def _parse_config_version(config_path: str) -> str:
 
 
 def auto_detect_versions():
-    """Find versions by scanning train log files."""
-    version_jobs = {}
+    """Find versions by scanning train log files.
+    Among jobs with actual iteration data, prefers the one with the highest
+    last-seen iteration number. This ensures a cancelled/short job with a
+    higher Slurm ID doesn't shadow a long-running job with more real progress.
+    """
+    # version -> (job_id, last_iter) for jobs that have iteration data
+    version_jobs_data: dict[str, tuple[str, int]] = {}
+    # version -> job_id for jobs with no iteration data (fallback)
+    version_jobs_nodata: dict[str, str] = {}
     pattern = os.path.join(PROJECT_ROOT, "logs", "train_*.out")
     for fpath in glob.glob(pattern):
         try:
-            with open(fpath) as f:
-                first_lines = "".join(f.readline() for _ in range(3))
+            with open(fpath, errors="ignore") as f:
+                first_lines = f.read(512)
             m = re.search(r"Config:\s*.*/([\w_]+)\.json", first_lines)
             if not m:
                 m = re.search(r"Config:\s*.*/([\w_]+)",
@@ -91,43 +105,74 @@ def auto_detect_versions():
             if not job_id_match:
                 continue
             job_id = job_id_match.group(1)
-            if version not in version_jobs or int(job_id) > int(version_jobs[version]):
-                version_jobs[version] = job_id
+
+            # Quick tail scan for iteration data
+            file_size = os.path.getsize(fpath)
+            with open(fpath, "rb") as f:
+                f.seek(max(0, file_size - _TAIL_BYTES))
+                tail = f.read().decode("utf-8", errors="ignore")
+            iters = re.findall(r"Main Loop (\d+)/\d+", tail)
+
+            if iters:
+                last_iter = int(iters[-1])
+                prev = version_jobs_data.get(version)
+                if prev is None or last_iter > prev[1]:
+                    version_jobs_data[version] = (job_id, last_iter)
+            else:
+                prev_id = version_jobs_nodata.get(version)
+                if prev_id is None or int(job_id) > int(prev_id):
+                    version_jobs_nodata[version] = job_id
         except Exception:
             continue
+
+    # Build final map: prefer real-data jobs; fall back to no-data for new versions
+    version_jobs = {v: info[0] for v, info in version_jobs_data.items()}
+    for v, jid in version_jobs_nodata.items():
+        if v not in version_jobs:
+            version_jobs[v] = jid
     return version_jobs
 
 
+
 def get_log_data(version: str, job_id: str):
-    """Parse training log for a given job."""
+    """Parse training log for a given job.
+
+    Reads only the tail (_TAIL_BYTES) for iteration progress/status, and the
+    head (_HEAD_BYTES) for the resume-from line — avoids loading the full 7-8 MB
+    Lustre file into memory on every report invocation.
+    """
     log_path = os.path.join(PROJECT_ROOT, "logs", f"train_{job_id}.out")
     if not os.path.exists(log_path):
         return None
 
-    with open(log_path, errors="ignore") as f:
-        text = f.read()
+    file_size = os.path.getsize(log_path)
+    with open(log_path, "rb") as f:
+        # Head: config / resume line (written once near startup)
+        head = f.read(_HEAD_BYTES).decode("utf-8", errors="ignore")
+        # Tail: most-recent iteration lines and final status
+        f.seek(max(0, file_size - _TAIL_BYTES))
+        tail = f.read().decode("utf-8", errors="ignore")
 
-    iters = re.findall(r"Main Loop (\d+)/(\d+)", text)
+    iters = re.findall(r"Main Loop (\d+)/(\d+)", tail)
     if not iters:
         return {"version": version, "job_id": job_id, "iteration": "?", "total": "?", "status": "loading"}
 
     last_iter, total = iters[-1]
 
-    execs = re.findall(r"exec: (\d+):(\d+):(\d+)\.(\d+)", text)
+    execs = re.findall(r"exec: (\d+):(\d+):(\d+)\.(\d+)", tail)
     last_execs = []
     for h, m, s, ms in execs[-5:]:
         secs = int(h) * 3600 + int(m) * 60 + int(s)
         last_execs.append(secs)
 
-    status_lines = [l for l in text.split("\n") if "TRAINING FAILED" in l or "TRAINING FINISHED" in l]
     status = "running"
-    if "TRAINING FAILED" in "".join(status_lines):
+    if "TRAINING FAILED" in tail:
         status = "FAILED"
-    elif "TRAINING FINISHED" in "".join(status_lines):
+    elif "TRAINING FINISHED" in tail:
         status = "FINISHED"
 
     resume_from = None
-    m = re.search(r"Resumed model.*from.*run_(\d+)/models/model_(\d+)\.pt", text)
+    m = re.search(r"Resumed model.*from.*run_(\d+)/models/model_(\d+)\.pt", head)
     if m:
         resume_from = f"run_{m.group(1)}/model_{m.group(2)}"
 
@@ -250,7 +295,7 @@ def get_running_jobs():
         out = subprocess.check_output(
             ["squeue", "-u", os.environ.get("USER", ""), "--noheader",
              "--format=%i|%j|%T|%M|%l"],
-            timeout=5, stderr=subprocess.DEVNULL
+            timeout=10, stderr=subprocess.DEVNULL
         ).decode().strip()
         jobs = {}
         for line in out.split("\n"):
@@ -260,6 +305,9 @@ def get_running_jobs():
                                   "time": parts[3] if len(parts) > 3 else "?",
                                   "limit": parts[4] if len(parts) > 4 else "?"}
         return jobs
+    except subprocess.TimeoutExpired:
+        print("Warning: squeue timed out — Slurm status unavailable", file=sys.stderr)
+        return {}
     except Exception:
         return {}
 
@@ -364,6 +412,7 @@ def main():
     running_jobs = get_running_jobs()
 
     def print_report():
+        _t0 = time.time()
         print(f"\n=== Training Progress @ {time.strftime('%Y-%m-%d %H:%M:%S')} ===")
         print(f"Dataset: {args.dataset}\n")
         data = []
@@ -406,6 +455,8 @@ def main():
             print("No training data found.")
             return
         format_table(data)
+
+        print(f"\nReport generated in {time.time() - _t0:.1f}s")
 
         if getattr(args, 'json', None):
             export = []

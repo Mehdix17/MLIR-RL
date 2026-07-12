@@ -17,18 +17,22 @@ import math
 import os
 import re
 import sys
+import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 DATASET_DIRS = {
     "new": "results/new_dataset_results",
     "single_ops": "results/single_ops_dataset_results",
+    "ops_and_blocks": "results/ops_and_blocks_results",
 }
 
 DATASET_BASELINES = {
     "new": "results/new_dataset_results/baselines/mlir/eval_base.json",
     "single_ops": "results/single_ops_dataset_results/baselines/mlir/base_eval.json",
+    "ops_and_blocks": "results/ops_and_blocks_results/baselines/mlir/base_eval.json",
 }
 
 AGENT_REGISTRY = {
@@ -48,6 +52,13 @@ BASELINE_PATH = "results/new_dataset_results/baselines/mlir/eval_base.json"
 def build_agent_registry(dataset: str):
     """Build agent registry for a specific dataset."""
     base = DATASET_DIRS.get(dataset, DATASET_DIRS["new"])
+    if dataset == "ops_and_blocks":
+        return {
+            "paper_original": {"results_dir": f"{base}/paper_original_agent", "display": "paper_original"},
+            "paper_transformer_small": {"results_dir": f"{base}/paper_transformer_small_agent", "display": "paper_tf_small"},
+            "paper_transformer_large": {"results_dir": f"{base}/paper_transformer_large_agent", "display": "paper_tf_large"},
+            "v0": {"results_dir": f"{base}/v0_agent", "display": "V0"},
+        }
     return {
         "v0": {"results_dir": f"{base}/v0_agent", "display": "V0"},
         "v4_6": {"results_dir": f"{base}/v4_6_agent", "display": "V4.6"},
@@ -175,7 +186,7 @@ def main():
     parser = argparse.ArgumentParser(description="Report evaluation progression")
     parser.add_argument("-v", "--agents", nargs="*",
                         help="Agent keys (e.g. v4_6 v4_7)")
-    parser.add_argument("-d", "--dataset", choices=["new", "single_ops"], default="new",
+    parser.add_argument("-d", "--dataset", choices=["new", "single_ops", "ops_and_blocks"], default="new",
                         help="Dataset to report (default: new)")
     parser.add_argument("--missing", action="store_true",
                         help="Show checkpoints that have models but no eval")
@@ -204,9 +215,12 @@ def main():
     else:
         print(f"Warning: Baseline not found at {baseline_path}, showing raw exec times")
 
+    t0 = time.time()
     all_rows = []
     missing_list = []
 
+    # Collect (agent_key, reg, cf) tasks and missing info in a first pass
+    tasks = []
     for agent_key in agents:
         reg = agent_registry.get(agent_key)
         if not reg:
@@ -216,46 +230,51 @@ def main():
         models_dir = os.path.join(agent_dir, "models")
 
         ckpt_files = get_checkpoint_files(eval_dir)
-
         if args.checkpoint:
             target = f"checkpoint_{args.checkpoint}.json"
             ckpt_files = [f for f in ckpt_files if f == target]
 
         for cf in ckpt_files:
-            ckpt_num = int(cf.split("_")[1].split(".")[0])
-            fpath = os.path.join(eval_dir, cf)
+            tasks.append((agent_key, reg, cf))
 
-            try:
-                with open(fpath) as f:
-                    eval_data = json.load(f)
-            except Exception:
-                continue
+        if args.missing:
+            model_ckpts = get_model_checkpoint_indices(models_dir)
+            eval_ckpts = {int(f.split("_")[1].split(".")[0]) for f in get_checkpoint_files(eval_dir)}
+            for ckpt in sorted(model_ckpts - eval_ckpts):
+                missing_list.append({"agent": reg["display"], "checkpoint": ckpt, "status": "missing eval"})
 
-            speedups, failed, total = compute_speedups(eval_data, baseline)
-            s = stats(speedups)
+    def _load_checkpoint(task):
+        agent_key, reg, cf = task
+        ckpt_num = int(cf.split("_")[1].split(".")[0])
+        fpath = os.path.join(PROJECT_ROOT, reg["results_dir"], "eval", cf)
+        try:
+            with open(fpath) as f:
+                eval_data = json.load(f)
+        except Exception:
+            return None
+        speedups, failed, total = compute_speedups(eval_data, baseline)
+        s = stats(speedups)
+        return {
+            "agent": reg["display"],
+            "checkpoint": ckpt_num,
+            "benchmarks": s["n"],
+            "failed": failed,
+            "arith": s["arith_mean"],
+            "geo": s["geo_mean"],
+            "best": s["best"],
+            "worst": s["worst"],
+        }
 
-            all_rows.append({
-                "agent": f"{reg['display']}",
-                "checkpoint": ckpt_num,
-                    "benchmarks": s["n"],
-                    "failed": failed,
-                    "arith": s["arith_mean"],
-                    "geo": s["geo_mean"],
-                    "best": s["best"],
-                    "worst": s["worst"],
-                })
+    # Load checkpoint files in parallel (up to 8 concurrent Lustre reads)
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {executor.submit(_load_checkpoint, t): t for t in tasks}
+        for fut in as_completed(futures):
+            row = fut.result()
+            if row:
+                all_rows.append(row)
 
-            # Check missing: models exist but no eval
-            if args.missing:
-                model_ckpts = get_model_checkpoint_indices(models_dir)
-                eval_ckpts = {int(f.split("_")[1].split(".")[0]) for f in ckpt_files}
-                missing = sorted(model_ckpts - eval_ckpts)
-                for ckpt in missing:
-                    missing_list.append({
-                        "agent": f"{reg['display']}",
-                        "checkpoint": ckpt,
-                        "status": "missing eval",
-                    })
+    # Sort by agent display name then checkpoint number for consistent output
+    all_rows.sort(key=lambda r: (r["agent"], r["checkpoint"]))
 
     if args.best and all_rows:
         # Filter out incomplete evals (too few benchmarks)
@@ -277,6 +296,7 @@ def main():
         columns = ["agent", "checkpoint", "benchmarks", "failed", "arith", "geo", "best", "worst"]
         print_table(all_rows, columns)
         print(f"\nTotal: {len(all_rows)} checkpoint evals")
+        print(f"Report generated in {time.time() - t0:.1f}s")
 
     if args.corrupted and corrupted_rows:
         print(f"\n=== Potentially Corrupted Checkpoints ({len(corrupted_rows)}) ===")
