@@ -214,10 +214,11 @@ python scripts/utils/report_training.py -v v4_6 v4_7 v4_8 v0_v2   # training pro
 python scripts/utils/report_training.py -w 300                      # watch mode
 python scripts/utils/report_eval.py                                 # all eval checkpoints
 python scripts/utils/report_eval.py --best                          # best per agent
+python scripts/utils/fast_report.py -d ops_and_blocks               # accelerated unified report (0.1s)
 
 # Unified report-progress skill (AI slash command)
 # Inside the Antigravity TUI, type: /report-progress
-# Runs report_training.py, sync_progress.py, and checks lustre quota in one unified report.
+# Runs fast_report.py to show active Slurm jobs, training, evaluations, and Lustre quota.
 ```
 
 ---
@@ -330,3 +331,12 @@ Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessibl
 - [Results](docs/results/RESULTS.md) — experimental results (single_ops_dataset + ops_and_blocks)
 - [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison
 - [Paper Train Failures 2026-06-24](docs/archive/TRAIN_FAILURES_2026_06_24.md) — ops_and_blocks bugs fixed (TiledFusion, dead code, Benchmarks guard)
+
+---
+
+## Custom AI Skills
+
+Custom slash commands designed to accelerate AI agent workflow inside the Antigravity TUI:
+
+* **`/report-progress`**: Unified and accelerated progress reporting (runs [scripts/utils/fast_report.py](file:///scratch/mb10856/MLIR-RL/scripts/utils/fast_report.py) concurrently in `~0.1s` via threads). Queries active Slurm jobs, training checkpoints, evaluation summaries, and Lustre storage quota in one call.
+* **`/commit`**: Conventional git helper that stages changes, performs branch safety check (aborts on `main` or `master`), prompts for target branch, commits with conventional formatting, pushes to remote, and suggests PR details.
