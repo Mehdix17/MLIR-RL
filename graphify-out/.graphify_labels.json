@@ -517,5 +517,10 @@
   "515": "Reporting & Analysis",
   "516": "extraction-spec.md",
   "517": "generate_resnet_block",
-  "518": "transform_vectorize_with_vectorizer"
+  "518": "transform_vectorize_with_vectorizer",
+  "519": ".map_states",
+  "520": "NoTransformation",
+  "521": ".__str__",
+  "522": ".__str__",
+  "523": ".__formula_str_to_list"
 }
