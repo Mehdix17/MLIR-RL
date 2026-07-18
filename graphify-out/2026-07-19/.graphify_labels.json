@@ -504,5 +504,18 @@
   "502": "graphify.md",
   "503": "graphify.md",
   "504": "transform_vectorize_with_vectorizer",
-  "505": "transform_vectorize_with_vectorizer"
+  "505": "transform_vectorize_with_vectorizer",
+  "506": "Git Workflow Automation (Staging, Committing, Pushing, & PRs)",
+  "507": "graphify reference: query, path, explain",
+  "508": "NoTransformation",
+  "509": "Full-Model End-to-End RL Optimization Documentation",
+  "510": "graphify reference: add a URL and watch a folder",
+  "511": "graphify reference: commit hook and native CLAUDE.md integration",
+  "512": "graphify reference: incremental update and cluster-only",
+  "513": "graphify reference: GitHub clone and cross-repo merge",
+  "514": "graphify reference: transcribe video and audio",
+  "515": "Reporting & Analysis",
+  "516": "extraction-spec.md",
+  "517": "generate_resnet_block",
+  "518": "transform_vectorize_with_vectorizer"
 }
