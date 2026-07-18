@@ -1,0 +1,235 @@
+[
+  {
+    "chunk_num": 1,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_01.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/AGENTS.md",
+      "/scratch/mb10856/MLIR-RL/README.md",
+      "/scratch/mb10856/MLIR-RL/environment.yml",
+      "/scratch/mb10856/MLIR-RL/quick_commands.txt",
+      "/scratch/mb10856/MLIR-RL/requirements.txt",
+      "/scratch/mb10856/MLIR-RL/.agents/rules/graphify.md",
+      "/scratch/mb10856/MLIR-RL/.agents/skills/plot-experimentation-results/SKILL.md",
+      "/scratch/mb10856/MLIR-RL/.agents/skills/report-progress/SKILL.md",
+      "/scratch/mb10856/MLIR-RL/.agents/workflows/graphify.md",
+      "/scratch/mb10856/MLIR-RL/config/README.md",
+      "/scratch/mb10856/MLIR-RL/dashboard/requirements.txt",
+      "/scratch/mb10856/MLIR-RL/data/README.md",
+      "/scratch/mb10856/MLIR-RL/data/new_dataset/README.md",
+      "/scratch/mb10856/MLIR-RL/data_utils/README.md",
+      "/scratch/mb10856/MLIR-RL/data_utils/requirements.txt",
+      "/scratch/mb10856/MLIR-RL/demo/DEMO_GUIDE.md",
+      "/scratch/mb10856/MLIR-RL/docs/README.md",
+      "/scratch/mb10856/MLIR-RL/docs/archive/FIX1_MODEL_SURGERY.md",
+      "/scratch/mb10856/MLIR-RL/docs/archive/GPT2_JIT_FIX.md",
+      "/scratch/mb10856/MLIR-RL/docs/archive/LLAMA_BF16_FIX.md",
+      "/scratch/mb10856/MLIR-RL/docs/archive/PYTORCH_JIT_DEBUGGING.md",
+      "/scratch/mb10856/MLIR-RL/docs/archive/TRAIN_FAILURES_2026_06_24.md"
+    ]
+  },
+  {
+    "chunk_num": 2,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_02.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/docs/data/BENCHMARK_FAILURES_SUMMARY.md",
+      "/scratch/mb10856/MLIR-RL/docs/data/EXTRACT_OPS_README.md",
+      "/scratch/mb10856/MLIR-RL/docs/data/FULL_MODEL.md",
+      "/scratch/mb10856/MLIR-RL/docs/data/NEW_DATASET.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/CONFIG.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/METHODOLOGY_ALIGNMENT.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/NOVELTIES.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/VERSIONS.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v0_model_detailed.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v0_original_baseline.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v1_hardware_aware_observation.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v2_5_hardened_shaped_reward.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v2_shaped_reward.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v3_transformer_loop_nest_encoder.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v4_5_reliability_logic.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v4_5_robust_integration.md",
+      "/scratch/mb10856/MLIR-RL/docs/design/v4_combined_model.md",
+      "/scratch/mb10856/MLIR-RL/docs/guides/git_guide.md",
+      "/scratch/mb10856/MLIR-RL/docs/hpc/HPC_HARDWARE.md",
+      "/scratch/mb10856/MLIR-RL/docs/hpc/HPC_SETUP.md",
+      "/scratch/mb10856/MLIR-RL/docs/hpc/antigravity-hpc-install.md",
+      "/scratch/mb10856/MLIR-RL/docs/investigations/ENTROPY_COLLAPSE_INVESTIGATION.md"
+    ]
+  },
+  {
+    "chunk_num": 3,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_03.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/docs/investigations/FUTURE_WORKS_RL_FULL_MODEL_SUPPORT.md",
+      "/scratch/mb10856/MLIR-RL/docs/investigations/LLVM_DEFENSE.md",
+      "/scratch/mb10856/MLIR-RL/docs/investigations/V4_FAILURE_INVESTIGATION.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/01_WHAT_IS_MLIR.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/02_PROJECT_SETUP.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/03_ARCHITECTURE_OVERVIEW.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/04_RL_AGENT_DEEP_DIVE.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/05_AGENT_VERSIONS.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/06_ACTIONS_AND_OPTIMIZATIONS.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/07_CONTRIBUTIONS.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/08_DATA_PIPELINE.md",
+      "/scratch/mb10856/MLIR-RL/docs/onboarding/09_MONITORING_AND_EVALUATION.md",
+      "/scratch/mb10856/MLIR-RL/docs/paper/EVAL_PIPELINE_ANALYSIS.md",
+      "/scratch/mb10856/MLIR-RL/docs/pipeline/COMMANDS.md",
+      "/scratch/mb10856/MLIR-RL/docs/pipeline/PIPELINE.md",
+      "/scratch/mb10856/MLIR-RL/docs/pipeline/TRAINING_AND_EVALUATION.md",
+      "/scratch/mb10856/MLIR-RL/docs/pipeline/TRAINING_MANUAL.md",
+      "/scratch/mb10856/MLIR-RL/docs/results/DASHBOARD.md",
+      "/scratch/mb10856/MLIR-RL/docs/results/RESULTS.md",
+      "/scratch/mb10856/MLIR-RL/docs/results/RESULTS_ARCHITECTURE.md",
+      "/scratch/mb10856/MLIR-RL/docs/results/eval_progress.md",
+      "/scratch/mb10856/MLIR-RL/manuscript/references/Bendib 2024.md"
+    ]
+  },
+  {
+    "chunk_num": 4,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_04.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/manuscript/references/Nassim & Mohamed 2025.md",
+      "/scratch/mb10856/MLIR-RL/manuscript/references/Rafik & Djad 2025.md",
+      "/scratch/mb10856/MLIR-RL/manuscript/references/manuscript_writing_comments.md",
+      "/scratch/mb10856/MLIR-RL/manuscript/references/mlir-rl-paper.md",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp1/experimentation_report.md",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp2/experimentation_report.md",
+      "/scratch/mb10856/MLIR-RL/rl_autoschedular/rl_autoschedular_paper/README.md",
+      "/scratch/mb10856/MLIR-RL/rl_autoschedular/rl_autoschedular_paper_transformer/README.md",
+      "/scratch/mb10856/MLIR-RL/scripts/README.md",
+      "/scratch/mb10856/MLIR-RL/tools/ast_dumper/CMakeLists.txt",
+      "/scratch/mb10856/MLIR-RL/tools/pre_vec/CMakeLists.txt",
+      "/scratch/mb10856/MLIR-RL/tools/vectorizer/CMakeLists.txt"
+    ]
+  },
+  {
+    "chunk_num": 5,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_05.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/compiler_phases.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/control_flow_graph.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_fusion_comparison.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_inversion.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_peeling.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_skewing.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_tiling.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_unrolling.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/loop_unswitching.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/memory_access_patterns.png"
+    ]
+  },
+  {
+    "chunk_num": 6,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_06.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/phase_ordering_problem.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/progressive_lowering_MLIR.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter1/scalar_vs_SIMD_execution_comparison.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter2/RNN_vs_LSTM.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter2/reinforcement_learning_feedback_loop.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter2/transformer_encoder_and_attention_mechanism.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/data_generation_pipeline.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/hardware_specification_feature.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/logos/MLIR_logo.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/logos/ONNX_logo.png"
+    ]
+  },
+  {
+    "chunk_num": 7,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_07.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/logos/Pytorch_logo.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/logos/python_logo.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/logos/slurm_logo.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/logos/streamlit_logo.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/reward_blending.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/system_architecture.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter4/transformer_encoder_architecture.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/ablation_study.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph1_performance.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph2_bergamo_model.png"
+    ]
+  },
+  {
+    "chunk_num": 8,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_08.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph2_bergamo_operation.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph2_dalma_model.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph2_dalma_operation.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph2_jubail_model.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph2_jubail_operation.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/chapter5/graph3_fullmodel.png",
+      "/scratch/mb10856/MLIR-RL/manuscript/ressources/frontpage/USTHB_Logo.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp1/pngs/best_checkpoint_results.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp1/pngs/best_checkpoint_results_no_llama3.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp1/pngs/checkpoint_evolution.png"
+    ]
+  },
+  {
+    "chunk_num": 9,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_09.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp1/pngs/operation_type_results.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp2/pngs/best_checkpoint_results.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp2/pngs/best_checkpoint_results_no_llama3.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp2/pngs/checkpoint_evolution.png",
+      "/scratch/mb10856/MLIR-RL/plots/experimentation_plots/exp2/pngs/operation_type_results.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/ablation_study/ablation_study.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/full_model_comparison/graph3_fullmodel.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/bergamo/graph2_bergamo_merged.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/bergamo/graph2_bergamo_model.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/bergamo/graph2_bergamo_operation.png"
+    ]
+  },
+  {
+    "chunk_num": 10,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_10.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/dalma/graph2_dalma_merged.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/dalma/graph2_dalma_model.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/dalma/graph2_dalma_operation.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/jubail/graph2_jubail_merged.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/jubail/graph2_jubail_model.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/multi_hardware/jubail/graph2_jubail_operation.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/overall_comparison/mehdi/comparison_per_model.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/overall_comparison/mehdi/v45_improvement.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0.png",
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/overall_comparison/mehdi/v45_outperforms_v0_single_ops.png"
+    ]
+  },
+  {
+    "chunk_num": 11,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_11.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/plots/manuscript/overall_comparison/tayeb/graph1_performance.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/new_dataset/v0/v0.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/new_dataset/v4_6/v4_6.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/new_dataset/v4_7/v4_7.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/new_dataset/v4_8/v4_8.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/single_ops_dataset/combined/combined.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/single_ops_dataset/per_model/per_model.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/single_ops_dataset/per_operation/per_operation.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/single_ops_dataset/v0/v0.png",
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/single_ops_dataset/v4_9_large/v4_9_large.png"
+    ]
+  },
+  {
+    "chunk_num": 12,
+    "total_chunks": 12,
+    "chunk_path": "/scratch/mb10856/MLIR-RL/graphify-out/.graphify_chunk_12.json",
+    "files": [
+      "/scratch/mb10856/MLIR-RL/plots/version_comparison/single_ops_dataset/v4_9_small/v4_9_small.png"
+    ]
+  }
+]
