@@ -1,12 +1,18 @@
-# Graph Report - /scratch/mb10856/MLIR-RL  (2026-07-15)
+# Graph Report - MLIR-RL  (2026-07-19)
 
 ## Corpus Check
-- Large corpus: 662 files · ~1,623,755 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder.
+- 594 files · ~1,635,803 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 7718 nodes · 15577 edges · 445 communities (368 shown, 77 thin omitted)
-- Extraction: 80% EXTRACTED · 20% INFERRED · 0% AMBIGUOUS · INFERRED: 3101 edges (avg confidence: 0.59)
+- 9029 nodes · 16909 edges · 519 communities (460 shown, 59 thin omitted)
+- Extraction: 82% EXTRACTED · 18% INFERRED · 0% AMBIGUOUS · INFERRED: 3105 edges (avg confidence: 0.59)
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `96fa1884`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - MLIR AST Feature Extraction
@@ -421,6 +427,80 @@
 - Module: Dashboard
 - Module: Eval Progress
 - Module: Checkpoint Evolution
+- tiled_fusion.py
+- MLIR-RL Configuration Details
+- 2. Stage-by-Stage Breakdown
+- MLIR Baselines
+- Nassim & Mohamed 2025.md
+- **Chapter 4** {#chapter-4}
+- **Code Optimization**
+- Experimentation Report
+- Documentation
+- Onboarding: Architecture Overview
+- 2. Key Evolutionary Phases
+- MLIR-RL Project Commands Reference
+- Evaluation
+- 📂 Directory Map
+- **Chapter 3 Related Work** {#chapter-3-related-work}
+- **Reward types and formulas**
+- MLIR-PAPER Agent (`rl_autoschedular_paper`)
+- MLIR-PAPER Agent (`rl_autoschedular_paper`)
+- .execute_code
+- fast_report.py
+- Onboarding: What is MLIR?
+- **Chapter 2 Reinforcement Learning** {#chapter-2-reinforcement-learning}
+- **Reinforcement Learning for Automatic Code Optimization**
+- **Design & implementation**
+- new_dataset
+- Full-Model End-to-End RL Optimization — Complete Documentation
+- 6. Commands
+- Data Generation
+- Detailed Status per Agent
+- Q: explore the codebase to understand how to monitor and submit jobs (training and eval)
+- **Chapter 5 Implementation** {#chapter-5-implementation}
+- Manuscript Writing Comments
+- new_dataset
+- 3. Results
+- Full Model Optimization
+- Utilities
+- Workflow: From Raw Models to Training
+- all/ - Flat Benchmark Collection
+- code_files/
+- 2. Key Bugs Fixed (v1–v13)
+- Core Training Commands
+- **Analysis**
+- Pipelines
+- Ported Hardening (The 4 Pillars)
+- Typical Workflow
+- **Appendix** {#appendix}
+- MLIR-RL Progress Reporting Runbook (Unified & Accelerated)
+- Supported Neural Networks
+- Data Generation
+- 1. Overview
+- Plotting & Visualization
+- **Chapter 1** {#chapter-1}
+- 7. Edge Cases & Known Issues
+- **Chapter 1** {#chapter-1}
+- **Chapter 4 Design** {#chapter-4-design}
+- **Chapter 5** {#chapter-5}
+- .free_pointer
+- graphify.md
+- graphify.md
+- transform_vectorize_with_vectorizer
+- transform_vectorize_with_vectorizer
+- Git Workflow Automation (Staging, Committing, Pushing, & PRs)
+- graphify reference: query, path, explain
+- NoTransformation
+- Full-Model End-to-End RL Optimization Documentation
+- graphify reference: add a URL and watch a folder
+- graphify reference: commit hook and native CLAUDE.md integration
+- graphify reference: incremental update and cluster-only
+- graphify reference: GitHub clone and cross-repo merge
+- graphify reference: transcribe video and audio
+- Reporting & Analysis
+- extraction-spec.md
+- generate_resnet_block
+- transform_vectorize_with_vectorizer
 
 ## God Nodes (most connected - your core abstractions)
 1. `Config` - 444 edges
@@ -461,47 +541,47 @@
 - **hyperedge_loop_optimizations** — manuscript_ressources_chapter1_loop_fusion_comparison_loop_fusion, manuscript_ressources_chapter1_loop_inversion_loop_inversion, manuscript_ressources_chapter1_loop_peeling_loop_peeling, manuscript_ressources_chapter1_loop_skewing_loop_skewing, manuscript_ressources_chapter1_loop_tiling_loop_tiling, manuscript_ressources_chapter1_loop_unrolling_loop_unrolling, manuscript_ressources_chapter1_loop_unswitching_loop_unswitching [INFERRED]
 - **hyperedge_cache_optimizations** — manuscript_ressources_chapter1_loop_tiling_loop_tiling, manuscript_ressources_chapter1_loop_fusion_comparison_loop_fusion, manuscript_ressources_chapter1_memory_access_patterns_spatial_locality [INFERRED]
 
-## Communities (445 total, 77 thin omitted)
+## Communities (519 total, 59 thin omitted)
 
 ### Community 0 - "MLIR AST Feature Extraction"
-Cohesion: 0.02
-Nodes (163): Load benchmarks          Args:             is_training: Whether to load train or, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file(), __get_operation_type(), IteratorType, NestedLoopFeatures, OperationFeatures (+155 more)
+Cohesion: 0.03
+Nodes (98): IteratorType, OperationFeatures, OperationState, OperationType, Enum, Dataclass to store the operation state data.      Attributes:         bench_idx:, Get the transformation sequence of the current operation being optimized., Get the number of steps in the current transformation sequence.          Returns (+90 more)
 
 ### Community 1 - "RL Policy and Value Models"
 Cohesion: 0.03
-Nodes (131): HiearchyModel, LSTMEmbedding, PolicyModel, Neural network models for MLIR RL policy and value estimation.  This module impl, Initialize the model., Policy model for MLIR code optimization.      Attributes:         lstm: The LSTM, Initialize the model., Hierarchical reinforcement learning model for MLIR code optimization.      Attri (+123 more)
+Nodes (140): HiearchyModel, LSTMEmbedding, PolicyModel, Neural network models for MLIR RL policy and value estimation.  This module impl, Initialize the model., Calculate the value loss.          Args:             new_values: The current val, Policy model for MLIR code optimization.      Attributes:         lstm: The LSTM, Initialize the model. (+132 more)
 
 ### Community 2 - "RL Environment and Trainer Configuration"
-Cohesion: 0.06
-Nodes (40): MLIR-RL Configuration Parameters, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support (+32 more)
+Cohesion: 0.05
+Nodes (55): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model (+47 more)
 
 ### Community 3 - "PPO Update and Execution Management"
-Cohesion: 0.04
-Nodes (47): ppo_update(), Optimizer, TrajectoryData, Update the policy and value models using PPO algorithm.      Performs PPO traini, Update the value function model using trajectory data.      Trains the value mod, value_update(), DaskManager, obj_T (+39 more)
+Cohesion: 0.06
+Nodes (34): DaskManager, obj_T, T, Distributed computation management using Dask.  This module handles distributed, Map a function across objects in a distributed manner.          Args:, Run a function both locally and on the workers.         The result will be regis, Submit a persistent function to a worker,         and keep track of its result (, Get the result of a persistent function from a worker.          Args: (+26 more)
 
 ### Community 4 - "MLIR JIT Compilation and Timing"
-Cohesion: 0.04
-Nodes (62): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+54 more)
+Cohesion: 0.05
+Nodes (44): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+36 more)
 
 ### Community 5 - "Trajectory Collection and Benchmark Drivers"
-Cohesion: 0.05
-Nodes (49): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+41 more)
+Cohesion: 0.06
+Nodes (37): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model (+29 more)
 
 ### Community 6 - "Benchmark Resolution and Loader"
-Cohesion: 0.05
-Nodes (46): Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, Execution, c_void_p (+38 more)
+Cohesion: 0.10
+Nodes (22): Benchmarks, Config, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file() (+14 more)
 
 ### Community 7 - "MLIR Test Program Generation"
 Cohesion: 0.08
-Nodes (48): add_nn(), batch_matmul(), batch_matmul_transpose_a(), batch_matmul_transpose_b(), batch_reduce_matmul(), choice_topped(), conv_1d(), conv_1d_ncw_fcw() (+40 more)
+Nodes (46): add_nn(), batch_matmul(), batch_matmul_transpose_a(), batch_matmul_transpose_b(), batch_reduce_matmul(), choice_topped(), conv_1d(), conv_1d_ncw_fcw() (+38 more)
 
 ### Community 8 - "RL Environment State Transitions"
-Cohesion: 0.06
-Nodes (39): Env, Action, Benchmarks, Module, OperationState, Apply the sequence of actions to the state's code and run it.          Args:, Generate results for a failed sequence.         Typically used for aborted state, Create a new operation state.          Args:             operation_idx: The oper (+31 more)
+Cohesion: 0.11
+Nodes (18): Env, Action, Benchmarks, Module, OperationState, Apply the sequence of actions to the state's code and run it.          Args:, Generate results for a failed sequence.         Typically used for aborted state, Create a new operation state.          Args:             operation_idx: The oper (+10 more)
 
 ### Community 9 - "Transformation Actions and Base Classes"
 Cohesion: 0.05
-Nodes (42): Base action classes for MLIR loop transformations.  This module defines the abst, Action space and transformation action implementations.  This module defines all, InterchangeMethod, Enum, Interchange action for MLIR loop transformations.  This module implements the lo, Enumeration of interchange encoding methods., NoTransformation, Action (+34 more)
+Nodes (44): Base action classes for MLIR loop transformations.  This module defines the abst, Action space and transformation action implementations.  This module defines all, Enum, Interchange action for MLIR loop transformations.  This module implements the lo, NoTransformation, Action, OperationState, No transformation action for MLIR loop transformations.  This module implements (+36 more)
 
 ### Community 10 - "IR Transformations and Scheduling Application"
 Cohesion: 0.05
@@ -509,19 +589,19 @@ Nodes (51): HiearchyModel, add_timing_wrapper(), _apply_schedules_per_op(), appl
 
 ### Community 11 - "Action Decoders and Distribution Policy"
 Cohesion: 0.05
-Nodes (20): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:, Class representing Interchange action, OperationState, Tiling (+12 more)
+Nodes (18): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:, Class representing Interchange action, Action, OperationState (+10 more)
 
 ### Community 12 - "Observation Representation and Hardware Features"
-Cohesion: 0.07
-Nodes (30): ActionHistory, ActionMask, _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), HardwareFeatures, NumLoops (+22 more)
+Cohesion: 0.09
+Nodes (21): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), Observation, _parse_size_to_kb(), OperationFeatures, OperationState (+13 more)
 
 ### Community 13 - "Transformation Action Framework"
-Cohesion: 0.06
-Nodes (25): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+17 more)
+Cohesion: 0.08
+Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
 
 ### Community 14 - "Action Spaces and Trajectory Execution"
-Cohesion: 0.06
-Nodes (34): Action, Module, OperationFeatures, Return the size of the parameters in the index for this action type          Ret, Return the size of the network output for this action type          Returns:, Return the size of the mask for this action type          Returns:             s, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             module: current code (+26 more)
+Cohesion: 0.03
+Nodes (65): Action, Distribution, Module, OperationFeatures, OperationState, Tensor, Return the size of the parameters in the index for this action type          Ret, Return the size of the network output for this action type          Returns: (+57 more)
 
 ### Community 15 - "Module: Data"
 Cohesion: 0.07
@@ -529,15 +609,15 @@ Nodes (37): MLIR-RL Evaluation Dashboard — Multi-page Streamlit app.  Run:    
 
 ### Community 16 - "Module: Base"
 Cohesion: 0.07
-Nodes (25): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+17 more)
+Nodes (22): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+14 more)
 
 ### Community 17 - "Module: Base"
-Cohesion: 0.07
-Nodes (25): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+17 more)
+Cohesion: 0.08
+Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
 
 ### Community 18 - "Module: State"
-Cohesion: 0.06
-Nodes (39): Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file() (+31 more)
+Cohesion: 0.07
+Nodes (24): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+16 more)
 
 ### Community 19 - "Module: Base"
 Cohesion: 0.06
@@ -568,8 +648,8 @@ Cohesion: 0.05
 Nodes (25): Dataset, Model, T_timestep, Tensor, Get the length of the trajectory.          Returns:             int: The length, Get a single timestep from the trajectory.          Args:             idx (int):, Concatenate this trajectory with another.          Args:             other (Traj, Create a DataLoader for the trajectory.          Args:             batch_size (i (+17 more)
 
 ### Community 26 - "Module: Transforms"
-Cohesion: 0.06
-Nodes (34): Context, interpreter, Module, Apply the padding transformation to the specified operation in the given code., Apply the packing transformation to the specified operation in the given code., Apply the unroll transformation to the specified operation in the given code., Apply the vectorization transformation with img2col to the specified operation i, Apply the tiling and parallelization transformation to the specified operation i (+26 more)
+Cohesion: 0.07
+Nodes (32): Context, interpreter, Module, Apply the padding transformation to the specified operation in the given code., Apply the packing transformation to the specified operation in the given code., Apply the unroll transformation to the specified operation in the given code., Apply the vectorization transformation with img2col to the specified operation i, Apply the tiling and parallelization transformation to the specified operation i (+24 more)
 
 ### Community 27 - "Module: Trajectory"
 Cohesion: 0.05
@@ -616,32 +696,32 @@ Cohesion: 0.06
 Nodes (34): Context, interpreter, Module, Apply the padding transformation to the specified operation in the given code., Apply the packing transformation to the specified operation in the given code., Apply the unroll transformation to the specified operation in the given code., Apply the vectorization transformation with img2col to the specified operation i, Apply the tiling and parallelization transformation to the specified operation i (+26 more)
 
 ### Community 38 - "Module: Trajectory"
-Cohesion: 0.05
-Nodes (25): Dataset, Model, T_timestep, Tensor, Get the length of the trajectory.          Returns:             int: The length, Get a single timestep from the trajectory.          Args:             idx (int):, Concatenate this trajectory with another.          Args:             other (Traj, Create a DataLoader for the trajectory.          Args:             batch_size (i (+17 more)
+Cohesion: 0.12
+Nodes (13): Dataset, Model, Tensor, Get the length of the trajectory.          Returns:             int: The length, Get a single timestep from the trajectory.          Args:             idx (int):, Concatenate this trajectory with another.          Args:             other (Traj, Copy the trajectory.          Returns:             TrajectoryData: The copied tr, Update the attributes of the trajectory following the new model.          Args: (+5 more)
 
 ### Community 39 - "Module: Observation"
-Cohesion: 0.09
-Nodes (24): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), Observation, OpFeatures, _parse_size_to_kb(), ProducerOpFeatures (+16 more)
+Cohesion: 0.07
+Nodes (33): ActionHistory, ActionMask, _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), HardwareFeatures, NumLoops (+25 more)
 
 ### Community 40 - "Module: Observation"
-Cohesion: 0.09
-Nodes (24): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), Observation, OpFeatures, _parse_size_to_kb(), ProducerOpFeatures (+16 more)
+Cohesion: 0.07
+Nodes (32): ActionHistory, ActionMask, _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), HardwareFeatures, NumLoops (+24 more)
 
 ### Community 41 - "Module: Ppo"
-Cohesion: 0.09
-Nodes (31): main(), Evaluation script for trained MLIR RL models.  This module evaluates all trained, _sigabrt_handler(), Execution, c_void_p, Free the memory pointed to by the given pointer using the C standard library., Class that deals with code execution and cache management      Attributes:, collect_trajectory() (+23 more)
+Cohesion: 0.06
+Nodes (30): main(), Baseline execution time measurement for MLIR benchmarks.  This script measures t, Benchmark loading and management module.  This module provides functionality for, # NOTE: For now img2col is applied to single operator codes only, Reinforcement learning environment for MLIR RL.  This module implements the RL e, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, Evaluation script for trained MLIR RL models.  This module evaluates all trained (+22 more)
 
 ### Community 42 - "Module: Transforms"
 Cohesion: 0.07
 Nodes (31): OperationState, Context, interpreter, Module, Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the vectorization transformation with vectorizer to the specified operatio (+23 more)
 
 ### Community 43 - "Module: Execution"
-Cohesion: 0.07
-Nodes (25): as_ctype(), BF16Type, Context, Execution, ExecutionEngine, F16Type, F32Type, F64Type (+17 more)
+Cohesion: 0.06
+Nodes (29): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+21 more)
 
 ### Community 44 - "Module: Execution"
-Cohesion: 0.07
-Nodes (25): as_ctype(), BF16Type, Context, Execution, ExecutionEngine, F16Type, F32Type, F64Type (+17 more)
+Cohesion: 0.05
+Nodes (32): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+24 more)
 
 ### Community 45 - "Module: Observation"
 Cohesion: 0.09
@@ -649,71 +729,71 @@ Nodes (21): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_core
 
 ### Community 46 - "Module: Observation"
 Cohesion: 0.09
-Nodes (21): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), Observation, _parse_size_to_kb(), OperationFeatures, OperationState (+13 more)
+Nodes (23): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), Observation, OpFeatures, _parse_size_to_kb(), OperationFeatures (+15 more)
 
 ### Community 47 - "Module: Generate Synthetic"
-Cohesion: 0.08
-Nodes (33): Any, _exceeds_tensor_limit(), _extract_result_type(), _generate_bench(), _generate_single(), _get_next_ids(), _get_shapes_args(), _legacy_wrap_bench() (+25 more)
+Cohesion: 0.11
+Nodes (26): Any, _exceeds_tensor_limit(), _extract_result_type(), _generate_bench(), _generate_single(), _get_next_ids(), _get_shapes_args(), _legacy_wrap_bench() (+18 more)
 
 ### Community 48 - "Module: Transforms"
-Cohesion: 0.07
-Nodes (28): Context, interpreter, Module, Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the tiling and parallelization transformation to the specified operation i (+20 more)
+Cohesion: 0.08
+Nodes (21): Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the tiling and parallelization transformation to the specified operation i, Apply the img2col transformation to the specified operation in the given code., Apply the tiling and fusion transformation to the specified operation in the giv, Apply the decomposition transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio (+13 more)
 
 ### Community 49 - "Module: Execution"
-Cohesion: 0.07
-Nodes (24): as_ctype(), BF16Type, Context, Execution, ExecutionEngine, F16Type, F32Type, F64Type (+16 more)
+Cohesion: 0.06
+Nodes (28): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+20 more)
 
 ### Community 50 - "Module: Transforms"
 Cohesion: 0.07
-Nodes (28): Context, interpreter, Module, Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the tiling and parallelization transformation to the specified operation i (+20 more)
+Nodes (31): OperationState, Context, interpreter, Module, Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the vectorization transformation with vectorizer to the specified operatio (+23 more)
 
 ### Community 51 - "Module: Base"
-Cohesion: 0.07
-Nodes (21): Action, Distribution, OperationFeatures, OperationState, Tensor, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Check if this action type is allowed in the current state          Args: (+13 more)
+Cohesion: 0.08
+Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
 
 ### Community 52 - "Module: Execution"
-Cohesion: 0.07
-Nodes (24): as_ctype(), BF16Type, Context, Execution, ExecutionEngine, F16Type, F32Type, F64Type (+16 more)
+Cohesion: 0.08
+Nodes (22): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, ExecutionEngine (+14 more)
 
 ### Community 53 - "Module: Transforms"
-Cohesion: 0.08
+Cohesion: 0.07
 Nodes (28): Context, interpreter, Module, Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the tiling and parallelization transformation to the specified operation i (+20 more)
 
 ### Community 54 - "Module: Observation"
-Cohesion: 0.10
-Nodes (18): ActionMask, Observation, OpFeatures, ProducerOpFeatures, OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)         Example: (+10 more)
+Cohesion: 0.09
+Nodes (24): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+16 more)
 
 ### Community 55 - "Module: Trajectory"
 Cohesion: 0.07
 Nodes (21): Dataset, Model, Tensor, Initialize the trajectory dataset.          Args:             num_loops: Number, Get the length of the trajectory.          Returns:             The length of th, Get a single timestep from the trajectory.          Args:             idx: Index, Concatenate this trajectory with another.          Args:             other: The, Copy the trajectory.          Returns:             The copied trajectory. (+13 more)
 
 ### Community 56 - "Module: Base"
-Cohesion: 0.08
-Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
+Cohesion: 0.07
+Nodes (25): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+17 more)
 
 ### Community 57 - "Module: Base"
 Cohesion: 0.08
 Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
 
 ### Community 58 - "Module: Base"
-Cohesion: 0.08
-Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
+Cohesion: 0.07
+Nodes (25): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+17 more)
 
 ### Community 59 - "Module: Base"
 Cohesion: 0.08
 Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
 
 ### Community 60 - "Module: Observation"
-Cohesion: 0.09
-Nodes (19): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), NumLoops, _parse_size_to_kb(), OperationFeatures, OperationState (+11 more)
+Cohesion: 0.07
+Nodes (32): ActionHistory, ActionMask, _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), HardwareFeatures, NumLoops (+24 more)
 
 ### Community 61 - "Module: Base"
-Cohesion: 0.08
-Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
+Cohesion: 0.13
+Nodes (14): InterchangeMethod, Enum, NoTransformation, Action, OperationState, Class representing No Transformation, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support (+6 more)
 
 ### Community 62 - "Module: Base"
-Cohesion: 0.08
-Nodes (17): Action, OperationFeatures, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Apply action on the current code          Args:             code (str): current, Apply action that is guarenteed to be ready on the current state          Args:, Update the operation features based on the action          Args:             ope, String representation of the action with extra params (+9 more)
+Cohesion: 0.07
+Nodes (21): Action, Distribution, OperationFeatures, OperationState, Tensor, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Check if this action type is allowed in the current state          Args: (+13 more)
 
 ### Community 63 - "Module: Base"
 Cohesion: 0.08
@@ -724,8 +804,8 @@ Cohesion: 0.11
 Nodes (29): Module, move_module(), Module, MLIR transformation passes for loop optimization.  This module provides function, Apply vectorization transformation to an operation.      Args:         module: T, Apply img2col transformation to convert convolution to matrix multiplication., Apply tiling and fusion transformation to consumer and producer operations., Apply tiling and parallelization transformation to an operation.      Tiles loop (+21 more)
 
 ### Community 65 - "Module: State"
-Cohesion: 0.08
-Nodes (22): BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file(), __get_operation_type(), IteratorType, NestedLoopFeatures, OperationFeatures (+14 more)
+Cohesion: 0.09
+Nodes (24): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+16 more)
 
 ### Community 66 - "Module: Env"
 Cohesion: 0.12
@@ -744,8 +824,8 @@ Cohesion: 0.12
 Nodes (16): Env, Action, Benchmarks, OperationFeatures, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState (+8 more)
 
 ### Community 70 - "Module: State"
-Cohesion: 0.11
-Nodes (21): InterchangeMethod, Enum, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, BenchmarkFeatures (+13 more)
+Cohesion: 0.09
+Nodes (24): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+16 more)
 
 ### Community 71 - "Module: Env"
 Cohesion: 0.12
@@ -760,84 +840,84 @@ Cohesion: 0.12
 Nodes (16): Env, Action, Benchmarks, OperationFeatures, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState (+8 more)
 
 ### Community 74 - "Module: Env"
-Cohesion: 0.12
-Nodes (16): Env, Action, Benchmarks, OperationFeatures, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState (+8 more)
+Cohesion: 0.19
+Nodes (9): Env, Action, OperationFeatures, Get the reward of the action based on the transformation and execution results., Get the reward based on the speedup.          Args:             new (float): The, Update state infos after applying a transformation.          Notes: Updated fiel, Apply the sequence of actions to the state's code.          Args:             co, Compute intermediate shaped reward from static feature changes.          This re (+1 more)
 
 ### Community 75 - "Module: Extract Ops"
 Cohesion: 0.10
-Nodes (30): _build_benchmark(), _choose_dynamic_batches(), _count_parallel_loops(), _count_reduction_loops(), _estimate_op_footprint(), extract_from_file(), _get_needed_constants(), _get_referenced_maps() (+22 more)
+Nodes (30): _build_benchmark(), _choose_dynamic_batches(), _count_parallel_loops(), _count_reduction_loops(), _estimate_op_footprint(), extract_from_file(), _extract_result_type(), _get_referenced_maps() (+22 more)
 
 ### Community 76 - "Module: Env"
 Cohesion: 0.11
 Nodes (18): Env, Action, Benchmarks, Module, OperationState, Apply the sequence of actions to the state's code and run it.          Args:, Generate results for a failed sequence.         Typically used for aborted state, Create a new operation state.          Args:             operation_idx: The oper (+10 more)
 
 ### Community 77 - "Module: Model"
-Cohesion: 0.10
-Nodes (13): Distribution, Tensor, Initialize the model., Forward pass of the value model.          Args:             obs: The input tenso, Calculate the value loss.          Args:             new_values: The current val, Initialize the model., Forward pass of the policy model.          Args:             obs: The input tens, Calculate the policy loss.          Args:             actions_log_p: The log pro (+5 more)
+Cohesion: 0.04
+Nodes (41): Distribution, Tensor, Initialize the model., Forward pass of the value model.          Args:             obs: The input tenso, Calculate the value loss.          Args:             new_values: The current val, Initialize the model., Forward pass of the policy model.          Args:             obs: The input tens, Calculate the policy loss.          Args:             actions_log_p: The log pro (+33 more)
 
 ### Community 78 - "Module: Get Pytorch Baselines"
 Cohesion: 0.10
 Nodes (20): _HFWrapper, _load_gpt2_jit(), _load_transformer(), _load_vision(), main(), process_model(), Load gpt2 variant via JIT-compatible wrapper., Trace then script fallback. Returns median ns or None. (+12 more)
 
 ### Community 79 - "Module: Observation"
-Cohesion: 0.12
-Nodes (13): Observation, OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)         Example:, Class to manage creation and use of observations, Create the observation part from the current state., Get cumulative sizes of all observation parts. (+5 more)
+Cohesion: 0.09
+Nodes (23): ActionHistory, ActionMask, NumLoops, Observation, ObservationPart, OpFeatures, ProducerOpFeatures, OperationFeatures (+15 more)
 
 ### Community 80 - "Module: Model"
-Cohesion: 0.11
-Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
+Cohesion: 0.05
+Nodes (34): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+26 more)
 
 ### Community 81 - "Module: Execution"
-Cohesion: 0.10
-Nodes (22): Execution, c_void_p, Lowers and runs the given MLIR code using MLIR opt and MLIR CPU Runner., Get the code cache key for the given operation state.          Args:, Lowers and runs the given MLIR code using Python bindings in an isolated process, Check the execution cache for the given operation state.          Args:, Class that deals with code execution and cache management, Evaluates the given MLIR code with a profiling-based timeout and cmd fallback. (+14 more)
+Cohesion: 0.06
+Nodes (31): 1. Problem Scope, 2.1 What Exists, 2.2 What Is Needed, 2.3 Observation Tensor, 2.4 Files to Modify, 2. State: Global Graph Representation, 3.1 What Exists, 3.2 What Is Needed (+23 more)
 
 ### Community 82 - "Module: Model"
 Cohesion: 0.11
 Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
 
 ### Community 83 - "Module: Model"
-Cohesion: 0.11
-Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
+Cohesion: 0.08
+Nodes (25): Affected Job, Affected Jobs, Bug 1 — `rl_autoschedular_paper`: TiledFusion crashes on constant store dimensions, Bug 2 — `rl_autoschedular_paper_transformer`: Dead duplicate class body causes `NameError`, Bug 3 — `rl_autoschedular_paper_transformer`: Same TiledFusion crash missed in round 1, Bug 4 — SIGABRT during `Benchmarks()` construction crashes training before it starts, Bug 5 — MLIR Overwriting Custom Python Signal Handlers, Bug 6 — Unchecked Diagnostic Aborts inside C++ Bindings (`CollectDiagnosticsToStringScope`) (+17 more)
 
 ### Community 84 - "Module: Execution"
-Cohesion: 0.10
-Nodes (22): Execution, c_void_p, Lowers and runs the given MLIR code using MLIR opt and MLIR CPU Runner., Get the code cache key for the given operation state.          Args:, Lowers and runs the given MLIR code using Python bindings in an isolated process, Check the execution cache for the given operation state.          Args:, Class that deals with code execution and cache management, Evaluates the given MLIR code with a profiling-based timeout and cmd fallback. (+14 more)
+Cohesion: 0.07
+Nodes (29): 1. Affected Agents, 2. Entropy Collapse Timeline, 3. Impact on Evaluation, 4. Root Cause Analysis, 5. Why This Matters for the Paper, 6. Recommended Fixes, 7. Verification Plan, 8. Log References (+21 more)
 
 ### Community 85 - "Module: Model"
-Cohesion: 0.11
-Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
+Cohesion: 0.08
+Nodes (26): 1. Hardware Feature Extraction (`rl_autoschedular_v1/observation.py`), 2. Model Integration (`rl_autoschedular_v1/model.py`), 3. Observation Construction, Architecture Changes, Configuration, Current Limitations, Execution-Time Impact, Expected Benefits (+18 more)
 
 ### Community 86 - "Module: Model"
-Cohesion: 0.11
-Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
+Cohesion: 0.15
+Nodes (16): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model (+8 more)
 
 ### Community 87 - "Module: Model"
+Cohesion: 0.12
+Nodes (8): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor):, Forward pass of the model.          Args:             obs (torch.Tensor): The in
+
+### Community 88 - "Module: Execution"
+Cohesion: 0.06
+Nodes (29): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+21 more)
+
+### Community 89 - "Module: Dask Manager"
+Cohesion: 0.08
+Nodes (32): main(), evaluate_benchmarks(), ppo_update(), Model, Optimizer, TrajectoryData, Update the policy and value models using PPO algorithm.      Performs PPO traini, Update the value function model using trajectory data.      Trains the value mod (+24 more)
+
+### Community 90 - "Module: State"
 Cohesion: 0.11
 Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
 
-### Community 88 - "Module: Execution"
-Cohesion: 0.12
-Nodes (18): BindingsProcess, _func_wrapper(), T, Process management for safe execution of MLIR bindings with timeouts.  This modu, as_ctype(), BF16Type, Context, ExecutionEngine (+10 more)
-
-### Community 89 - "Module: Dask Manager"
-Cohesion: 0.11
-Nodes (15): DaskManager, obj_T, T, Map a function across objects in a distributed manner.          Args:, Run a function both locally and on the workers.         The result will be regis, Submit a persistent function to a worker,         and keep track of its result (, Get the result of a persistent function from a worker.          Args:, Recompute the result of a persistent function on a worker.         This should b (+7 more)
-
-### Community 90 - "Module: State"
-Cohesion: 0.08
-Nodes (22): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+14 more)
-
 ### Community 91 - "Module: State"
-Cohesion: 0.08
-Nodes (22): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+14 more)
+Cohesion: 0.05
+Nodes (44): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), Benchmarks, Config (+36 more)
 
 ### Community 92 - "Module: Observation"
-Cohesion: 0.13
-Nodes (15): _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), _parse_size_to_kb(), OperationFeatures, OperationState, Tensor (+7 more)
+Cohesion: 0.07
+Nodes (33): ActionHistory, ActionMask, _build_hardware_vector(), _detect_clock_mhz(), _detect_physical_cores(), _detect_simd_width(), HardwareFeatures, NumLoops (+25 more)
 
 ### Community 93 - "Module: State"
-Cohesion: 0.11
-Nodes (22): Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file() (+14 more)
+Cohesion: 0.08
+Nodes (22): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+14 more)
 
 ### Community 94 - "Module: Env"
 Cohesion: 0.14
@@ -848,84 +928,84 @@ Cohesion: 0.14
 Nodes (14): Env, Action, Benchmarks, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState, Get the reward of the action based on the transformation and execution results. (+6 more)
 
 ### Community 96 - "Module: Execution"
-Cohesion: 0.10
-Nodes (17): as_ctype(), BF16Type, Context, ExecutionEngine, F16Type, F32Type, F64Type, FuncOp (+9 more)
+Cohesion: 0.07
+Nodes (27): type, Meta class to create a singleton instance of a class, Singleton, as_ctype(), BF16Type, Context, Execution, ExecutionEngine (+19 more)
 
 ### Community 97 - "Module: Execution"
-Cohesion: 0.11
-Nodes (21): Execution, c_void_p, Get the code cache key for the given operation state.          Args:, Lowers and runs the given MLIR code using Python bindings, then returns the exec, Check the execution cache for the given operation state.          Args:, Class that deals with code execution and cache management, Evaluates the given MLIR code with a timeout.          Args:             state (, collect_trajectory() (+13 more)
+Cohesion: 0.09
+Nodes (23): **Actions**, **Actions**, **Agent**, **Agent and Policy Network**, **Challenges in Applying RL**, **Chapter 3** {#chapter-3}, **Dataset Generation**, **Environments** (+15 more)
 
 ### Community 98 - "Module: Observation"
-Cohesion: 0.12
-Nodes (11): OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)         Example:, Create the observation part from the current state., Get cumulative sizes of all observation parts., Get the index of a part in the observation., Get a specific part of the observation. (+3 more)
+Cohesion: 0.09
+Nodes (22): 1. Think Before Coding, 2. Simplicity First, 3. Surgical Changes, 4. Goal-Driven Execution, Behavioral Guidelines, Config Structure, Creating / Extending Datasets, Datasets (+14 more)
 
 ### Community 99 - "Module: Execution"
-Cohesion: 0.11
-Nodes (21): Execution, c_void_p, Get the code cache key for the given operation state.          Args:, Lowers and runs the given MLIR code using Python bindings, then returns the exec, Check the execution cache for the given operation state.          Args:, Class that deals with code execution and cache management, Evaluates the given MLIR code with a timeout.          Args:             state (, collect_trajectory() (+13 more)
+Cohesion: 0.20
+Nodes (14): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+6 more)
 
 ### Community 100 - "Module: Observation"
-Cohesion: 0.12
-Nodes (11): OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)         Example:, Create the observation part from the current state., Get cumulative sizes of all observation parts., Get the index of a part in the observation., Get a specific part of the observation. (+3 more)
+Cohesion: 0.08
+Nodes (24): Novelty 2: Transformer-based Loop Nest Encoder, 1) Structured tokenization, 2) Structural embeddings, 3) Transformer encoder core, 4) Output pooling and compatibility, Ablation smoke metrics, Configuration, Design goals (+16 more)
 
 ### Community 101 - "Module: State"
-Cohesion: 0.11
-Nodes (22): Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file() (+14 more)
+Cohesion: 0.09
+Nodes (20): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result() (+12 more)
 
 ### Community 102 - "Module: State"
 Cohesion: 0.11
-Nodes (22): Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file() (+14 more)
+Nodes (21): InterchangeMethod, Enum, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, BenchmarkFeatures (+13 more)
 
 ### Community 103 - "Module: State"
-Cohesion: 0.11
-Nodes (22): Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), BenchmarkFeatures, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file() (+14 more)
+Cohesion: 0.07
+Nodes (30): Benchmarks, Config, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, ppo_update(), Optimizer (+22 more)
 
 ### Community 104 - "Module: Execution"
-Cohesion: 0.09
-Nodes (15): OutputsStructure, Module, ndarray, Protocol, Executes the given MLIR module and measures execution time.          Checks the, Get the code cache key for the given operation state.          Args:, Execute MLIR code in an isolated process with fallback.          Passes the modu, Lowers and runs the given MLIR code in an isolated child process.          MLIR (+7 more)
+Cohesion: 0.18
+Nodes (9): OutputsStructure, Module, ndarray, Protocol, Placeholder for structure used as output of MLIR execution.      Note:         U, Creates the input and output parameters for the given MLIR module.          Args, Converts input arrays and output structure into ctypes arguments for MLIR execut, Returns the output arrays as numpy arrays          Returns:             List of (+1 more)
 
 ### Community 105 - "Module: Trajectory"
-Cohesion: 0.10
-Nodes (15): Dataset, Model, Tensor, Initialize the trajectory dataset.          Args:             num_loops: Number, Get the length of the trajectory.          Returns:             The length of th, Get a single timestep from the trajectory.          Args:             idx: Index, Concatenate this trajectory with another.          Args:             other: The, Copy the trajectory.          Returns:             The copied trajectory. (+7 more)
+Cohesion: 0.07
+Nodes (21): Dataset, Model, Tensor, Initialize the trajectory dataset.          Args:             num_loops: Number, Get the length of the trajectory.          Returns:             The length of th, Get a single timestep from the trajectory.          Args:             idx: Index, Concatenate this trajectory with another.          Args:             other: The, Copy the trajectory.          Returns:             The copied trajectory. (+13 more)
 
 ### Community 106 - "Module: Observation"
-Cohesion: 0.12
-Nodes (11): OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)          Example:, Get cumulative sizes of all observation parts.          Returns:             Lis, Get the index of a part in the observation.          Args:             part: The, Get a specific part of the observation.          Args:             obs: The obse, Create the full observation from the current state.          Args:             s (+3 more)
+Cohesion: 0.11
+Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
 
 ### Community 107 - "Module: Execution"
-Cohesion: 0.13
-Nodes (17): type, Meta class to create a singleton instance of a class, Singleton, as_ctype(), BF16Type, Context, ExecutionEngine, F16Type (+9 more)
+Cohesion: 0.07
+Nodes (29): BindingsProcess, _func_wrapper(), T, Process management for safe execution of MLIR bindings with timeouts.  This modu, as_ctype(), BF16Type, Context, Execution (+21 more)
 
 ### Community 108 - "Module: Evaluation"
-Cohesion: 0.10
-Nodes (21): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+13 more)
+Cohesion: 0.12
+Nodes (18): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+10 more)
 
 ### Community 109 - "Module: Evaluation"
-Cohesion: 0.10
-Nodes (21): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+13 more)
+Cohesion: 0.12
+Nodes (18): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+10 more)
 
 ### Community 110 - "Module: Evaluation"
 Cohesion: 0.10
-Nodes (21): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+13 more)
+Nodes (11): Distribution, Tensor, Calculate the value loss.          Args:             new_values (torch.Tensor):, Initialize the model., Forward pass of the model.          Args:             obs (torch.Tensor): The in, Calculate the policy loss.          Args:             new_actions_log_p (torch.T, Forward pass of the model.          Args:             obs (torch.Tensor): The in, Sample an action from the model.          Args:             obs (torch.Tensor): (+3 more)
 
 ### Community 111 - "Module: Evaluation"
-Cohesion: 0.10
-Nodes (21): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+13 more)
+Cohesion: 0.14
+Nodes (14): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+6 more)
 
 ### Community 112 - "Module: Extract Blocks"
-Cohesion: 0.13
-Nodes (23): _collect_candidate_windows(), _collect_linalg_ops_from_full_code(), _enumerate_backward_paths(), _parse_ast(), _parse_op_count(), ParsedAst, ParsedOperation, _patch_block_op() (+15 more)
+Cohesion: 0.17
+Nodes (20): block_complexity_from_op_counts(), Compute deterministic complexity score from block op-count dictionaries., _collect_candidate_windows(), _collect_linalg_ops_from_full_code(), _enumerate_backward_paths(), extract_blocks_from_file(), main(), _parse_ast() (+12 more)
 
 ### Community 113 - "Module: Base"
-Cohesion: 0.10
-Nodes (15): Distribution, OperationState, Tensor, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe (+7 more)
+Cohesion: 0.08
+Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
 ### Community 114 - "Module: Benchmarks"
-Cohesion: 0.09
-Nodes (16): main(), Baseline execution time measurement for MLIR benchmarks.  This script measures t, Benchmarks, BenchmarkFeatures, Benchmark loading and management module.  This module provides functionality for, A class that holds benchmarks data      Attributes:         data: The list conta, # NOTE: For now img2col is applied to single operator codes only, Get the number of benchmarks loaded.          Returns:             The total num (+8 more)
+Cohesion: 0.13
+Nodes (10): Benchmarks, BenchmarkFeatures, A class that holds benchmarks data      Attributes:         data: The list conta, Get the number of benchmarks loaded.          Returns:             The total num, Get a benchmark by index.          Args:             idx: The index of the bench, BenchmarkFeatures, Copy the current [OperationFeatures][..] object.          Returns:             T, Dataclass to store the benchmark features data.      Attributes:         bench_n (+2 more)
 
 ### Community 115 - "Module: Evaluate"
-Cohesion: 0.12
-Nodes (15): main(), Baseline execution time measurement for MLIR benchmarks.  This script measures t, Benchmark loading and management module.  This module provides functionality for, # NOTE: For now img2col is applied to single operator codes only, Reinforcement learning environment for MLIR RL.  This module implements the RL e, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, main() (+7 more)
+Cohesion: 0.29
+Nodes (5): Benchmarks, BenchmarkFeatures, A class that holds benchmarks data      Attributes:         data: The list conta, Get the number of benchmarks loaded.          Returns:             The total num, Get a benchmark by index.          Args:             idx: The index of the bench
 
 ### Community 116 - "Module:   Init  "
 Cohesion: 0.19
@@ -936,12 +1016,12 @@ Cohesion: 0.19
 Nodes (8): ActionSpace, Action, Distribution, OperationState, Tensor, Create a list of distributions for the actions based on the logits.          Arg, Create a list of uniform distributions for the actions based on the observation., Class holding information about the action space
 
 ### Community 118 - "Module: Log"
-Cohesion: 0.13
-Nodes (16): Global configuration management for MLIR RL training.  This module provides a si, Distributed computation management using Dask.  This module handles distributed, Result logging and file management for training metrics.  This module provides f, _gpu_occupier_run(), GPU resource management and memory occupancy utilities.  This module provides ut, generate_random_string(), print_alert(), print_error() (+8 more)
+Cohesion: 0.11
+Nodes (17): Global configuration management for MLIR RL training.  This module provides a si, Distributed computation management using Dask.  This module handles distributed, Result logging and file management for training metrics.  This module provides f, _gpu_occupier_run(), GPUOccupier, GPU resource management and memory occupancy utilities.  This module provides ut, Manages a parallel process to keep the GPU busy when it is idle., Context manager that signals that the GPU is needed. (+9 more)
 
 ### Community 119 - "Module: Execution"
-Cohesion: 0.11
-Nodes (15): as_ctype(), BF16Type, Context, ExecutionEngine, F16Type, F32Type, F64Type, FuncOp (+7 more)
+Cohesion: 0.06
+Nodes (28): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+20 more)
 
 ### Community 120 - "Module: Tiled Fusion"
 Cohesion: 0.17
@@ -952,8 +1032,8 @@ Cohesion: 0.17
 Nodes (8): BenchmarkFeatures, OperationFeatures, OperationState, TiledParallelization, Update the features of the prducer after the fusion.          Note:, Class representing Tiled Fusion action, This is only for pickle, not for any other use, TiledFusion
 
 ### Community 122 - "Module: State"
-Cohesion: 0.09
-Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
+Cohesion: 0.10
+Nodes (10): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+2 more)
 
 ### Community 123 - "Module:   Init  "
 Cohesion: 0.20
@@ -964,8 +1044,8 @@ Cohesion: 0.20
 Nodes (8): ActionSpace, Action, Distribution, OperationState, Tensor, Create a list of distributions for the actions based on the logits.          Arg, Class holding information about the action space, Create a list of uniform distributions for the actions based on the observation.
 
 ### Community 125 - "Module: Tiling"
-Cohesion: 0.10
-Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
+Cohesion: 0.08
+Nodes (14): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+6 more)
 
 ### Community 126 - "Module: State"
 Cohesion: 0.09
@@ -980,20 +1060,20 @@ Cohesion: 0.20
 Nodes (8): ActionSpace, Action, Distribution, OperationState, Tensor, Create a list of distributions for the actions based on the logits.          Arg, Class holding information about the action space, Create a list of uniform distributions for the actions based on the observation.
 
 ### Community 129 - "Module: Tiling"
-Cohesion: 0.10
-Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
+Cohesion: 0.13
+Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
 
 ### Community 130 - "Module:   Init  "
 Cohesion: 0.20
 Nodes (8): ActionSpace, Action, Distribution, OperationState, Tensor, Create a list of distributions for the actions based on the logits.          Arg, Class holding information about the action space, Create a list of uniform distributions for the actions based on the observation.
 
 ### Community 131 - "Module: Tiling"
-Cohesion: 0.10
-Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
+Cohesion: 0.13
+Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
 
 ### Community 132 - "Module: State"
 Cohesion: 0.09
-Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
+Nodes (12): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationFeatures (+4 more)
 
 ### Community 133 - "Module:   Init  "
 Cohesion: 0.20
@@ -1012,20 +1092,20 @@ Cohesion: 0.20
 Nodes (8): ActionSpace, Action, Distribution, OperationState, Tensor, Create a list of distributions for the actions based on the logits.          Arg, Class holding information about the action space, Create a list of uniform distributions for the actions based on the observation.
 
 ### Community 137 - "Module: Tiling"
-Cohesion: 0.10
-Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
+Cohesion: 0.14
+Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
 
 ### Community 138 - "Module: State"
-Cohesion: 0.09
-Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
+Cohesion: 0.18
+Nodes (5): Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState
 
 ### Community 139 - "Module:   Init  "
 Cohesion: 0.20
 Nodes (8): ActionSpace, Action, Distribution, OperationState, Tensor, Create a list of distributions for the actions based on the logits.          Arg, Class holding information about the action space, Create a list of uniform distributions for the actions based on the observation.
 
 ### Community 140 - "Module: State"
-Cohesion: 0.09
-Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
+Cohesion: 0.11
+Nodes (10): Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationFeatures, OperationState, Copy the current BenchmarkFeatures object., Copy the current OperationState object. (+2 more)
 
 ### Community 141 - "Module:   Init  "
 Cohesion: 0.20
@@ -1052,11 +1132,11 @@ Cohesion: 0.12
 Nodes (6): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:, Class representing Interchange action
 
 ### Community 147 - "Module: Observation"
-Cohesion: 0.14
-Nodes (10): ActionMask, OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)          Example:, Class representing action mask in the observation, Create the full observation from the current state.          Args:             s, Create the full observation for all the states.          Args:             state (+2 more)
+Cohesion: 0.10
+Nodes (19): 1. SIGABRT Handler (`evaluate.py`), 2. Process-Isolated Execution (`execution.py`), 3. Dynamic Timeout (`execution.py`), 4. mlir-cpu-runner Fallback (`execution.py`), 5. Updated API Signatures, Crash Details (2026-06-22), Detail of Changes, Entry Points (+11 more)
 
 ### Community 148 - "Module: Interchange"
-Cohesion: 0.12
+Cohesion: 0.13
 Nodes (6): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Class representing Interchange action, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:
 
 ### Community 149 - "Module: Tiled Fusion"
@@ -1076,8 +1156,8 @@ Cohesion: 0.18
 Nodes (8): BenchmarkFeatures, OperationFeatures, OperationState, TiledParallelization, Update the features of the prducer after the fusion.          Note:, This is only for pickle, not for any other use, Class representing Tiled Fusion action, TiledFusion
 
 ### Community 153 - "Module: Evaluation"
-Cohesion: 0.12
-Nodes (18): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+10 more)
+Cohesion: 0.10
+Nodes (19): 10. Dependencies, 1. Overview, 2. Results Folder Structure, 3. Benchmark Categories, 4. Model Family Normalization, 5. Dashboard Layout, 6. Tabs, 7. Speedup Semantics (+11 more)
 
 ### Community 154 - "Module: Tiled Fusion"
 Cohesion: 0.18
@@ -1096,24 +1176,24 @@ Cohesion: 0.18
 Nodes (8): BenchmarkFeatures, OperationFeatures, OperationState, TiledParallelization, Update the features of the prducer after the fusion.          Note:, This is only for pickle, not for any other use, Class representing Tiled Fusion action, TiledFusion
 
 ### Community 158 - "Module: Execution"
-Cohesion: 0.12
-Nodes (14): as_ctype(), BF16Type, Context, ExecutionEngine, F16Type, F32Type, F64Type, FuncOp (+6 more)
+Cohesion: 0.06
+Nodes (29): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+21 more)
 
 ### Community 159 - "Module: Tiled Fusion"
 Cohesion: 0.18
 Nodes (8): BenchmarkFeatures, OperationFeatures, OperationState, TiledParallelization, Update the features of the prducer after the fusion.          Note:, This is only for pickle, not for any other use, Class representing Tiled Fusion action, TiledFusion
 
 ### Community 160 - "Module: Evaluation"
-Cohesion: 0.12
-Nodes (18): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+10 more)
+Cohesion: 0.14
+Nodes (14): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+6 more)
 
 ### Community 161 - "Module: Tiled Fusion"
 Cohesion: 0.18
 Nodes (8): BenchmarkFeatures, OperationFeatures, OperationState, TiledParallelization, Update the features of the prducer after the fusion.          Note:, This is only for pickle, not for any other use, Class representing Tiled Fusion action, TiledFusion
 
 ### Community 162 - "Module: Execution"
-Cohesion: 0.12
-Nodes (14): as_ctype(), BF16Type, Context, ExecutionEngine, F16Type, F32Type, F64Type, FuncOp (+6 more)
+Cohesion: 0.06
+Nodes (29): __create_inputs(), evaluate_code_with_bindings(), ndarray, Lowers and runs the given MLIR code using Python bindings, then returns the exec, as_ctype(), BF16Type, Context, Execution (+21 more)
 
 ### Community 163 - "Module: Tiled Fusion"
 Cohesion: 0.18
@@ -1124,8 +1204,8 @@ Cohesion: 0.18
 Nodes (8): BenchmarkFeatures, OperationFeatures, OperationState, TiledParallelization, Update the features of the prducer after the fusion.          Note:, This is only for pickle, not for any other use, Class representing Tiled Fusion action, TiledFusion
 
 ### Community 165 - "Module: Evaluation"
-Cohesion: 0.12
-Nodes (18): __create_inputs(), evaluate_code_with_bindings(), evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd() (+10 more)
+Cohesion: 0.14
+Nodes (10): ActionMask, OperationFeatures, OperationState, Tensor, Turns assignement formula to a list of (index, factor)          Example:, Class representing action mask in the observation, Create the full observation from the current state.          Args:             s, Create the full observation for all the states.          Args:             state (+2 more)
 
 ### Community 166 - "Module: Report Training"
 Cohesion: 0.11
@@ -1140,27 +1220,27 @@ Cohesion: 0.17
 Nodes (20): Entropy Collapse, Geometric Mean Speedup, V0 - Geometric Mean Speedup Across Checkpoints (New Dataset) Chart, V4.6 - Geometric Mean Speedup Across Checkpoints (New Dataset) Chart, V4.7 - Geometric Mean Speedup Across Checkpoints (New Dataset) Chart, V4.8 - Geometric Mean Speedup Across Checkpoints (New Dataset) Chart, Our Proposed Agent, Single-Operation Performance: Prior Agent vs Our Agent Chart (+12 more)
 
 ### Community 169 - "Module: State"
-Cohesion: 0.10
-Nodes (10): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+2 more)
+Cohesion: 0.09
+Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
 
 ### Community 170 - "Module: Interchange"
 Cohesion: 0.13
 Nodes (6): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Class representing Interchange action, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:
 
 ### Community 171 - "Module: Interchange"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (6): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Class representing Interchange action, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:
 
 ### Community 172 - "Module: Vectorization"
-Cohesion: 0.13
-Nodes (14): Action, OperationFeatures, OperationState, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the decomposition transformation to the specified operation in the given c (+6 more)
+Cohesion: 0.28
+Nodes (5): Action, OperationFeatures, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization
 
 ### Community 173 - "Module: State"
-Cohesion: 0.10
-Nodes (10): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+2 more)
+Cohesion: 0.09
+Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
 
 ### Community 174 - "Module: Interchange"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (6): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Class representing Interchange action, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:
 
 ### Community 175 - "Module: Interchange"
@@ -1188,32 +1268,32 @@ Cohesion: 0.13
 Nodes (6): Interchange, Action, OperationState, Decode the interchange parameter to get the loop permutation.          Args:, Class representing Interchange action, Get all 1c 2c 3c possible interchanges for `num_loops`          Args:
 
 ### Community 181 - "Module: Transforms"
-Cohesion: 0.12
-Nodes (15): Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the tiling and parallelization transformation to the specified operation i, Apply the tiling and fusion transformation to the specified operation in the giv, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the tiling transformation to the specified operation in the given code., Apply the interchange transformation to the specified operation in the given cod, __run_transform_code() (+7 more)
+Cohesion: 0.07
+Nodes (31): OperationState, Context, interpreter, Module, Apply the vectorization transformation with img2col to the specified operation i, Apply the vectorization transformation to the specified operation in the given c, Apply the vectorization transformation with vectorizer to the specified operatio, Apply the vectorization transformation with vectorizer to the specified operatio (+23 more)
 
 ### Community 182 - "Module: State"
-Cohesion: 0.11
-Nodes (10): Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationFeatures, OperationState, Copy the current BenchmarkFeatures object., Copy the current OperationState object. (+2 more)
+Cohesion: 0.09
+Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
 
 ### Community 183 - "Module: Implementation"
 Cohesion: 0.11
-Nodes (17): _timeout_handler(), TimeoutError, model_family(), Split a base execution times JSON into train and eval files.  Uses stratified sp, Extract model family from benchmark name.      First checks known model prefixes, get_agent_subdir(), get_base_eval_files(), get_base_file_path() (+9 more)
+Nodes (19): Architecture Overview, Current Problem, Fix #1: Model Surgery — Implementation Guide, Integration with `measure_full_model_baselines.py`, Issue: "Graphs differed across invocations" or branching errors, Issue: JIT model produces different outputs than eager, Issue: "Module 'X' has no attribute 'Y'" during trace, Issue: Traced model crashes during benchmark with "can't find CUDA kernel" (+11 more)
 
 ### Community 184 - "Module: Batch Policy"
 Cohesion: 0.20
 Nodes (17): BatchPolicyError, BatchSelectionResult, fit_heuristic_model(), _heuristic_select_one(), HeuristicModel, _mean_fallback_set(), _percentile(), RuntimeError (+9 more)
 
 ### Community 185 - "Module: Model"
-Cohesion: 0.14
-Nodes (8): Distribution, Tensor, Forward pass of the value model.          Args:             obs: The input tenso, Calculate the value loss.          Args:             new_values: The current val, Forward pass of the policy model.          Args:             obs: The input tens, Calculate the policy loss.          Args:             actions_log_p: The log pro, Forward pass of the hierarchical model.          Args:             obs: The inpu, Sample an action from the model.          Args:             obs: The input tenso
+Cohesion: 0.16
+Nodes (7): Distribution, Tensor, Forward pass of the value model.          Args:             obs: The input tenso, Forward pass of the policy model.          Args:             obs: The input tens, Calculate the policy loss.          Args:             actions_log_p: The log pro, Forward pass of the hierarchical model.          Args:             obs: The inpu, Sample an action from the model.          Args:             obs: The input tenso
 
 ### Community 186 - "Module: State"
 Cohesion: 0.11
 Nodes (10): OperationState, Copy the current [OperationFeatures][..] object.          Returns:             T, Copy the current [BenchmarkFeatures][..] object.          Returns:             T, Dataclass to store the operation state data.      Attributes:         bench_idx:, Get the transformation sequence of the current operation being optimized., Get the number of steps in the current transformation sequence.          Returns, Get the latest action in the current transformation sequence.          Returns:, Check if the latest action is incomplete.          Returns:             True if (+2 more)
 
 ### Community 187 - "Module: Ppo"
-Cohesion: 0.16
-Nodes (17): Execution, c_void_p, Class that deals with code execution and cache management, collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks (+9 more)
+Cohesion: 0.11
+Nodes (19): Active Experiment: experiment3, Auto-Derived File Resolution, Benchmark generation, Comparison, Config Derivation, Config Files, Dashboard, Evaluation (+11 more)
 
 ### Community 188 - "Module: Model"
 Cohesion: 0.14
@@ -1256,24 +1336,24 @@ Cohesion: 0.23
 Nodes (15): backup_and_strip(), _cleanup_onnx_intermediates(), direct_route(), _hf_repo(), _import_onnx(), _load_model_and_inputs(), _lower_to_linalg(), main() (+7 more)
 
 ### Community 198 - "Module: Tiling"
-Cohesion: 0.14
-Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
+Cohesion: 0.10
+Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
 
 ### Community 199 - "Module: Tiling"
-Cohesion: 0.14
-Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
+Cohesion: 0.10
+Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
 
 ### Community 200 - "Module: Tiling"
 Cohesion: 0.14
 Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
 
 ### Community 201 - "Module: Tiling"
-Cohesion: 0.14
-Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
+Cohesion: 0.10
+Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
 
 ### Community 202 - "Module: Tiling"
-Cohesion: 0.14
-Nodes (5): Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action, Tiling
+Cohesion: 0.10
+Nodes (9): OperationState, Tiling, Class representing Tiled Parallelization action, TiledParallelization, Action, OperationState, Get the number of tiling candidates for a given loop upper bound.          Args:, Class representing Tiling action (+1 more)
 
 ### Community 203 - "Module: Tiling"
 Cohesion: 0.14
@@ -1300,16 +1380,16 @@ Cohesion: 0.30
 Nodes (13): backup_and_strip(), _cleanup_onnx_intermediates(), direct_route(), _get_dummy_input_size(), _import_onnx(), _load_model(), _lower_to_linalg(), main() (+5 more)
 
 ### Community 209 - "Module: Env"
-Cohesion: 0.25
-Nodes (7): Env, Action, Get the reward of the action based on the transformation and execution results., Get the reward based on the speedup.          Args:             new (float): The, Update state infos after applying a transformation.          Notes: Updated fiel, Apply the sequence of actions to the state's code.          Args:             co, Take a step in the environment.          Args:             state (OperationState
+Cohesion: 0.14
+Nodes (14): Env, Action, Benchmarks, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState, Get the reward of the action based on the transformation and execution results. (+6 more)
 
 ### Community 210 - "Module: Ppo"
 Cohesion: 0.20
 Nodes (14): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+6 more)
 
 ### Community 211 - "Module: Ppo"
-Cohesion: 0.20
-Nodes (14): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+6 more)
+Cohesion: 0.14
+Nodes (14): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+6 more)
 
 ### Community 212 - "Module: Optimize Model Via Blocks"
 Cohesion: 0.27
@@ -1324,20 +1404,20 @@ Cohesion: 0.32
 Nodes (12): ArgumentParser, main(), build_parser(), _check_env(), _cmd_gnn(), _cmd_strip(), _cmd_transformer(), _cmd_vision() (+4 more)
 
 ### Community 215 - "Module: Execution"
-Cohesion: 0.18
-Nodes (9): OutputsStructure, Module, ndarray, Protocol, Placeholder for structure used as output of MLIR execution.      Note:         U, Creates the input and output parameters for the given MLIR module.          Args, Converts input arrays and output structure into ctypes arguments for MLIR execut, Returns the output arrays as numpy arrays          Returns:             List of (+1 more)
+Cohesion: 0.04
+Nodes (56): main(), Baseline execution time measurement for MLIR benchmarks.  This script measures t, Benchmark loading and management module.  This module provides functionality for, # NOTE: For now img2col is applied to single operator codes only, Reinforcement learning environment for MLIR RL.  This module implements the RL e, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, main() (+48 more)
 
 ### Community 216 - "Module: Vectorization"
 Cohesion: 0.22
 Nodes (8): Action, OperationFeatures, OperationState, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization, Eliminate accesses with the constant 1 by adding subviews     which enables more, transform_pre_vec()
 
 ### Community 217 - "Module: Vectorization"
-Cohesion: 0.22
-Nodes (8): Action, OperationFeatures, OperationState, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization, Eliminate accesses with the constant 1 by adding subviews     which enables more, transform_pre_vec()
+Cohesion: 0.18
+Nodes (10): Action, OperationFeatures, OperationState, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization, Apply the Conv2D transpose transformation to the specified operation in the give, Eliminate accesses with the constant 1 by adding subviews     which enables more (+2 more)
 
 ### Community 218 - "Module: Vectorization"
-Cohesion: 0.22
-Nodes (8): Action, OperationFeatures, OperationState, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization, Eliminate accesses with the constant 1 by adding subviews     which enables more, transform_pre_vec()
+Cohesion: 0.28
+Nodes (5): Action, OperationFeatures, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization
 
 ### Community 219 - "Module: Vectorization"
 Cohesion: 0.22
@@ -1364,8 +1444,8 @@ Cohesion: 0.22
 Nodes (8): Action, OperationFeatures, OperationState, Class representing Vectorization action, a.k.a is a two dimensional conv interface op, Vectorization, Eliminate accesses with the constant 1 by adding subviews     which enables more, transform_pre_vec()
 
 ### Community 225 - "Module: Train Failures 2026 06 24"
-Cohesion: 0.23
-Nodes (12): docs/archive/FIX1_MODEL_SURGERY.md, GPT2 JIT Causal Mask, docs/archive/GPT2_JIT_FIX.md, bf16 Lowering Crash, docs/archive/LLAMA_BF16_FIX.md, docs/archive/PYTORCH_JIT_DEBUGGING.md, ONNX CPU Slowdown, C++ Diagnostic Destructor Abort (+4 more)
+Cohesion: 0.08
+Nodes (28): docs/archive/FIX1_MODEL_SURGERY.md, GPT2 JIT Causal Mask, docs/archive/GPT2_JIT_FIX.md, docs/archive/PYTORCH_JIT_DEBUGGING.md, ONNX CPU Slowdown, Methodology Alignment, Hyperparameters, Methodology (+20 more)
 
 ### Community 226 - "Module: Readme"
 Cohesion: 0.21
@@ -1384,8 +1464,8 @@ Cohesion: 0.23
 Nodes (7): Distribution, Tensor, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe, Calculate the log probabilities and entropies for the distribution          Args, Sample an action based on the distribution          Args:             distributi
 
 ### Community 230 - "Module: Tiled Fusion"
-Cohesion: 0.17
-Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+Cohesion: 0.14
+Nodes (14): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+6 more)
 
 ### Community 231 - "Module: Base"
 Cohesion: 0.23
@@ -1408,16 +1488,16 @@ Cohesion: 0.23
 Nodes (7): Distribution, Tensor, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe, Calculate the log probabilities and entropies for the distribution          Args, Sample an action based on the distribution          Args:             distributi
 
 ### Community 236 - "Module: Env"
-Cohesion: 0.24
-Nodes (7): Benchmarks, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState, Reset the environment.          Args:             bench_idx (Optional[int]): The, Get the state that represents the next operation (None if benchmark is done).
+Cohesion: 0.11
+Nodes (18): 1. V4.9-Small excels at synthetic benchmarks; V4.9-Large excels at model ops, 2. Per-model breakdown (best checkpoints), 3. Per-operation breakdown (best checkpoints), 4. Entropy collapse (all transformer-based agents), 5. Larger model does not help, Baselines, Configs, Experimentation Results (+10 more)
 
 ### Community 237 - "Module: Base"
 Cohesion: 0.23
 Nodes (7): Distribution, Tensor, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe, Calculate the log probabilities and entropies for the distribution          Args, Sample an action based on the distribution          Args:             distributi
 
 ### Community 238 - "Module: Tiled Fusion"
-Cohesion: 0.17
-Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+Cohesion: 0.14
+Nodes (14): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+6 more)
 
 ### Community 239 - "Module: Base"
 Cohesion: 0.23
@@ -1428,20 +1508,20 @@ Cohesion: 0.17
 Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
 
 ### Community 241 - "Module: Base"
-Cohesion: 0.23
-Nodes (7): Distribution, Tensor, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe, Calculate the log probabilities and entropies for the distribution          Args, Sample an action based on the distribution          Args:             distributi
+Cohesion: 0.07
+Nodes (21): Action, Distribution, OperationFeatures, OperationState, Tensor, Return the size of the mask for this action type          Returns:             i, Return the size of the history for this action type          Returns:, Check if this action type is allowed in the current state          Args: (+13 more)
 
 ### Community 242 - "Module: Tiled Fusion"
 Cohesion: 0.17
-Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+Nodes (13): Load benchmarks          Args:             is_training: Whether to load train or, __extract_bench_features_from_ast_result(), extract_bench_features_from_code(), extract_bench_features_from_file(), __get_operation_type(), NestedLoopFeatures, State representation and feature extraction for MLIR operations.  This module pr, Extract benchmark features from the given code.      Args:         bench_name: t (+5 more)
 
 ### Community 243 - "Module: Base"
-Cohesion: 0.23
-Nodes (7): Distribution, Tensor, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe, Calculate the log probabilities and entropies for the distribution          Args, Sample an action based on the distribution          Args:             distributi
+Cohesion: 0.20
+Nodes (14): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+6 more)
 
 ### Community 244 - "Module: Tiled Fusion"
-Cohesion: 0.17
-Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+Cohesion: 0.20
+Nodes (14): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+6 more)
 
 ### Community 245 - "Module: Base"
 Cohesion: 0.23
@@ -1460,12 +1540,12 @@ Cohesion: 0.42
 Nodes (9): _blue(), _green(), main(), print_bench_table(), print_config(), print_header(), print_info(), print_success() (+1 more)
 
 ### Community 249 - "Module: Benchmarks"
-Cohesion: 0.20
-Nodes (8): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), Apply the img2col transformation to the specified operation in the given code., transform_img2col()
+Cohesion: 0.11
+Nodes (18): **Chapter 2 Reinforcement learning** {#chapter-2-reinforcement-learning}, **Convolutional Neural Networks (CNN)**, **Double DQN**, **DQN Algorithm**, **Experience Replay**, **Exploration vs Exploitation**, **Feedforward Neural Networks (FNN)**, **Monte Carlo (MC)** (+10 more)
 
 ### Community 250 - "Module: Benchmarks"
-Cohesion: 0.20
-Nodes (8): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), extract_bench_features_from_code(), Extract benchmark features from the given code.      Args:         bench_name (s
+Cohesion: 0.12
+Nodes (16): 1. The MDP (Markov Decision Process) Formulation, 2. State Representation & Feature Extraction, 3. Action Space & Action Masking, 4. Environment Transitions & Trajectory Walkthrough, 5. Execution Safety & Process Isolation, 6. Reward Design & Mathematical Formulation, 7. Actor-Critic PPO Training Loop, A. Core Operation Features (+8 more)
 
 ### Community 251 - "Module: Add Timing Wrapper"
 Cohesion: 0.24
@@ -1480,40 +1560,40 @@ Cohesion: 0.40
 Nodes (10): MLIR-RL Agent with Hardware Features, MLIR-RL Agent without Hardware Features, Dalma Hardware (Intel Xeon E5-2680 v4, 28c), Jubail Hardware (AMD EPYC 7742, 128c), Dalma Merged Performance Plot (By Operation & Model), Dalma Performance Plot by Model, Dalma Performance Plot by Operation Type, Jubail Merged Performance Plot (By Operation & Model) (+2 more)
 
 ### Community 254 - "Module: Extract Blocks"
-Cohesion: 0.22
-Nodes (9): block_complexity_from_op_counts(), Compute deterministic complexity score from block op-count dictionaries., BlockBuildSkip, extract_blocks_from_file(), main(), RuntimeError, Extract blocks from one MLIR file. Returns (written, skipped)., Known, non-fatal reason for skipping one candidate block. (+1 more)
+Cohesion: 0.14
+Nodes (14): evaluate_code_with_bindings_and_timeout(), evaluate_code_with_bindings_wrapper(), evaluate_code_with_cmd(), evaluate_code_with_cmd_and_timeout(), evaluate_code_with_cmd_wrapper(), evaluate_transform_with_cmd(), get_cached_execution_time(), Wrapper function for evaluate_code_with_bindings to be used in multiprocessing. (+6 more)
 
 ### Community 255 - "Module: Novelties"
-Cohesion: 0.20
-Nodes (10): Thesis Proposal Novelties, Novelty 1: Hardware-Aware Observation Space, Novelty 3: Shaped Rewards, Novelty 2: Transformer-based Loop Nest Encoder, V1: Hardware-Aware Observation Design, V3: Transformer Loop-Nest Encoder Design, Entropy Collapse Investigation Report, Entropy Collapse (+2 more)
+Cohesion: 0.11
+Nodes (18): 1. Baseline Architecture Overview, 2. Proposed Novelties, 3. Future Work (V4+), Thesis Proposal Novelties, Novelty 1: Hardware-Aware Observation Space, Novelty 2: Deep Loop Nest Parsing (Transformer-based Encoder), Novelty 3: Multi-Objective and Shaped Rewards (Already Implemented), Novelty 4: Full Graph Observation (Future Work - V5) (+10 more)
 
 ### Community 256 - "Module: V4 Failure Investigation"
 Cohesion: 0.22
 Nodes (10): Entropy Collapse, V4 Failure Investigation, Success-Contingent Reward Negation, Actor-Critic PPO Agent, Hardware-Aware Features, Process-Isolated Execution, Paper Package Safety Upgrades, SIGABRT Crash Investigation (+2 more)
 
 ### Community 257 - "Module: Benchmarks"
-Cohesion: 0.20
-Nodes (6): BenchmarkFeatures, Dataclass to store the benchmark features data.      Attributes:         bench_n, Benchmarks, A class that holds benchmarks data, Benchmarks, A class that holds benchmarks data
+Cohesion: 0.12
+Nodes (16): ✅ Current Workaround: Accept Eager-Only, ❌ Fix #3: ONNX Intermediate (NOT VIABLE), GPT2 Models: `**kwargs` Design Pattern, ONNX Runtime Performance Test Results, 🔧 Potential Fix #1: Model Surgery (Experimental), 🔧 Potential Fix #2: TorchScript Custom Ops, 🔧 Potential Fix #4: Distilled Student Model, PyTorch JIT Failure Analysis — gpt2 & Workarounds (+8 more)
 
 ### Community 258 - "Module: Trajectory"
 Cohesion: 0.20
 Nodes (6): DataLoader, Create a DataLoader for the trajectory.          Args:             batch_size: B, Sampler that yields indices of top-K advantage samples in random order.      Sel, Returns an iterator over shuffled indices of the top-k samples.         This is, The total number of samples to be drawn.          Returns:             The total, TopKAdvantageSampler
 
 ### Community 259 - "Module: Trajectory"
-Cohesion: 0.20
-Nodes (6): Class that appends timestep data to a trajectory.      Attributes:         num_l, Initialize the trajectory collector., Add another trajectory collector to the current one.          Args:, Convert the collected data to a [TrajectoryData][...TrajectoryData] object., Reset the trajectory collector., TrajectoryCollector
+Cohesion: 0.12
+Nodes (15): 1. Supported Action Space (Transformations), 2. Missing Loop Nest Optimizations, 3. Why are Skewing, Distribution, and Peeling Missing?, 4. Complexity & Selection Flow, A. Loop Skewing, A. Tiling (`tiling.py` — symbol: `T`), B. Loop Distribution (Fission), B. Tiled Fusion (`tiled_fusion.py` — symbol: `TPF`) (+7 more)
 
 ### Community 260 - "Module: Trajectory"
-Cohesion: 0.20
-Nodes (6): DataLoader, Create a DataLoader for the trajectory.          Args:             batch_size: B, Sampler that yields indices of top-K advantage samples in random order.      Sel, Returns an iterator over shuffled indices of the top-k samples.         This is, The total number of samples to be drawn.          Returns:             The total, TopKAdvantageSampler
+Cohesion: 0.13
+Nodes (15): 1. Re-export Raw Model in f32, 2. Convert ONNX → torch-mlir → linalg, 3. Replace Raw Model File, 4. Re-extract Single Ops, 5. Re-extract Blocks, 6. Rebuild Flat Dataset, 7. Re-run MLIR Baselines, bf16 Lowering Crash (+7 more)
 
 ### Community 261 - "Module: Execution"
-Cohesion: 0.20
-Nodes (5): Lowers and runs the given MLIR code using MLIR opt and MLIR CPU Runner., Get the code cache key for the given operation state.          Args:, Lowers and runs the given MLIR code using Python bindings in an isolated process, Check the execution cache for the given operation state.          Args:, Evaluates the given MLIR code with bindings first, cmd fallback.
+Cohesion: 0.13
+Nodes (15): **Chapter 6** {#chapter-6}, **Conclusion**, **Conclusion**, **Conclusion**, **Conclusion**, **Experimental Setup**, **Experimental Setup**, **Hyperparameter	Value** (+7 more)
 
 ### Community 262 - "Module: Base"
-Cohesion: 0.20
-Nodes (7): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet
+Cohesion: 0.09
+Nodes (11): OperationState, Check if this action type is allowed in the current state          Args:, Return the action mask for this action type in the current state          Args:, Initialize action without parameters, Initialize action dependent on state but without parameters          Args:, Initialize action with parameters          Args:             parameters (list[in, Initialize action with unprocessed parameters          Args:             paramet, OperationState (+3 more)
 
 ### Community 263 - "Module: Classify Benchmarks"
 Cohesion: 0.29
@@ -1528,8 +1608,8 @@ Cohesion: 0.33
 Nodes (9): MLIR Baseline, PyTorch Eager, PyTorch JIT, MLIR-RL V0 Agent (LSTM Baseline), MLIR-RL V4.5 Agent (Transformer with Hardware features), Performance Comparison by Model (V0 vs V4.5 vs PyTorch), V4.5 Speedup Improvement Over V0, V4.5 Outperforming V0 Average Speedup by Model Family (+1 more)
 
 ### Community 266 - "Module: Extract Blocks"
-Cohesion: 0.22
-Nodes (9): _block_has_heavy_op(), _build_block_benchmark(), _build_block_module(), Build one block benchmark MLIR and return (mlir_text, metadata)., Return True if any op in *op_texts* is a non-trivial scheduling target., _extract_result_type(), _has_elided_tensor(), Extract the tensor result type from the trailing '-> tensor<...>'. (+1 more)
+Cohesion: 0.20
+Nodes (9): _block_has_heavy_op(), BlockBuildSkip, _build_block_benchmark(), _build_block_module(), Build one block benchmark MLIR and return (mlir_text, metadata)., Known, non-fatal reason for skipping one candidate block., Return True if any op in *op_texts* is a non-trivial scheduling target., _get_needed_constants() (+1 more)
 
 ### Community 267 - "Module: Vectorization"
 Cohesion: 0.28
@@ -1556,8 +1636,8 @@ Cohesion: 0.29
 Nodes (7): Data Generation Pipeline, MLIR Benchmark Dataset, ONNX (Open Neural Network Exchange), Sub-graph Isolation, torch-mlir, Data Generation Pipeline Diagram, ONNX Logo Image
 
 ### Community 273 - "Module: Benchmarks"
-Cohesion: 0.29
-Nodes (5): Benchmarks, BenchmarkFeatures, A class that holds benchmarks data      Attributes:         data: The list conta, Get the number of benchmarks loaded.          Returns:             The total num, Get a benchmark by index.          Args:             idx: The index of the bench
+Cohesion: 0.13
+Nodes (14): **Abstract** {#abstract}, **Acknowledgements**, **Bibliography**, **Conclusion**, **Contents**, **Defense Date:**, **General Conclusion** {#general-conclusion}, **General Introduction** {#general-introduction} (+6 more)
 
 ### Community 274 - "Module: Get Base"
 Cohesion: 0.29
@@ -1584,8 +1664,8 @@ Cohesion: 0.29
 Nodes (6): AUTOSCHEDULER_IMPL, CONFIG_FILE_PATH, LD_LIBRARY_PATH, PATH, PYTHONPATH, train.sh script
 
 ### Community 280 - "Module: Mlir Generators"
-Cohesion: 0.33
-Nodes (6): add(), getShapes_Args(), randomSubGraph(), Remove duplicate (arg, shape) pairs while preserving order., _remove_duplicate_args(), sub()
+Cohesion: 0.50
+Nodes (4): add(), getShapes_Args(), Remove duplicate (arg, shape) pairs while preserving order., _remove_duplicate_args()
 
 ### Community 281 - "Module: Rafik & Djad 2025"
 Cohesion: 0.33
@@ -1604,16 +1684,16 @@ Cohesion: 0.53
 Nodes (5): geo_mean_speedup(), get_checkpoint_number(), load_baseline(), main(), Compute geometric mean speedup across all benchmarks.
 
 ### Community 285 - "Module: State"
-Cohesion: 0.33
-Nodes (3): Copy the current [OperationFeatures][..] object.          Returns:             T, Copy the current [BenchmarkFeatures][..] object.          Returns:             T, Copy the current [OperationState][..] object.          Returns:             The
+Cohesion: 0.14
+Nodes (14): Batch-process all models in a directory, CLI Reference, Deduplication, extract_ops.py — Reference, How it works, Large model files (many operations), Output file format, Pass 1 — Pre-scan (+6 more)
 
 ### Community 286 - "Module: Bindings Process"
 Cohesion: 0.40
 Nodes (4): BindingsProcess, _func_wrapper(), T, Process management for safe execution of MLIR bindings with timeouts.  This modu
 
 ### Community 287 - "Module: No Transformation"
-Cohesion: 0.33
-Nodes (4): NoTransformation, Action, OperationState, Class representing No Transformation
+Cohesion: 0.14
+Nodes (14): Entry Template, MLIR-RL Version Evolution Log, V1 - Hardware-Aware Observation, V2.5 - Hardened Shaped Reward (Fair Baseline), V2 - Shaped Reward, V3 - Transformer Loop-Nest Encoder, V4.5 - Robust Integration (Hardened Reliability & Safety), V4.6 — Reward-Fixed Classic Transformer (+6 more)
 
 ### Community 288 - "Module: Eval"
 Cohesion: 0.33
@@ -1640,12 +1720,12 @@ Cohesion: 0.50
 Nodes (5): Concatenated Observation Vector, Hardware Specifications, Program State Features, RL Agent Policy Network, Hardware Specification Integration Diagram
 
 ### Community 294 - "Module: Benchmark Failures Summary"
-Cohesion: 0.40
-Nodes (5): MLIR Benchmark Failures Summary, Out of Memory (OOM) Errors on Tensor Allocation, Invalid MLIR Syntax Parse Failure, C++ Binding Hard Crashes (SIGKILL), Compilation/Execution Timeouts
+Cohesion: 0.20
+Nodes (10): 1. Out of Memory (OOM) Errors on Tensor Allocation, 2. Invalid MLIR Syntax (Parse Failure), 3. C++ Binding Hard Crashes (SIGKILL), 4. Infinite Loops / Compilation Timeouts, MLIR Benchmark Failures Summary, MLIR Benchmark Failure Summary, Out of Memory (OOM) Errors on Tensor Allocation, Invalid MLIR Syntax Parse Failure (+2 more)
 
 ### Community 295 - "Module: Full Model"
-Cohesion: 0.40
-Nodes (5): Batched In-Process MLIR Transform, Bufferization and Lowering Fallback Pipeline, Full-Model End-to-End RL Optimization Documentation, V2.5: Hardened Shaped Reward Design, V2.5/V4.5 Reliability Engineering (4 Pillars)
+Cohesion: 0.33
+Nodes (6): Comparison Table, Configuration, Overview, Rationale for V2.5, Significance, V2.5: Hardened Shaped Reward (Fair Baseline)
 
 ### Community 296 - "Module: Execution"
 Cohesion: 0.40
@@ -1680,8 +1760,8 @@ Cohesion: 0.40
 Nodes (4): CUDA_VISIBLE_DEVICES, LD_LIBRARY_PATH, PYTHONPATH, gen_onnx.sh script
 
 ### Community 305 - "Module: Readme"
-Cohesion: 0.40
-Nodes (5): Eval Scripts, Full Model Optimization Scripts, Scripts Folder README, Train Scripts, AstDumper Tool Build Configuration
+Cohesion: 0.14
+Nodes (15): `baseline/`, `checkpoint/`, `data/`, Directory Layout, `eval/`, `full_model/`, New Dataset, Old Dataset (+7 more)
 
 ### Community 306 - "Module: Main"
 Cohesion: 0.60
@@ -1696,8 +1776,8 @@ Cohesion: 0.60
 Nodes (4): LinalgOp, string, getLinalgOpTag(), main()
 
 ### Community 309 - "Module: Agents"
-Cohesion: 0.50
-Nodes (3): Entropy Collapse, Lustre Soft File Quota, Shaped Reward Misdirection
+Cohesion: 0.09
+Nodes (21): 1. DRL Fundamentals, 1. Phase A: Rollout & Simulation (Trajectory Collection), 1. Setup & Environment, 2. Codebase Representation, 2. Config Files, 2. Phase B: Neural Network Weight Updates, 3. Directory Layout, 4. Operational Commands (+13 more)
 
 ### Community 310 - "Module: Graph3 Fullmodel"
 Cohesion: 0.50
@@ -1735,6 +1815,10 @@ Nodes (4): Manuscript Ablation Study Plot, Impact of Hardware Features in RL Tra
 Cohesion: 0.83
 Nodes (4): Manuscript Bergamo Multi-Hardware Merged Plot, Manuscript Bergamo Multi-Hardware Model Plot, Manuscript Bergamo Multi-Hardware Operation Plot, Generalization on EPYC Bergamo Architecture
 
+### Community 320 - "Module: Config"
+Cohesion: 0.14
+Nodes (13): 1. LLVM is a language-building platform, 2. Peak performance — measurable, not theoretical, 3. Security-critical systems, 4. LLVM is the backbone of AI/ML in 2026, a) Memory overhead, b) Determinism and latency, c) The JVM cannot run everywhere, ❌ Claim 1: "JVM avoids compilation time" (+5 more)
+
 ### Community 321 - "Module: Execution"
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
@@ -1742,6 +1826,10 @@ Nodes (3): Get already existing instance, Initialize a new first instance withou
 ### Community 322 - "Module: Execution"
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
+
+### Community 323 - "Module: Benchmarks"
+Cohesion: 0.14
+Nodes (13): 1. Monitoring Active Training Runs, 2. Using Reporting Scripts (`scripts/utils/`), 3. Running Standalone Evaluations (`eval.sh`), 4. Key Experimental Metrics, 5. The Comparison Dashboard, 6. Lustre File Quota Safety, A. Terminal / Standard Output, A. Training Progress Summary (+5 more)
 
 ### Community 324 - "Module: Execution"
 Cohesion: 0.50
@@ -1755,9 +1843,17 @@ Nodes (3): Get already existing instance, Initialize a new first instance withou
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
 
+### Community 327 - "Module: Benchmarks"
+Cohesion: 0.17
+Nodes (11): 1. Checkpoint Evolution Line Chart, 2. Model Family Comparison (all model families), 3. Model Family Comparison (without LLaMA), 4. Operation Type Comparison, 🗂️ Benchmark Classification, MLIR-RL Experimentation Plotting Skill, 🎯 Step 1. Ask the User (Interactive Menu), 🛠️ Step 2. Generate the Plots (+3 more)
+
 ### Community 328 - "Module: Execution"
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
+
+### Community 329 - "Module: Benchmarks"
+Cohesion: 0.17
+Nodes (12): Baseline JSON Format, Benchmark Loading Workflow, Best Practices, Config Integration, Data Directory, Directory Structure, File Format Details, MLIR Operation Block Format (+4 more)
 
 ### Community 330 - "Module: Execution"
 Cohesion: 0.50
@@ -1771,25 +1867,37 @@ Nodes (3): Get already existing instance, Initialize a new first instance withou
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
 
+### Community 333 - "Module: Benchmarks"
+Cohesion: 0.17
+Nodes (12): _patch_block_op(), _replace_result_name(), _find_closing_paren(), _parse_section(), _patch_op(), Replace the *keyword*(...) block with rebuilt content., Return op_text with:       - result SSA renamed to %result       - ins SSA args, Return the index of ')' that matches '(' at *start*. Returns -1 if not found. (+4 more)
+
 ### Community 334 - "Module: Execution"
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
 
+### Community 335 - "Module: Benchmarks"
+Cohesion: 0.17
+Nodes (11): 1. Global Performance & Reliability Summary, 2. Comparative Reliability Summary (V3 vs V4), 3. Why V3 was so much more reliable?, 4. Why V4 is failing so much?, 5. Path to 0% Failure Rate (Strategy for V4.5), A. Success-Contingent Reward Negation (Provisional Rewards), B. Execution-Time Profiling Safeguard (Dynamic Timeouts), C. Physical Boundary Safeguards (Depth Limit) (+3 more)
+
 ### Community 336 - "Module: Execution"
 Cohesion: 0.50
 Nodes (3): Get already existing instance, Initialize a new first instance without main exec data, Initialize a new first instance
+
+### Community 337 - "Module: Config"
+Cohesion: 0.20
+Nodes (14): collect_trajectory(), evaluate_benchmarks(), __execute_states(), ppo_update(), Benchmarks, Model, OperationState, Optimizer (+6 more)
 
 ### Community 338 - "Module: Rnn Vs Lstm"
 Cohesion: 1.00
 Nodes (3): Long Short-Term Memory (LSTM), Recurrent Neural Network (RNN), RNN vs LSTM Structure Diagram
 
 ### Community 339 - "Module: Readme"
-Cohesion: 0.67
+Cohesion: 1.00
 Nodes (3): data/new_dataset/README.md, data/README.md, data_utils/README.md
 
 ### Community 341 - "Module: V0 Model Detailed"
-Cohesion: 0.67
-Nodes (3): RL Agent Model Architecture Details, rl_autoschedular.model.HiearchyModel, rl_autoschedular.model.LSTMEmbedding
+Cohesion: 0.05
+Nodes (39): 10. Summary Cheat-Sheet, 11. Where to Read the Code, 1. High-Level Picture, 2.1 Concrete Example: OpFeatures for a 3-loop matmul, 2. Input: The Observation Tensor, 3.1 Architecture, 3.2 Why an LSTM over two ops?, 3.3 Output size (+31 more)
 
 ### Community 342 - "Module: Future Works Rl Full Model Support"
 Cohesion: 0.67
@@ -1803,20 +1911,360 @@ Nodes (3): Backedge and Loop-Carried Dependency, Control Flow Graph Structure, C
 Cohesion: 0.67
 Nodes (3): Loop Skewing Diagram, Loop Skewing, Wavefront Parallelism
 
+### Community 354 - "Module: Readme"
+Cohesion: 0.15
+Nodes (13): plot-experimentation-results SKILL.md, Baseline Pipeline, config/ — MLIR-RL Configuration, Directory Layout, config/README.md, `eval/` — Bergamo Eval (5), `eval_dalma/` + `eval_jubail/` — Multi-Hardware (4), `full_model/` — Full Model Eval (2) (+5 more)
+
+### Community 357 - "Module: New Dataset"
+Cohesion: 0.10
+Nodes (20): all/ Stratification, Audio Transformers, Block Extraction (`extract_blocks.py`), Data Extraction Pipeline, Decoder / Seq2Seq, Directory Structure, MLIR-RL Dataset Selection & Structure, Encoder Transformers (+12 more)
+
+### Community 358 - "Module: Methodology Alignment"
+Cohesion: 0.21
+Nodes (9): build_id_space_state(), IdSpaceState, _max_or_none(), Return sorted IDs extracted from file names in *directory*., Compute next IDs by considering both legacy sources and already-generated files., Return contiguous IDs [start_id, start_id + count)., reserve_ids(), _scan_ids() (+1 more)
+
+### Community 359 - "Module: Antigravity-Hpc-Install"
+Cohesion: 0.22
+Nodes (9): After Installation, Context, Antigravity CLI HPC Installer Guide, Fake curl PATH Shadowing, Installing Antigravity CLI on an HPC/Slurm Node, Notes, The Fix, The Problem (+1 more)
+
+### Community 367 - "Module: Readme"
+Cohesion: 0.06
+Nodes (32): 1. The Core Compiler Concept, 2. The Dialect Architecture, 3. Deep Dive: The Linalg Dialect, 4. Annotated Example: MLIR Loop Kernel, 5. What "Scheduling" Means in MLIR, Key Dialects Used in This Project, Onboarding: What is MLIR?, Structural Elements of `linalg.generic` (+24 more)
+
+### Community 376 - "Module: Transforms"
+Cohesion: 0.17
+Nodes (11): 1. The RL Training Process, 2. The RL Evaluation Process, 3. Slurm Resource Configurations, 4. Operational Commands, Architecture Consistency (Genoa vs. Bergamo), Launching Batch Evaluation, Launching Training (from scratch or resuming), MLIR-RL Training and Evaluation Pipeline Guide (+3 more)
+
+### Community 383 - "Module: Execution"
+Cohesion: 0.13
+Nodes (16): Execution, c_void_p, Update the temp execution cache with the new data.          Args:             ne, Get the code cache key for the given operation state.          Args:, Lowers and runs the given MLIR code using Python bindings, then returns the exec, Check the execution cache for the given operation state.          Args:, Class that deals with code execution and cache management, Evaluates the given MLIR code with a timeout.          Args:             state ( (+8 more)
+
+### Community 399 - "Module: Demo Guide"
+Cohesion: 0.40
+Nodes (5): Demo: V4.9 Large vs V0, demo/DEMO_GUIDE.md, Results, Run, Setup
+
+### Community 400 - "Module: V0 Original Baseline"
+Cohesion: 0.07
+Nodes (30): 10. Entrypoint Flow, 1. State Representation, 2. Observation Space, 3. Action Space, 4. Model (`HiearchyModel`), 5. Reward Function, 6. Environment Dynamics (`Env`), 7. Execution Engine (`Execution`) (+22 more)
+
+### Community 401 - "Module: V2 Shaped Reward"
+Cohesion: 0.06
+Nodes (32): 1. Static Efficiency Score (`rl_autoschedular_v2/env.py`), 2. Shaped Reward per Transformation (`__shaped_reward()`), 3. Per-Step Reward Recording, 4. Final Reward Aggregation (`__apply_sequence()`), Configuration, Current Limitations, V2: Shaped Reward Design, Expected Benefits (+24 more)
+
+### Community 402 - "Module: V4 5 Reliability Logic"
+Cohesion: 0.17
+Nodes (11): **Abstract** {#abstract}, **Acronyms**, **Automatic Code Optimization in the MLIR Compiler Using Deep Reinforcement Learning**, **Bibliography** {#bibliography}, **Contents** {#contents}, **Dedication**, **Final Year Project**, **General conclusion** {#general-conclusion} (+3 more)
+
+### Community 403 - "Module: V4 5 Robust Integration"
+Cohesion: 0.15
+Nodes (13): 1. Process Isolation (The "Sandbox"), 2. Success-Contingent Reward Negation, 3. Stability Rails (Action Masking), 4. Multi-Engine Fallback, Comparison: V4 vs. V4.5, Configuration, V4.5: Robust Integration Design, Expected Impact (+5 more)
+
+### Community 404 - "Module: V4 Combined Model"
+Cohesion: 0.17
+Nodes (11): 1. Best Checkpoint Summary, 2. Model Family Performance (Best Checkpoint), 3. Model Family Performance — Excluding LLaMA, 4. Operation Type Performance (Best Checkpoint), 5. Top Individual Benchmark Performances, 6. Generated Plots, Experimentation Report, `paper_original` (checkpoint 6100) (+3 more)
+
+### Community 405 - "Module: Versions"
+Cohesion: 0.17
+Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+
+### Community 406 - "Module: Git Guide"
+Cohesion: 0.09
+Nodes (22): 1. Porting Folders / Files between Branches (e.g., `tev` to `main`), 2. Resolving Merge Conflicts (Ours vs. Theirs), 3. Removing Large Files from Git History, 4. Bypassing Server Resource / Thread Constraints, 5. Other Useful Commands, Check diff between branches for a specific file, Git Commands Guide, MLIR-RL Git Commands Guide (+14 more)
+
+### Community 407 - "Module: Hpc Hardware"
+Cohesion: 0.17
+Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+
+### Community 408 - "Module: Hpc Setup"
+Cohesion: 0.06
+Nodes (33): 10. Create a Neptune Project, 11. Setup Environment Variables, 12. Change the config file, 8. Tools Installation, 9. Install Python Packages, Add MLIR binaries and Python bindings to `PATH`, Adjust the paths accordingly for LLLVM and MLIR, AST Dumper (+25 more)
+
+### Community 418 - "Module: Eval Progress"
+Cohesion: 0.23
+Nodes (7): Distribution, Tensor, Return the action history for this action type in the current state          Arg, Create a distribution for this action type based on the logits          Args:, Create a uniform distribution for this action type based on the logits and numbe, Calculate the log probabilities and entropies for the distribution          Args, Sample an action based on the distribution          Args:             distributi
+
+### Community 445 - "tiled_fusion.py"
+Cohesion: 0.17
+Nodes (9): # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, # NOTE: To change with mutliple uses support, # NOTE: To change with mutliple producers support, OperationState, Tiling, Class representing Tiled Parallelization action (+1 more)
+
+### Community 446 - "MLIR-RL Configuration Details"
+Cohesion: 0.18
+Nodes (11): 1. Project & Execution Settings, 2. Action Space & Loop Nest Constraints, 3. RL Training & Hyperparameters, 4. Hardware Awareness, 5. Reward Shaping, 6. Transformer Architecture, 7. Evaluation Configuration, Advanced RL & Normalization (+3 more)
+
+### Community 447 - "2. Stage-by-Stage Breakdown"
+Cohesion: 0.18
+Nodes (10): 1. End-to-End Pipeline Flow, 2. Stage-by-Stage Breakdown, 3. Batch Policy Grouping (`batch_policy.py`), 4. Pipeline Quick-Start Commands, Onboarding: Data Generation Pipeline, Stage 1: Model Conversion (`convert/`), Stage 2: Operation and Block Extraction (`extract/`), Stage 3: The Standalone Timing Harness (+2 more)
+
+### Community 448 - "MLIR Baselines"
+Cohesion: 0.18
+Nodes (11): Baseline Measurement, Block Baselines, Full Model PyTorch Timing, Measure Baselines for All Benchmarks, Measure Baselines with Config, MLIR Baselines, Parallelized Baseline Measurement (Array Job), Per-Operation PyTorch Timing (+3 more)
+
+### Community 449 - "Nassim & Mohamed 2025.md"
+Cohesion: 0.18
+Nodes (10): **Abstract** {#abstract}, **Acknowledgments** {#acknowledgments}, **Acronyms** {#acronyms}, **Bibliography**, **Conclusion** {#conclusion-1}, **Contents** {#contents}, **Final Year Thesis**, **General Introduction** {#general-introduction} (+2 more)
+
+### Community 450 - "**Chapter 4** {#chapter-4}"
+Cohesion: 0.18
+Nodes (11): **Actor Heads**, **AlphaZero**, **Backbone**, **Chapter 4** {#chapter-4}, **Critic Head**, **Input Layer**, **Interchange Permutation**, **Parallel Tile Sizes** (+3 more)
+
+### Community 451 - "**Code Optimization**"
+Cohesion: 0.18
+Nodes (11): **Benefits of Loop Fusion**, **Benefits of Loop Interchange**, **Benefits of Loop Inversion:**, **Benefits of Loop Parallelization:**, **Benefits of Loop Skewing:**, **Benefits of Loop Tiling:**, **Benefits of Loop Unrolling:**, **Benefits of Loop Unswitching:** (+3 more)
+
+### Community 452 - "Experimentation Report"
+Cohesion: 0.18
+Nodes (10): 1. Best Checkpoint Summary, 2. Model Family Performance (Best Checkpoint), 3. Operation Type Performance (Best Checkpoint), 4. Top Individual Benchmark Performances, 5. Generated Plots, Experimentation Report, `paper_original` (checkpoint 6100), `paper_tf_large` (checkpoint 1200) (+2 more)
+
+### Community 453 - "Documentation"
+Cohesion: 0.18
+Nodes (11): 0. Onboarding Guides, 1. Building MLIR :, 1. Jobs, 2. Configuration, 2. Install python requirements :, 3. Setup environment variables :, Documentation, Getting Started (+3 more)
+
+### Community 454 - "Onboarding: Architecture Overview"
+Cohesion: 0.24
+Nodes (7): Benchmarks, OperationState, Create a new operation state.          Args:             operation_idx (int): Th, Get the index of the current operation.          Args:             state (Operat, Check if the benchmark is done.          Args:             state (OperationState, Reset the environment.          Args:             bench_idx (Optional[int]): The, Get the state that represents the next operation (None if benchmark is done).
+
+### Community 455 - "2. Key Evolutionary Phases"
+Cohesion: 0.20
+Nodes (9): 1. Version Comparison Matrix, 2. Key Evolutionary Phases, 3. Which Package Should You Use?, Onboarding: Agent Versions & Evolution, Phase 1: The Baseline (`v0`), Phase 2: Feature Ablations (`v1`, `v2`, `v3`), Phase 3: The Integration Failure and Hardening (`v4`, `v4_5`), Phase 4: Scaling and Hyperparameter Tuning (`v4_6` – `v4_8`) (+1 more)
+
+### Community 456 - "MLIR-RL Project Commands Reference"
+Cohesion: 0.18
+Nodes (10): Benchmark Classification, Config Files Location, Dashboard CSVs, Environment Setup (Interactive Use Only), Environment Variables Reference, Generate Paper Graphs, MLIR-RL Project Commands Reference, Plotting & Visualization (+2 more)
+
+### Community 457 - "Evaluation"
+Cohesion: 0.20
+Nodes (10): Ablation Evaluation (V0, V4.5 variants), Cluster-Specific Evaluation, Core Evaluation Commands, Eval Config Structure, Evaluate All Checkpoints, Evaluate Single Checkpoint, Evaluate with Custom Model Directory, Evaluation (+2 more)
+
+### Community 458 - "📂 Directory Map"
+Cohesion: 0.20
+Nodes (10): 1. ⚙️ [Pipeline & Operations](pipeline/), 2. 📊 [Results & Logging](results/), 3. 🧠 [Design & Architecture](design/), 4. 🔬 [Failure Investigations](investigations/), 5. 🗄️ [Historical Archive & Post-Mortems](archive/), 6. 🚀 [Onboarding Guides](onboarding/), 7. 💻 [HPC & System Setup](hpc/), 8. 📁 [Data & Extraction](data/) (+2 more)
+
+### Community 459 - "**Chapter 3 Related Work** {#chapter-3-related-work}"
+Cohesion: 0.20
+Nodes (10): **Action**, **Agent**, **Automatical scheduling using partitioning (Mullapudi et al., [2016](#mnih,-v.,-kavukcuoglu,-k.,-silver,-d.,-rusu,-a.-a.,-veness,-j.,-bellemare,-m.-g.,-graves,-a.,-riedmiller,-m.,-fidjeland,-a.-k.,-ostrovski,-g.,-et-al.-\(2015\).-human-level-control-through-deep-reinforcement-learning.-nature,-518-\(7540\),-529–533.))**, **Autotuning using Genetic Search (Ragan-Kelley et al., [2013](#pecenin,-m.,-maidl,-a.-m.,-&-weingaertner,-d.-\(2019\).-optimization-of-halide-image-pro--cessing-schedules-with-reinforcement-learning.-anais-do-xx-simpósio-em-sistemas-computacionais-de-alto-desempenho,-37–48.))**, **Autotuning using Opentuner (Ansel et al., [2014](#ansel,-j.,-kamil,-s.,-veeramachaneni,-k.,-ragan-kelley,-j.,-bosboom,-j.,-o’reilly,-u.-m.,-&-amarasinghe,-s.-\(2014\).-opentuner:-an-extensible-framework-for-program-auto--tuning.-2014-23rd-international-conference-on-parallel-architecture-and-compi--lation-techniques-\(pact\),-303–315.-https://doi.org/10.1145/2628071.2628092))**, **Chapter 3 Related Work** {#chapter-3-related-work}, **Environment**, **Halide Schedule Optimization with Reinforcement Learning (Pecenin et al., [2019](#inc.-http-://-papers-.neurips.cc/-paper-/9015--pytorch--an---imperative---style---high---performance-deep-learning-library.pdf))** (+2 more)
+
+### Community 460 - "**Reward types and formulas**"
+Cohesion: 0.20
+Nodes (10): **Actions**, **Backend**, **CUDA Loop Nest Generation**, **Frontend**, **GCC Flag Selection**, **LLVM Phase Ordering**, **Policy**, **Reward types and formulas** (+2 more)
+
+### Community 461 - "MLIR-PAPER Agent (`rl_autoschedular_paper`)"
+Cohesion: 0.20
+Nodes (9): Evaluation, Key Differences from MLIR-RL V0, Key Differences from V4.5+ (Transformer), MLIR-PAPER Agent (`rl_autoschedular_paper`), Prerequisites, Slurm, Structure, Training (+1 more)
+
+### Community 462 - "MLIR-PAPER Agent (`rl_autoschedular_paper`)"
+Cohesion: 0.20
+Nodes (9): Evaluation, Key Differences from MLIR-RL V0, Key Differences from V4.5+ (Transformer), MLIR-PAPER Agent (`rl_autoschedular_paper`), Prerequisites, Slurm, Structure, Training (+1 more)
+
+### Community 463 - ".execute_code"
+Cohesion: 0.17
+Nodes (7): T_timestep, Class that appends timestep data to a trajectory., Initialize the trajectory collector., Append a single timestep to the trajectory.          Args:             timestep, Convert the collected data to a TrajectoryData object.          Returns:, Reset the trajectory collector., TrajectoryCollector
+
+### Community 464 - "fast_report.py"
+Cohesion: 0.29
+Nodes (9): get_agent_stats(), get_lfs_quota(), get_slurm_jobs(), main(), Aggregate stats for a specific agent version., Query squeue in the background., Query lfs quota in the background., Scan training logs to identify active training job IDs and progress. (+1 more)
+
+### Community 465 - "Onboarding: What is MLIR?"
+Cohesion: 0.20
+Nodes (8): Benchmarks, Config, Resolve the train/eval JSON file path.      Priority:     1. cfg.json_file / cfg, A class that holds benchmarks data, Load benchmarks          Args:             is_training (bool): Whether to load t, _resolve_bench_file(), extract_bench_features_from_code(), Extract benchmark features from the given code.      Args:         bench_name (s
+
+### Community 466 - "**Chapter 2 Reinforcement Learning** {#chapter-2-reinforcement-learning}"
+Cohesion: 0.22
+Nodes (9): **Advantage Actor Critic (A2C)**, **Chapter 2 Reinforcement Learning** {#chapter-2-reinforcement-learning}, **Importance Sampling**, **Monte Carlo Tree Search (MCTS)**, **Neural Network Training**, **Proximal Policy Optimization (PPO)**, **Self-Play**, **Trust Region (TRPO)** (+1 more)
+
+### Community 467 - "**Reinforcement Learning for Automatic Code Optimization**"
+Cohesion: 0.22
+Nodes (9): **Actions**, **Agent**, **Analysis**, **Autotuning Using Genetic Search**, **Conclusion**, **Environment**, **Halide Schedule Optimization with Reinforcement Learning**, **Observation** (+1 more)
+
+### Community 468 - "**Design & implementation**"
+Cohesion: 0.22
+Nodes (9): **Design & implementation**, **else**, **else**, **else**, **else**, **else**, **MLIR**, **Neptune** (+1 more)
+
+### Community 469 - "new_dataset"
+Cohesion: 0.25
+Nodes (8): Best Practices, Configuration Integration, Directory Structure, MLIR File Format, new_dataset, See Also, test/ - Test Benchmarks, Troubleshooting
+
+### Community 470 - "Full-Model End-to-End RL Optimization — Complete Documentation"
+Cohesion: 0.22
+Nodes (9): 4. Root Cause Analysis: MLIR Baseline Failures, 5. Files Created, 7. Edge Cases & Known Issues, 8. Non-Fixable Issues, 9. Implementation Notes, Edge Cases Handled, Files Modified (Infrastructure Fixes), Full-Model End-to-End RL Optimization — Complete Documentation (+1 more)
+
+### Community 471 - "6. Commands"
+Cohesion: 0.25
+Nodes (8): 6. Commands, Environment Setup, Full Run (All 20 Models, Slurm Array), Merge Results, Model List (Array Index), PyTorch Timing (All Models), Quick Test (Single Model, Interactive), Run Specific Models (Slurm)
+
+### Community 472 - "Data Generation"
+Cohesion: 0.25
+Nodes (8): Data Generation, Extract Blocks (Multi-Op Sequences), Extract Operations from MLIR, GNN Models to MLIR, Synthetic Data Generation, Transformer Models to MLIR, Unified Data Pipeline, Vision Models to MLIR
+
+### Community 473 - "Detailed Status per Agent"
+Cohesion: 0.07
+Nodes (23): Entropy Collapse, Lustre Soft File Quota, Shaped Reward Misdirection, C++ Diagnostic Destructor Abort, docs/archive/TRAIN_FAILURES_2026_06_24.md, MLIR Signal Handler Override, TiledFusion Constant Store Dimension, Active Slurm Jobs (+15 more)
+
+### Community 474 - "Q: explore the codebase to understand how to monitor and submit jobs (training and eval)"
+Cohesion: 0.25
+Nodes (7): 1. Job Submission, 2. Job Monitoring & Progress Reporting, Answer, MLIR-RL Job Submission & Monitoring Guide, Outcome, Q: explore the codebase to understand how to monitor and submit jobs (training and eval), Source Nodes
+
+### Community 475 - "**Chapter 5 Implementation** {#chapter-5-implementation}"
+Cohesion: 0.25
+Nodes (8): 13:   **else if transformation is "Tiling+Parallelization" then**, 20:   **else if transformation is "Interchange" then**, 26:	**else if transformation is "Vectorization" then**, 6:   **if transformation is "Tiling" then**, **Chapter 5 Implementation** {#chapter-5-implementation}, [**MLIR**](#mlir-multi-level-intermidiate-representation-13,-14,-47–49,-51,-58–64,-68,-70,-71,) **Python Bindings**, **Neptune**, **Torch**
+
+### Community 476 - "Manuscript Writing Comments"
+Cohesion: 0.25
+Nodes (7): Bibliography, General, Introduction, Manuscript Writing Comments, Structure, Text Formatting / Spelling / Grammar, Writing Style
+
+### Community 477 - "new_dataset"
+Cohesion: 0.29
+Nodes (7): `all/` - Flat Benchmark Collection, `code_files/`, `legacy/` - Legacy Data Organization, new_dataset, `nn/` - Operation Code Files, `raw_bench/`, `test/` - Test Benchmarks
+
+### Community 478 - "3. Results"
+Cohesion: 0.29
+Nodes (7): 3.1 Full-Model End-to-End (9 models, checkpoint 715), 3.2 Block-Based Baselines (All 20 models), 3.3 Block-Based RL Speedups (10 models, checkpoint 1999), 3.4 PyTorch Baselines (22 models), 3.5 Checkpoint Comparison (Final), 3. Results, JIT Failure Details
+
+### Community 479 - "Full Model Optimization"
+Cohesion: 0.29
+Nodes (7): Add Timing Wrapper, Block-Based Model Optimization, End-to-End Full Model Optimization, Full Model Optimization, Honest Model Speedup, Preprocess Model (AST Dumper Tagging), Slurm Array Jobs
+
+### Community 480 - "Utilities"
+Cohesion: 0.29
+Nodes (7): Lustre Quota Cleanup, Migrate Results Structure, Migrate to Flat Structure, Split Baseline JSON, Submit and Monitor Job, Test torch-mlir Compilation, Utilities
+
+### Community 481 - "Workflow: From Raw Models to Training"
+Cohesion: 0.33
+Nodes (6): 1. Extract Operations from Full Models, 2. Generate Baseline Timings, 3. Split into Train/Eval, 4. Train RL Agent, 5. Evaluate Checkpoints, Workflow: From Raw Models to Training
+
+### Community 482 - "all/ - Flat Benchmark Collection"
+Cohesion: 0.33
+Nodes (6): all/ - Flat Benchmark Collection, `eval/` - Evaluation Set, `eval_full/` - Full Evaluation Set, File Format, JSON Baseline Format, `train/` - Training Set
+
+### Community 483 - "code_files/"
+Cohesion: 0.33
+Nodes (6): `bench_train/`, code_files/, nn/ - Operation Code Files, raw_bench/, `single_bench/`, `single_bench_full/`
+
+### Community 484 - "2. Key Bugs Fixed (v1–v13)"
+Cohesion: 0.33
+Nodes (6): 2. Key Bugs Fixed (v1–v13), v11: Schedule Application Bottleneck (Critical Fix), v12: Checkpoint Scan Hangs, v13: PyTorch Baselines & Block-Based Final Results, v1–v8: Wrapper & Timing Fixes, v9–v10: Execution Timeout & Bufferization
+
+### Community 485 - "Core Training Commands"
+Cohesion: 0.33
+Nodes (6): Core Training Commands, Direct Python Training (Debugging), Launch Training (Slurm), Training, Training Config Structure, Training on Condo Partition (48h limit)
+
+### Community 486 - "**Analysis**"
+Cohesion: 0.33
+Nodes (6): **Analysis**, **Conclusion**, **Conclusion**, **Experiments and Results**, **Interpretation**, **Results**
+
+### Community 487 - "Pipelines"
+Cohesion: 0.22
+Nodes (9): 1. Convert a real neural network to linalg MLIR, 2. Extract benchmark fragments from full-model MLIR, 3. Generate synthetic benchmarks, 4. Post-processing, data_utils, Directory layout, model_catalog.py, Pipelines (+1 more)
+
+### Community 488 - "Ported Hardening (The 4 Pillars)"
+Cohesion: 0.40
+Nodes (5): 1. Process Isolation, 2. Success-Contingent Reward Negation, 3. Dynamic Timeouts, 4. Stability Rails (Action Masking), Ported Hardening (The 4 Pillars)
+
+### Community 489 - "Typical Workflow"
+Cohesion: 0.40
+Nodes (5): 1. Generate Data, 2. Train, 3. Evaluate, 4. Report & Plot, Typical Workflow
+
+### Community 490 - "**Appendix** {#appendix}"
+Cohesion: 0.40
+Nodes (5): **Appendix** {#appendix}, **General Architecture**, **Halide IR**, **LQCD IR**, **MLIR  Generation**
+
+### Community 491 - "MLIR-RL Progress Reporting Runbook (Unified & Accelerated)"
+Cohesion: 0.50
+Nodes (3): MLIR-RL Progress Reporting Runbook (Unified & Accelerated), 🛠️ Step 1. Run Unified Fast Report, 📊 Step 2. Present the Output Report
+
+### Community 492 - "Supported Neural Networks"
+Cohesion: 0.50
+Nodes (4): GNN Models (4), NLP Models (10), Supported Neural Networks, Vision Models (10)
+
+### Community 493 - "Data Generation"
+Cohesion: 0.50
+Nodes (4): Data Generation, Extract Operations from Full Models, Generate Baseline Timings, Split into Train/Eval
+
+### Community 494 - "1. Overview"
+Cohesion: 0.50
+Nodes (4): 1. Overview, Agent, How It Works, Pipeline
+
+### Community 495 - "Plotting & Visualization"
+Cohesion: 0.20
+Nodes (10): Approach: Model Surgery (Fix #1), Files, GPT2 PyTorch JIT Fix — Summary, Key design decision: causal mask, Problem, Results, Usage, Validation (+2 more)
+
+### Community 496 - "**Chapter 1** {#chapter-1}"
+Cohesion: 0.50
+Nodes (4): **Chapter 1** {#chapter-1}, **Hybrid Optimization**, **Machine-Dependent Optimization**, **Machine-Independent Optimization**
+
+### Community 497 - "7. Edge Cases & Known Issues"
+Cohesion: 0.20
+Nodes (9): 1. Core Project Contributions, 2. Detailed Contribution Breakdown, Contribution 1: PPO Auto-Scheduling on MLIR, Contribution 2: Multi-Operation Block Optimization, Contribution 3: Hardware-Aware Portability, Contribution 4: Transformer-based Loop Nest Encoder, Contribution 5: Process-Isolated Execution Infrastructure, Contribution 6: Reward Design and Entropy Collapse Investigation (+1 more)
+
+### Community 498 - "**Chapter 1** {#chapter-1}"
+Cohesion: 0.67
+Nodes (3): **Chapter 1** {#chapter-1}, **Memory Profiling**, **Time Profiling**
+
+### Community 499 - "**Chapter 4 Design** {#chapter-4-design}"
+Cohesion: 0.67
+Nodes (3): **Chapter 4 Design** {#chapter-4-design}, **Policy Network with Hierarchical Action Space**, **Policy Network with Unrolled Action Space**
+
+### Community 500 - "**Chapter 5** {#chapter-5}"
+Cohesion: 0.67
+Nodes (3): **Chapter 5** {#chapter-5}, **MLIR Command Line**, **MLIR Python Bindings**
+
+### Community 501 - ".free_pointer"
+Cohesion: 0.20
+Nodes (6): DataLoader, Create a DataLoader for the trajectory.          Args:             batch_size: B, Sampler that yields indices of top-K advantage samples in random order.      Sel, Returns an iterator over shuffled indices of the top-k samples.         This is, The total number of samples to be drawn.          Returns:             The total, TopKAdvantageSampler
+
+### Community 504 - "transform_vectorize_with_vectorizer"
+Cohesion: 0.22
+Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
+
+### Community 505 - "transform_vectorize_with_vectorizer"
+Cohesion: 0.22
+Nodes (5): Create a DataLoader for the trajectory.          Args:             batch_size (i, A Sampler that yields a random permutation of the indices     corresponding to t, Returns an iterator over shuffled indices of the top-k samples.         This is, The total number of samples to be drawn., TopKAdvantageSampler
+
+### Community 506 - "Git Workflow Automation (Staging, Committing, Pushing, & PRs)"
+Cohesion: 0.29
+Nodes (6): Git Workflow Automation (Staging, Committing, Pushing, & PRs), 🛠️ Step 1. Branch Safety Check, 🛠️ Step 2. Analyze & Stage Changes, 🛠️ Step 3. Generate Conventional Commit Message, 🛠️ Step 4. Confirm Branch & Push, 🛠️ Step 5. Push to Remote & Suggest PR
+
+### Community 507 - "graphify reference: query, path, explain"
+Cohesion: 0.33
+Nodes (5): For /graphify explain, For /graphify path, graphify reference: query, path, explain, Step 0 — Constrained query expansion (REQUIRED before traversal), Step 1 — Traversal
+
+### Community 508 - "NoTransformation"
+Cohesion: 0.33
+Nodes (4): NoTransformation, Action, OperationState, Class representing No Transformation
+
+### Community 509 - "Full-Model End-to-End RL Optimization Documentation"
+Cohesion: 0.40
+Nodes (5): Batched In-Process MLIR Transform, Bufferization and Lowering Fallback Pipeline, Full-Model End-to-End RL Optimization Documentation, V2.5: Hardened Shaped Reward Design, V2.5/V4.5 Reliability Engineering (4 Pillars)
+
+### Community 510 - "graphify reference: add a URL and watch a folder"
+Cohesion: 0.50
+Nodes (3): For /graphify add, For --watch, graphify reference: add a URL and watch a folder
+
+### Community 511 - "graphify reference: commit hook and native CLAUDE.md integration"
+Cohesion: 0.50
+Nodes (3): For git commit hook, For native CLAUDE.md integration, graphify reference: commit hook and native CLAUDE.md integration
+
+### Community 512 - "graphify reference: incremental update and cluster-only"
+Cohesion: 0.50
+Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphify reference: incremental update and cluster-only
+
+### Community 515 - "Reporting & Analysis"
+Cohesion: 0.67
+Nodes (3): Evaluation Results Reports, Reporting & Analysis, Training Progress Reports
+
 ## Knowledge Gaps
-- **198 isolated node(s):** `launch_demo.sh script`, `EVAL_LABEL`, `get_base.sh script`, `PATH`, `LD_LIBRARY_PATH` (+193 more)
+- **1178 isolated node(s):** `launch_demo.sh script`, `EVAL_LABEL`, `get_base.sh script`, `PATH`, `LD_LIBRARY_PATH` (+1173 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **77 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **59 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Config` connect `MLIR AST Feature Extraction` to `RL Policy and Value Models`, `Benchmark Resolution and Loader`, `RL Environment State Transitions`, `Transformation Actions and Base Classes`, `Action Decoders and Distribution Policy`, `Observation Representation and Hardware Features`, `Transformation Action Framework`, `Action Spaces and Trajectory Execution`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Transforms`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Observation`, `Module: Observation`, `Module: Ppo`, `Module: Observation`, `Module: Observation`, `Module: Observation`, `Module: Trajectory`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Model`, `Module: Observation`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: State`, `Module: State`, `Module: State`, `Module: Env`, `Module: Env`, `Module: State`, `Module: State`, `Module: State`, `Module: Trajectory`, `Module: Execution`, `Module: Benchmarks`, `Module:   Init  `, `Module:   Init  `, `Module: Log`, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module: Tiling`, `Module: State`, `Module:   Init  `, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module: State`, `Module:   Init  `, `Module: State`, `Module:   Init  `, `Module: State`, `Module:   Init  `, `Module: No Transformation`, `Module: Interchange`, `Module: Observation`, `Module: Interchange`, `Module: Interchange`, `Module: State`, `Module: Interchange`, `Module: Interchange`, `Module: Vectorization`, `Module: State`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: State`, `Module: Model`, `Module: State`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Env`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Benchmarks`, `Module: Benchmarks`, `Module: Benchmarks`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Vectorization`, `Module: Benchmarks`, `Module: File Logger`, `Module: Config`, `Module: Benchmarks`, `Module: Benchmarks`, `Module: Benchmarks`, `Module: Benchmarks`, `Module: Benchmarks`?**
-  _High betweenness centrality (0.290) - this node is a cross-community bridge._
-- **Why does `Config` connect `RL Environment and Trainer Configuration` to `MLIR AST Feature Extraction`, `RL Policy and Value Models`, `Trajectory Collection and Benchmark Drivers`, `Benchmark Resolution and Loader`, `IR Transformations and Scheduling Application`, `Observation Representation and Hardware Features`, `Transformation Action Framework`, `Action Spaces and Trajectory Execution`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Observation`, `Module: Observation`, `Module: Observation`, `Module: Observation`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Observation`, `Module: Model`, `Module: Execution`, `Module: Model`, `Module: Model`, `Module: Execution`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: State`, `Module: State`, `Module: Observation`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Execution`, `Module: Execution`, `Module: Observation`, `Module: Execution`, `Module: Observation`, `Module: State`, `Module: State`, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module:   Init  `, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Vectorization`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Ppo`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Env`, `Module: Ppo`, `Module: Ppo`, `Module: Optimize Model Via Blocks`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Config`?**
-  _High betweenness centrality (0.152) - this node is a cross-community bridge._
-- **Why does `OperationState` connect `MLIR AST Feature Extraction` to `RL Policy and Value Models`, `Trajectory Collection and Benchmark Drivers`, `RL Environment State Transitions`, `Transformation Actions and Base Classes`, `Action Decoders and Distribution Policy`, `Observation Representation and Hardware Features`, `Transformation Action Framework`, `Action Spaces and Trajectory Execution`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Transforms`, `Module: Observation`, `Module: Observation`, `Module: Observation`, `Module: Observation`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Observation`, `Module: Env`, `Module: Env`, `Module: Base`, `Module:   Init  `, `Module:   Init  `, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module:   Init  `, `Module: No Transformation`, `Module: Interchange`, `Module: Observation`, `Module: Interchange`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Interchange`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Interchange`, `Module: Interchange`, `Module: Vectorization`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiled Fusion`, `Module: Env`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Tiled Fusion`, `Module: Vectorization`, `Module: State`, `Module: No Transformation`?**
-  _High betweenness centrality (0.112) - this node is a cross-community bridge._
+- **Why does `Config` connect `RL Policy and Value Models` to `MLIR AST Feature Extraction`, `Benchmark Resolution and Loader`, `RL Environment State Transitions`, `Transformation Actions and Base Classes`, `Action Decoders and Distribution Policy`, `Observation Representation and Hardware Features`, `Transformation Action Framework`, `Action Spaces and Trajectory Execution`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Transforms`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Observation`, `Module: Observation`, `Module: Ppo`, `Module: Observation`, `Module: Observation`, `Module: Base`, `Module: Observation`, `Module: Trajectory`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Model`, `Module: Observation`, `Module: Model`, `Module: Model`, `Module: Dask Manager`, `Module: State`, `Module: State`, `Module: Observation`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Execution`, `Module: State`, `Module: State`, `Module: State`, `Module: Trajectory`, `Module: Observation`, `Module: Evaluation`, `Module: Benchmarks`, `Module: Evaluate`, `Module:   Init  `, `Module:   Init  `, `Module: Log`, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module: Tiling`, `Module: State`, `Module:   Init  `, `Module: State`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module: State`, `Module:   Init  `, `Module: State`, `Module:   Init  `, `Module: State`, `Module:   Init  `, `Module: No Transformation`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Evaluation`, `Module: State`, `Module: Interchange`, `Module: Interchange`, `Module: Vectorization`, `Module: State`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: State`, `Module: State`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Env`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Tiled Fusion`, `Module: Trajectory`, `Module: Base`, `Module: Vectorization`, `Module: File Logger`, `.execute_code`, `Onboarding: What is MLIR?`, `.free_pointer`, `transform_vectorize_with_vectorizer`?**
+  _High betweenness centrality (0.229) - this node is a cross-community bridge._
+- **Why does `Config` connect `RL Environment and Trainer Configuration` to `MLIR AST Feature Extraction`, `RL Policy and Value Models`, `Trajectory Collection and Benchmark Drivers`, `Benchmark Resolution and Loader`, `IR Transformations and Scheduling Application`, `Observation Representation and Hardware Features`, `Transformation Action Framework`, `Action Spaces and Trajectory Execution`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Trajectory`, `Module: Observation`, `Module: Observation`, `Module: Execution`, `Module: Observation`, `Module: Observation`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Base`, `Module: Observation`, `Module: Base`, `Module: Base`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Env`, `Module: Observation`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: State`, `Module: State`, `Module: Observation`, `Module: State`, `Module: Env`, `Module: Env`, `Module: Execution`, `Module: State`, `Module: State`, `Module: State`, `Module: Observation`, `Module: Evaluation`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module:   Init  `, `Module: Tiling`, `Module:   Init  `, `Module:   Init  `, `Module:   Init  `, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Vectorization`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Interchange`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Model`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Tiling`, `Module: Env`, `Module: Ppo`, `Module: Optimize Model Via Blocks`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Vectorization`, `Module: Base`, `Module: Tiled Fusion`, `Module: Vectorization`, `Module: Config`, `Module: Execution`, `MLIR-RL Configuration Details`, `transform_vectorize_with_vectorizer`?**
+  _High betweenness centrality (0.222) - this node is a cross-community bridge._
+- **Why does `MLIR-RL Configuration Parameters` connect `MLIR-RL Configuration Details` to `Module: Train Failures 2026 06 24`, `RL Environment and Trainer Configuration`?**
+  _High betweenness centrality (0.140) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `Config` (e.g. with `Singleton` and `FileInstance`) actually correct?**
   _`Config` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 389 inferred relationships involving `Config` (e.g. with `ActionSpace` and `.action_mask()`) actually correct?**
