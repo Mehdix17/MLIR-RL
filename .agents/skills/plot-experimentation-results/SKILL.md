@@ -24,18 +24,20 @@ Use the `ask_question` tool with `is_multi_select: false` for each item:
      - `plots/experimentation_plots/exp1` (next available)
      - `plots/experimentation_plots/exp2`
    - Let the user write a custom path if none of the suggestions suit them.
+4. **Update CSV Data**: ask the user if they want to rebuild/update the underlying CSV data from raw checkpoint JSON files (suggest: `Yes (rebuild/update CSVs)` | `No (reuse existing CSVs)`).
+   - If they select `Yes`, pass the `--force-csv` flag when running the plotting commands in Step 2.
 
 ---
 
 ## 🛠️ Step 2. Generate the Plots
 
-Run four plots per experimentation session into the chosen `<out-dir>` using `--out-dir=<path>` (use `=` to avoid argparse ambiguity):
+Run four plots per experimentation session into the chosen `<out-dir>` using `--out-dir=<path>` (use `=` to avoid argparse ambiguity, and include `--force-csv` if requested in Step 1):
 
 ### 1. Checkpoint Evolution Line Chart
 ```bash
 source ~/envs/mlir/bin/activate && set -a && source .env && set +a
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m evolution --out-dir=<out-dir> \
+  -d <dataset> -m evolution --out-dir=<out-dir> [--force-csv] \
   -a <agent1> <agent2> ...
 ```
 → Saves: `<out-dir>/csvs/checkpoint_evolution.csv` and `<out-dir>/pngs/checkpoint_evolution.png`
@@ -44,7 +46,7 @@ python scripts/plots/generate_plots.py \
 ### 2. Model Family Comparison (all model families)
 ```bash
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m comparison --filter-type models_only --out-dir=<out-dir> \
+  -d <dataset> -m comparison --filter-type models_only --out-dir=<out-dir> [--force-csv] \
   -a <agent1> <agent2> ...
 ```
 → Saves: `<out-dir>/csvs/best_checkpoint_results.csv` and `<out-dir>/pngs/best_checkpoint_results.png`
@@ -53,7 +55,7 @@ python scripts/plots/generate_plots.py \
 ### 3. Model Family Comparison (without LLaMA)
 ```bash
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m comparison --filter-type models_only --exclude llama3_2_1b --out-dir=<out-dir> \
+  -d <dataset> -m comparison --filter-type models_only --exclude llama3_2_1b --out-dir=<out-dir> [--force-csv] \
   -a <agent1> <agent2> ...
 ```
 → Saves: `<out-dir>/csvs/best_checkpoint_results_no_llama3.csv` and `<out-dir>/pngs/best_checkpoint_results_no_llama3.png`
@@ -61,7 +63,7 @@ python scripts/plots/generate_plots.py \
 ### 4. Operation Type Comparison
 ```bash
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m comparison --filter-type ops_only --out-dir=<out-dir> \
+  -d <dataset> -m comparison --filter-type ops_only --out-dir=<out-dir> [--force-csv] \
   -a <agent1> <agent2> ...
 ```
 → Saves: `<out-dir>/csvs/operation_type_results.csv` and `<out-dir>/pngs/operation_type_results.png`

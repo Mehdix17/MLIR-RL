@@ -1,6 +1,6 @@
 # Experimentation Report
 
-**Generated**: 2026-07-12 14:23  
+**Generated**: 2026-07-19 18:19  
 **Dataset**: `ops_and_blocks`  
 **Agents**: `paper_original`, `paper_transformer_small`, `paper_transformer_large`  
 **Experiment directory**: `plots/experimentation_plots/exp1`
@@ -11,16 +11,16 @@
 
 | Agent | Best Checkpoint | Peak Geo-Mean Speedup |
 |:------|:--------------:|----------------------:|
-| `paper_tf_small` | 7900 | **3.2503×** |
+| `paper_tf_small` | 14600 | **3.5749×** |
+| `paper_original` | 12200 | **3.0084×** |
 | `paper_tf_large` | 1200 | **2.7651×** |
-| `paper_original` | 6100 | **2.6843×** |
 
 ### Per-Agent Detailed Stats (at best checkpoint)
 
 | Agent | Best CP | Valid | Failed | Geo-Mean | Arith-Mean | Best Speedup | Worst Speedup |
 |:------|:-------:|------:|-------:|---------:|-----------:|-------------:|---------------:|
-| `paper_original` | 6100 | 1552 | 135 | 2.6843× | 109.37× | 28647.78× | 0.0105× |
-| `paper_tf_small` | 7900 | 1555 | 132 | 3.2503× | 123.35× | 28521.73× | 0.0489× |
+| `paper_original` | 12200 | 1557 | 130 | 3.0084× | 99.76× | 28249.28× | 0.0448× |
+| `paper_tf_small` | 14600 | 1557 | 130 | 3.5749× | 165.73× | 41157.10× | 0.1026× |
 | `paper_tf_large` | 1200 | 1559 | 128 | 2.7651× | 121.59× | 28668.59× | 0.0162× |
 
 ---
@@ -31,30 +31,30 @@ Geo-mean speedup per model family across all agents.
 
 | Model Family | `paper_original` | `paper_tf_large` | `paper_tf_small` |
 |:-------------|:------:|:------:|:------:|
-| **Albert** | 6.9392× | 8.0256× | 9.0101× |
-| **Bart** | 5.6200× | 6.3429× | 7.2564× |
-| **Bert** | 7.0499× | 7.5646× | 8.4713× |
-| **Convnext Tiny** | 0.7669× | 0.9267× | 0.8790× |
-| **Distilbert** | 5.9247× | 6.8034× | 7.6958× |
-| **Efficientnet B0** | 1.2376× | 1.1959× | 1.4017× |
-| **Gat** | 1.7000× | 1.3082× | 0.9073× |
-| **Gin** | 7.5066× | 1.8772× | 1.4106× |
-| **Gpt2** | 1.1856× | 1.3192× | 1.3730× |
-| **Llama3 2 1B** | 196.4559× | 218.9669× | 238.2355× |
-| **Mobilenet V3 Small** | 1.3742× | 1.2883× | 1.3581× |
-| **Resnet50** | 1.1042× | 1.4573× | 1.8450× |
-| **Resnext50** | 1.2372× | 1.4083× | 1.8686× |
-| **T5** | 6.9947× | 8.8480× | 10.0422× |
-| **Vgg16** | 1.6235× | 0.6324× | 0.8828× |
-| **Vit B 16** | 3.0809× | 3.7499× | 5.5300× |
-| **Whisper Base** | 4.6777× | 4.5106× | 5.1276× |
-| **Yolov8M** | 1.1979× | 0.4114× | 1.4271× |
+| **Albert** | 8.3475× | 8.0256× | 8.0716× |
+| **Bart** | 6.9545× | 6.3429× | 7.1946× |
+| **Bert** | 7.7254× | 7.5646× | 8.2781× |
+| **Convnext Tiny** | 1.0279× | 0.9267× | 1.1013× |
+| **Distilbert** | 7.1146× | 6.8034× | 7.4481× |
+| **Efficientnet B0** | 1.5021× | 1.1959× | 1.4253× |
+| **Gat** | 0.2492× | 1.3082× | 1.4463× |
+| **Gin** | 1.2052× | 1.8772× | 2.0663× |
+| **Gpt2** | 1.2010× | 1.3192× | 1.4144× |
+| **Llama3 2 1B** | 169.3781× | 218.9669× | 312.1997× |
+| **Mobilenet V3 Small** | 1.3714× | 1.2883× | 1.4730× |
+| **Resnet50** | 3.1682× | 1.4573× | 3.1267× |
+| **Resnext50** | 3.1736× | 1.4083× | 3.2961× |
+| **T5** | 10.0462× | 8.8480× | 9.6571× |
+| **Vgg16** | 0.9101× | 0.6324× | 1.7423× |
+| **Vit B 16** | 5.2436× | 3.7499× | 5.6169× |
+| **Whisper Base** | 5.2540× | 4.5106× | 5.0410× |
+| **Yolov8M** | 1.8300× | 0.4114× | 1.9710× |
 
 **Top-3 families by geo-mean speedup (averaged across agents):**
 
-1. `llama3_2_1b` — avg geo-mean **217.8861×**
-2. `t5` — avg geo-mean **8.6283×**
-3. `albert` — avg geo-mean **7.9916×**
+1. `llama3_2_1b` — avg geo-mean **233.5149×**
+2. `t5` — avg geo-mean **9.5171×**
+3. `albert` — avg geo-mean **8.1482×**
 
 ---
 
@@ -64,11 +64,11 @@ Only synthetic operation-type benchmarks (`add`, `conv_2d`, `matmul`, `pooling`,
 
 | Operation | `paper_original` | `paper_tf_large` | `paper_tf_small` |
 |:----------|:------:|:------:|:------:|
-| **Add** | 0.4592× | 0.3284× | 0.4431× |
-| **Conv 2D** | 0.8846× | 3.8479× | 2.2470× |
-| **Matmul** | 7.2048× | 1.6261× | 2.2111× |
-| **Pooling** | 0.4046× | 0.1505× | 0.4484× |
-| **Relu** | 0.3754× | 0.3212× | 0.3110× |
+| **Add** | 0.2521× | 0.3284× | 0.5334× |
+| **Conv 2D** | 1.5617× | 3.8479× | 3.2910× |
+| **Matmul** | 0.7123× | 1.6261× | 2.9429× |
+| **Pooling** | 0.2380× | 0.1505× | 0.4896× |
+| **Relu** | 0.2118× | 0.3212× | 0.5152× |
 
 ---
 
@@ -76,49 +76,49 @@ Only synthetic operation-type benchmarks (`add`, `conv_2d`, `matmul`, `pooling`,
 
 Best individual benchmark speedups from each agent's best checkpoint.
 
-### `paper_original` (checkpoint 6100)
+### `paper_original` (checkpoint 12200)
 
 **Top-5 model benchmarks:**
 
 | Rank | Benchmark | Family | Speedup |
 |:----:|:----------|:-------|--------:|
-| 1 | `llama3_2_1b_block_1079` | llama3_2_1b | 28647.78× |
-| 2 | `llama3_2_1b_block_546` | llama3_2_1b | 28636.75× |
-| 3 | `llama3_2_1b_block_430` | llama3_2_1b | 27565.30× |
-| 4 | `llama3_2_1b_block_635` | llama3_2_1b | 24040.02× |
-| 5 | `llama3_2_1b_block_1080` | llama3_2_1b | 23808.86× |
+| 1 | `llama3_2_1b_block_635` | llama3_2_1b | 28249.28× |
+| 2 | `llama3_2_1b_block_546` | llama3_2_1b | 27577.11× |
+| 3 | `llama3_2_1b_block_430` | llama3_2_1b | 25754.41× |
+| 4 | `llama3_2_1b_block_1080` | llama3_2_1b | 24661.08× |
+| 5 | `llama3_2_1b_block_679` | llama3_2_1b | 14821.79× |
 
 **Top-5 operation-type benchmarks:**
 
 | Rank | Benchmark | Op Type | Speedup |
 |:----:|:----------|:--------|--------:|
-| 1 | `matmul_1536_512_128` | matmul | 11.02× |
-| 2 | `matmul_512_512_256` | matmul | 10.82× |
-| 3 | `matmul_512_512_128` | matmul | 10.77× |
-| 4 | `matmul_256_512_768` | matmul | 10.68× |
-| 5 | `matmul_1536_768_256` | matmul | 10.63× |
+| 1 | `conv_2d_nchw_fchw_128_128_7_7_192_1_1_7_7` | conv_2d | 3.22× |
+| 2 | `matmul_512_512_128` | matmul | 2.92× |
+| 3 | `conv_2d_nchw_fchw_128_256_15_15_64_1_1_15_15` | conv_2d | 2.69× |
+| 4 | `conv_2d_nchw_fchw_128_240_7_7_192_1_1_7_7` | conv_2d | 2.58× |
+| 5 | `conv_2d_nchw_fchw_256_48_56_56_96_1_1_28_28` | conv_2d | 2.57× |
 
-### `paper_tf_small` (checkpoint 7900)
+### `paper_tf_small` (checkpoint 14600)
 
 **Top-5 model benchmarks:**
 
 | Rank | Benchmark | Family | Speedup |
 |:----:|:----------|:-------|--------:|
-| 1 | `llama3_2_1b_block_1079` | llama3_2_1b | 28521.73× |
-| 2 | `llama3_2_1b_block_635` | llama3_2_1b | 27916.80× |
-| 3 | `llama3_2_1b_block_430` | llama3_2_1b | 27669.49× |
-| 4 | `llama3_2_1b_block_679` | llama3_2_1b | 25349.51× |
-| 5 | `llama3_2_1b_block_546` | llama3_2_1b | 25345.63× |
+| 1 | `llama3_2_1b_block_635` | llama3_2_1b | 41157.10× |
+| 2 | `llama3_2_1b_block_679` | llama3_2_1b | 40727.86× |
+| 3 | `llama3_2_1b_block_430` | llama3_2_1b | 40110.23× |
+| 4 | `llama3_2_1b_block_546` | llama3_2_1b | 39447.62× |
+| 5 | `llama3_2_1b_block_1079` | llama3_2_1b | 38184.38× |
 
 **Top-5 operation-type benchmarks:**
 
 | Rank | Benchmark | Op Type | Speedup |
 |:----:|:----------|:--------|--------:|
-| 1 | `conv_2d_nchw_fchw_128_240_7_7_192_1_1_7_7` | conv_2d | 5.05× |
-| 2 | `conv_2d_nchw_fchw_256_256_14_14_48_1_1_7_7` | conv_2d | 5.02× |
-| 3 | `conv_2d_nchw_fchw_128_256_15_15_64_1_1_15_15` | conv_2d | 4.79× |
-| 4 | `conv_2d_nchw_fchw_256_288_15_15_32_1_1_15_15` | conv_2d | 4.57× |
-| 5 | `conv_2d_nchw_fchw_128_128_14_14_192_1_1_7_7` | conv_2d | 4.48× |
+| 1 | `conv_2d_nchw_fchw_128_96_28_28_288_1_1_14_14` | conv_2d | 5.77× |
+| 2 | `conv_2d_nchw_fchw_128_256_15_15_64_1_1_15_15` | conv_2d | 5.35× |
+| 3 | `conv_2d_nchw_fchw_256_512_15_15_48_1_1_8_8` | conv_2d | 5.12× |
+| 4 | `conv_2d_nchw_fchw_256_128_14_14_64_1_1_14_14` | conv_2d | 4.77× |
+| 5 | `conv_2d_nchw_fchw_256_48_56_56_96_1_1_28_28` | conv_2d | 4.74× |
 
 ### `paper_tf_large` (checkpoint 1200)
 
