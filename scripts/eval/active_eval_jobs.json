@@ -1,1 +1,26 @@
-{}
+{
+  "16787661": {
+    "agent": "paper_original",
+    "start": 18700,
+    "end": 20000,
+    "step": 100,
+    "state": "RUNNING",
+    "node": "bn001"
+  },
+  "16787663": {
+    "agent": "paper_transformer_large",
+    "start": 13200,
+    "end": 13800,
+    "step": 100,
+    "state": "RUNNING",
+    "node": "bn001"
+  },
+  "16787664": {
+    "agent": "paper_transformer_small",
+    "start": 19300,
+    "end": 20000,
+    "step": 100,
+    "state": "RUNNING",
+    "node": "bn002"
+  }
+}
