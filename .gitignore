@@ -34,3 +34,5 @@ data/*
 old_data/*
 
 demo/models/*
+
+graphify-out/
