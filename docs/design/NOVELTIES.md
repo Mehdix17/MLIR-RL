@@ -82,7 +82,7 @@ See [`docs/VERSIONS.md`](VERSIONS.md) for full details on each version's fixes, 
 - **Pack (`PK`):** Reorganizes data into blocked/tiled layouts using `transform.structured.pack`, improving cache locality for tiled access patterns.
 - **Unroll (`U`):** Tiles loops and then unrolls them with `transform.loop.unroll`, exposing instruction-level parallelism and reducing loop overhead.
 
-See [`docs/Novelties/v5_action_space_expansion.md`](Novelties/v5_action_space_expansion.md) for full planned implementation details.
+See [`docs/design/v5_expanded_action_space.md`](v5_expanded_action_space.md) for full planned implementation details.
 
 ### Novelty 6: Guided Search Strategy (Beam Search / MCTS) (Future Work - V6)
 

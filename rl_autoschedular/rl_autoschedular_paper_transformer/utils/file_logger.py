@@ -39,6 +39,9 @@ class FileLogger(metaclass=Singleton):
         self.models_dir = os.path.join(self.run_dir, 'models')
         os.makedirs(self.models_dir, exist_ok=True)
 
+        # Results file for train progress detection
+        self.train_results_file = os.path.join(self.run_dir, 'train_results.json')
+
         # Init files dict
         self.files_dict: dict[str, FileInstance] = {}
 
@@ -53,6 +56,9 @@ class FileLogger(metaclass=Singleton):
 
     def disable_logging(self):
         self.enabled = False
+
+    def clear_per_iter_logs(self):
+        pass
 
 
 class FileInstance:
