@@ -55,7 +55,6 @@ for model in "${MODELS[@]}"; do
         --partition=compute \
         --mem=16G \
         --cpus-per-task=8 \
-        -C bergamo \
         --time=1-00:00:00 \
         --output="$LOG" \
         --error="$LOG.err" \

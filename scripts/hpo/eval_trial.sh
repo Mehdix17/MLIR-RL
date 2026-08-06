@@ -3,7 +3,6 @@
 #SBATCH --partition=compute
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=12
-#SBATCH --constraint=bergamo
 #SBATCH --time=24:00:00
 #SBATCH --output=logs/hpo/eval_%x_%j.out
 #SBATCH --error=logs/hpo/eval_%x_%j.err

@@ -3,7 +3,6 @@
 #SBATCH --partition=compute
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=12
-#SBATCH --constraint=bergamo
 #SBATCH --time=3-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/train_%j.err
