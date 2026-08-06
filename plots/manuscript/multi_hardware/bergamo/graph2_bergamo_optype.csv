@@ -1,9 +1,0 @@
-cluster,agent,group,group_type,geo_mean,avg,count
-bergamo,No-Reward (HW),conv2d,op_type,6.1992,9.1371,71
-bergamo,No-Reward (HW),generic,op_type,2.1574,2.421,106
-bergamo,No-Reward (HW),matmul,op_type,1.9955,2.504,233
-bergamo,No-Reward (HW),pooling,op_type,2.9977,3.4175,315
-bergamo,No-Reward (No-HW),conv2d,op_type,1.6142,2.4259,70
-bergamo,No-Reward (No-HW),generic,op_type,1.1934,1.6736,106
-bergamo,No-Reward (No-HW),matmul,op_type,2.1505,2.445,222
-bergamo,No-Reward (No-HW),pooling,op_type,1.1835,1.549,310

@@ -1,34 +1,38 @@
 # Evaluation Progress Tracker
 
-**Last Updated:** 2026-07-18 22:41:08
+**Last Updated:** 2026-07-21 23:43:16
 
 ## Active Slurm Jobs
-*No active evaluation jobs in Slurm.*
+| Job ID | Agent Version | Checkpoint Range | State | Node |
+|---|---|---|---|---|
+| 16787661 | `paper_original` | 18700–20000 (step 100) | **RUNNING** | `bn001` |
+| 16787663 | `paper_transformer_large` | 13200–13800 (step 100) | **RUNNING** | `bn001` |
+| 16787664 | `paper_transformer_small` | 19300–20000 (step 100) | **RUNNING** | `bn002` |
 
 ## Agent Progress Summary
 | Agent Version | Evaluated | Evaluating | Pending | Max Trained |
 |---|---|---|---|---|
-| `paper_original` | 165 | 0 | 21 | 18650 |
-| `paper_transformer_large` | 115 | 0 | 9 | 12450 |
-| `paper_transformer_small` | 170 | 0 | 14 | 18450 |
+| `paper_original` | 186 | 14 | 0 | 20000 |
+| `paper_transformer_large` | 131 | 7 | 0 | 13800 |
+| `paper_transformer_small` | 192 | 8 | 0 | 20000 |
 
 ## Detailed Status per Agent
 
 ### paper_original
-- **Max trained checkpoint:** 18650
-- **Evaluated (165):** 100–16500
-- **Evaluating:** none
-- **Pending (21):** 16600–18600
+- **Max trained checkpoint:** 20000
+- **Evaluated (186):** 100–18600
+- **Evaluating:** Job 16787661 [18700-20000 (step 100)]: RUNNING
+- **Pending (0):** none
 
 ### paper_transformer_large
-- **Max trained checkpoint:** 12450
-- **Evaluated (115):** 100–11500
-- **Evaluating:** none
-- **Pending (9):** 11600–12400
+- **Max trained checkpoint:** 13800
+- **Evaluated (131):** 100–13100
+- **Evaluating:** Job 16787663 [13200-13800 (step 100)]: RUNNING
+- **Pending (0):** none
 
 ### paper_transformer_small
-- **Max trained checkpoint:** 18450
-- **Evaluated (170):** 100–17000
-- **Evaluating:** none
-- **Pending (14):** 17100–18400
+- **Max trained checkpoint:** 20000
+- **Evaluated (192):** 100–19200
+- **Evaluating:** Job 16787664 [19300-20000 (step 100)]: RUNNING
+- **Pending (0):** none
 

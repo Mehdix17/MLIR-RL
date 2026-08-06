@@ -21,6 +21,8 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 - **Features to add:** L1/L2/L3 cache sizes (in KB), number of physical vs. logical cores, SIMD vector width (e.g., 256 for AVX2, 512 for AVX-512), and clock speed.
 - **Impact:** This enables **Cross-Hardware Portability**. The agent learns to adjust tile sizes and parallelization strategies based on available cache and cores.
 
+**Status: EXPLORED AND ABANDONED (2026-08-06).** Implemented and integrated in V1/V4.5/V4.9, but found unhelpful in practice — the user explored it in V4.9 and observed no benefit. **V5 does NOT include hardware features**; the `hardware_*` config fields are dropped from the V5 package. Recorded here as a negative result (contribution: evidence against hardware-aware observation for this task).
+
 ### Novelty 2: Deep Loop Nest Parsing (Transformer-based Encoder)
 
 **The Problem:** LSTMs are sequential and struggle with long-range dependencies in complex nested loops.
@@ -28,6 +30,8 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 
 - **Mechanism:** Treat each loop level in a nest as a "token." Use Self-Attention to allow the model to weigh the importance of the outermost loop (for tiling) against the innermost loop (for vectorization) simultaneously.
 - **Positional Encoding:** Use structural encoding to maintain the hierarchy of the loop nest (which loop is inside which).
+
+**Status: THE CORE CONTRIBUTION — carried into V5 unchanged.** The Transformer encoder is the most important contribution and V5 keeps it exactly as in `paper_transformer` (self-attention, CLS pooling).
 
 ### Novelty 3: Multi-Objective and Shaped Rewards (Already Implemented)
 
@@ -38,7 +42,7 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 
 - **Multi-Objective:** Create a weighted reward: $R = w_1(Speedup) + w_2(PeakMemoryUsage)$. This is critical for edge computing where memory is constrained.
 
-**Status:** This novelty has been implemented and integrated into the training pipeline (V4.5+).
+**Status: EXPLORED AND ABANDONED (2026-08-06).** Implemented and integrated in V2/V4.5/V4.6-4.8, then disabled in V4.9 as the entropy-collapse fix (shaped reward + transformer → policy collapses to zero entropy). The user explored it further in V4.9 and found it unhelpful. **V5 does NOT include reward shaping**; the `reward_shaping_*` config fields are dropped from the V5 package. Recorded here as a negative result (contribution: evidence against shaped reward for this task).
 
 **Reward Design Lessons (V4.6/7/8):**
 - **Shaped reward magnitude:** Must be ≤10% of terminal reward magnitude. Original V4.5 had shaped reward dominating terminal speedup reward by 20×, causing the agent to optimize static heuristics (parallel ratio, vectorizability) rather than actual execution time.
@@ -51,6 +55,16 @@ The current system utilizes a structured approach to optimize `Linalg` and `Affi
 ---
 
 ## 3. Future Work (V4+)
+
+### V5 Generation (current research line, 2026-08-06)
+
+The V5 generation restructures the roadmap. V5 = platform (accelerated pipeline,
+`rl_autoschedular_v5` package based on the `paper_transformer` structure), V5.1 =
+full-model evaluation, V5.2 = expanded action space (below, formerly "V6").
+**Hardware-aware observation (Novelty 1) and shaped reward (Novelty 3) are
+abandoned** — explored through V1/V2/V4.5/V4.9 and found unhelpful. The
+Transformer encoder (Novelty 2) is the core contribution and is carried into V5.
+HPO runs as a parallel track, not a version.
 
 ### Reward-Fixed Training Runs (V4.6, V4.7, V4.8) — Completed
 **Status:** Trained on 18-model new dataset (Bergamo HPC). All three share the V4.5 implementation package (`rl_autoschedular_v4_5`) with corrected reward shaping and execution timeout improvements.
@@ -65,24 +79,25 @@ All three use identical reward fixes (scale=0.05, clip=0.1, vec_bonus=0.0, slowd
 
 See [`docs/VERSIONS.md`](VERSIONS.md) for full details on each version's fixes, results, and lessons learned.
 
-### Novelty 4: Full Graph Observation (Future Work - V5)
+### Novelty 4: Full Graph Observation / Full-Model Evaluation (V5.1 + extension)
 
 **The Problem:** The current agent optimizes operations in isolation, traversing the computation graph in reverse order (Consumer → Producer). This limits the agent's ability to make globally optimal scheduling decisions that depend on the entire model structure.
 **The Solution:** Enhance the observation space to include the full computation graph structure as input to the agent.
 
-- **Mechanism:** Instead of per-operation features, construct a graph neural network (GNN) representation of the entire model dependency graph.
+- **V5.1 (planned, current)**: Full-model *evaluation* — apply the block-trained policy to complete `.mlir` model files (ResNet18, T5, GPT-2), scheduling each op in topological order on the full Module. Uses the graph structure without a GNN. See [`docs/design/todo/v5_1_full_model_eval.md`](todo/v5_1_full_model_eval.md).
+- **Extension (post-V5.1)**: GNN encoder (GraphSAGE/GAT) on the full model graph for global context — this is the "Full Graph Observation" novelty proper, listed under V5.1's future extensions.
 - **Impact:** The agent gains context about downstream operations, enabling scheduling decisions that account for data reuse patterns and cross-operation optimization opportunities.
 
-### Novelty 5: Expanded Transformation Action Space (Future Work - V6)
+### Novelty 5: Expanded Transformation Action Space (V5.2, planned)
 
 **The Problem:** The current set of actions is limited to high-level loop transformations (Tiling, Parallelization, Fusion, Interchange, Vectorization). The agent cannot express schedules that combine high-level tiling with low-level memory layout changes or instruction-level parallelism optimizations.
-**The Solution:** Implement finer-grained transformations available in the MLIR Transform Dialect. This is planned for future work (e.g., **`rl_autoschedular_v6`**):
+**The Solution:** Implement finer-grained transformations available in the MLIR Transform Dialect. Now planned as **`rl_autoschedular_v5` V5.2** (was formerly earmarked for V6):
 
 - **Pad (`P`):** Pads operation dimensions to multiples of powers of 2, ensuring aligned memory accesses and efficient vectorization.
 - **Pack (`PK`):** Reorganizes data into blocked/tiled layouts using `transform.structured.pack`, improving cache locality for tiled access patterns.
 - **Unroll (`U`):** Tiles loops and then unrolls them with `transform.loop.unroll`, exposing instruction-level parallelism and reducing loop overhead.
 
-See [`docs/Novelties/v5_action_space_expansion.md`](Novelties/v5_action_space_expansion.md) for full planned implementation details.
+See [`docs/design/todo/v5_2_expanded_action_space.md`](todo/v5_2_expanded_action_space.md) for full planned implementation details.
 
 ### Novelty 6: Guided Search Strategy (Beam Search / MCTS) (Future Work - V6)
 
