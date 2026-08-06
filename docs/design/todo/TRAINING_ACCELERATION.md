@@ -209,6 +209,43 @@ python scripts/train/train.py  # with CUDA visible
   - `sbatch --array=0-3 --cpus-per-task=32 --mem=64G` → 4 trainers × 32 cores = 128 cores.
   - Doesn't speed up a single run, but gives 4× data points for variance analysis.
 
+### 7. Config-Level Levers (CPU-only, zero-to-minimal code changes)
+
+These are pure config knobs that trade sample efficiency or gradient quality for wall-clock time. **No code changes needed** — they can be tested by editing `config.json` only. All of them attack the dominant cost (MLIR execution) by reducing *how much* execution happens per iteration, rather than making each execution faster.
+
+Measured baseline (trial 0, Bergamo, `bench_count=64`): iteration ≈ **50s**, of which sampling ≈ **1.5s (3%)** and MLIR execution ≈ **40-50s (95%+)**.
+
+#### 7a. Reduce `bench_count` (the single biggest wall-clock dial)
+
+- Currently `64`. Each iteration randomly samples `bench_count` benchmarks (`ppo.py:54`, `torch.randperm`) and executes those. Reducing to **16** cuts the execution phase ~4× (40s → 10s), giving iteration ≈ **12s**, ~4× wall-clock speedup.
+- **Coverage is preserved**: sampling is random each iteration, so over 20k iterations all 6,464 train benchmarks are still visited many times. The dataset is NOT reduced.
+- **Trade-off**: the per-update gradient is noisier (trajectory from 16 vs 64 benchmarks) and the model may need more iterations to reach the same reward. Pair with `ppo_batch_size` ≈ 16 so mini-batches stay meaningful. Net wall-clock win is typically 3-4× even accounting for extra iterations.
+- ⚠️ **Note**: this *contradicts* recommendation #5 above ("Increase `bench_count`"). #5 optimizes gradient diversity per iteration; 7a optimizes wall-clock. They are opposite directions on the same knob. For time-to-result, reduce; for sample efficiency at fixed iteration count, increase.
+
+#### 7b. Enable `reuse_experience` / raise `replay_count`
+
+- Config already supports `reuse_experience: 'none'|'random'|'topk'` plus `replay_count` (`config.py:37,43`). Currently set to `'none'`.
+- With reuse, each iteration's trajectory is *extended* with previously-collected transitions (`train.py:175-182`), so a fixed-size training batch is filled with more reused data and fewer fresh MLIR executions.
+- **Effect**: fewer expensive executions per iteration for the same batch size. Also raises the execution-cache hit rate (revisiting known schedules hits the JSON cache instead of recompiling).
+- **Trade-off**: off-policy bias (reused transitions come from older policies). `random`/`topk` modes exist to control which old data is kept. Test with a small `replay_count` first.
+
+#### 7c. Early stopping on reward plateau
+
+- `nb_iterations=20000` is a fixed budget. Many trials converge to a speedup plateau well before the end. Add a monitor on `train/final_speedup` (or average reward): if no improvement over N iterations (e.g. 500-1000), stop early and save the wall-clock spent on the converged tail.
+- **Risk**: pre-mature stop on local plateaus (entropy collapse can look like a plateau). Use a generous patience window and only stop on the *evaluation* speedup, not raw reward, if possible.
+
+#### 7d. Straggler control (fix the 5-minute outliers)
+
+- Logs show most iterations at ~40-50s but occasional iterations at **5+ minutes** (`0:05:37/it`). These are pathological benchmarks whose dynamic timeout (`root_exec_time * 5`, capped at 300s) lets them hang near the ceiling. One straggler per 50 iterations can add ~10% wall-clock.
+- Options: lower `MIN_EXEC_TIMEOUT` so slow benchmarks fail fast (return the `-20.0` penalty instead of burning 300s); or track per-benchmark exec time and skip/re-execute rarely; or pre-filter the train set to drop the pathological tail.
+- ⚠️ **Careful**: the timeout value partially shapes the reward signal (a timed-out benchmark becomes `speedup=0.0` / `-20.0`). Reducing it makes the agent treat slow benchmarks as failures more aggressively — acceptable if that matches the eval-time behavior (`MIN_EXEC_TIMEOUT` is set identically in eval).
+
+#### 7e. Pre-compute & cache benchmark features
+
+- On startup, `Benchmarks` extracts AST features for all 6,464 files ("Extracting benchmark features" — ~2-3 min, and it re-runs on every resume). This is a one-time cost, not per-iteration, but it adds up across frequent `--resume` restarts.
+- **Idea**: serialize the extracted feature vectors to disk (e.g. `data/all/features.json` or a `.npy`) keyed by benchmark name + file mtime, and load from cache when unchanged. Skip re-parsing on resume.
+- **Trade-off**: none for training dynamics — pure startup optimization. Helps a lot when HPO restarts trials frequently.
+
 ---
 
 ## What NOT to Change (Academic Constraints)
@@ -231,5 +268,11 @@ python scripts/train/train.py  # with CUDA visible
 | 2 | Persistent MLIR worker pool | Medium (`execution.py`) | 2-3x on execution phase (amortizes context creation) |
 | 3 | Run on C2 GPU node: `--partition=nvidia --qos=c2 --gres=gpu:a100:1` (remove bergamo constraint) | 4 lines in `train.sh` | 1.1-1.3x (model on GPU, frees CPU for compilation) |
 | 4 | Pipeline sampling + execution (requires GPU node) | Medium-High (`ppo.py`) | Marginal (sampling is small fraction of iteration time) |
+| 5 | **Reduce `bench_count` 64 → 16** (+ `ppo_batch_size` 64 → 16) | config only | **~3-4x wall-clock** (iteration 50s → ~12s) |
+| 6 | **Straggler control**: lower `MIN_EXEC_TIMEOUT` cap | 1 line / env var | removes 5-min outlier iterations |
+| 7 | **Early stopping** on eval-speedup plateau | Low-Medium (`train.py`) | variable — saves converged tail |
+| 8 | **Enable `reuse_experience` / `replay_count`** | config only | fewer fresh executions per batch + higher cache hits |
 
-**Bottom line**: The dominant cost is MLIR compilation/execution, which is always CPU. The biggest win is **#1** (more CPU threads — Bergamo has 256 cores, you're using 12). Adding **#2** (persistent workers) compounds this by eliminating per-benchmark process spawn overhead. Running on GPU nodes (#3) helps the model but not the bottleneck.
+**Bottom line**: The dominant cost is MLIR compilation/execution, which is always CPU. The biggest *per-execution* wins are **#1** (more CPU threads — Bergamo has 256 cores, you're using 12) and **#2** (persistent workers). The biggest *wall-clock* wins without touching execution speed are **#5** (do less execution per iteration via config), which compounds with #1. Running on GPU nodes (#3) helps the model but not the bottleneck.
+
+**Recommended order**: First test **#5** on a short run (zero-code, immediate ~4x per-iteration win). Then apply **#1** to make each remaining execution faster, **#6** to kill stragglers, and **#2** (persistent pool) for the compounding CPU-side win. **#4** only pays off on GPU nodes and is marginal.
