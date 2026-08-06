@@ -1,10 +1,18 @@
-# V2: Shaped Reward
+# V2: Shaped Reward — Design
 
-## Overview
+**Status**: **abandoned in V5** (entropy-collapse fix in V4.9; explored further and found unhelpful)
+**Date**: 2026-04-22
+**Novelty scope**: Reward shaping only
+**Package**: `rl_autoschedular_v2`
+**Config selector**: `"implementation": "rl_autoschedular_v2"`
+**VERSIONS.md**: [V2 entry](../VERSIONS.md)
+**Survives in V5**: ❌ no — the `reward_shaping_*` config fields are dropped from the V5 package (negative result: evidence against shaped reward for this task)
+
+## 1. Overview
 
 Version 2 introduces **reward shaping** to guide the RL agent toward meaningful optimizations earlier in training. Rather than only rewarding final execution speedup at episode end, V2 provides dense intermediate rewards based on the *quality* of each transformation applied, enabling faster policy learning and more stable convergence.
 
-## Problem Statement
+## 2. Problem Statement
 
 The baseline RL agent only receives reward at the end of an episode:
 - **Terminal reward**: Log-ratio of original vs. final execution time (`log₁₀(original/final)`)
@@ -18,7 +26,7 @@ This sparse feedback structure means:
 - Training curves are noisy and require many iterations to stabilize
 - Small benchmark variations cause large reward swings
 
-## Solution: Shaped Reward
+## 3. Solution: Shaped Reward
 
 V2 adds **dense intermediate rewards** that reinforce locally good decisions:
 
@@ -33,7 +41,7 @@ V2 adds **dense intermediate rewards** that reinforce locally good decisions:
 
 The result: Agent receives positive signals **immediately after good transformations**, speeding convergence and reducing noise.
 
-## Implementation Details
+## 4. Implementation Details
 
 ### Reward Calculation Pipeline
 
@@ -200,7 +208,7 @@ New config fields control reward shaping (all optional with sensible defaults):
 | `utils/implementation.py` | Added v2 implementation routing |
 | `scripts/*.sh` | Config-aware implementation resolution |
 
-## How to Use
+## 5. How to Use
 
 ### Option 1: Default Shaped Reward (Recommended)
 
@@ -263,7 +271,7 @@ streamlit run dashboard/dashboard.py --server.fileWatcherType none
 
 All scripts will automatically use V2 with shaped reward based on the config.
 
-## Expected Benefits
+## 6. Expected Benefits
 
 1. **Faster Convergence**: Dense rewards guide learning toward good transformations faster
 2. **Lower Variance**: Intermediate rewards smooth out random noise in final episode outcomes
@@ -271,7 +279,7 @@ All scripts will automatically use V2 with shaped reward based on the config.
 4. **Reduced Training Time**: Fewer random exploration episodes needed before meaningful progress
 5. **Better Sample Efficiency**: Each training step provides more informative gradient signals
 
-## Validation Results
+## 7. Validation Results
 
 ✅ Python compile checks passed for V2 and routing files
 ✅ Implementation routing verified (`rl_autoschedular_v2 → v2_agent / v2`)
@@ -279,7 +287,7 @@ All scripts will automatically use V2 with shaped reward based on the config.
 ✅ Config defaults loaded correctly
 ✅ No baseline package references inside V2 code
 
-## Expected vs. Actual
+## 8. Expected vs. Actual
 
 ### Hypothesis
 - Shaped reward should provide denser learning signals, leading to faster convergence
@@ -299,7 +307,7 @@ All scripts will automatically use V2 with shaped reward based on the config.
 - **Stability**: Standard deviation of rolling average return
 - **Sample efficiency**: Reward per gradient step
 
-## Limitations and Future Work
+## 9. Limitations and Future Work
 
 ### Current Limitations
 - Static efficiency scores ignore actual data access patterns
@@ -314,7 +322,7 @@ All scripts will automatically use V2 with shaped reward based on the config.
 - **Execution prediction**: Predict post-transformation execution time and reward directly
 - **Curriculum learning**: Start with high shaping weight, gradually shift to terminal reward
 
-## Troubleshooting
+## 10. Troubleshooting
 
 ### Reward Shaping Not Improving Training
 
@@ -336,7 +344,7 @@ All scripts will automatically use V2 with shaped reward based on the config.
 2. **Lower weight_vectorizable**: Increase impact of pure vectorization action
 3. **Check operation types**: Ensure benchmarks have vectorizable operations (FP floating-point ops)
 
-## References
+## 11. References
 
 - [VERSIONS.md](../VERSIONS.md) - Version history and validation details
 - [RL_AGENT_TUTORIAL.md](../RL_AGENT_TUTORIAL.md) - General RL agent architecture and reward structure

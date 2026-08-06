@@ -1,6 +1,14 @@
-# V3: Transformer Loop-Nest Encoder
+# V3: Transformer Loop-Nest Encoder — Design
 
-## Overview
+**Status**: complete — **the core contribution, carried into V5 unchanged**
+**Date**: 2026-04-22
+**Novelty scope**: Transformer-based encoder only (replacing the LSTM embedding)
+**Package**: `rl_autoschedular_v3`
+**Config selector**: `"implementation": "rl_autoschedular_v3"`
+**VERSIONS.md**: [V3 entry](../VERSIONS.md)
+**Survives in V5**: ✅ yes — the Transformer encoder is V5's core contribution, kept exactly as in `paper_transformer` (self-attention, CLS pooling). All `transformer_*` config fields carry over.
+
+## 1. Overview
 
 Version 3 replaces the previous LSTM embedding with a transformer-based encoder that models loop-nest structure using attention. The objective is to improve representation quality for complex nested loops while keeping the rest of the RL pipeline unchanged.
 
@@ -9,7 +17,7 @@ This version is intentionally scoped to one novelty only:
 
 No reward, action-space, PPO, or environment behavior changes are introduced in V3.
 
-## Why this change
+## 2. Why this change
 
 The baseline embedding path processes consumer and producer operation features with an LSTM. While simple and efficient, recurrent processing can under-represent long-range interactions between loop levels and producer-consumer contexts.
 
@@ -18,16 +26,16 @@ The transformer encoder provides:
 - Attention-based interaction between outer and inner loops
 - Explicit structural conditioning through role/type/depth embeddings
 
-## Design goals
+## 3. Design goals
 
 1. Keep V3 isolated to one novelty (encoder only).
 2. Preserve existing training and evaluation interfaces.
 3. Keep policy/value heads unchanged.
 4. Make architecture tunable from config.
 
-## Implemented architecture
+## 4. Implemented architecture
 
-## 1) Structured tokenization
+### 4.1 Structured tokenization
 
 Implemented in `rl_autoschedular_v3/model.py` inside `TransformerEmbedding`.
 
@@ -49,7 +57,7 @@ Per-loop token inputs are built from:
 
 This allows each loop token to carry both local loop details and global operation context.
 
-## 2) Structural embeddings
+### 4.2 Structural embeddings
 
 Each token receives additive structural embeddings:
 - Role embedding: global / consumer / producer
@@ -58,7 +66,7 @@ Each token receives additive structural embeddings:
 
 These embeddings provide positional hierarchy and semantic context without changing observation format.
 
-## 3) Transformer encoder core
+### 4.3 Transformer encoder core
 
 Encoder stack:
 - `nn.TransformerEncoder`
@@ -71,7 +79,7 @@ Token validity mask:
 - Producer loop tokens are masked using non-zero loop signal detection.
 - Mask is passed as `src_key_padding_mask` to avoid learning from padded loops.
 
-## 4) Output pooling and compatibility
+### 4.4 Output pooling and compatibility
 
 Pooling options:
 - `cls`: use CLS token output
@@ -83,7 +91,7 @@ Compatibility contract:
 
 Policy and value heads still consume a single embedding vector and require no architectural rewrite.
 
-## Implementation details by file
+## 5. Implementation details by file
 
 - `rl_autoschedular_v3/model.py`
   - Replaced `LSTMEmbedding` with `TransformerEmbedding`.
@@ -108,7 +116,7 @@ Policy and value heads still consume a single embedding vector and require no ar
 - `README.md`
   - Added documentation for transformer config fields.
 
-## Configuration
+## 6. Configuration
 
 Example V3 config:
 
@@ -130,7 +138,7 @@ Notes:
 - Keep `transformer_d_model % transformer_nhead == 0`.
 - Start with `cls` pooling and action-history token disabled for stable baselines.
 
-## How to use
+## 7. How to use
 
 1. Set implementation in config:
    - `"implementation": "rl_autoschedular_v3"`
@@ -146,7 +154,7 @@ sbatch scripts/eval.sh <config>
 
 No script changes are required beyond choosing the implementation in config.
 
-## Recommended starting hyperparameters
+## 8. Recommended starting hyperparameters
 
 - `transformer_d_model`: 256
 - `transformer_nhead`: 8
@@ -157,7 +165,7 @@ No script changes are required beyond choosing the implementation in config.
 - `transformer_pooling`: cls
 - `transformer_use_action_history_token`: false
 
-## Measured sanity results
+## 9. Measured sanity results
 
 Lightweight end-to-end sanity was executed with one benchmark using the existing shared environment (`~/envs/mlir`) and a compact config (`bench_count=1`, `nb_iterations=5`).
 
@@ -170,7 +178,7 @@ Lightweight end-to-end sanity was executed with one benchmark using the existing
 
 These runs validate end-to-end stability and artifact generation for V3 without introducing any script changes.
 
-## Ablation smoke metrics
+## 10. Ablation smoke metrics
 
 The following architecture-only ablation metrics were measured on CPU by timing embedding forward passes on a synthetic observation (`NumLoops=3`).
 
@@ -186,7 +194,7 @@ Interpretation:
 - `mean` pooling is slower than `cls` in this setup.
 - Enabling history token reduces external embedding size (no post-concatenation of ActionHistory).
 
-## What is unchanged in V3
+## 11. What is unchanged in V3
 
 - PPO objective and update logic
 - Reward function and environment step logic
@@ -195,27 +203,27 @@ Interpretation:
 
 This keeps attribution clean: observed behavior changes can be tied to the encoder replacement.
 
-## Validation checklist
+## 12. Validation checklist
 
 - Python compile checks pass for modified files.
 - Import smoke test for `rl_autoschedular_v3.model` passes.
 - Implementation routing resolves `rl_autoschedular_v3` correctly.
 - No baseline-package import references remain inside `rl_autoschedular_v3` Python files.
 
-## Limitations
+## 13. Limitations
 
 - Producer loop validity is inferred from non-zero static feature signals.
 - Sequence length grows with `max_num_loops`, increasing memory/compute at larger settings.
 - No warmup schedule was added in V3 (can be explored later if needed).
 
-## Next experiments
+## 14. Next experiments
 
 1. Keep A and B as primary candidates depending on throughput vs capacity target.
 2. Run longer training with B (3 layers, cls, history token off) as research default.
 3. Evaluate D when final assembly aims to reduce external embedding width.
 4. Evaluate on deeper loop nests to measure attention benefits.
 
-## Ultimate-version assembly notes
+## 15. Ultimate-version assembly notes
 
 To make final merging of all novelties feasible and low-risk, V3 was implemented with strict interface compatibility:
 
@@ -224,7 +232,7 @@ To make final merging of all novelties feasible and low-risk, V3 was implemented
 - Policy/value model external call contracts are unchanged.
 - This allows combining V1 + V2 + V3 + V4 via composition instead of rewrites.
 
-## References
+## 16. References
 
 - `docs/VERSIONS.md`
 - `docs/NOVELTIES.md`

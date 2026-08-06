@@ -1,4 +1,12 @@
-# rl_autoschedular — Baseline Implementation Deep Dive
+# V0: Original Baseline — Design
+
+**Status**: complete (historical — the package all later versions fork from)
+**Date**: baseline
+**Novelty scope**: none (baseline implementation)
+**Package**: `rl_autoschedular_v0`
+**Config selector**: `"implementation": "rl_autoschedular_v0"`
+**VERSIONS.md**: [V0 entry](../VERSIONS.md)
+**Survives in V5**: foundation only — state/obs/action/reward/PPO concepts carry over; the LSTM model does not (V5 uses the Transformer)
 
 This document provides a comprehensive breakdown of the original `rl_autoschedular` package (the baseline that all later versions fork from).
 

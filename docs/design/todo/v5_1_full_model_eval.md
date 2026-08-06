@@ -1,8 +1,27 @@
-# Full-Model Evaluation Plan for V5
+# V5.1: Full-Model Evaluation Support — Design
 
-**Status**: Design Phase  
-**Target**: `rl_autoschedular_v5` package (single package, backward compatible)  
+**Status**: Design Phase
+**Version**: **V5.1** of the new MLIR-RL generation (V5 → V5.1 → V5.2)
+**Target**: `rl_autoschedular_v5` package (single package, backward compatible with V4.9 checkpoints)
+**Base**: `rl_autoschedular_paper_transformer` structure (Transformer encoder only — no HW features, no shaped reward; both abandoned in V5) — V5.1 inherits V5's package + V5's accelerated pipeline
+**Depends on**: V5 (`v5_training_acceleration.md`) — full-model eval needs the accelerated pipeline
+**Precedes**: V5.2 (expanded action space, `v5_2_expanded_action_space.md`)
 **Scope**: Block/Op training (unchanged) → Full-Model Evaluation (new)
+
+> **Checkpoint compatibility note**: §8.4 says "V5 loads V4.9 checkpoints
+> directly — same model architecture (TransformerEncoder + policy/value heads)."
+> This holds only if the observation space matches. Since V5 drops HW features
+> from the observation (paper_transformer structure), the observation size
+> differs from v4_9 — **checkpoint compat is with `paper_transformer`
+> checkpoints, not v4_9**. The architect must confirm this against
+> `observation.py` before locking the design.
+
+> **Already-implemented overlap**: `scripts/checkpoint/ckpt_scan_all.sh` +
+> `submit_ckpt_scan.sh` already do a partial full-model eval of trained checkpoints
+> on full `.mlir` files (block-based, `rl_autoschedular_v4_5`, results in
+> `results/full_model/scan/`). This plan must **reconcile with, not duplicate,
+> those scripts** — reuse their evaluation plumbing where possible and extend it.
+> See §5.4 below.
 
 ---
 
@@ -392,11 +411,13 @@ def build_op_state_from_full_model(
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=128G
 #SBATCH --time=4:00:00
-#SBATCH --partition=standard
-# For large models (GPT-2+):
-# #SBATCH --partition=bigmem
-# #SBATCH --mem=512G
+#SBATCH --partition=compute
+# For very large models (GPT-2+), raise:
+# #SBATCH --mem=256G
 # #SBATCH --time=8:00:00
+# Note: full-model eval is CPU-bound MLIR execution (no model training),
+# so it stays on the Jubail `compute` partition — do NOT burn C2 GPU quota
+# (team cap ~5 GPUs) on it. GPU is not needed here.
 
 source ~/envs/mlir/bin/activate
 set -a && source .env && set +a
@@ -418,9 +439,9 @@ python -m rl_autoschedular_v5.eval_fullmodel \
 | Parse test | 5 small (<50MB) | <5 min | All ops extracted, graph correct |
 | Transform apply | ResNet18, VGG11 | <10 min | All transforms apply, no MLIR crash |
 | Execution | ResNet18, VGG11 | <30 min | Speedup measured, matches block baseline |
-| Medium models | T5, BERT-base (~200MB) | <1 hr | Completes on Jubail (480GB) |
-| Large models | GPT-2 (950MB) | <2 hr | Completes on Bergamo (1TB) |
-| XL models | 2.5GB model (~2000 ops) | <1 hr | Completes on Bergamo bigmem |
+| Medium models | T5, BERT-base (~200MB) | <1 hr | Completes on Jubail compute (480GB) |
+| Large models | GPT-2 (950MB) | <2 hr | Completes on compute partition (128-core node) |
+| XL models | 2.5GB model (~2000 ops) | <1 hr | Completes on compute with high `--mem` |
 
 ### 5.3 Comparison Baseline
 
@@ -434,6 +455,32 @@ Compare full-model eval speedups against:
 | ResNet18 | 1.83x | 1.83x | Target: ≥1.83x |
 | T5 | N/A | 10.07x | Target: ≥10.07x |
 | GPT-2 | N/A | N/A | Functional |
+
+### 5.4 Reconcile with Existing `ckpt_scan` Scripts (already-implemented overlap)
+
+`scripts/checkpoint/ckpt_scan_all.sh` + `scripts/checkpoint/submit_ckpt_scan.sh`
+already evaluate trained checkpoints against full `.mlir` files (v4_5 policy,
+`results/full_model/scan/<model>_scan.json`, 19 models × 14 checkpoints). They
+use a block-based approach with parallel block evaluation.
+
+**Design requirement**: V5.1 must **reuse and extend** these scripts, not
+re-implement them:
+
+- Reuse the checkpoints→models iteration and scan-result layout
+  (`results/full_model/scan/`, `merge_ckpt_scan.py`).
+- Replace the v4_5 policy import with the `rl_autoschedular_v5` policy; keep
+  checkpoint compatibility (V5 loads V4.9 checkpoints — same architecture).
+- The new `eval_fullmodel.py` provides the per-model greedy rollout; the scan
+  scripts become the batch driver over checkpoints × models.
+- Keep `ckpt_scan_all.sh` on the `compute` partition (CPU-bound; already
+  `--cpus-per-task=128 --mem=300G` after the bergamo-constraint removal).
+
+| Script | Status | V5.1 action |
+|--------|--------|-------------|
+| `ckpt_scan_all.sh` | ✅ works (v4_5) | Point at `rl_autoschedular_v5`; keep on `compute` |
+| `submit_ckpt_scan.sh` | ✅ works | Same change; keep resource params |
+| `merge_ckpt_scan.py` | ✅ works | Extend for `eval_fullmodel` output shape |
+| `eval_fullmodel.py` | ❌ new | The greedy full-model rollout (this plan §4.1) |
 
 ---
 
@@ -468,7 +515,7 @@ data/
 
 ---
 
-## 7. Resource Estimates (Bergamo/Jubail)
+## 7. Resource Estimates (Jubail compute partition)
 
 | Model | Parse | Transform (all ops) | Execute | Peak Mem | Total |
 |-------|-------|---------------------|---------|----------|-------|
@@ -480,9 +527,10 @@ data/
 | 2.5GB model (~2000 ops) | 2 min | 20 min | 30 min | 100 GB | ~55 min |
 
 **Hardware Requirements**:
-- Jubail standard (128 cores, 480 GB): All up to BERT-base
-- Bergamo bigmem (256 cores, 1 TB): GPT-2 and larger
+- Jubail compute partition standard nodes (128 cores, 480 GB): all models up to and including GPT-2
+- High-memory cases (>100 GB peak): request higher `--mem` on the same compute partition (or the 1TB node subset if still needed)
 - `--cpus-per-task=64` for parallel MLIR pass execution
+- **No GPU needed** — full-model eval is CPU-bound MLIR execution; keep it off the C2 `nvidia` partition (team GPU cap ~5).
 
 ---
 

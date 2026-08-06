@@ -1,4 +1,12 @@
-# RL Agent Model Architecture (`HiearchyModel`) — Detailed Breakdown
+# V0: Model Architecture Deep-Dive (appendix to `v0_original_baseline.md`)
+
+**Status**: complete (historical — reference for the baseline LSTM model)
+**Date**: baseline
+**Novelty scope**: none (appendix to V0)
+**Package**: `rl_autoschedular_v0`
+**Config selector**: `"implementation": "rl_autoschedular_v0"`
+**VERSIONS.md**: [V0 entry](../VERSIONS.md)
+**Survives in V5**: ❌ no — the LSTM embedding is replaced by the Transformer encoder (V3); the policy/value-head architecture and hierarchical action index concepts do carry over
 
 This document explains the neural-network architecture of the baseline RL autoscheduler in **plain, step-by-step terms**. It covers every tensor shape, the rationale behind each layer, concrete numerical examples, and the known limitations of this design.
 

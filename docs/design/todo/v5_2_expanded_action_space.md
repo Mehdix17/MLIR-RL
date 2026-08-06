@@ -1,10 +1,24 @@
-# V5: Expanded Transformation Action Space
+# V5.2: Expanded Transformation Action Space — Design
+
+**Status**: Design Phase
+**Version**: **V5.2** of the new MLIR-RL generation (V5 → V5.1 → V5.2)
+**Target**: `rl_autoschedular_v5` package (extends V5's package in place)
+**Base**: `rl_autoschedular_paper_transformer` action space (6 actions, Transformer encoder — no HW features, no shaped reward). The transforms referenced below live in `rl_autoschedular_v4_9/transforms.py` (padding, unrolling, packing already implemented there) and are inherited/ported into the V5 package.
+**Depends on**: V5 (`v5_training_acceleration.md`) — more actions → longer trajectories → more MLIR executions per iteration, so V5's acceleration is a prerequisite
+**Precedes/parallel**: V5.1 (full-model eval, `v5_1_full_model_eval.md`) — see the sequencing note in §Overview
 
 ## Overview
 
-This document proposes new actions for the MLIR-RL agent's action space. The current action space (V4.9) contains 6 actions: NoTransformation, Tiling, TiledParallelization, TiledFusion, Interchange, and Vectorization. Several MLIR Transform Dialect operations are already implemented in `transforms.py` but have no corresponding action class. Others require new transform code.
+This document proposes new actions for the MLIR-RL agent's action space. The current action space (V4.9 / V5 base) contains 6 actions: NoTransformation, Tiling, TiledParallelization, TiledFusion, Interchange, and Vectorization. Several MLIR Transform Dialect operations are already implemented in `transforms.py` but have no corresponding action class. Others require new transform code.
 
 **Goal:** Expand the action space to expose finer-grained MLIR transformations, enabling the agent to discover optimization schedules that the current action space cannot express.
+
+> **Sequencing note (open question for the architect)**: the user's stated order is
+> V5 → V5.1 (full-model eval) → V5.2 (action space). For *paper sequencing*,
+> expanding the action space before full-model eval would make V5.1's headline
+> full-model numbers reflect the new agent. Keeping the stated order means V5.1
+> results are for the 6-action agent and may need re-running after V5.2. Both are
+> defensible — resolve before Phase 3.
 
 ---
 

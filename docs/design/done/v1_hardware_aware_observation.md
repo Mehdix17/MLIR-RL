@@ -1,10 +1,18 @@
-# V1: Hardware-Aware Observation
+# V1: Hardware-Aware Observation — Design
 
-## Overview
+**Status**: **abandoned in V5** (explored through V1/V4.5/V4.9, found unhelpful)
+**Date**: 2026-04-22
+**Novelty scope**: Hardware-aware observation only
+**Package**: `rl_autoschedular_v1`
+**Config selector**: `"implementation": "rl_autoschedular_v1"`
+**VERSIONS.md**: [V1 entry](../VERSIONS.md)
+**Survives in V5**: ❌ no — the `hardware_*` config fields are dropped from the V5 package (negative result: evidence against hardware-aware observation for this task)
+
+## 1. Overview
 
 Version 1 introduces **hardware-aware observation** to the RL agent's state representation. Instead of relying solely on operation and loop structure features, the agent now explicitly observes the target hardware's capabilities. This allows the RL model to make optimization decisions tailored to specific hardware characteristics.
 
-## Problem Statement
+## 2. Problem Statement
 
 The baseline RL agent makes optimization decisions (tiling factors, parallelization, vectorization) based only on the MLIR code structure. However, optimal transformations depend heavily on:
 - **Cache hierarchy**: L1/L2/L3 cache sizes determine effective tile sizes and memory access patterns
@@ -16,7 +24,7 @@ Without this information, the agent must learn optimal settings through trial an
 - Potential performance regressions when deployed to different hardware
 - Inability to generalize across hardware families
 
-## Solution: Hardware-Aware Observation
+## 3. Solution: Hardware-Aware Observation
 
 V1 adds a new **Hardware Features** observation component that captures the target system's key characteristics. The agent now receives:
 1. **Cache information**: L1/L2/L3 cache sizes (KB)
@@ -27,7 +35,7 @@ These features are either:
 - **Auto-detected** at runtime from `/sys/devices/` on Linux systems
 - **Optionally overridden** in the JSON config file for advanced cross-hardware experiments
 
-## Implementation Details
+## 4. Implementation Details
 
 ### Architecture Changes
 
@@ -117,7 +125,7 @@ New config fields (optional, with sensible defaults):
 | `utils/implementation.py` | Added v1 implementation routing |
 | `scripts/*.sh` | Config-aware implementation resolution |
 
-## How to Use
+## 5. How to Use
 
 ### Option 1: Auto-Detect Hardware (Recommended for Single HPC)
 
@@ -149,7 +157,7 @@ The system will automatically detect all hardware features at runtime.
 Use overrides only when you intentionally need to simulate/condition on a different hardware profile.
 For single-machine train/eval, prefer auto-detect without overrides.
 
-## Execution-Time Impact
+## 6. Execution-Time Impact
 
 - Hardware detection does not directly change the execution timer.
 - Execution time is measured later when transformed code is executed on the host CPU.
@@ -178,14 +186,14 @@ streamlit run dashboard/dashboard.py --server.fileWatcherType none
 
 All scripts will automatically use V1 implementation based on the config.
 
-## Expected Benefits
+## 7. Expected Benefits
 
 1. **Faster Convergence**: Agent learns hardware-specific optimal tile sizes and parallelization strategies earlier
 2. **Better Generalization**: Model can adapt to different hardware without complete retraining
 3. **Reduced Trial-and-Error**: Explicit hardware knowledge reduces exploration of suboptimal regions
 4. **Interpretability**: Can analyze how agent weights hardware features when making decisions
 
-## Validation Results
+## 8. Validation Results
 
 ✅ Python compile checks passed
 ✅ Import test successful (`rl_autoschedular_v1.model`)
@@ -193,7 +201,7 @@ All scripts will automatically use V1 implementation based on the config.
 ✅ No baseline package references inside V1 code
 ✅ Hardware feature extraction working on test systems
 
-## Limitations and Future Work
+## 9. Limitations and Future Work
 
 ### Current Limitations
 - Hardware features are 7-dimensional (may miss exotic features like specialized accelerators)
@@ -208,7 +216,7 @@ All scripts will automatically use V1 implementation based on the config.
 - Dynamic hardware reconfiguration during training
 - Learn feature importance via attention mechanisms
 
-## Troubleshooting
+## 10. Troubleshooting
 
 ### Hardware Features Not Detected
 
@@ -241,7 +249,7 @@ Check model embedding includes hardware size:
 python -c "from rl_autoschedular_v1.model import PPOModel; m = PPOModel(...); print('Embedding size:', m.embedding_output_size)"
 ```
 
-## References
+## 11. References
 
 - [VERSIONS.md](../VERSIONS.md) - Version history and validation details
 - [RL_AGENT_TUTORIAL.md](../RL_AGENT_TUTORIAL.md) - General RL agent architecture

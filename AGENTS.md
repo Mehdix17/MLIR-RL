@@ -94,7 +94,7 @@ python scripts/utils/report_eval.py --best                          # best per a
 
 **`BindingsProcess.ENABLED` must stay `False`** — fork corrupts MLIR C++ state.
 
-**DaskManager disabled** — `ThreadPoolExecutor` fallback uses `SLURM_CPUS_PER_TASK` workers. Set `--cpus-per-task` to match the node (128 on Jubail, 64-128 on C2 GPU nodes). See [Training Acceleration](docs/design/todo/TRAINING_ACCELERATION.md).
+**DaskManager disabled** — `ThreadPoolExecutor` fallback uses `SLURM_CPUS_PER_TASK` workers. Set `--cpus-per-task` to match the node (128 on Jubail, 64-128 on C2 GPU nodes). See [V5 Training Acceleration](docs/design/todo/v5_training_acceleration.md).
 
 **Lustre:** `/scratch` has 500K file soft limit. Check `lfs quota -u $USER /scratch` before large eval batches.
 
@@ -126,11 +126,11 @@ See [HPC Hardware](docs/hpc/HPC_HARDWARE.md) and [C2 Guide](docs/hpc/Guide%20to%
 
 ### Design Docs
 
-`docs/design/done/` — completed features. `docs/design/todo/` — planned features:
-- [Training Acceleration](docs/design/todo/TRAINING_ACCELERATION.md) — persistent workers, more CPUs, GPU nodes
-- [V5 Expanded Action Space](docs/design/todo/v5_expanded_action_space.md) — padding, unrolling, packing, LICM, fusion
-- [Full-Model Evaluation Plan](docs/design/todo/FULL_MODEL_EVAL_PLAN.md) — block-trained policy → full `.mlir` eval
-- [HPO Plan](docs/design/todo/HPO_PLAN.md) — hyperparameter tuning
+`docs/design/done/` — completed features. `docs/design/todo/` — planned features (V5 generation: V5 platform → V5.1 full-model eval → V5.2 action space):
+- [V5 Training Acceleration](docs/design/todo/v5_training_acceleration.md) — V5 platform: GPU-ready pipeline, CPU parallelism, resource allocation, GPUOccupier wiring
+- [V5.1 Full-Model Evaluation](docs/design/todo/v5_1_full_model_eval.md) — block-trained policy → full `.mlir` eval (reuses `scripts/checkpoint/ckpt_scan*`)
+- [V5.2 Expanded Action Space](docs/design/todo/v5_2_expanded_action_space.md) — padding, unrolling, packing, LICM, fusion
+- [HPO Plan](docs/design/todo/HPO_PLAN.md) — hyperparameter tuning (candidate V5.3)
 
 New feature design → `docs/design/todo/<feature>.md`. Move to `done/` when implemented.
 
