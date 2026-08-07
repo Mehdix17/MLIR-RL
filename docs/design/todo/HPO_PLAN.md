@@ -6,7 +6,7 @@
 
 ## Overview
 
-Tune the **Transformer encoder architecture** only (d_model, nhead, num_layers, ffn_dim, dropout, pooling) using **Optuna** with TPE Bayesian optimization on the **ops_and_blocks** dataset. PPO/training hyperparameters remain fixed.
+Tune the **Transformer encoder architecture** (d_model, nhead, num_layers, ffn_dim, dropout, pooling) **plus the four PPO training knobs that were implemented but never activated in any run** (`reuse_experience`, `replay_count`, `value_epochs`, `value_batch_size`) using **Optuna** with TPE Bayesian optimization on the **ops_and_blocks** dataset. All other PPO/training hyperparameters remain fixed.
 
 ## Search Space
 
@@ -18,10 +18,50 @@ Tune the **Transformer encoder architecture** only (d_model, nhead, num_layers, 
 | `transformer_ffn_dim` | int | {64, 128, 256, 512, 1024} | — |
 | `transformer_dropout` | float | [0.0, 0.3] | — |
 | `transformer_pooling` | categorical | {"cls", "mean"} | — |
+| `reuse_experience` | categorical | {"none", "random", "topk"} | "none" keeps current on-policy behavior; random/topk activate replay |
+| `replay_count` | int | {3, 5, 10} (or 0) | **must be ≥ 1 when `reuse_experience != "none"`** (assert crash otherwise — see Gotchas); forced to 0 when "none" |
+| `value_epochs` | int | {0, 2, 5} | 0 = current joint-loss mode (value head still trained inside ppo_update) |
+| `value_batch_size` | int | {32, 64} (or 0) | **must be > 0 when `value_epochs > 0`** (DataLoader crash otherwise); forced to 0 when `value_epochs == 0` |
 
 ## Fixed Parameters
 
-All PPO params, lr=0.001, reward_shaping=false, gae_lambda=0.95, entropy_coef=0.01, etc. remain unchanged from `paper_transformer_large.json`.
+Everything except the six Transformer-architecture params and the four RL knobs in
+the search space remains unchanged from `paper_transformer_large.json`: lr=0.001,
+reward_shaping=false, gae_lambda=0.95, entropy_coef=0.01, ppo_epochs=4,
+ppo_batch_size=64, bench_count=64, opt_level=3, action space, reward function.
+Paper-artifact configs (`config/paper/**`) stay frozen — trials run in isolated
+`results/hpo/trial_*` dirs, so a bad knob combination can never contaminate them.
+
+## RL Knob Gotchas (verified 2026-08-06 against code)
+
+The four RL knobs are implemented but have **never been enabled in any run** —
+flipping them on has landmines:
+
+- **`replay_count` must be ≥ 1 when `reuse_experience != "none"`.** All current
+  configs carry `replay_count: 0` (inert). `TrajectoryData.__add__` does
+  `sizes[-replay_count:]` then `assert len(sizes) <= replay_count` — with 0 this
+  asserts and crashes training (`trajectory.py:175-211`).
+- **`value_epochs > 0` requires `value_batch_size > 0`.** `value_update` builds
+  `trajectory.loader(cfg.value_batch_size, 1)` — `batch_size=0` raises a
+  DataLoader ValueError (`ppo.py:249`).
+- **Replay does not enlarge the update.** `loader(..., num_trajectories=1)` draws
+  one trajectory's worth of samples from the whole buffer: replay changes WHERE
+  gradient samples come from (old+new mix, or the top-|advantage| subset), not
+  how many per update.
+- **Off-policy bias is only partially corrected.** `rho = exp(old_log_p −
+  beh_log_p)` with `clamp_max(1)` (truncated importance sampling) is applied in
+  the return/advantage computation (`trajectory.py:288-341`) — old transitions
+  are down-weighted, not exactly re-weighted. `'topk'` amplifies this by focusing
+  on high-|advantage| (most surprising) transitions.
+- **Entropy-collapse regime.** Replay + Transformer is the exact regime where
+  v4_9's entropy collapse appeared (shaped reward was the trigger there; V5 and
+  paper_transformer have shaping disabled). If a replay trial shows entropy → 0,
+  raise `entropy_coef` (0.01 in the base config) — flag the trial, don't trust
+  its speedup.
+- **Buffer cost grows with `replay_count`.** `update_attributes` recomputes
+  values/rho/returns over the whole buffer every iteration
+  (`trajectory.py:268-341`) — a few extra forward passes per iteration;
+  negligible vs MLIR execution but not free.
 
 ## Objective Metric
 
@@ -72,7 +112,7 @@ Slurm script modeled after `scripts/train/train.sh`. Key differences:
 - Reads config from `scripts/hpo/trials/trial_{TRIAL_ID}/config.json`
 - Sets `CONFIG_FILE_PATH` to that config
 - Sets `RESUME_FROM=results/hpo/trial_{TRIAL_ID}` if the directory already has model checkpoints (auto-resume on timeout)
-- Same SBATCH params: `--partition=compute --mem=32G --cpus-per-task=12 --constraint=bergamo --time=7-00:00:00`
+- Same SBATCH params: `--partition=compute --mem=32G --cpus-per-task=16 --time=7-00:00:00` (no constraint — removed 2026-08-06; sized for 8 parallel trials, see Resource Usage)
 - Sources `.env`, activates conda, sets `PYTHONPATH` (same as `train.sh`)
 - Calls `python scripts/train/train.py`
 
@@ -109,7 +149,7 @@ import subprocess
 import time
 from pathlib import Path
 
-BATCH_SIZE = 5  # Number of parallel trials per batch
+BATCH_SIZE = 8  # Number of parallel trials per batch (8 x 16c/32G = 128c/256G ≈ 1 node)
 TOTAL_TRIALS = 50  # Total number of Optuna trials
 POLL_INTERVAL = 60  # Seconds between Slurm status checks
 
@@ -126,6 +166,13 @@ def objective(trial):
     dropout = trial.suggest_float("transformer_dropout", 0.0, 0.3)
     pooling = trial.suggest_categorical("transformer_pooling", ["cls", "mean"])
 
+    # RL knobs (implemented but never activated — see "RL Knob Gotchas").
+    # Conditional sampling keeps every generated config valid:
+    reuse = trial.suggest_categorical("reuse_experience", ["none", "random", "topk"])
+    replay_count = trial.suggest_categorical("replay_count", [3, 5, 10]) if reuse != "none" else 0
+    value_epochs = trial.suggest_categorical("value_epochs", [0, 2, 5])
+    value_batch_size = trial.suggest_categorical("value_batch_size", [32, 64]) if value_epochs > 0 else 0
+
     # 2. Generate trial config
     trial_id = trial.number
     generate_trial_config(trial_id, {
@@ -135,6 +182,10 @@ def objective(trial):
         "transformer_ffn_dim": ffn_dim,
         "transformer_dropout": dropout,
         "transformer_pooling": pooling,
+        "reuse_experience": reuse,
+        "replay_count": replay_count,
+        "value_epochs": value_epochs,
+        "value_batch_size": value_batch_size,
     })
 
     # 3. Submit training job
@@ -305,12 +356,32 @@ Post-hoc analysis script that:
 
 6. **7-day time limit**: Per jubail cluster max. With resume, even slow trials will complete eventually.
 
-## Resource Usage
+## Resource Usage (sized 2026-08-07 for 8 parallel trials)
 
-- **Per trial**: 12 CPUs, 32G RAM, up to 7 days
-- **Batch of 5**: 60 CPUs, 160G RAM simultaneously
-- **Total trials**: 50 (configurable)
-- **Total compute**: ~50 node-days (parallelized across batches)
+- **Per trial**: 16 CPUs, 32G RAM, up to 7 days wall (auto-resume absorbs the ~8.8d tail)
+- **Batch of 8**: 128 CPUs, 256G RAM simultaneously ≈ **1 compute node** (of 404)
+- **Total trials**: 50 (configurable) → 7 batches
+- **Per-trial speed**: ~38s/iter at 16c (4 waves of 16 on bench_count=64) vs ~50s at the old 12c — trials finish ~1.3x faster; with 8-way parallelism the whole study is ~7x faster than 5 trials at 12c
+- **Total compute**: ~55 node-days (parallelized across batches)
+
+Why not more per trial: 64c/128G × 8 = 4 nodes is too much for a search; parallelism caps at
+`min(CPUS, bench_count=64)`, and HPO optimizes study throughput, not per-trial latency. 16c is the
+leanest count that keeps trials productive (4 waves/iter); 32c/96G × 8 (2 nodes, ~20s/iter, no
+resume) is the faster alternative if the study needs to finish ~2x sooner.
+
+### Memory calibration (measured 2026-08-07, `sacct` MaxRSS, jobacct_gather/linux + UsePss, 120s sampling)
+
+| Job (12 CPUs, 32G requested) | Peak MaxRSS | State |
+|---|---|---|
+| mlir-train, 2d10h | 11.5G | COMPLETED |
+| mlir-train, 3d | 10.8G | TIMEOUT |
+| mlir-eval-batch | 9.4G / 12.7G | COMPLETED |
+
+→ The old 12c/32G jobs peaked at ~⅓ of requested memory; the ~2G/child + ~8G parent model
+overshoots ~2x (real ~0.7-1G per concurrent MLIR child). **32G per trial = ~1.5x headroom** over
+the expected 16c peak (~17G from the worst measured 12.7G scaled by 16/12, plus margin for the
+120s sampling undershoot). 8 jobs × 32G = 256G total. Re-check MaxRSS on the first 16c/32G HPO
+trials and right-size if the long 7-9d trials drift (cache growth).
 
 ## Wrapper Script Summary
 
@@ -332,3 +403,4 @@ Post-hoc analysis script that:
 4. **Eval test**: Run eval on the trained model, verify `average_speedup` is written to logs
 5. **Full batch**: Submit batch of 5, verify all complete and Optuna receives results
 6. **Full study**: Run 50 trials, verify study.db has all results, generate analysis
+7. **RL-knob smoke (before the full study)**: generate one config with `reuse_experience="topk"`, `replay_count=5`, `value_epochs=2`, `value_batch_size=32` and run it for a few iterations — verify no assert/DataLoader crash, `train_value/loss` appears in the logs, and entropy stays away from 0. Also generate one with `reuse_experience="random"`, `replay_count=3`, `value_epochs=0` (joint-loss mode) to cover the other branch.

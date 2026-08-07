@@ -257,6 +257,90 @@ class FullModelExecutor:
         return self._invoke()
 ```
 
+### 3.6 Persistent MLIR Worker Pool (moved from V5.0)
+
+**Why it lives here, not in V5.0** — in block training a worker pool saves
+only ~1-3% of wall-clock: every execution is a different code string, exact
+repeats hit the execution-time cache before any process work, and a freshly
+forked child is nearly free (it inherits the already-imported MLIR bindings).
+In full-model eval the economics flip: each model is parsed once, transforms
+are applied incrementally to the same module, and several models can be
+evaluated in parallel on one node. Keeping one executor process per model
+avoids repeated process startup and lets the parsed module live for the whole
+rollout.
+
+**What it is**: N long-lived worker processes (N ≤ `--cpus-per-task`), each
+owning a `FullModelExecutor` for one model. The parent dispatches model
+rollouts to free workers and collects per-model exec times.
+
+**Design requirements** (carried over from the V5.0 analysis):
+- **Spawn-based only** — `multiprocessing.get_context("spawn")`, never fork
+  (fork corrupts MLIR C++ state; `BindingsProcess.ENABLED` must stay `False`).
+  Spawn cost is paid once per worker at eval start, then amortized over the
+  whole rollout.
+- **Worker lifecycle**: workers start at eval start, import MLIR once, receive
+  `(model_name, code)`, parse → loop over transform sequences → apply →
+  execute → return `(exec_time_ns, success, error)`.
+- **Crash recovery**: a worker SIGABRT only kills its own model rollout — the
+  parent detects death, respawns the worker, marks that model failed, and the
+  existing `mlir-opt | mlir-cpu-runner` fallback still applies.
+- **Timeout**: per-model dynamic timeout (`root_exec_time * 5`, clamped) — the
+  same rule as block execution.
+- **Memory**: ~0.7-1G per worker (measured, see
+  `v5_training_acceleration.md` §Memory calibration) — 64 workers fit the eval
+  budget.
+
+**Deferred from V5.0 by decision** (`v5_training_acceleration.md` §Scope
+decisions). V5.0 ships without it; V5.1 implements it only if parallel
+full-model eval needs it — a sequential eval over ~19 models is fine without.
+
+### 3.7 DaskManager — evaluated, not worth enabling
+
+**Current state**: `DaskManager` (`utils/dask_manager.py`) is disabled by
+default — `ENABLED = int(os.getenv('DASK_NODES', '0')) > 0`, and `DASK_NODES`
+is not set in `.env`. The fallback is a `ThreadPoolExecutor(max_workers =
+SLURM_CPUS_PER_TASK)` (`dask_manager.py:122-130`), which is what all current
+and planned runs use. `dask-jobqueue` is installed (requirements.txt), so
+enabling it is a pure env-var flip — the question is whether it's worth it.
+
+**What it would do**: spin up extra whole Slurm nodes (`--nodes=1 --exclusive`,
+28 cores / 100GB per worker job, walltime 7-00) and dispatch tasks to them,
+giving parallelism beyond one node's 128 cores.
+
+**Why it does not help**:
+1. **It does not touch the expensive part.** The dominant cost (parse,
+   bufferize, lower, JIT, run — ~95% of iteration) happens inside a fresh
+   child process per execution (`execution.py` `__execute_bufferized_code_isolated`,
+   called from every task). Dask workers do not remove that child spawn — each
+   task still pays it. Dask's long-lived workers only persist *data* (the
+   `Benchmarks` object, `main_exec_data`, imported modules) — and that data is
+   already loaded once in the parent and shared via singletons.
+2. **Training caps at `bench_count=64` anyway.** One wave per iteration; one
+   node's 64 threads already cover it. Extra Dask nodes would sit idle between
+   waves.
+3. **Eval is not the bottleneck.** Eval (2,363 benches) is the only workload
+   that could use >128 workers, but it is a separate Slurm job, already ~5x
+   faster at 64 workers, and eval wall-clock is not the paper's constraint.
+
+**Costs**:
+- Extra `--exclusive` node requests → queue latency on a busy cluster and
+  wasted resources (a whole node per Dask worker job).
+- ~378 lines of machinery (cluster management, persistent futures, worker
+  restart on timeout) with new failure modes.
+- Contradicts the V5 scope decision: "no code changes to `dask_manager.py`"
+  (`v5_training_acceleration.md` §Approach) — enabling Dask changes the
+  execution architecture under the platform run.
+
+**Relation to §3.6**: Dask's persistence is data-only — it does not provide
+the parse-once-per-model reuse that makes a worker pool worthwhile in
+full-model eval. If parallel full-model eval is ever needed, the spawn-based
+pool in §3.6 is the simpler, cheaper alternative.
+
+**When it WOULD matter**: cross-node parallelism for a workload bigger than
+one node — e.g. full-model eval over many large models at once, or a
+multi-thousand-bench eval sweep. Then it is the right tool (already
+installed); until then, keep `DASK_NODES` unset.
+
 ---
 
 ## 4. Phase 2: Full-Model Evaluation Pipeline (Weeks 2-3)
@@ -574,6 +658,7 @@ data/
 - [ ] Config fields: `full_model_*`
 - [ ] `execute_model()` with dynamic timeout + memory monitor
 - [ ] Module caching in `FullModelExecutor`
+- [ ] Persistent worker pool (spawn-based, §3.6) — only if parallel full-model eval is needed
 
 ### Phase 2: Evaluation Pipeline
 - [ ] `eval_fullmodel.py` entry point
