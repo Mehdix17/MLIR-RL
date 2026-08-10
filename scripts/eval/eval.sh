@@ -1,17 +1,20 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-eval
 #SBATCH --partition=compute
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=12
+#SBATCH --mem=100G
+#SBATCH --cpus-per-task=64
+#SBATCH --time=7-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/eval_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/eval_%j.err
 #SBATCH --mail-type=END,FAIL
 #
 # Usage:
-#   sbatch scripts/eval.sh                                                    # array mode: auto-picks version
-#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json             # single version from config
-#   sbatch scripts/eval.sh config/old_dataset/train/baseline.json v1          # explicit version
-#   sbatch scripts/eval.sh config/new_dataset/eval/v4_6_eval.json --checkpoint 100  # single checkpoint eval
+#   sbatch scripts/eval/eval.sh                                                    # array mode: auto-picks version
+#   sbatch scripts/eval/eval.sh config/old_dataset/train/baseline.json             # single version from config
+#   sbatch scripts/eval/eval.sh config/old_dataset/train/baseline.json v1          # explicit version
+#   sbatch scripts/eval/eval.sh config/new_dataset/eval/v4_6_eval.json --checkpoint 100  # single checkpoint eval
+#   sbatch scripts/eval/eval.sh config/v5/v5_small.json                            # unified config: eval all checkpoints in models/
+#   sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint 500           # unified config: eval checkpoint 500
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${SLURM_SUBMIT_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"

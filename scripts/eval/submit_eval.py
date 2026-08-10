@@ -13,7 +13,8 @@ EVAL_BATCH_SH = os.path.join(PROJECT_ROOT, "scripts/eval/eval_batch.sh")
 AGENT_CONFIGS = {
     "paper_original": "config/ops_and_blocks/eval/paper_original_eval.json",
     "paper_transformer_small": "config/ops_and_blocks/eval/paper_transformer_small_eval.json",
-    "paper_transformer_large": "config/ops_and_blocks/eval/paper_transformer_large_eval.json"
+    "paper_transformer_large": "config/ops_and_blocks/eval/paper_transformer_large_eval.json",
+    "v5_small": "config/v5/v5_small.json"
 }
 
 def resolve_agent_config(input_arg):
@@ -82,7 +83,7 @@ def main():
             agent_name = agent
             break
     if not agent_name:
-        agent_name = config_name.replace("_eval.json", "")
+        agent_name = config_name.replace(".json", "")
 
     print(f"Resolved Config Path: {config_path}")
     print(f"Agent Version: {agent_name}")

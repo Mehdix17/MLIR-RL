@@ -15,6 +15,8 @@ Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda internally.
 ## Hard Rules
 
 - **NEVER delete files without explicit permission.**
+- **`data/` is the irreplaceable, untracked dataset** (`data/` is gitignored via `*`, so nothing under it is recoverable from git or GitHub). **Never** `git clean`, `rm -rf data/`, or include `data/` in any cleanup sweep — even when asked to "clean up".
+- **"Cleanup <branch>" means `origin/<branch>` (the remote), not the local working tree.** When asked to clean a branch, operate on the remote's tracked content; never remove untracked local files (dataset, results, logs) as part of it. If scope is ambiguous, ask.
 - **NEVER cancel the interactive Slurm session** — it runs the CLI coding tool.
 - **Never mix imports between packages** — each `rl_autoschedular_vN` is fully standalone.
 - `utils.config.Config` is a singleton — reads `CONFIG_FILE_PATH` at first import.
@@ -58,6 +60,7 @@ All under `rl_autoschedular/`. Each is fully standalone (no cross-package import
 | `v4_9` | Transformer | ✅ | ❌ | Entropy collapse fix |
 | `paper` | LSTM | ❌ | ❌ | Paper artifact |
 | `paper_transformer` | Transformer | ❌ | ❌ | Paper ablation |
+| `v5` | Transformer | ❌ | ❌ | V5 platform: CPU-only (no GPUOccupier), no eval-in-training; base for V5.1/V5.2 |
 
 V4.6/V4.7/V4.8 use `v4_5` with different configs. V1–V4 are legacy. Ablations: `v45_no_hw`, `v45_no_shaped_reward`, `v45_no_transformer`.
 
@@ -71,8 +74,12 @@ sbatch scripts/train/train.sh config/<dataset>/train/<config>.json
 sbatch scripts/train/train.sh <config> --resume results/.../run_0   # resume
 FORCE_NEW=1 sbatch scripts/train/train.sh <config>                   # fresh
 
+# Train (V5+ unified config: one JSON drives train AND eval)
+sbatch scripts/train/train.sh config/v5/v5_small.json
+
 # Eval
 sbatch --cpus-per-task=12 --mem=16G scripts/eval/eval.sh <eval_config> --checkpoint 500
+sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint 500   # unified config (64c/100G defaults)
 python scripts/eval/submit_eval.py paper_transformer_small 7300 10200 100 --time 3-00:00:00
 python scripts/eval/sync_progress.py
 
