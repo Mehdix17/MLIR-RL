@@ -4,7 +4,7 @@
 #SBATCH --mem=100G
 #SBATCH --cpus-per-task=64
 #SBATCH --constraint=bergamo
-#SBATCH --time=24:00:00
+#SBATCH --time=7-00:00:00
 #SBATCH --output=logs/hpo/eval_%x_%j.out
 #SBATCH --error=logs/hpo/eval_%x_%j.err
 #SBATCH --mail-type=END,FAIL

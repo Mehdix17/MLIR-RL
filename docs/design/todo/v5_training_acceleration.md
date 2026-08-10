@@ -150,8 +150,8 @@ analysis: see [v5_gpu_exploration.md](v5_gpu_exploration.md).
 | `scripts/train/train.sh` | `compute` | **64** | **100G** | **7-00:00:00** | 64 workers = bench_count=64 (one wave); ~0.7-1G/worker (measured) + parent |
 | `scripts/eval/eval.sh` | `compute` | **64** | **100G** | 7-00:00:00 | same as training (user decision — eval resources match train) |
 | `scripts/eval/eval_batch.sh` | `compute` | 64 | 100G | 7-00:00:00 | same as eval |
-| `scripts/hpo/train_trial.sh` | `compute` | **16** | **32G** | 7-00:00:00 | HPO runs 8 parallel trials — keep each lean: 16c = 4 waves/iter (~38s); 32G = ~1.5x measured peak (see HPO_PLAN §Memory calibration); auto-resume absorbs the ~8.8d tail past the 7d wall |
-| `scripts/hpo/eval_trial.sh` | `compute` | **16** | **32G** | 7-00:00:00 | one checkpoint per trial (EVAL_LAST_ONLY); same sizing as train |
+| `scripts/hpo/train_trial.sh` | `compute` | **64** | **100G** | 7-00:00:00 | bergamo constraint |
+| `scripts/hpo/eval_trial.sh` | `compute` | **64** | **100G** | 7-00:00:00 | bergamo constraint |
 | `scripts/checkpoint/ckpt_scan_all.sh` | `compute` | 128 | 300G | 7-00:00:00 | full-model eval, CPU-only |
 | `scripts/checkpoint/submit_ckpt_scan.sh` | `compute` | 8 | 16G | — | launches children; CPU-only |
 
@@ -332,7 +332,7 @@ action space, or Transformer encoder. Expected net effect: iteration wall-clock 
    `eval_json_file` (eval split). `benchmarks.py:38-42` already selects by `is_training`; both
    scripts read the same `CONFIG_FILE_PATH`. No schema change needed.
 3. **Resource re-allocation** — edit the `#SBATCH` header of 5 scripts per the DECIDED matrix
-   (train 64/100G/7d; **eval + eval_batch 64/100G/7d**; HPO 16c/32G). `scripts/checkpoint/*`
+   (train 64/100G/7d; **eval + eval_batch 64/100G/7d**; HPO 64c/100G). `scripts/checkpoint/*`
    already correct → untouched.
 4. **Script adaptation for unified configs** — `scripts/eval/submit_eval.py` registry (v5 entries;
    name derivation no longer assumes an `_eval.json` suffix); usage comments in `eval.sh`.
@@ -356,8 +356,8 @@ config per run. (c) GPU/GPUOccupier — removed entirely (see `v5_gpu_exploratio
 | `scripts/train/train.sh` | `--cpus-per-task=64 --mem=100G --time=7-00:00:00` |
 | `scripts/eval/eval.sh` | `--cpus-per-task=64 --mem=100G --time=7-00:00:00` (same as training; add explicit `--time`) |
 | `scripts/eval/eval_batch.sh` | `--cpus-per-task=64 --mem=100G --time=7-00:00:00` (add explicit `--time`) |
-| `scripts/hpo/train_trial.sh` | `--cpus-per-task=16 --mem=32G --time=7-00:00:00` |
-| `scripts/hpo/eval_trial.sh` | `--cpus-per-task=16 --mem=32G --time=7-00:00:00` |
+| `scripts/hpo/train_trial.sh` | `--cpus-per-task=64 --mem=100G --constraint=bergamo --time=7-00:00:00` |
+| `scripts/hpo/eval_trial.sh` | `--cpus-per-task=64 --mem=100G --constraint=bergamo --time=7-00:00:00` |
 | `scripts/eval/submit_eval.py` | Registry: add `v5_small` → `config/v5/v5_small.json`; name derivation must not assume an `_eval.json` suffix |
 | `docs/design/todo/v5_gpu_exploration.md` | **NEW** — GPU analysis archive (C2 limits, A100 vs H100, GPUOccupier) |
 | `AGENTS.md` | Add `v5` row to package table; update commands to the unified-config usage |
@@ -416,8 +416,8 @@ Apply the DECIDED matrix (§Resource Allocation) — restated for Phase 3 (eval 
 | `scripts/train/train.sh` | `compute` | 64 | 100G | 7-00:00:00 |
 | `scripts/eval/eval.sh` | `compute` | 64 | 100G | 7-00:00:00 |
 | `scripts/eval/eval_batch.sh` | `compute` | 64 | 100G | 7-00:00:00 |
-| `scripts/hpo/train_trial.sh` | `compute` | 16 | 32G | 7-00:00:00 |
-| `scripts/hpo/eval_trial.sh` | `compute` | 16 | 32G | 7-00:00:00 |
+| `scripts/hpo/train_trial.sh` | `compute` | 64 | 100G | 7-00:00:00 |
+| `scripts/hpo/eval_trial.sh` | `compute` | 64 | 100G | 7-00:00:00 |
 | `scripts/checkpoint/ckpt_scan_all.sh` | `compute` | 128 | 300G | 7-00:00:00 *(no change)* |
 
 `eval.sh` and `eval_batch.sh` currently have **no `--time` line** — add `--time=7-00:00:00` explicitly.
@@ -426,7 +426,7 @@ No GPU anywhere (see `v5_gpu_exploration.md` for the GPU partition analysis).
 ### Tasks (for feature-develop, in order)
 - [x] **T1 — Create `rl_autoschedular_v5` package (clean copy).** `cp -r rl_autoschedular/rl_autoschedular_paper_transformer rl_autoschedular/rl_autoschedular_v5`; then: (a) remove the 15 dead fields from `utils/config.py`; (b) **delete `utils/gpu_occupier.py`** and strip every `gpu_needed()`/GPUOccupier reference from `ppo.py`, `train.py`, `evaluate.py`; (c) **remove the `evaluate_benchmarks` calls** from `train.py` (the `(step + 1) % 100 == 0` block, the trailing block, and the now-unused `eval_data` loading). Verify: `python -m py_compile` on every `.py` in the package; `python -c "import rl_autoschedular_v5"` and confirm `rl_autoschedular_v5.device` exists; `grep -rn "gpu_occupier\|GPUOccupier\|gpu_needed" rl_autoschedular/rl_autoschedular_v5/` = 0 hits; `grep -rn "evaluate_benchmarks" rl_autoschedular/rl_autoschedular_v5/train.py` = 0 hits (allowed in `evaluate.py`/`ppo.py` — eval module keeps it). ✅ verified 2026-08-08: py_compile all-pass, import OK (device=cpu), greps 0/0/0.
 - [x] **T2 — Unified V5 config.** Create `config/v5/v5_small.json` from `config/paper/new_dataset/paper_transformer_small_train.json`: set `"implementation": "rl_autoschedular_v5"`, `"results_dir": "results/new_dataset_results/v5_small_agent"`, set `"eval_json_file"` to the eval split (the paper eval pair's `json_file`, e.g. `results/new_dataset_results/baselines/mlir/eval_base.json` — or leave empty to auto-derive), delete the 15 dead keys (keep `bench_count: 64`, `ppo_batch_size: 64`). Verify: `python -m json.tool config/v5/v5_small.json`; load with `CONFIG_FILE_PATH=config/v5/v5_small.json python -c "from rl_autoschedular_v5.utils.config import Config; c=Config(); assert not hasattr(c,'hardware_l1_kb'); assert c.json_file and c.eval_json_file"`; smoke both splits: `Benchmarks(is_training=True)` and `Benchmarks(is_training=False)` load. ✅ json.tool OK; Config load OK (47 annotations, both splits set). ⚠️ Benchmarks split smoke deferred — dataset .mlir files absent on this node (T5 blocker, see note).
-- [x] **T3 — Resource re-allocation.** Edit the 5 `#SBATCH` headers per the matrix: train 64c/100G/7d; **eval + eval_batch 64c/100G/7d** (add the missing `--time=7-00:00:00` to both); **hpo train + eval 16c/32G/7d** (8 parallel HPO trials = 128c/256G ≈ 1 node; 32G = ~1.5x measured MaxRSS — see HPO_PLAN §Memory calibration). Verify: `bash -n` each script; `grep -n "cpus-per-task\|mem=\|time="` shows the new values; `grep -c bergamo` = 0. ✅ verified 2026-08-08: bash -n all-pass, headers match matrix, 0 bergamo.
+- [x] **T3 — Resource re-allocation.** Edit the 5 `#SBATCH` headers per the matrix: train 64c/100G/7d; **eval + eval_batch 64c/100G/7d** (add the missing `--time=7-00:00:00` to both); **hpo train + eval 64c/100G/7d** (bergamo constraint added). Verify: `bash -n` each script; `grep -n "cpus-per-task\|mem=\|time="` shows the new values; all 5 scripts match the standard allocation. ✅ verified 2026-08-10: all scripts now use 64c/100G/bergamo/7d.
 - [x] **T4 — Script adaptation for unified configs.** `scripts/eval/submit_eval.py`: add `"v5_small": "config/v5/v5_small.json"` to the agent registry; make the agent-name derivation work without an `_eval.json` suffix (strip `.json` only). Update `eval.sh` usage comments (unified config examples). Verify: `python -m py_compile scripts/eval/submit_eval.py`; dry-run `resolve_agent_config("v5_small")` returns `config/v5/v5_small.json`. ✅ verified 2026-08-08: py_compile OK, resolve OK, name derivation `v5_small` OK; eval.sh usage updated.
 - [ ] **T5 — Smoke train run.** `sbatch scripts/train/train.sh config/v5/v5_small.json` with a short-run override (nb_iterations ~50, or `--resume` on an existing run). Verify: `squeue` shows `compute`/`64`/`100G`; log shows `device = cpu`, no CUDA, no GPUOccupier lines, **no "Evaluating benchmarks" lines**; first iterations complete with `iter_time_dlt` in the 8-12s band. ✅ unblocked 2026-08-10: dataset restored to `data/ops_and_blocks` (8,093 files, flat); 147 JSON names with no file pruned from the split JSONs (train 6,464 / eval 1,629; originals in `.bak`, record in `docs/archive/OPS_AND_BLOCKS_MISSING_BENCHMARKS_2026_08_10.md`); config `benchmarks_folder_path` → `data/ops_and_blocks`; ad-hoc verified (config load + extraction + name match).
 - [ ] **T6 — Smoke eval run.** `sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint N`. Verify: `squeue` shows `compute`/`64`/`100G`; `eval/checkpoint_<N>.json` written with `{bench: exec_time_ns}`; completes faster than the old 12-CPU eval. ⛔ BLOCKED: same as T5.
