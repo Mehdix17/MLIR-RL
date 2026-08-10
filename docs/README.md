@@ -26,7 +26,7 @@ Theoretical specifications, observation features, action spaces, and config file
 * [CONFIG.md](design/CONFIG.md) — Explanation of hyperparameter configuration schema.
 * [VERSIONS.md](design/VERSIONS.md) — Design logs of all package versions (`v0` to `v4_9`) and paper baselines.
 * [METHODOLOGY_ALIGNMENT.md](design/METHODOLOGY_ALIGNMENT.md) — Methodological notes aligning the code with scientific paper implementations.
-* **Architecture Novelties**: Detailed specs in [design/done/](design/done/README.md) — [v0 Baseline](design/done/v0_original_baseline.md) + [v0 Model](design/done/v0_model_detailed.md), [v1 Hardware Observations](design/done/v1_hardware_aware_observation.md), [v2 Shaped Rewards](design/done/v2_shaped_reward.md), [v2.5 Hardened Baseline](design/done/v2_5_hardened_shaped_reward.md), [v3 Transformer Encoder](design/done/v3_transformer_loop_nest_encoder.md), [v4 Combined Model](design/done/v4_combined_model.md), and [v4.5 Reliability Systems](design/done/v4_5_robust_integration.md).
+* **Architecture Novelties**: Detailed specs on [v0 Baseline](design/v0_model_detailed.md), [v1 Hardware Observations](design/v1_hardware_aware_observation.md), [v2 Shaped Rewards](design/v2_shaped_reward.md), [v3 Transformer Encoder](design/v3_transformer_loop_nest_encoder.md), [v4 Combined Model](design/v4_combined_model.md), and [v4.5 Reliability Systems](design/v4_5_reliability_logic.md).
 
 ### 4. 🔬 [Failure Investigations](investigations/)
 Deep-dives into historical design flaws, compiler errors, and mitigations:

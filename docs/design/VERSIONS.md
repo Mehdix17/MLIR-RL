@@ -6,7 +6,6 @@ Rules used in this repository:
 - `rl_autoschedular_v0` is the baseline (renamed from `rl_autoschedular`).
 - Each version folder (`rl_autoschedular_v1`, `rl_autoschedular_v2`, ...) implements exactly one novelty.
 - Every completed version must add one section here with implementation details and validation notes.
-- **V5 generation convention (2026-08-06)**: V5 is the *platform* version (accelerated pipeline + the `rl_autoschedular_v5` package); V5.1 and V5.2 are feature increments on the same package. The base is the `paper_transformer` structure — Transformer encoder only (the core contribution). **Hardware-aware observation and shaped reward are abandoned** (explored through V1/V2/V4.5/V4.9, found unhelpful). Design docs live in `docs/design/todo/`: `v5_training_acceleration.md` (V5), `v5_1_full_model_eval.md` (V5.1), `v5_2_expanded_action_space.md` (V5.2). HPO (`HPO_PLAN.md`) is a parallel track, not a version.
 
 ## Entry Template
 Use this template for each completed version:
@@ -453,59 +452,61 @@ Notes/limitations:
 - Shaped reward code kept as dead code (not deleted) for reference
 - Expected: entropy stays > 0.1 throughout training (like V0)
 - Expected: eval speedup improves over training (not flat like V4.6/V4.7/V4.8)
-- **V4.9's HW features and shaped reward are the last use of both** — V5 abandons them (see V5 entry). Detailed design + measured results: [`docs/design/done/v4_9_no_shaped_reward.md`](done/v4_9_no_shaped_reward.md)
 
-### Paper - LSTM Baseline (Paper Artifact)
-- Status: complete
-- Novelty scope: Paper artifact — LSTM encoder, no HW features, no shaped reward, `interchange_mode="pointers"`, process-isolated
-- Package: `rl_autoschedular_paper`
-- Config selector: `"implementation": "rl_autoschedular_paper"`
-- Notes: Used for paper single-op benchmarks (18 models). Clean-room baseline for the paper's comparisons.
 
-### Paper Transformer - Transformer Ablation (Paper Artifact)
-- Status: complete
-- Novelty scope: Paper ablation — Transformer encoder (self-attention, CLS pooling), no HW features, no shaped reward, `interchange_mode="pointers"`, process-isolated
-- Package: `rl_autoschedular_paper_transformer`
-- Config selector: `"implementation": "rl_autoschedular_paper_transformer"`
-- Notes: **This package is the structural base for V5** — verified 2026-08-06: paper_transformer = v4_9 minus HW observation minus shaped reward, and is fully standalone (own `utils/config.py`), unlike v4_9 which imports the shared root `utils.config`. The Transformer encoder (the core contribution) is identical in both.
-
----
-
-## V5 Generation (current research line, 2026-08-06)
-
-### V5 - Accelerated Training Platform (in progress)
-- Status: **in progress (design phase)** — see `docs/design/todo/v5_training_acceleration.md`
-- Novelty scope: Platform version — no new RL novelty; infrastructure that V5.1/V5.2 depend on
-- Package: `rl_autoschedular_v5` (new standalone package, `paper_transformer` structure)
-- Config selector: `"implementation": "rl_autoschedular_v5"`
-- Base: `rl_autoschedular_paper_transformer` structure — Transformer encoder only
-- Abandoned features (explored in v4_9, found unhelpful): hardware-aware observation (`hardware_*` config fields), reward shaping (`reward_shaping_*` config fields) — dead fields dropped from V5 config
-- Key changes (planned):
-  - `rl_autoschedular_v5/*`: standalone copy of paper_transformer structure, internal imports redirected to `rl_autoschedular_v5`
-  - `utils/config.py`: drop `hardware_*` and `reward_shaping_*` fields
-  - Slurm resources: `--cpus-per-task=64` (train, matches `bench_count=64`) / 128 (eval), `--mem=128G`/`256G`, `--time=7-00:00:00` (compute partition max), no GPU (see doc)
-  - **No GPU decision**: GPU accelerates only the ~3% sampling/PPO fraction (~1.05-1.1x); CPU parallelism 12→64/128 accelerates the ~95% MLIR-exec fraction (5-10x). V5 runs on the Jubail `compute` partition only.
-  - GPUOccupier: rejected for V5 (CPU-only pipeline; `start()` requires CUDA)
-  - Optional (architect's call): persistent MLIR worker pool (spawn-based, never fork)
-- How to run: `sbatch scripts/train/train.sh config/.../v5.json`
-- Validation: `python -m py_compile` all package files; `bash -n` scripts; smoke run via sbatch; iteration wall-clock 50s → 8-12s
-
-### V5.1 - Full-Model Evaluation Support (planned)
-- Status: **planned (design phase)** — see `docs/design/todo/v5_1_full_model_eval.md`
-- Novelty scope: Evaluate the block-trained policy on full `.mlir` model files (ResNet18, T5, GPT-2) without retraining
-- Package: `rl_autoschedular_v5` (extends V5 in place)
-- Key insight: per-op features from full models are identical to block features; schedule each op in topological order on the full Module
-- Reuses existing `scripts/checkpoint/ckpt_scan_all.sh` + `submit_ckpt_scan.sh` (already do partial full-model eval, v4_5) — reconcile, don't duplicate
-- Checkpoint compat: with **paper_transformer** checkpoints, NOT v4_9 (observation size differs — HW features dropped)
-- Note: runs on `compute` partition (CPU-bound MLIR execution; no GPU)
-
-### V5.2 - Expanded Transformation Action Space (planned)
-- Status: **planned (design phase)** — see `docs/design/todo/v5_2_expanded_action_space.md`
+- Status: planned (future work)
+- Date completed: N/A
 - Novelty scope: Expanded transformation action space only
-- Package: `rl_autoschedular_v5` (extends V5 in place)
+- Package: `rl_autoschedular_v5`
 - Config selector: `"implementation": "rl_autoschedular_v5"`
-- Base: `rl_autoschedular_paper_transformer` action space (6 actions) — transforms referenced live in `rl_autoschedular_v4_9/transforms.py` (padding, unrolling, packing already implemented there) and are ported into V5
-- Sequencing note: user confirmed V5 → V5.1 → V5.2 order (no swap). Consequence accepted: V5.1's full-model numbers describe the 6-action agent; re-run after V5.2 if the paper needs them for the expanded agent.
 
-> **HPO (parallel track, not a version)**: `docs/design/todo/HPO_PLAN.md` — Optuna TPE tuning of Transformer architecture (d_model, nhead, num_layers, ffn_dim, dropout, pooling) on ops_and_blocks, running in parallel with V5/V5.1, feeding hyperparameters before V5.2.
+**Note:** This version was never implemented and remains a planned future work. The details below describe the intended design.
+
+Key code changes:
+- `rl_autoschedular_v5/*`: full standalone copy of baseline package with internal imports redirected to `rl_autoschedular_v5`.
+- `rl_autoschedular_v5/transforms.py`:
+	- Added `transform_pad()`: `structured.match` → `structured.pad` → re-annotate tag.
+	- Added `transform_pack()`: `structured.match` → `structured.pack` → re-annotate tag.
+	- Added `transform_unroll()`: `structured.match` → `structured.convert_to_loops` → `loop.unroll`.
+- `rl_autoschedular_v5/actions/pad.py`:
+	- New `Pad` action (`symbol = 'P'`).
+	- Per-dimension categorical parameter: 0 = no pad, 1 = pad to multiple 2, 2 = multiple 4, etc.
+	- Updates loop upper bounds in `update_features` by rounding up to the chosen multiple.
+- `rl_autoschedular_v5/actions/pack.py`:
+	- New `Pack` action (`symbol = 'PK'`).
+	- Per-dimension categorical parameter reusing tile-size encoding (powers of 2).
+	- Updates loop upper bounds in `update_features` to `ceil(orig / pack_size)`.
+- `rl_autoschedular_v5/actions/unroll.py`:
+	- New `Unroll` action (`symbol = 'U'`, `terminal = True`).
+	- Single categorical parameter mapping to unroll factor (2, 4, 8, ...).
+	- Only allowed when `producer_tag is None` (safe to lose tag after `convert_to_loops`).
+- `rl_autoschedular_v5/actions/__init__.py`:
+	- Registered `Pad`, `Pack`, `Unroll` in `ActionSpace.supported_actions`.
+	- Action space expands from 6 → 9 actions; model auto-adapts via dynamic `ActionSpace` queries.
+- `utils/config.py`:
+	- Added defaults: `num_pad_multiples = 3`, `num_unroll_factors = 3`.
+
+How to run (example):
+1. Set in config:
+	 - `"implementation": "rl_autoschedular_v5"`
+2. Run pipeline:
+	 - `sbatch scripts/get_base.sh config/train1.json`
+	 - `python scripts/split_json.py config/train1.json`
+	 - `sbatch scripts/train.sh config/train1.json`
+	 - `sbatch scripts/eval.sh config/train1.json`
+3. Launch dashboard:
+	 - `streamlit run dashboard/dashboard.py --server.fileWatcherType none`
+
+Validation performed:
+- Python compile checks passed for all new/modified files.
+- Import smoke test passed for `rl_autoschedular_v5.model`.
+- `ActionSpace.size()` verified as 9 with symbols `['NT', 'T', 'TP', 'TPF', 'I', 'V', 'P', 'PK', 'U']`.
+- Dummy-state mask tests passed for Pad, Pack, and Unroll.
+- No remaining baseline package import references inside `rl_autoschedular_v5` Python files.
+
+Notes/limitations:
+- V5 does not modify observation architecture, reward shaping, or model type.
+- `Unroll` is terminal because `convert_to_loops` destroys the structured-op tag.
+- Pack access-pattern tracking is approximate in `update_features` (loop bounds only).
+- New config fields have backward-compatible defaults; existing configs work without modification.
 

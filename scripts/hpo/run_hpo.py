@@ -39,11 +39,6 @@ VALID_NHEAD = {
     256: [2, 4, 8],
 }
 
-# Flat list of valid (d_model, nhead) pairs for Optuna conditional-free sampling
-VALID_DMODEL_NHEAD = [(dm, nh) for dm in sorted(VALID_NHEAD) for nh in VALID_NHEAD[dm]]
-# String-encoded version for Optuna (only supports scalar categorical choices)
-VALID_DMODEL_NHEAD_STR = [f"{dm}_{nh}" for dm, nh in VALID_DMODEL_NHEAD]
-
 
 def generate_trial_config(trial_id: int, params: dict) -> Path:
     """Generate a trial-specific config JSON from the base template."""
@@ -188,8 +183,8 @@ def read_trial_result(trial_id: int) -> float:
 
 def sample_hyperparameters(trial: optuna.Trial) -> dict:
     """Sample transformer architecture hyperparameters with constraint handling."""
-    d_model_nhead_str = trial.suggest_categorical("d_model_nhead", VALID_DMODEL_NHEAD_STR)
-    d_model, nhead = [int(x) for x in d_model_nhead_str.split("_")]
+    d_model = trial.suggest_categorical("transformer_d_model", list(VALID_NHEAD.keys()))
+    nhead = trial.suggest_categorical("transformer_nhead", VALID_NHEAD[d_model])
     num_layers = trial.suggest_int("transformer_num_layers", 1, 4)
     ffn_dim = trial.suggest_categorical("transformer_ffn_dim", [64, 128, 256, 512, 1024])
     dropout = trial.suggest_float("transformer_dropout", 0.0, 0.3)

@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=hpo-eval
 #SBATCH --partition=compute
-#SBATCH --mem=100G
-#SBATCH --cpus-per-task=64
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=12
 #SBATCH --constraint=bergamo
 #SBATCH --time=7-00:00:00
 #SBATCH --output=logs/hpo/eval_%x_%j.out
@@ -42,7 +42,10 @@ json.dump(cfg, open('$CONFIG', 'w'), indent=2)
 "
 
 TRIAL_DIR="$PROJECT_ROOT/results/hpo/trial_${TRIAL_ID}"
+# Checkpoints are saved to nested path by base FileLogger:
+#   <results_dir>/rl_autoschedular_paper_transformer_agent/run_0/models/
 export EVAL_DIR="$TRIAL_DIR/rl_autoschedular_paper_transformer_agent/run_0/models"
+export EVAL_LAST_ONLY=${EVAL_LAST_ONLY:-1}
 export EVAL_STRIDE=${EVAL_STRIDE:-100}
 export FORCE_RUN_ID="trial_${TRIAL_ID}"
 

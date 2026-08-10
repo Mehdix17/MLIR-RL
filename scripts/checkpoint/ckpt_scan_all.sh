@@ -3,6 +3,7 @@
 #SBATCH --partition=compute
 #SBATCH --mem=300G
 #SBATCH --cpus-per-task=128
+#SBATCH -C bergamo
 #SBATCH --time=3-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/ckpt_scan_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/ckpt_scan_%j.err

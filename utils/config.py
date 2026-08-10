@@ -78,7 +78,7 @@ class Config(metaclass=Singleton):
     """Path to the file containing the execution data"""
     results_dir: str
     """Path to the results directory"""
-    implementation: str = "rl_autoschedular_v0"
+    implementation: str = "rl_autoschedular"
     """Autoscheduler package implementation to use (e.g., rl_autoschedular, rl_autoschedular_v1)."""
     hardware_auto_detect: bool = True
     """If true, hardware features are auto-detected when a value is not explicitly provided."""
@@ -126,16 +126,6 @@ class Config(metaclass=Singleton):
     """Token pooling strategy for transformer output."""
     transformer_use_action_history_token: bool = False
     """If true, action history is injected as a transformer token instead of post-concatenation."""
-    eval_runs: int = 1
-    """Number of execution runs per benchmark during evaluation (default 1 = single run)."""
-    eval_aggregation: Literal['min', 'median', 'mean'] = 'min'
-    """Aggregation method for multiple eval runs: min, median, or mean."""
-    ppo_clip_range: float = 0.2
-    """PPO policy ratio clipping bound."""
-    gae_lambda: float = 0.95
-    """GAE (Generalized Advantage Estimation) lambda discount factor."""
-    max_grad_norm: float = 0.5
-    """Maximum gradient norm for clipping."""
 
     def __init__(self):
         """Load the configuration from the JSON file
