@@ -32,7 +32,7 @@
     "normalize_bounds": "max",
     "normalize_adv": "standard",
     "reuse_experience": "none",
-    "benchmarks_folder_path": "data/ops_and_blocks/train",
+    "benchmarks_folder_path": "data/ops_and_blocks",
     "replay_count": 0,
     "nb_iterations": 20000,
     "ppo_epochs": 4,
