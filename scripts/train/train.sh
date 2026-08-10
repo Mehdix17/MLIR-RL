@@ -1,10 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=12
-#SBATCH --constraint=bergamo
-#SBATCH --time=3-00:00:00
+#SBATCH --mem=100G
+#SBATCH --cpus-per-task=64
+#SBATCH --time=7-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/train_%j.err
 #SBATCH --mail-type=END,FAIL

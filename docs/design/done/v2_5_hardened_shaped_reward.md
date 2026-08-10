@@ -1,12 +1,20 @@
-# V2.5: Hardened Shaped Reward (Fair Baseline)
+# V2.5: Hardened Shaped Reward (Fair Baseline) — Design
 
-## Overview
+**Status**: complete (historical — baseline artifact for the V4.5 comparison)
+**Date**: 2026-05-12
+**Novelty scope**: V4.5 reliability engineering ported back to V2 (fair baseline)
+**Package**: `rl_autoschedular_v2_5`
+**Config selector**: `"implementation": "rl_autoschedular_v2_5"`
+**VERSIONS.md**: [V2.5 entry](../VERSIONS.md)
+**Survives in V5**: ❌ no (shaped reward abandoned; the hardening pillars survive via V4.5's execution.py, which V5 inherits)
+
+## 1. Overview
 
 Version 2.5 is a "Hardened" version of the original **V2 (Shaped Reward)** agent. It is designed to serve as a **fair baseline** for head-to-head comparison against **V4.5 (Integrated Robust)**. 
 
 By porting the reliability and safety engineering from V4.5 back to the V2 architecture, we isolate the performance gains of the V4.5 novelties (Transformer + Hardware-Awareness) from the improvements caused simply by a more stable execution platform.
 
-## Rationale for V2.5
+## 2. Rationale for V2.5
 
 The original V2 implementation achieved significant speedups but suffered from a high failure rate (~36%) due to native crashes and the "gambler's incentive" (earning shaped rewards on code that ultimately failed). 
 
@@ -15,7 +23,7 @@ V2.5 eliminates these engineering-level failures while keeping the **Core Algori
 2.  **Observation:** Code features only (no Hardware-Awareness).
 3.  **Reward:** Dense Shaped Reward (from V2).
 
-## Ported Hardening (The 4 Pillars)
+## 3. Ported Hardening (The 4 Pillars)
 
 V2.5 includes all four reliability pillars introduced in V4.5:
 
@@ -33,7 +41,7 @@ Proactively masks out "risky" action patterns:
 -   **Sequence Boundary:** The agent is restricted to terminal actions (`NT` or `V`) as it reaches the end of the predefined `order` sequence or approaches the environment's `truncate` limit.
 -   **Depth:** Vectorization is forbidden if the loop-nest depth is > 6.
 
-## Comparison Table
+## 4. Comparison Table
 
 | Feature | V2 (Original) | V2.5 (Hardened) | V4.5 (Integrated) |
 | :--- | :--- | :--- | :--- |
@@ -43,7 +51,7 @@ Proactively masks out "risky" action patterns:
 | **Execution** | In-process | **Isolated Subprocess** | Isolated Subprocess |
 | **Stability Rails** | No | **Yes** | Yes |
 
-## Configuration
+## 5. Configuration
 
 V2.5 uses the `rl_autoschedular_v2_5` package and targets `results/experiment3`.
 
@@ -55,6 +63,6 @@ V2.5 uses the `rl_autoschedular_v2_5` package and targets `results/experiment3`.
 }
 ```
 
-## Significance
+## 6. Significance
 
 Evaluating V2.5 alongside V4.5 in `experiment3` will reveal the true "Novelty Value" of the Transformer and Hardware features. If V4.5 significantly outperforms V2.5, we can attribute that gain to the architectural integration rather than just better reliability.

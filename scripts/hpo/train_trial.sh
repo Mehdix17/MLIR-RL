@@ -2,8 +2,7 @@
 #SBATCH --job-name=hpo-train
 #SBATCH --partition=compute
 #SBATCH --mem=32G
-#SBATCH --cpus-per-task=12
-#SBATCH --constraint=bergamo
+#SBATCH --cpus-per-task=16
 #SBATCH --time=7-00:00:00
 #SBATCH --output=logs/hpo/train_%x_%j.out
 #SBATCH --error=logs/hpo/train_%x_%j.err
