@@ -1,38 +1,24 @@
 {
   "max_num_stores_loads": 7,
-  "max_num_loops": 12,
-  "max_num_load_store_dim": 12,
+  "max_num_loops": 7,
+  "max_num_load_store_dim": 7,
   "num_tile_sizes": 7,
   "num_pad_multiples": 3,
   "num_unroll_factors": 3,
   "vect_size_limit": 512,
   "order": [
-    [
-      "I"
-    ],
-    [
-      "!",
-      "I",
-      "NT"
-    ],
-    [
-      "!",
-      "I"
-    ],
-    [
-      "V",
-      "NT"
-    ]
+    ["I"],
+    ["!", "I", "NT"],
+    ["!", "I"],
+    ["V", "NT"]
   ],
   "interchange_mode": "pointers",
-  "exploration": [
-    "entropy"
-  ],
+  "exploration": ["entropy"],
   "init_epsilon": 0.0,
   "normalize_bounds": "max",
   "normalize_adv": "standard",
   "reuse_experience": "none",
-  "benchmarks_folder_path": "data/new_dataset/all",
+  "benchmarks_folder_path": "data/all",
   "replay_count": 0,
   "nb_iterations": 20000,
   "ppo_epochs": 4,
@@ -62,19 +48,20 @@
   "ppo_clip_range": 0.2,
   "gae_lambda": 0.95,
   "max_grad_norm": 0.5,
-  "bench_count": 32,
-  "lr": 0.0003,
-  "tags": [
-    "new_dataset",
-    "paper",
-    "lstm",
-    "eval"
-  ],
-  "results_dir": "results/new_dataset_results/paper_agent",
-  "implementation": "rl_autoschedular_paper",
-  "json_file": "",
-  "eval_json_file": "results/new_dataset_results/baselines/mlir/base_eval.json",
-  "hardware_auto_detect": false,
-  "eval_runs": 1,
-  "eval_aggregation": "min"
+  "transformer_d_model": 256,
+  "transformer_nhead": 8,
+  "transformer_num_layers": 3,
+  "transformer_ffn_dim": 1024,
+  "transformer_dropout": 0.1,
+  "transformer_activation": "gelu",
+  "transformer_pooling": "cls",
+  "transformer_use_action_history_token": false,
+  "bench_count": 64,
+  "lr": 0.001,
+  "tags": ["ops_and_blocks", "paper", "transformer", "hpo"],
+  "results_dir": "results/hpo/trial_TEMPLATE",
+  "implementation": "rl_autoschedular_paper_transformer",
+  "json_file": "baselines/all/base_train.json",
+  "eval_json_file": "",
+  "hardware_auto_detect": true
 }
