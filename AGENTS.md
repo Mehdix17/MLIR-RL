@@ -30,6 +30,10 @@ Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda internally.
 
 **Simplicity first:** Minimum code that solves the problem. No speculative features, no abstractions for single-use code. If 200 lines could be 50, rewrite.
 
+**Ponytail (always-on when writing code):** The ponytail plugin (`/ponytail`, version 4.9.0, installed via `hermes plugins install DietrichGebert/ponytail --enable`) is the enforcement of "lazy senior dev" minimalism. When writing or reviewing code, follow its ruleset: reach for the simplest existing primitive (native `<input type="date">`, an existing util, the standard library) before adding a dependency or a wrapper component; delete dead code; prefer the 1-line fix. Levels: `/ponytail lite|full|ultra|off`. Use `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help` for reviews/metrics.
+
+**rtk (always-on when running commands):** Route output-heavy shell commands through the RTK token-optimizing proxy — `rtk git status`, `rtk ls`, `rtk tree`, `rtk err <cmd>`, `rtk json < file`, `rtk test` — to compress command output before it enters context. Binary: `~/.local/bin/rtk` (v0.44.2). `rtk proxy <cmd>` runs the raw unfiltered command when output looks wrong; `rtk gain` shows token savings. See `.agents/rules/rtk.md`. Note: `read_file` / `search_files` remain the primary file-reading tools.
+
 **Surgical changes:** Touch only what you must. Match existing style. Don't refactor things that aren't broken. Every changed line should trace to the user's request.
 
 **Goal-driven:** Define success criteria. For multi-step tasks, state a brief plan with verification per step. Loop until verified.

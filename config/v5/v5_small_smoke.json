@@ -1,30 +1,70 @@
 {
-  "implementation": "rl_autoschedular_v5",
-  "results_dir": "results/ops_and_blocks_results/v5_small_agent",
+  "max_num_stores_loads": 7,
+  "max_num_loops": 12,
+  "max_num_load_store_dim": 12,
+  "num_tile_sizes": 7,
+  "num_pad_multiples": 3,
+  "num_unroll_factors": 3,
+  "vect_size_limit": 512,
+  "order": [
+    [
+      "I"
+    ],
+    [
+      "!",
+      "I",
+      "NT"
+    ],
+    [
+      "!",
+      "I"
+    ],
+    [
+      "V",
+      "NT"
+    ]
+  ],
+  "interchange_mode": "pointers",
+  "exploration": [
+    "entropy"
+  ],
+  "init_epsilon": 0.0,
+  "normalize_bounds": "max",
+  "normalize_adv": "standard",
+  "reuse_experience": "none",
   "benchmarks_folder_path": "data/ops_and_blocks",
-  "json_file": "results/ops_and_blocks_results/baselines/mlir/base_train.json",
-  "eval_json_file": "results/ops_and_blocks_results/baselines/mlir/base_eval.json",
+  "replay_count": 0,
   "nb_iterations": 50,
-  "ppo_batch_size": 64,
   "ppo_epochs": 4,
-  "bench_count": 64,
-  "lr": 0.001,
-  "entropy_coef": 0.05,
-  "gae_lambda": 0.95,
+  "ppo_batch_size": 64,
+  "value_epochs": 0,
+  "value_batch_size": 0,
+  "value_clip": false,
+  "value_coef": 0.5,
+  "entropy_coef": 0.01,
+  "truncate": 5,
+  "debug": false,
+  "main_exec_data_file": "",
   "ppo_clip_range": 0.2,
+  "gae_lambda": 0.95,
   "max_grad_norm": 0.5,
   "transformer_d_model": 64,
   "transformer_nhead": 2,
   "transformer_num_layers": 2,
   "transformer_ffn_dim": 128,
   "transformer_dropout": 0.1,
+  "transformer_activation": "gelu",
   "transformer_pooling": "cls",
-  "value_epochs": 0,
-  "value_coef": 0.5,
-  "reuse_experience": "none",
-  "replay_count": 0,
-  "main_exec_data_file": "",
-  "truncate": 5,
-  "tags": ["ops_and_blocks", "v5", "smoke"],
-  "debug": false
+  "transformer_use_action_history_token": false,
+  "bench_count": 64,
+  "lr": 0.001,
+  "tags": [
+    "ops_and_blocks",
+    "v5",
+    "smoke"
+  ],
+  "results_dir": "results/ops_and_blocks_results/v5_small_agent",
+  "implementation": "rl_autoschedular_v5",
+  "json_file": "results/ops_and_blocks_results/baselines/mlir/base_train.json",
+  "eval_json_file": "results/ops_and_blocks_results/baselines/mlir/base_eval.json"
 }
