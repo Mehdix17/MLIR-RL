@@ -2,7 +2,7 @@
 
 **Status**: Archive / analysis only — **no GPU in V5**
 **Moved from**: `v5_training_acceleration.md` on 2026-08-06 (user request — keep the main design doc free of GPU exploration and limits)
-**Related**: [v5_training_acceleration.md](v5_training_acceleration.md) — the operational decisions live there; the reasoning lives here.
+**Related**: [v5_training_acceleration.md](../done/v5_training_acceleration.md) — the operational decisions live there; the reasoning lives here.
 
 ## Why this file exists
 

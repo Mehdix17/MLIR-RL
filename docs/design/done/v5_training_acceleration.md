@@ -48,7 +48,7 @@ and the parallelism lever is unused.
 
 **The one win that matters**: 12 → 64 workers multiplies MLIR execution
 parallelism ~5x (the dominant cost). GPU was evaluated and dropped — the
-analysis is archived in [v5_gpu_exploration.md](v5_gpu_exploration.md).
+analysis is archived in [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 
 Goal: cut wall-clock per iteration by **~4-6x** (50s → 8-12s) with zero change to
 the RL algorithm, reward function, or action space.
@@ -64,7 +64,7 @@ the RL algorithm, reward function, or action space.
   × ~0.7-1G RSS (measured, see §Memory calibration) + parent ≈ 50-70G peak; 100G ≈ 1.5x.
 - **Bump `--time`** to the compute-partition max **7-00:00:00**.
 - **No GPU, no nvidia migration, no GPUOccupier** — removed from V5 entirely
-  (analysis in [v5_gpu_exploration.md](v5_gpu_exploration.md)).
+  (analysis in [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md)).
 - **Optional follow-ups** (already implemented in config, just flip):
   `reuse_experience`/`replay_count`; `MIN_EXEC_TIMEOUT` straggler control.
 - **Keep `bench_count=64`** — with 64 workers it executes in one wave, so
@@ -133,7 +133,7 @@ for step in range(start_step, cfg.nb_iterations):
 | `compute` (Jubail) | 404 | 128 (standard) / 256 (Bergamo subset) | 105G-480G | ❌ none | **7-00:00:00** |
 
 GPU partitions (`nvidia` C2 QOS, `dalma`), their caps, and the A100 vs H100
-analysis: see [v5_gpu_exploration.md](v5_gpu_exploration.md).
+analysis: see [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 
 ### Key structural insights
 
@@ -173,7 +173,7 @@ V5 **removes all GPUOccupier logic from the package**: delete `utils/gpu_occupie
 and every `gpu_needed()` wrap in `ppo.py` (sampling `:69`, PPO update `:318`),
 per-package `train.py`, and `evaluate.py`. No GPU code paths remain — V5 is
 CPU-only. What GPUOccupier is, its wiring history, and the analysis behind the
-removal: [v5_gpu_exploration.md](v5_gpu_exploration.md).
+removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 
 ---
 
@@ -190,7 +190,7 @@ removal: [v5_gpu_exploration.md](v5_gpu_exploration.md).
 | Early stopping on plateau | ❌ Not implemented | Small change (`train.py`) |
 | Benchmark feature cache | ❌ Not implemented | Small change (`benchmarks.py`) — saves 2-3 min/start |
 | Multi-seed array runs | ⚠️ Array mode exists (version-based) | Extend to seed-based |
-| GPU / GPUOccupier | ✅ **Removed from V5** | Delete `gpu_occupier.py` + all `gpu_needed()` wraps in `ppo.py`/`train.py`/`evaluate.py` (analysis: [v5_gpu_exploration.md](v5_gpu_exploration.md)) |
+| GPU / GPUOccupier | ✅ **Removed from V5** | Delete `gpu_occupier.py` + all `gpu_needed()` wraps in `ppo.py`/`train.py`/`evaluate.py` (analysis: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md)) |
 | ckpt_scan (full-model eval) | ✅ Works, CPU-only | Keep on `compute`; no GPU needed |
 
 ---
@@ -202,7 +202,7 @@ removal: [v5_gpu_exploration.md](v5_gpu_exploration.md).
 2. ~~Persistent MLIR worker pool~~ — **moved to V5.1** (`v5_1_full_model_eval.md` §3.6): ~1-3% wall-clock for block training (repeats hit the time cache; fresh fork ≈ free), real payoff only in full-model eval.
 
 **Out of scope for V5:**
-- GPU / GPUOccupier / nvidia migration — **removed entirely** from V5 (CPU-only; see [v5_gpu_exploration.md](v5_gpu_exploration.md)).
+- GPU / GPUOccupier / nvidia migration — **removed entirely** from V5 (CPU-only; see [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md)).
 - Pipelining sampling/execution (marginal: ~3% of iteration).
 - Multi-seed arrays, early stopping, feature cache, `reuse_experience` flips — separate decisions, mostly config-only.
 - Any change to the RL algorithm, reward function, action space, `opt_level=3`, or `ppo_batch_size` in paper-artifact configs.
@@ -434,6 +434,6 @@ No GPU anywhere (see `v5_gpu_exploration.md` for the GPU partition analysis).
   - **Timing (median iter_time_dlt)**: OLD 12c small on ops_and_blocks: 50.1s (best of 4 runs; others 78-207s) · OLD 12c large: 78s · **NEW V5 64c (cold cache, 50 iters): 32.6s** → speedup 1.5x median / 3.6x mean vs best old small. 8-12s target NOT reached in the 50-iter smoke: cache keyed on (bench, action-seq) + exploring policy → cache misses; exec phase compressed (15.5s last iter) but collection (17.8s) + PPO fit (13s) now dominate — the out-of-scope pipelining lever is the follow-up.
   - **Training dynamics**: healthy — entropy 1.39 → 0.29, rewards mostly 0 (timeout/penalty) with positive tail (max 1.59, mean -0.04), max speedup 38.6x. Matches expected CPU-run profile.
   - **Memory (MaxRSS)**: 6.3G actual (vs 50-70G estimate) → scripts re-allocated 100G → 16G (2.5x headroom) on train/eval/eval_batch + get_pytorch_times; HPO kept at 32G (user decision).
-- [ ] **T8 — Docs.** AGENTS.md: add the `v5` row to the package table (Transformer, no HW, no shaping, no GPUOccupier; base for V5.1/V5.2); update the Commands section to unified-config usage (`sbatch scripts/train/train.sh config/v5/v5_small.json`; `sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint N`). When the user confirms results, move this doc to `docs/design/done/`. ✅ AGENTS.md package table + Commands updated 2026-08-08; ⏳ doc move pending user confirmation of T7 results.
+- [x] **T8 — Docs.** AGENTS.md: add the `v5` row to the package table (Transformer, no HW, no shaping, no GPUOccupier; base for V5.1/V5.2); update the Commands section to unified-config usage (`sbatch scripts/train/train.sh config/v5/v5_small.json`; `sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint N`). When the user confirms results, move this doc to `docs/design/done/`. ✅ AGENTS.md package table + Commands updated 2026-08-08; ✅ moved to `docs/design/done/` 2026-08-13 (cross-links fixed: AGENTS.md ×2, v5_gpu_exploration.md, feature-architect/SKILL.md, 6 in-doc refs).
 
 
