@@ -6,14 +6,12 @@ across data in a distributed manner with resource management.
 """
 
 import os
-import subprocess
-from time import sleep, time
+from time import time
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional, TypeVar
 
 from .file_logger import FileLogger
 from .singleton import Singleton
 from .log import print_alert, print_error, print_info, print_success
-from .bindings_process import ENABLED as BP_ENABLED
 
 if TYPE_CHECKING:
     from rl_autoschedular_v5.benchmarks import Benchmarks
@@ -31,33 +29,84 @@ class DaskManager(metaclass=Singleton):
         if not ENABLED:
             return
 
+        import shutil
+
         from dask_jobqueue import SLURMCluster
+        from dask_jobqueue.slurm import SLURMJob
         from distributed import Client
+
+        # Resolve slurm CLI binaries to absolute paths: compute nodes don't all
+        # expose /opt/slurm/default/bin on PATH, and dask-jobqueue execs the bare
+        # 'sbatch' string (class attr) which then fails with ENOENT.
+        def _find_slurm_bin(name: str) -> str:
+            found = shutil.which(name)
+            if found:
+                return found
+            for prefix in ('/opt/slurm/default/bin', '/opt/slurm/20.11.4-13/bin', '/usr/bin'):
+                candidate = os.path.join(prefix, name)
+                if os.path.exists(candidate):
+                    return candidate
+            return name
+
+        self.sbatch = _find_slurm_bin('sbatch')
+        self.scancel = _find_slurm_bin('scancel')
+        SLURMJob.submit_command = self.sbatch
+        SLURMJob.cancel_command = self.scancel
+        print_info(f"Using slurm binaries: sbatch={self.sbatch}, scancel={self.scancel}")
+
+        # Worker PYTHONPATH, built deterministically: the driver's PYTHONPATH env
+        # var can carry a literal $PYTHONPATH (sourced from .env) which would
+        # expand to nothing in the worker's bare env.
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))))  # .../utils -> MLIR-RL
+        worker_pythonpath = (
+            f"{os.getenv('LLVM_BUILD_PATH', '')}/tools/mlir/python_packages/mlir_core"
+            f":{project_root}:{project_root}/rl_autoschedular"
+        )
+        conda_bin = (os.getenv('CONDA_ENV') or os.path.expanduser('~/envs/mlir/bin/activate')).replace('/bin/activate', '/bin')
+        worker_path = f"/usr/local/bin:/usr/bin:/bin:/opt/slurm/default/bin:{conda_bin}"
+        print_info(f"Driver PYTHONPATH={os.getenv('PYTHONPATH', '')!r}")
+        print_info(f"Worker PYTHONPATH={worker_pythonpath}")
+        print_info(f"Worker PATH={worker_path}")
 
         enable_dashboard = True
         dask_reservation = os.getenv('DASK_RESERVATION')
-        dask_conda_env = os.getenv('CONDA_ENV')
+        # CONDA_ENV points at the activate script (~/envs/mlir/bin/activate);
+        # conda activate wants the env dir.
+        dask_conda_env = (os.getenv('CONDA_ENV') or '').replace('/bin/activate', '')
         cluster = SLURMCluster(
             job_name='dask',
             queue='compute',
-            cores=28,
+            cores=int(os.getenv('DASK_WORKER_CORES', '28')),
             processes=1,
             nanny=True,
-            memory='100GB',
+            memory=os.getenv('DASK_WORKER_MEM', '100GB'),
             walltime='7-00',
+            shebang='#!/bin/bash',
             job_extra_directives=[
                 f'--reservation={dask_reservation}' if dask_reservation else '',
                 '--nodes=1',
-                '--exclusive',
+                '--constraint=bergamo',
+                '--exclusive' if int(os.getenv('DASK_WORKER_EXCLUSIVE', '1')) > 0 else '',
             ],
             worker_extra_args=['--resources', 'single_task_slot=1'],
             log_directory='dask-logs',
             job_script_prologue=[
-                'module load miniconda-nobashrc',
-                'eval "$(conda shell.bash hook)"',
-                f'conda activate {dask_conda_env}' if dask_conda_env else '',
+                # Slurm batch jobs on this cluster do NOT inherit the driver env
+                # (bare PATH); export everything the worker path needs. The
+                # worker command itself uses the absolute env python, so no
+                # module/conda activation is required.
+                *(f'export {v}={os.getenv(v, "")}' for v in (
+                    'LD_LIBRARY_PATH', 'LLVM_BUILD_PATH',
+                    'AST_DUMPER_BIN_PATH', 'VECTORIZER_BIN_PATH',
+                    'CONFIG_FILE_PATH', 'AUTOSCHEDULER_IMPL')),
+                f'export PATH={worker_path}',
+                f'export PYTHONPATH={worker_pythonpath}',
                 'export OMP_NUM_THREADS=12',
-                'export DASK_DISTRIBUTED__WORKER__DAEMON=False' if BP_ENABLED else '',
+                # Nanny spawns workers as daemonic by default; execution.py spawns a
+                # multiprocessing.Process for MLIR isolation, which daemonic processes
+                # cannot do ("daemonic processes are not allowed to have children").
+                'export DASK_DISTRIBUTED__WORKER__DAEMON=False',
             ],
             scheduler_options={
                 'dashboard': enable_dashboard,
@@ -69,12 +118,20 @@ class DaskManager(metaclass=Singleton):
         num_nodes_to_use = int(os.environ["DASK_NODES"])
         print_info(f"Requesting {num_nodes_to_use} nodes for Dask workers...")
         cluster.scale(jobs=num_nodes_to_use)
-        self.__keep_only_running()
-        print_success(f"Got {self.num_workers} nodes")
 
-        client = Client(cluster)
+        # Wait for the scheduler (jobs submitted), then connect by address.
+        # Client(cluster) triggers SpecCluster state-correction, which races with
+        # fresh job creation and immediately closes the submitted worker jobs.
+        async def _wait_scheduler():
+            await cluster
+        cluster.sync(_wait_scheduler)
+
+        client = Client(cluster.scheduler_address)
         self.client = client
         print_success("Dask client connected!", f"  Dashboard at: {client.dashboard_link}" if enable_dashboard else "")
+
+        self.__keep_only_running()
+        print_success(f"Got {self.num_workers} nodes")
 
         self.batch_timeout = 300
         self.persistent_funcs: dict[str, Callable[[], Any]] = {}
@@ -82,17 +139,23 @@ class DaskManager(metaclass=Singleton):
 
     @property
     def workers_names(self) -> list[str]:
-        """List of available worker names."""
+        """Names of workers currently CONNECTED to the scheduler.
+
+        Only connected workers get tasks — job names from cluster.workers can
+        include not-yet-connected (or dead) jobs, which would strand tasks.
+        """
         if not ENABLED:
             return []
-        return list(self.cluster.workers.keys())
+        # n_workers=-1: scheduler_info defaults to 5 workers only — without -1 we'd
+        # silently dispatch to a 5-worker subset of the cluster.
+        return [w['name'] for w in self.client.scheduler_info(n_workers=-1).get('workers', {}).values() if w.get('name')]
 
     @property
     def num_workers(self) -> int:
-        """Number of available workers."""
+        """Number of workers currently connected to the scheduler."""
         if not ENABLED:
             return 0
-        return len(self.cluster.workers)
+        return len(self.workers_names)
 
     def map_objs(
         self,
@@ -324,53 +387,23 @@ class DaskManager(metaclass=Singleton):
         )
 
     def __keep_only_running(self):
-        """Keep only workers with running jobs"""
-        if TYPE_CHECKING:
-            from dask_jobqueue.slurm import SLURMJob
+        """Wait for workers to connect to the scheduler.
 
-        # Wait for the cluster to submit the jobs
-        async def _():
-            await self.cluster
-        self.cluster.sync(_)
-
-        # Get workers and their job ids
-        workers: dict[str, 'SLURMJob'] = self.cluster.workers
+        Uses wait_for_workers (live scheduler state) — Client.scheduler_info()
+        is a cached client-side view that can lag behind actual registrations,
+        and a polling race previously caused healthy workers to be scancel'd.
+        Workers that never connect are simply not used (workers_names returns
+        connected workers only); nothing is killed.
+        """
+        workers: dict = self.cluster.workers
         if not workers:
             return
-        job_id_to_worker = {j.job_id: w for w, j in workers.items() if isinstance(j.job_id, str)}
-
-        # Give it some time for the jobs to be accepted
-        pending_jobs = set(job_id_to_worker.keys())
-        start_wait = time()
-        print_info("Waiting for jobs to be accepted")
-        while time() - start_wait < 60 and pending_jobs:
-            command = ['squeue', '-h', '-o', '%i %T', '-j', ','.join(job_id_to_worker.keys())]
-            running_workers: set[str] = set()
-            pending_jobs: set[str] = set()
-            try:
-                # Run the command
-                result = subprocess.run(command, capture_output=True, text=True, check=True)
-
-                # The output will be one status per line
-                output_statuses = result.stdout.strip().split('\n')
-
-                # Map job IDs to their retrieved statuses
-                for id_status in output_statuses:
-                    job_id, status = id_status.split()
-                    if status == 'RUNNING':
-                        running_workers.add(job_id_to_worker[job_id])
-                    elif status == 'PENDING':
-                        pending_jobs.add(job_id_to_worker[job_id])
-            except subprocess.CalledProcessError:
-                pass
-            sleep(1)
-        non_running_workers = set(workers.keys()) - running_workers
-        if non_running_workers:
-            print_alert(
-                f"Jobs weren't accepted for workers: {non_running_workers}\n"
-                "Removing those workers from cluster"
-            )
-            self.cluster.sync(self.cluster.scale_down, non_running_workers)
+        print_info(f"Waiting for {len(workers)} workers to connect...")
+        try:
+            self.client.wait_for_workers(len(workers), timeout=600)
+            print_success(f"All {len(workers)} workers connected")
+        except Exception as e:
+            print_alert(f"Only {len(self.workers_names)}/{len(workers)} workers connected within 600s ({type(e).__name__}); continuing with those")
 
     def close(self):
         """Close the cluster and client."""

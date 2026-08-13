@@ -1,11 +1,11 @@
-# V5.1: Full-Model Evaluation Support — Design
+# V5.2: Full-Model Evaluation Support — Design
 
 **Status**: Design Phase
-**Version**: **V5.1** of the new MLIR-RL generation (V5 → V5.1 → V5.2)
+**Version**: **V5.2** of the new MLIR-RL generation (V5 → V5.1 → V5.2 → V5.3)
 **Target**: `rl_autoschedular_v5` package (single package, backward compatible with V4.9 checkpoints)
-**Base**: `rl_autoschedular_paper_transformer` structure (Transformer encoder only — no HW features, no shaped reward; both abandoned in V5) — V5.1 inherits V5's package + V5's accelerated pipeline
+**Base**: `rl_autoschedular_paper_transformer` structure (Transformer encoder only — no HW features, no shaped reward; both abandoned in V5) — V5.2 inherits V5's package + V5's accelerated pipeline
 **Depends on**: V5 (`v5_training_acceleration.md`) — full-model eval needs the accelerated pipeline
-**Precedes**: V5.2 (expanded action space, `v5_2_expanded_action_space.md`)
+**Precedes**: V5.3 (expanded action space, `v5_3_expanded_action_space.md`)
 **Scope**: Block/Op training (unchanged) → Full-Model Evaluation (new)
 
 > **Checkpoint compatibility note**: §8.4 says "V5 loads V4.9 checkpoints
@@ -291,7 +291,7 @@ rollouts to free workers and collects per-model exec times.
   budget.
 
 **Deferred from V5.0 by decision** (`v5_training_acceleration.md` §Scope
-decisions). V5.0 ships without it; V5.1 implements it only if parallel
+decisions). V5.0 ships without it; V5.2 implements it only if parallel
 full-model eval needs it — a sequential eval over ~19 models is fine without.
 
 ### 3.7 DaskManager — evaluated, not worth enabling
@@ -547,7 +547,7 @@ already evaluate trained checkpoints against full `.mlir` files (v4_5 policy,
 `results/full_model/scan/<model>_scan.json`, 19 models × 14 checkpoints). They
 use a block-based approach with parallel block evaluation.
 
-**Design requirement**: V5.1 must **reuse and extend** these scripts, not
+**Design requirement**: V5.2 must **reuse and extend** these scripts, not
 re-implement them:
 
 - Reuse the checkpoints→models iteration and scan-result layout
@@ -559,7 +559,7 @@ re-implement them:
 - Keep `ckpt_scan_all.sh` on the `compute` partition (CPU-bound; already
   `--cpus-per-task=128 --mem=300G` after the bergamo-constraint removal).
 
-| Script | Status | V5.1 action |
+| Script | Status | V5.2 action |
 |--------|--------|-------------|
 | `ckpt_scan_all.sh` | ✅ works (v4_5) | Point at `rl_autoschedular_v5`; keep on `compute` |
 | `submit_ckpt_scan.sh` | ✅ works | Same change; keep resource params |

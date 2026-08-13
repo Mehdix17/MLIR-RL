@@ -81,31 +81,15 @@ print_success("Model initialized")
 # Start evaluation
 eval_dir = os.getenv('EVAL_DIR')
 if eval_dir is None:
-    # Derive from config: find the latest run_N for the selected implementation
-    # whose models/ dir has .pt files.
-    # (the current eval run's models/ dir is always empty)
-    _agent_root = str(get_agent_runs_root(cfg.results_dir, AUTOSCHEDULER_IMPL))
-    if not os.path.isdir(_agent_root):
+    # Derive from config: models/ lives directly under results_dir (flat v4.9-style layout)
+    _models_dir = os.path.join(cfg.results_dir, 'models')
+    if not os.path.isdir(_models_dir) or not any(
+            f.endswith('.pt') for f in os.listdir(_models_dir)):
         raise ValueError(
-            "No implementation run directory found. "
-            f"Expected: {_agent_root}. Run training first or set EVAL_DIR explicitly."
+            "No model checkpoints found in results_dir. "
+            f"Expected: {_models_dir}. Run training first or set EVAL_DIR explicitly."
         )
-    _runs = sorted(
-        [d for d in os.listdir(_agent_root) if d.startswith('run_') and d.split('_')[-1].isdigit()],
-        key=lambda x: int(x.split('_')[1])
-    )
-    _candidates = [
-        os.path.join(_agent_root, d, 'models') for d in _runs
-        if any(f.endswith('.pt') for f in os.listdir(os.path.join(_agent_root, d, 'models'))
-               if os.path.isdir(os.path.join(_agent_root, d, 'models')))
-    ]
-    if not _candidates:
-        raise ValueError(
-            "No run with saved model checkpoints found in results_dir. "
-            "Set EVAL_DIR explicitly or run training first. "
-            f"Looked under: {_agent_root}"
-        )
-    eval_dir = _candidates[-1]
+    eval_dir = _models_dir
     print(f"EVAL_DIR not set; using: {eval_dir}")
 eval_dir = os.path.abspath(eval_dir)
 

@@ -25,12 +25,76 @@ if TYPE_CHECKING:
     from rl_autoschedular_v5.actions import Action
 
 
+# Module-level so multiprocessing can pickle it (spawn context — dask workers).
+# Must stay at module level: a local closure is not picklable.
+_EXEC_PASS_PIPELINE = """builtin.module(
+            canonicalize,
+            buffer-deallocation-pipeline,
+            convert-bufferization-to-memref,
+            convert-linalg-to-loops,
+            scf-forall-to-parallel,
+            convert-scf-to-openmp,
+            expand-strided-metadata,
+            finalize-memref-to-llvm,
+            convert-scf-to-cf,
+            lower-affine,
+
+            convert-openmp-to-llvm,
+            convert-vector-to-llvm,
+            convert-math-to-llvm,
+            convert-math-to-libm,
+            finalize-memref-to-llvm,
+            convert-func-to-llvm,
+            convert-index-to-llvm,
+            convert-arith-to-llvm,
+            convert-cf-to-llvm,
+
+            reconcile-unrealized-casts,
+            canonicalize,
+            cse
+        )"""
+
+
+def _exec_child_worker(code_str: str, result_dict: dict, pass_pipeline: str) -> None:
+    """Run the MLIR lowering + execution in the isolated child process."""
+    try:
+        with Context():
+            module = Module.parse(code_str)
+            transform_bufferize_and_lower_v(module)
+            pm = PassManager.parse(pass_pipeline, module.context)
+
+            inputs, outs_struct = Execution._create_params(module)
+            args = Execution._convert_to_args(inputs, outs_struct)
+
+            pm.run(module.operation)
+            execution_engine = ExecutionEngine(
+                module,
+                opt_level=3,
+                shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
+            )
+
+            try:
+                times = []
+                for _ in range(2):
+                    execution_engine.invoke("main", *args)
+                    outs_struct.free_outputs()
+                    times.append(outs_struct.delta)
+            finally:
+                outs_struct.free_outputs()
+
+            result_dict['delta'] = median(times)
+            result_dict['success'] = True
+    except Exception as e:
+        result_dict['success'] = False
+        result_dict['error'] = str(e)
+
+
 class OutputsStructure(Protocol):
     """Placeholder for structure used as output of MLIR execution.
 
     Note:
         Used for type hinting only. The actual structure is defined
-        inside [create_params()][..Execution.__create_params].
+        inside [create_params()][..Execution._create_params].
 
     Attributes:
         delta: Execution time in nanoseconds.
@@ -200,69 +264,11 @@ class Execution(metaclass=Singleton):
         """
         import multiprocessing
 
-        pass_pipeline = """builtin.module(
-            canonicalize,
-            buffer-deallocation-pipeline,
-            convert-bufferization-to-memref,
-            convert-linalg-to-loops,
-            scf-forall-to-parallel,
-            convert-scf-to-openmp,
-            expand-strided-metadata,
-            finalize-memref-to-llvm,
-            convert-scf-to-cf,
-            lower-affine,
-
-            convert-openmp-to-llvm,
-            convert-vector-to-llvm,
-            convert-math-to-llvm,
-            convert-math-to-libm,
-            finalize-memref-to-llvm,
-            convert-func-to-llvm,
-            convert-index-to-llvm,
-            convert-arith-to-llvm,
-            convert-cf-to-llvm,
-
-            reconcile-unrealized-casts,
-            canonicalize,
-            cse
-        )"""
-
-        def worker(code_str, result_dict):
-            try:
-                with Context():
-                    module = Module.parse(code_str)
-                    transform_bufferize_and_lower_v(module)
-                    pm = PassManager.parse(pass_pipeline, module.context)
-
-                    inputs, outs_struct = Execution.__create_params(module)
-                    args = Execution.__convert_to_args(inputs, outs_struct)
-
-                    pm.run(module.operation)
-                    execution_engine = ExecutionEngine(
-                        module,
-                        opt_level=3,
-                        shared_libs=os.getenv("MLIR_SHARED_LIBS", "").split(","),
-                    )
-
-                    try:
-                        times = []
-                        for _ in range(2):
-                            execution_engine.invoke("main", *args)
-                            outs_struct.free_outputs()
-                            times.append(outs_struct.delta)
-                    finally:
-                        outs_struct.free_outputs()
-
-                    from statistics import median
-                    result_dict['delta'] = median(times)
-                    result_dict['success'] = True
-            except Exception as e:
-                result_dict['success'] = False
-                result_dict['error'] = str(e)
-
         manager = multiprocessing.Manager()
         result_dict = manager.dict()
-        process = multiprocessing.Process(target=worker, args=(code_str, result_dict))
+        process = multiprocessing.Process(
+            target=_exec_child_worker, args=(code_str, result_dict, _EXEC_PASS_PIPELINE)
+        )
         process.start()
         process.join(timeout=timeout_s)
 
@@ -329,7 +335,7 @@ class Execution(metaclass=Singleton):
         return None
 
     @staticmethod
-    def __create_params(module: Module) -> tuple[list[np.ndarray], OutputsStructure]:
+    def _create_params(module: Module) -> tuple[list[np.ndarray], OutputsStructure]:
         """Creates the input and output parameters for the given MLIR module.
 
         Args:
@@ -414,7 +420,7 @@ class Execution(metaclass=Singleton):
         return inputs, outputs_structure
 
     @staticmethod
-    def __convert_to_args(inputs: list[np.ndarray], outputs_structure: OutputsStructure) -> list:
+    def _convert_to_args(inputs: list[np.ndarray], outputs_structure: OutputsStructure) -> list:
         """Converts input arrays and output structure into ctypes arguments for MLIR execution.
 
         Prepares arguments in the format required by the MLIR execution engine. Each argument

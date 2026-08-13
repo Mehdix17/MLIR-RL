@@ -31,7 +31,8 @@ if [[ -f "$PROJECT_ROOT/.env" ]]; then
 fi
 
 # Slurm nodes start with a stripped PATH; restore standard utilities before activating the venv
-export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+# (/opt/slurm/default/bin needed by DaskManager for sbatch/squeue when DASK_NODES > 0)
+export PATH="/usr/local/bin:/usr/bin:/bin:/opt/slurm/default/bin:$PATH"
 
 source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH

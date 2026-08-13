@@ -18,27 +18,31 @@ from rl_autoschedular_v5.execution import Execution
 from rl_autoschedular_v5 import device
 from rl_autoschedular_v5.utils.config import Config
 from rl_autoschedular_v5.utils.file_logger import FileLogger
-from rl_autoschedular_v5.utils.log import print_error, print_info, print_success
+from rl_autoschedular_v5.utils.log import print_alert, print_error, print_info, print_success
 from rl_autoschedular_v5.utils.dask_manager import DaskManager
 from time import time
 from typing import Optional
 
 
-def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryData:
-    """Collect a trajectory using the model and the environment.
+def rollout_benchmarks(
+    data: Benchmarks,
+    model: Model,
+    indices: list[int],
+    step: int,
+) -> tuple[list[Env], list[OperationState], list[TrajectoryCollector], list[float]]:
+    """Step the envs for the given bench indices until terminal (sampling + env loop only).
 
-    Args:
-        data: The benchmarks dataset.
-        model: The model to use.
-        step: The current step of the main loop.
+    Shared by the single-node (collect_trajectory) and distributed
+    (distributed.rollout_group) paths. Execution is NOT performed here.
 
     Returns:
-        The collected trajectory.
+        envs: One Env per benchmark.
+        states: Terminal state per benchmark.
+        tcs: One TrajectoryCollector per benchmark (rewards filled by the caller).
+        entropies: All sampled entropies (logged by the caller).
     """
-    dm = DaskManager()
-    fl = FileLogger()
-    exe = Execution()
     cfg = Config()
+    fl = FileLogger()
 
     eps = None
     if 'epsilon' in cfg.exploration:
@@ -46,13 +50,6 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryD
         final_eps = 0.001
         eps = final_eps + (cfg.init_epsilon - final_eps) * (1 - ratio)
 
-    print_info(f"Collecting {cfg.bench_count} benchmarks using {dm.num_workers} workers...")
-    traj_start = time()
-
-    # Prepare benchmarks to explore
-    indices = torch.randperm(len(data))[:cfg.bench_count].long().tolist()
-    if len(indices) < cfg.bench_count:
-        indices = (indices * cfg.bench_count)[:cfg.bench_count]
     envs: list[Env] = []
     states: list[OperationState] = []
     observations: list[torch.Tensor] = []
@@ -65,12 +62,13 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryD
         observations.append(Observation.from_state(state))
         tcs.append(TrajectoryCollector())
 
+    entropies: list[float] = []
     while (active_states := [(i, s) for i, s in enumerate(states) if not s.terminal]):
         # Sample states that are not terminal yet
         obss = torch.cat([observations[i] for i, _ in active_states])
-        actions_index, actions_bev_log_p, entropies = model.sample(obss.to(device), eps=eps)
-        actions_index, actions_bev_log_p, entropies = actions_index.cpu(), actions_bev_log_p.cpu(), entropies.cpu()
-        fl['train/entropy'].extend(entropies.tolist())
+        actions_index, actions_bev_log_p, sampled_entropies = model.sample(obss.to(device), eps=eps)
+        actions_index, actions_bev_log_p, sampled_entropies = actions_index.cpu(), actions_bev_log_p.cpu(), sampled_entropies.cpu()
+        entropies.extend(sampled_entropies.tolist())
 
         # Record data and update states
         for (i, state), obs, action_index, action_bev_log_p in zip(active_states, obss, actions_index, actions_bev_log_p):
@@ -102,6 +100,35 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryD
                 done
             )
 
+    return envs, states, tcs, entropies
+
+
+def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryData:
+    """Collect a trajectory using the model and the environment.
+
+    Args:
+        data: The benchmarks dataset.
+        model: The model to use.
+        step: The current step of the main loop.
+
+    Returns:
+        The collected trajectory.
+    """
+    dm = DaskManager()
+    fl = FileLogger()
+    exe = Execution()
+    cfg = Config()
+
+    print_info(f"Collecting {cfg.bench_count} benchmarks using {dm.num_workers} workers...")
+    traj_start = time()
+
+    # Prepare benchmarks to explore
+    indices = torch.randperm(len(data))[:cfg.bench_count].long().tolist()
+    if len(indices) < cfg.bench_count:
+        indices = (indices * cfg.bench_count)[:cfg.bench_count]
+    envs, states, tcs, entropies = rollout_benchmarks(data, model, indices, step)
+    fl['train/entropy'].extend(entropies)
+
     traj_end_sampling = time()
 
     results = dm.map_objs(__execute_states, states, data, exe.main_exec_data, training=True, obj_str=lambda s: s.bench_name)
@@ -132,6 +159,14 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryD
     tc = sum(tcs, TrajectoryCollector())
     exe.update_execution_cache(new_cache_data)
 
+    # Surface benchmark failures instead of letting them pass silently
+    total_dispatched = len(results)
+    bench_failures = total_dispatched - sum(len(v) for v in new_cache_data.values())
+    if bench_failures > total_dispatched // 2:
+        print_alert(f"{bench_failures}/{total_dispatched} benchmarks failed this iteration — possible silent infrastructure issue")
+    elif bench_failures:
+        print_info(f"{bench_failures} benchmark failures this iteration")
+
     traj_end = time()
 
     sampling_time = traj_end_sampling - traj_start
@@ -141,6 +176,7 @@ def collect_trajectory(data: Benchmarks, model: Model, step: int) -> TrajectoryD
         f"Timings: collection: {timedelta(seconds=collection_time)}"
         f", sampling: {timedelta(seconds=sampling_time)}"
         f", exec: {timedelta(seconds=exec_states_time)}"
+        f" ({bench_failures} bench failures)"
     ))
 
     return tc.to_trajectory()

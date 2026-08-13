@@ -1,7 +1,7 @@
 # Hyperparameter Tuning Plan: paper_transformer
 
 **Status**: Active — parallel track (NOT a V5 version)
-**Role in V5 generation**: HPO runs **in parallel** with V5 (`v5_training_acceleration.md`) and V5.1 (`v5_1_full_model_eval.md`), finding the best Transformer hyperparameters and feeding them into training **before** V5.2 (`v5_2_expanded_action_space.md`) expands the action space. Per user decision 2026-08-06, HPO is experimentation, not a versioned feature.
+**Role in V5 generation**: HPO runs **in parallel** with V5 (`v5_training_acceleration.md`) and V5.1 (`v5_1_parallel_training.md`), finding the best Transformer hyperparameters and feeding them into training **before** V5.3 (`v5_3_expanded_action_space.md`) expands the action space. Per user decision 2026-08-06, HPO is experimentation, not a versioned feature.
 **Target package**: `rl_autoschedular_paper_transformer` (results transfer to `rl_autoschedular_v5` which shares the same Transformer encoder)
 
 ## Overview

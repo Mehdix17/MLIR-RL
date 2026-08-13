@@ -1,11 +1,11 @@
-# V5.2: Expanded Transformation Action Space — Design
+# V5.3: Expanded Transformation Action Space — Design
 
 **Status**: Design Phase
-**Version**: **V5.2** of the new MLIR-RL generation (V5 → V5.1 → V5.2)
+**Version**: **V5.3** of the new MLIR-RL generation (V5 → V5.1 → V5.2 → V5.3)
 **Target**: `rl_autoschedular_v5` package (extends V5's package in place)
 **Base**: `rl_autoschedular_paper_transformer` action space (6 actions, Transformer encoder — no HW features, no shaped reward). The transforms referenced below live in `rl_autoschedular_v4_9/transforms.py` (padding, unrolling, packing already implemented there) and are inherited/ported into the V5 package.
 **Depends on**: V5 (`v5_training_acceleration.md`) — more actions → longer trajectories → more MLIR executions per iteration, so V5's acceleration is a prerequisite
-**Precedes/parallel**: V5.1 (full-model eval, `v5_1_full_model_eval.md`) — see the sequencing note in §Overview
+**Follows**: V5.1 (parallel training, `v5_1_parallel_training.md`), V5.2 (full-model eval, `v5_2_full_model_eval.md`)
 
 ## Overview
 
@@ -13,12 +13,11 @@ This document proposes new actions for the MLIR-RL agent's action space. The cur
 
 **Goal:** Expand the action space to expose finer-grained MLIR transformations, enabling the agent to discover optimization schedules that the current action space cannot express.
 
-> **Sequencing note (open question for the architect)**: the user's stated order is
-> V5 → V5.1 (full-model eval) → V5.2 (action space). For *paper sequencing*,
-> expanding the action space before full-model eval would make V5.1's headline
-> full-model numbers reflect the new agent. Keeping the stated order means V5.1
-> results are for the 6-action agent and may need re-running after V5.2. Both are
-> defensible — resolve before Phase 3.
+> **Sequencing note (resolved 2026-08-13)**: the user's stated order is now
+> V5 → V5.1 (parallel training) → V5.2 (full-model eval) → V5.3 (action space).
+> Consequence for the paper: V5.2's full-model numbers describe the 6-action
+> agent; if the paper needs full-model numbers for the expanded agent, re-run
+> the V5.2 eval after V5.3.
 
 ---
 

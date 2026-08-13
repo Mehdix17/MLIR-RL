@@ -126,6 +126,8 @@ class Config(metaclass=Singleton):
     """Token pooling strategy for transformer output."""
     transformer_use_action_history_token: bool = False
     """If true, action history is injected as a transformer token instead of post-concatenation."""
+    seed: Optional[int] = None
+    """Random seed for reproducible runs (None = unseeded, current behavior)."""
 
     def __init__(self):
         """Load the configuration from the JSON file

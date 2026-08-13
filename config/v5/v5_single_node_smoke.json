@@ -34,7 +34,7 @@
   "reuse_experience": "none",
   "benchmarks_folder_path": "data/ops_and_blocks",
   "replay_count": 0,
-  "nb_iterations": 20000,
+  "nb_iterations": 50,
   "ppo_epochs": 4,
   "ppo_batch_size": 64,
   "value_epochs": 0,
@@ -61,10 +61,9 @@
   "tags": [
     "ops_and_blocks",
     "v5",
-    "transformer",
-    "small"
+    "smoke"
   ],
-  "results_dir": "results/ops_and_blocks_results/v5_small_agent",
+  "results_dir": "results/ops_and_blocks_results/v5_single_node_smoke_agent",
   "implementation": "rl_autoschedular_v5",
   "json_file": "results/ops_and_blocks_results/baselines/mlir/base_train.json",
   "eval_json_file": "results/ops_and_blocks_results/baselines/mlir/base_eval.json"

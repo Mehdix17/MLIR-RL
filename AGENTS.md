@@ -64,7 +64,7 @@ All under `rl_autoschedular/`. Each is fully standalone (no cross-package import
 | `v4_9` | Transformer | ✅ | ❌ | Entropy collapse fix |
 | `paper` | LSTM | ❌ | ❌ | Paper artifact |
 | `paper_transformer` | Transformer | ❌ | ❌ | Paper ablation |
-| `v5` | Transformer | ❌ | ❌ | V5 platform: CPU-only (no GPUOccupier), no eval-in-training; base for V5.1/V5.2 |
+| `v5` | Transformer | ❌ | ❌ | V5 platform: CPU-only (no GPUOccupier), no eval-in-training; base for V5.1/V5.2/V5.3 |
 
 V4.6/V4.7/V4.8 use `v4_5` with different configs. V1–V4 are legacy. Ablations: `v45_no_hw`, `v45_no_shaped_reward`, `v45_no_transformer`.
 
@@ -79,11 +79,11 @@ sbatch scripts/train/train.sh <config> --resume results/.../run_0   # resume
 FORCE_NEW=1 sbatch scripts/train/train.sh <config>                   # fresh
 
 # Train (V5+ unified config: one JSON drives train AND eval)
-sbatch scripts/train/train.sh config/v5/v5_small.json
+sbatch scripts/train/train.sh config/v5/v5_single_node.json
 
 # Eval
 sbatch --cpus-per-task=12 --mem=16G scripts/eval/eval.sh <eval_config> --checkpoint 500
-sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint 500   # unified config (64c/100G defaults)
+sbatch scripts/eval/eval.sh config/v5/v5_single_node.json --checkpoint 500   # unified config (64c/100G defaults)
 python scripts/eval/submit_eval.py paper_transformer_small 7300 10200 100 --time 3-00:00:00
 python scripts/eval/sync_progress.py
 
@@ -91,6 +91,13 @@ python scripts/eval/sync_progress.py
 python scripts/utils/fast_report.py -d ops_and_blocks               # unified (0.1s)
 python scripts/utils/report_training.py -v v4_6 v4_7 v4_8            # training progress
 python scripts/utils/report_eval.py --best                          # best per agent
+
+# Experiments registry
+# Every experiment must be registered in `experiments.json` (repo root) BEFORE launch:
+#   {"name": ..., "config": ..., "results_dir": ..., "mode": ..., "seed": ..., "state": "pending", "description": ...}
+# `report-progress` (fast_report.py) reads it to know what to report and auto-updates
+# each entry's `state` (pending → running → done/failed/stopped) on every call.
+# Example: `sbatch scripts/train/train.sh config/v5/v5_single_node.json` → registered as v5_single_node.
 ```
 
 `eval.sh` auto-discovers latest `run_N` from `results_dir/run_N/models/`.
@@ -137,11 +144,13 @@ See [HPC Hardware](docs/hpc/HPC_HARDWARE.md) and [C2 Guide](docs/hpc/Guide%20to%
 
 ### Design Docs
 
-`docs/design/done/` — completed features. `docs/design/todo/` — planned features (V5 generation: V5 platform → V5.1 full-model eval → V5.2 action space):
-- [V5 Training Acceleration](docs/design/done/v5_training_acceleration.md) — V5 platform: GPU-ready pipeline, CPU parallelism, resource allocation, GPUOccupier wiring
-- [V5.1 Full-Model Evaluation](docs/design/todo/v5_1_full_model_eval.md) — block-trained policy → full `.mlir` eval (reuses `scripts/checkpoint/ckpt_scan*`)
-- [V5.2 Expanded Action Space](docs/design/todo/v5_2_expanded_action_space.md) — padding, unrolling, packing, LICM, fusion
-- [HPO Plan](docs/design/todo/HPO_PLAN.md) — hyperparameter tuning (candidate V5.3)
+`docs/design/done/` — completed features. `docs/design/todo/` — planned features (V5 generation: V5 platform → V5.1 parallel training → V5.2 full-model eval → V5.3 action space):
+- [V5 Training Acceleration](docs/design/done/v5_training_acceleration.md) — V5 platform: CPU-only accelerated pipeline (12→64c, unified config, GPUOccupier removed)
+- [V5.1 Parallel Training](docs/design/todo/v5_1_parallel_training.md) — distributed PPO: driver + 16 Dask workers, one shared brain, 64 benches/iter (4 per node); compared vs single-node
+- [V5.2 Full-Model Evaluation](docs/design/todo/v5_2_full_model_eval.md) — block-trained policy → full `.mlir` eval (reuses `scripts/checkpoint/ckpt_scan*`)
+- [V5.3 Expanded Action Space](docs/design/todo/v5_3_expanded_action_space.md) — padding, unrolling, packing, LICM, fusion
+- [V5 Future Ideas](docs/design/todo/v5_future_ideas.md) — living list of experiments/variations (pipelining, bench_count scaling, async PPO, ...)
+- [HPO Plan](docs/design/todo/HPO_PLAN.md) — hyperparameter tuning (parallel track, not a version)
 
 New feature design → `docs/design/todo/<feature>.md`. Move to `done/` when implemented.
 

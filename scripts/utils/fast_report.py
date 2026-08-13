@@ -11,12 +11,46 @@ from concurrent.futures import ThreadPoolExecutor
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+EXPERIMENTS_FILE = os.path.join(PROJECT_ROOT, "experiments.json")
+
+
+def load_experiments() -> dict:
+    """Load active experiments from the repo-root experiments.json registry.
+
+    The report-progress skill reads this file to know which runs to report.
+    """
+    try:
+        with open(EXPERIMENTS_FILE) as f:
+            data = json.load(f)
+        return {e["name"]: e["results_dir"] for e in data.get("experiments", [])}
+    except Exception:
+        return {}
+
+
+def update_experiment_states(agent_reports):
+    """Write back derived states (running/done/failed/stopped/pending) to experiments.json."""
+    try:
+        with open(EXPERIMENTS_FILE) as f:
+            data = json.load(f)
+    except Exception:
+        return
+    states = {r["version"]: r["state"] for r in agent_reports}
+    updated = False
+    for e in data.get("experiments", []):
+        state = states.get(e["name"])
+        if state and state != e.get("state"):
+            e["state"] = state
+            updated = True
+    if updated:
+        tmp = EXPERIMENTS_FILE + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+        os.replace(tmp, EXPERIMENTS_FILE)
+
+
 DATASET_MAPPINGS = {
-    "ops_and_blocks": {
-        "paper_original": "results/ops_and_blocks_results/paper_original_agent",
-        "paper_transformer_small": "results/ops_and_blocks_results/paper_transformer_small_agent",
-        "paper_transformer_large": "results/ops_and_blocks_results/paper_transformer_large_agent",
-    },
+    "ops_and_blocks": load_experiments(),
     "new": {
         "v0": "results/new_dataset_results/v0_agent",
         "v4_6": "results/new_dataset_results/v4_6_agent",
@@ -112,13 +146,21 @@ def scan_train_logs():
             else:
                 last_iter, total = 0, 20000
 
-            prev = version_jobs.get(version)
+            distributed = "Distributed collection" in tail
+
+            fail_m = re.findall(r"\((\d+) bench failures\)", tail)
+            bench_failures = int(fail_m[-1]) if fail_m else None
+
+            version_jobs.setdefault(version, {})
+            prev = version_jobs[version].get(job_id)
             if prev is None or last_iter > prev["iteration"]:
-                version_jobs[version] = {
+                version_jobs[version][job_id] = {
                     "job_id": job_id,
                     "iteration": last_iter,
                     "total": total,
-                    "status": status
+                    "status": status,
+                    "distributed": distributed,
+                    "bench_failures": bench_failures,
                 }
         except Exception:
             continue
@@ -130,10 +172,16 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
     models_dir = os.path.join(agent_dir, "models")
     eval_dir = os.path.join(agent_dir, "eval")
     
-    # 1. Models Max Checkpoint
+    # 1. Models Max Checkpoint (flat layout, with legacy run_N fallback)
     max_trained = 0
-    if os.path.isdir(models_dir):
-        for f in os.listdir(models_dir):
+    models_dirs = [models_dir] + sorted(
+        glob.glob(os.path.join(agent_dir, "*", "run_*", "models"))
+        + glob.glob(os.path.join(agent_dir, "*", "models"))
+    )
+    for md in models_dirs:
+        if not os.path.isdir(md):
+            continue
+        for f in os.listdir(md):
             m = re.match(r"model_(\d+)\.pt", f)
             if m:
                 val = int(m.group(1))
@@ -159,7 +207,13 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
     job_type = "N/A"
     
     # Check if this agent is currently running training or evaluating
-    log_info = train_log_data.get(version)
+    log_info = None
+    version_logs = train_log_data.get(version, {})
+    if version_logs:
+        # Prefer the log whose job is still active; else the most advanced one
+        log_info = next((v for jid, v in version_logs.items() if jid in active_jobs), None)
+        if log_info is None:
+            log_info = max(version_logs.values(), key=lambda v: v["iteration"])
     if log_info:
         jid = log_info["job_id"]
         if jid in active_jobs:
@@ -193,6 +247,26 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
             if ckpt not in evaluated_ckpts:
                 pending_count += 1
                 
+    # 5. Distributed dask workers (only for distributed runs whose driver is active)
+    worker_count = 0
+    worker_nodes: list[str] = []
+    if job_type == "Train" and slurm_job_id and log_info and log_info.get("distributed"):
+        workers = [i for i, j in active_jobs.items() if j["name"] == "dask"]
+        worker_count = len(workers)
+        worker_nodes = sorted({active_jobs[i]["node"] for i in workers})
+
+    # 6. Derived state for the experiments registry
+    if job_type == "Train" and slurm_job_id:
+        state = "running"
+    elif log_info and log_info["status"] == "FAILED":
+        state = "failed"
+    elif log_info and log_info["status"] == "FINISHED":
+        state = "done"
+    elif log_info:
+        state = "stopped"
+    else:
+        state = "pending"
+
     return {
         "version": version,
         "max_trained": max_trained,
@@ -203,6 +277,9 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
         "slurm_state": slurm_state,
         "slurm_node": slurm_node,
         "job_type": job_type,
+        "worker_count": worker_count,
+        "worker_nodes": worker_nodes,
+        "state": state,
         "train_log": log_info
     }
 
@@ -237,6 +314,9 @@ def main():
             agent_reports.append(fut.result())
             
     agent_reports.sort(key=lambda x: x["version"])
+
+    # Persist derived states back into the experiments registry
+    update_experiment_states(agent_reports)
     
     # ------------------ PRESENT REPORT ------------------
     print(f"\n## MLIR-RL Progress & Resource Report")
@@ -258,6 +338,11 @@ def main():
             node = rep["slurm_node"]
             jtype = rep["job_type"]
             slurm_rows.append(f"| `{jid}` | `{rep['version']}` | {jtype} | **{state}** | `{node}` |")
+            if rep.get("worker_count"):
+                slurm_rows.append(
+                    f"| `{rep['worker_count']}× dask` | `{rep['version']}` | Workers | **RUNNING** | "
+                    f"`{', '.join(rep['worker_nodes'])}` |"
+                )
             
     if slurm_rows:
         print("| Job ID | Agent Version | Job Type | State | Compute Node |")
@@ -269,8 +354,8 @@ def main():
 
     # Table 2: Training Progress
     print("### 2. Training Progress")
-    print("| Version | Job ID | Iteration | Progress % | Status | Latest Checkpoint |")
-    print("|---|---|---|---|---|---|")
+    print("| Version | Job ID | Iteration | Progress % | Status | Workers | Bench Failures | Latest Checkpoint |")
+    print("|---|---|---|---|---|---|---|---|")
     for rep in agent_reports:
         log = rep["train_log"]
         if log:
@@ -283,9 +368,12 @@ def main():
                 status = "Stopped (Timeout/Cancelled)"
             
             ckpt = rep["max_trained"] if rep["max_trained"] > 0 else "N/A"
-            print(f"| `{rep['version']}` | `{log['job_id']}` | `{log['iteration']} / {log['total']}` | `{prog:.1f}%` | {status} | `{ckpt}` |")
+            workers = rep.get("worker_count") or "-"
+            failures = log.get("bench_failures")
+            failures_s = f"**{failures}**" if failures and failures > 0 else (str(failures) if failures is not None else "-")
+            print(f"| `{rep['version']}` | `{log['job_id']}` | `{log['iteration']} / {log['total']}` | `{prog:.1f}%` | {status} | `{workers}` | {failures_s} | `{ckpt}` |")
         else:
-            print(f"| `{rep['version']}` | `N/A` | `0 / 20000` | `0.0%` | Not Started | `N/A` |")
+            print(f"| `{rep['version']}` | `N/A` | `0 / 20000` | `0.0%` | Not Started | `-` | - | `N/A` |")
     print()
 
     # Table 3: Evaluation Progress

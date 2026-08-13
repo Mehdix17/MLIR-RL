@@ -1,0 +1,22 @@
+{
+  "experiments": [
+    {
+      "name": "v5_single_node",
+      "config": "config/v5/v5_single_node.json",
+      "results_dir": "results/ops_and_blocks_results/v5_single_node_agent",
+      "mode": "single_node",
+      "seed": 42,
+      "state": "running",
+      "description": "V5.1 baseline: single-node PPO, 64 benches/iter"
+    },
+    {
+      "name": "v5_distributed",
+      "config": "config/v5/v5_distributed.json",
+      "results_dir": "results/ops_and_blocks_results/v5_distributed_agent",
+      "mode": "distributed",
+      "seed": 42,
+      "state": "running",
+      "description": "V5.1: distributed PPO, driver + 16 dask workers, 64 benches/iter"
+    }
+  ]
+}

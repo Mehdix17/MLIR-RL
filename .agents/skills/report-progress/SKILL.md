@@ -15,6 +15,8 @@ Run the fast report script to get training progress, active Slurm jobs, evaluati
 python scripts/utils/fast_report.py -d ops_and_blocks
 ```
 *Note: Redirect output to a temporary file and read it to prevent truncation of wide tables.*
+*Distributed (V5.1) runs show their dask worker fleet (count + nodes) in the Slurm jobs table and a Workers column in the training table; workers are attributed only to the distributed run whose driver is active.*
+*The report covers ONLY experiments registered in `experiments.json` (repo root — accessible from any context). Before launching a new experiment, register it there (name, config, results_dir, mode, seed, state, description). Each report call auto-updates the `state` field (pending → running → done/failed/stopped).*
 
 ---
 

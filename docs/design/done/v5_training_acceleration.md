@@ -2,15 +2,15 @@
 
 **Status**: ✅ Phase 2 complete (feature-architect) — design approved in draft, ready for `feature-develop` (Phase 3)
 **Last verified**: 2026-08-06 against live code + live Slurm state
-**Version**: **V5** of the new MLIR-RL generation (V5 → V5.1 → V5.2)
+**Version**: **V5** of the new MLIR-RL generation (V5 → V5.1 → V5.2 → V5.3)
 **Target package**: `rl_autoschedular_v5` (new standalone package)
 **Base package**: `rl_autoschedular_paper_transformer` structure — Transformer encoder (the core contribution), **NO hardware features, NO reward shaping** (both explored in v4_9 and **abandoned** — not helpful). Verified: paper_transformer = v4_9 minus HW observation minus shaped reward, and is fully standalone — it never imports from another `rl_autoschedular_*` package. V5 follows the same rule: repo-level shared `utils/` (e.g. `utils.config`, `utils.implementation`) may be used where useful, but no cross-`rl_autoschedular` imports (see Constraints).
 **Depends on**: nothing (foundation version)
-**Followed by**: V5.1 (full-model eval, `v5_1_full_model_eval.md`), V5.2 (expanded action space, `v5_2_expanded_action_space.md`)
-**Parallel track**: HPO (`HPO_PLAN.md`) — hyperparameter search runs **in parallel** to V5/V5.1, feeding tuned hyperparameters into training **before** V5.2 expands the action space.
+**Followed by**: V5.1 (parallel training, `v5_1_parallel_training.md`), V5.2 (full-model eval, `v5_2_full_model_eval.md`), V5.3 (expanded action space, `v5_3_expanded_action_space.md`)
+**Parallel track**: HPO (`HPO_PLAN.md`) — hyperparameter search runs **in parallel** to V5/V5.1, feeding tuned hyperparameters into training **before** V5.3 expands the action space.
 
 > **What V5 is**: the platform version — a fast training/eval pipeline plus the
-> `rl_autoschedular_v5` package that V5.1 and V5.2 build on. Acceleration is
+> the `rl_autoschedular_v5` package that V5.1, V5.2, and V5.3 build on. Acceleration is
 > infrastructure, not a research novelty (per VERSIONS.md convention); it produces no
 > paper result by itself, but every later version depends on its speed.
 >
@@ -24,6 +24,8 @@
 > 4. Version order V5 → V5.1 → V5.2 confirmed (no swap). Consequence accepted:
 >    V5.1's full-model numbers describe the 6-action agent; re-run after V5.2 if
 >    the paper needs them for the expanded agent.
+>    *(Superseded 2026-08-13: V5.1 = parallel training, full-model eval → V5.2,
+>    action space → V5.3. See `v5_1_parallel_training.md`.)*
 > 5. HPO is a **parallel track**, not a version (V5.3 dropped).
 > 6. **Unified config**: one config file per run in `config/v5/` serves both
 >    training and eval (`json_file` + `eval_json_file` in the same JSON).
@@ -182,7 +184,7 @@ removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 | Lever | Status | What's needed |
 |-------|--------|---------------|
 | Raise CPUs on `compute` partition (12 → 64/128) | ⚠️ Code exists; scripts stale | Edit 5 scripts (matrix above) |
-| Persistent MLIR worker pool (spawn-based) | ❌ Not implemented | **Moved to V5.1** (`v5_1_full_model_eval.md` §3.6) — ~1-3% for block training, not worth it there |
+| Persistent MLIR worker pool (spawn-based) | ❌ Not implemented | **Moved to V5.2** (`v5_2_full_model_eval.md` §3.6) — ~1-3% for block training, not worth it there |
 | Sampling/execution pipelining | ❌ Not implemented | Code change (`ppo.py`) — low priority (~3% of iteration) |
 | `reuse_experience` / `replay_count` | ✅ Implemented (config.py:37,43; train.py:117-124) | Config only |
 | `MIN_EXEC_TIMEOUT` straggler control | ✅ Implemented (execution.py:124) | Env only |
@@ -199,7 +201,7 @@ removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 
 **In scope (Phase 2 design + Phase 3 implement):**
 1. Resource re-allocation of the 5 Slurm scripts (matrix above) on `compute` + `--time=7-00:00:00`.
-2. ~~Persistent MLIR worker pool~~ — **moved to V5.1** (`v5_1_full_model_eval.md` §3.6): ~1-3% wall-clock for block training (repeats hit the time cache; fresh fork ≈ free), real payoff only in full-model eval.
+2. ~~Persistent MLIR worker pool~~ — **moved to V5.2** (`v5_2_full_model_eval.md` §3.6): ~1-3% wall-clock for block training (repeats hit the time cache; fresh fork ≈ free), real payoff only in full-model eval.
 
 **Out of scope for V5:**
 - GPU / GPUOccupier / nvidia migration — **removed entirely** from V5 (CPU-only; see [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md)).
@@ -215,7 +217,7 @@ removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 - **Package isolation** (clarified 2026-08-06): no `rl_autoschedular_vN` may **import from another `rl_autoschedular_*` package** — ever. V5 is a new standalone package; it MAY use repo-level shared utils and tools (`utils.config`, `utils.implementation`, `utils.log`, ...) where useful — exactly like earlier versions do — and it MAY copy/paste code from previous versions (e.g. the paper_transformer tree) when building. What it must NOT do is `import rl_autoschedular_*`. Changes to `scripts/` (repo-level, not a package) are fine; changes inside a package must stay within that package.
 - **Root `utils/config.py` keeps `hardware_*` / `reward_shaping_*`**: it is shared by v4_5/v4_9, which still read those fields. The dead-field cleanup is scoped to `rl_autoschedular_v5/utils/config.py` only.
 - **Config singleton**: `utils/config.Config` reads `CONFIG_FILE_PATH` at first import; load `.env` before any config import.
-- **`BindingsProcess.ENABLED` must stay `False`** — fork corrupts MLIR C++ state. Any worker-pool design (incl. V5.1's, `v5_1_full_model_eval.md` §3.6) must use `multiprocessing.get_context("spawn")` or spawn before MLIR import.
+- **`BindingsProcess.ENABLED` must stay `False`** — fork corrupts MLIR C++ state. Any worker-pool design (incl. V5.2's, `v5_2_full_model_eval.md` §3.6) must use `multiprocessing.get_context("spawn")` or spawn before MLIR import.
 - **`torch.set_num_threads(4)`** at `scripts/train/train.py:100` — keep, or drop to 1-2 if CPU oversubscription appears with 64 workers (measure first).
 - **No pytest suite** — verification is `python -m py_compile <file>` + short smoke run via `sbatch` with a small config.
 - **NEVER delete files without explicit permission.**
@@ -226,7 +228,7 @@ removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 
 ## Success Criteria
 
-1. `sbatch scripts/train/train.sh config/v5/v5_small.json` runs on the `compute` partition with `--cpus-per-task=64`, `--mem=100G`, `--time=7-00:00:00` (verify via `squeue`).
+1. `sbatch scripts/train/train.sh config/v5/v5_single_node.json` runs on the `compute` partition with `--cpus-per-task=64`, `--mem=100G`, `--time=7-00:00:00` (verify via `squeue`).
 2. Logs show `device = cpu` (expected — no GPU in V5); training proceeds without CUDA and without GPUOccupier.
 3. Iteration wall-clock drops from ~50s to ~8-12s (measured in train log `iter_time_dlt`).
 4. Eval (`sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint N`) runs at `--cpus-per-task=64 --mem=100G` — same resources as training — and completes faster than the old 12-CPU runs.
@@ -253,10 +255,10 @@ removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 | `scripts/train/train.py` | Unified entry (`:87` Execution singleton, `:100` torch threads, `:159` loop) |
 | `scripts/eval/eval.sh`, `scripts/eval/eval_batch.sh` | Eval entries — resources to change |
 | `scripts/hpo/train_trial.sh`, `scripts/hpo/eval_trial.sh` | HPO entries — resources to change |
-| `scripts/checkpoint/ckpt_scan_all.sh`, `submit_ckpt_scan.sh` | Full-model eval — stay on `compute` (V5.1 reuses these) |
+| `scripts/checkpoint/ckpt_scan_all.sh`, `submit_ckpt_scan.sh` | Full-model eval — stay on `compute` (V5.2 reuses these) |
 | `rl_autoschedular/rl_autoschedular_paper_transformer/` | **Base structure for `rl_autoschedular_v5`** — standalone package, own `utils/`, Transformer encoder, no HW features, no shaped reward |
-| `rl_autoschedular/rl_autoschedular_v4_9/transforms.py` | Transform implementations V5.2 extends (padding, unrolling, packing already there) |
-| `rl_autoschedular/rl_autoschedular_paper_transformer/execution.py` | Bottleneck — cache (`:118-121`), isolated exec (`:196-277`), timeout (`:124-127`); worker-pool target moved to V5.1 (`v5_1_full_model_eval.md` §3.6) |
+| `rl_autoschedular/rl_autoschedular_v4_9/transforms.py` | Transform implementations V5.3 extends (padding, unrolling, packing already there) |
+| `rl_autoschedular/rl_autoschedular_paper_transformer/execution.py` | Bottleneck — cache (`:118-121`), isolated exec (`:196-277`), timeout (`:124-127`); worker-pool target moved to V5.2 (`v5_2_full_model_eval.md` §3.6) |
 | `rl_autoschedular/rl_autoschedular_paper_transformer/ppo.py` | `collect_trajectory` (`:28`), sampling (`:54`), eval (`:285`) |
 | `rl_autoschedular/rl_autoschedular_paper_transformer/utils/dask_manager.py` | ThreadPoolExecutor fallback (`:122-130`) |
 | `rl_autoschedular/rl_autoschedular_paper_transformer/utils/config.py` | Config fields — V5's copy drops dead `hardware_*` (`:83-97`) and `reward_shaping_*` (`:99-112`) fields (root `utils/config.py` keeps them — v4_5/v4_9 use them) |
@@ -265,14 +267,14 @@ removal: [v5_gpu_exploration.md](../todo/v5_gpu_exploration.md).
 | `config/v5/v5_small.json` | **NEW unified config** (train + eval in one JSON: `json_file` + `eval_json_file`) |
 | `docs/hpc/HPC_HARDWARE.md` | Partitions, node inventory (verified 2026-08-03); C2 caps moved to `v5_gpu_exploration.md` |
 | `docs/design/todo/v5_gpu_exploration.md` | **NEW** — GPU analysis archive (C2 limits, A100 vs H100, GPUOccupier analysis) |
-| `docs/design/todo/v5_1_full_model_eval.md` | What ckpt_scan implements (full-model eval, CPU-only) |
+| `docs/design/todo/v5_2_full_model_eval.md` | What ckpt_scan implements (full-model eval, CPU-only) |
 
 ---
 
 ## Open Questions — ALL RESOLVED (2026-08-06)
 
 Phase 1 questions 1-5 were resolved in the Phase 2 scope table below (worker pool →
-V5.1; torch threads → keep 4, measure; ckpt_scan → keep on `compute`; mini-features
+V5.2; torch threads → keep 4, measure; ckpt_scan → keep on `compute`; mini-features
 → follow-up; multi-seed → skip). The second wave of user comments (unified config,
 GPUOccupier removal, eval resources = training, no `evaluate_benchmarks` in
 training, package-isolation clarification) is folded into the Phase 2 design
@@ -308,8 +310,8 @@ action space, or Transformer encoder. Expected net effect: iteration wall-clock 
 ### Scope decisions (locked this session — both waves)
 | Open question | Decision | Rationale |
 |---|---|---|
-| Persistent MLIR worker pool | **Moved to V5.1** — full-model eval (`v5_1_full_model_eval.md` §3.6) | Resource change alone gives 4-6x; pool ≈ 1-3% for block training (per-exec setup hidden in parallel, repeats hit the time cache). Real payoff in V5.1: parse-once per model + incremental transforms + parallel model eval. |
-| ckpt_scan (full-model eval) future | **Keep untouched on `compute`** | Already correctly sized (128c/300G); V5.1 reuses these scripts; archiving saves nothing. |
+| Persistent MLIR worker pool | **Moved to V5.2** — full-model eval (`v5_2_full_model_eval.md` §3.6) | Resource change alone gives 4-6x; pool ≈ 1-3% for block training (per-exec setup hidden in parallel, repeats hit the time cache). Real payoff in V5.2: parse-once per model + incremental transforms + parallel model eval. |
+| ckpt_scan (full-model eval) future | **Keep untouched on `compute`** | Already correctly sized (128c/300G); V5.2 reuses these scripts; archiving saves nothing. |
 | Config-only mini-features (early stopping, feature cache, `reuse_experience` flips) | **Out of scope for V5** | Keeps V5's before/after measurement clean; separate follow-up mini-design after the resource change is measured. |
 | Multi-seed array runs | **Skip** | Only needed if the paper requires variance bars. |
 | `torch.set_num_threads(4)` | **Keep 4**, measure | MLIR passes are single-threaded; drop to 1-2 only if 64-worker oversubscription appears (measure `iter_time_dlt` first). |
@@ -341,9 +343,9 @@ action space, or Transformer encoder. Expected net effect: iteration wall-clock 
    prefix `v5` — no registry edit). Root `utils/config.py` keeps its dead fields (v4_5/v4_9 use them).
 
 Alternatives considered: (a) reusing `rl_autoschedular_paper_transformer` in place instead of a new
-package — rejected: paper artifact must stay frozen for the paper; V5.1/V5.2 need a stable base to
+package — rejected: paper artifact must stay frozen for the paper; V5.1/V5.2/V5.3 need a stable base to
 extend. (b) separate train/eval configs — rejected (user): they share most parameters; one unified
-config per run. (c) GPU/GPUOccupier — removed entirely (see `v5_gpu_exploration.md`). (d) worker pool in V5 — moved to V5.1 (§3.6 of `v5_1_full_model_eval.md`); block training can't amortize it (repeats hit the time cache, fresh fork ≈ free).
+config per run. (c) GPU/GPUOccupier — removed entirely (see `v5_gpu_exploration.md`). (d) worker pool in V5 — moved to V5.2 (§3.6 of `v5_2_full_model_eval.md`); block training can't amortize it (repeats hit the time cache, fresh fork ≈ free).
 
 ### Components / Changes
 | Path | Change |
@@ -434,6 +436,6 @@ No GPU anywhere (see `v5_gpu_exploration.md` for the GPU partition analysis).
   - **Timing (median iter_time_dlt)**: OLD 12c small on ops_and_blocks: 50.1s (best of 4 runs; others 78-207s) · OLD 12c large: 78s · **NEW V5 64c (cold cache, 50 iters): 32.6s** → speedup 1.5x median / 3.6x mean vs best old small. 8-12s target NOT reached in the 50-iter smoke: cache keyed on (bench, action-seq) + exploring policy → cache misses; exec phase compressed (15.5s last iter) but collection (17.8s) + PPO fit (13s) now dominate — the out-of-scope pipelining lever is the follow-up.
   - **Training dynamics**: healthy — entropy 1.39 → 0.29, rewards mostly 0 (timeout/penalty) with positive tail (max 1.59, mean -0.04), max speedup 38.6x. Matches expected CPU-run profile.
   - **Memory (MaxRSS)**: 6.3G actual (vs 50-70G estimate) → scripts re-allocated 100G → 16G (2.5x headroom) on train/eval/eval_batch + get_pytorch_times; HPO kept at 32G (user decision).
-- [x] **T8 — Docs.** AGENTS.md: add the `v5` row to the package table (Transformer, no HW, no shaping, no GPUOccupier; base for V5.1/V5.2); update the Commands section to unified-config usage (`sbatch scripts/train/train.sh config/v5/v5_small.json`; `sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint N`). When the user confirms results, move this doc to `docs/design/done/`. ✅ AGENTS.md package table + Commands updated 2026-08-08; ✅ moved to `docs/design/done/` 2026-08-13 (cross-links fixed: AGENTS.md ×2, v5_gpu_exploration.md, feature-architect/SKILL.md, 6 in-doc refs).
+- [x] **T8 — Docs.** AGENTS.md: add the `v5` row to the package table (Transformer, no HW, no shaping, no GPUOccupier; base for V5.1/V5.2/V5.3); update the Commands section to unified-config usage (`sbatch scripts/train/train.sh config/v5/v5_small.json`; `sbatch scripts/eval/eval.sh config/v5/v5_small.json --checkpoint N`). When the user confirms results, move this doc to `docs/design/done/`. ✅ AGENTS.md package table + Commands updated 2026-08-08; ✅ moved to `docs/design/done/` 2026-08-13 (cross-links fixed: AGENTS.md ×2, v5_gpu_exploration.md, feature-architect/SKILL.md, 6 in-doc refs).
 
 
