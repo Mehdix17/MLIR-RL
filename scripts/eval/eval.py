@@ -228,7 +228,9 @@ if _ckpt:
             # Auto-update the experiment ranking CSV (results/<agent>_agent/csvs/checkpoint_speedups.csv)
             try:
                 import json as _json
-                from utils.csvs import compute_geo_mean_speedup, rebuild_best_checkpoint, update_checkpoint_speedup
+                from utils.csvs import (compute_geo_mean_speedup, generate_comparison_csv,
+                                        load_benchmark_families, rebuild_best_checkpoint,
+                                        update_checkpoint_speedup)
                 with open(ckpt_file) as f:
                     _eval_data = _json.load(f)
                 _baseline_file = getattr(cfg, "eval_json_file", None) or getattr(cfg, "json_file", None)
@@ -241,6 +243,17 @@ if _ckpt:
                         print_info(f"Updated {_csv}")
                         rebuild_best_checkpoint(_agent_dir)
                         print_info("Updated best_checkpoint_speedups.csv")
+                        # Best-checkpoint breakdown csvs (benchmark family / op type)
+                        try:
+                            _agent_name = os.path.basename(os.path.normpath(_agent_dir))
+                            if _agent_name.endswith("_agent"):
+                                _agent_name = _agent_name[:-6]
+                            _fams = load_benchmark_families()
+                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "models_only", [], _fams)
+                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "ops_only", [], _fams)
+                            print_info("Updated breakdown csvs (benchmark family / op type)")
+                        except Exception as _e2:
+                            print_info(f"breakdown csvs skipped: {_e2}")
             except Exception as _e:
                 print_info(f"checkpoint_speedups.csv update skipped: {_e}")
 
