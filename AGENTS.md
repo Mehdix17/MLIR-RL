@@ -75,7 +75,7 @@ Paper packages: `interchange_mode="pointers"`, no HW features, no shaped reward,
 ```bash
 # Train
 sbatch scripts/train/train.sh config/<dataset>/train/<config>.json
-sbatch scripts/train/train.sh <config> --resume results/.../run_0   # resume
+sbatch scripts/train/train.sh <config> --resume results/...   # resume (explicit path to the experiment dir)
 FORCE_NEW=1 sbatch scripts/train/train.sh <config>                   # fresh
 
 # Train (V5+ unified config: one JSON drives train AND eval)
@@ -100,7 +100,7 @@ python scripts/utils/report_eval.py --best                          # best per a
 # Example: `sbatch scripts/train/train.sh config/v5/v5_single_node.json` → registered as v5_single_node.
 ```
 
-`eval.sh` auto-discovers latest `run_N` from `results_dir/run_N/models/`.
+`eval.sh` auto-discovers the latest checkpoints from `results_dir/models/`.
 
 ## Key Gotchas
 
@@ -118,15 +118,17 @@ python scripts/utils/report_eval.py --best                          # best per a
 
 ## Results Layout
 
-```
-results/<experiment>/<agent_dir>/run_N/
-├── train/        results.json, checkpoint_100.json
-├── eval/         checkpoint_100.json ({bench: exec_time_ns})
-├── logs/         exec_data.json, train/, train_ppo/, eval/
-└── models/       model_50.pt (every 50 iters)
-```
+Flat, v4.9-style (no `run_N` nesting):
 
-`FORCE_RUN_ID=N` → `run_N/`. `FORCE_RUN_ID=ckpt_N` → temp dir.
+```
+results/<experiment>_agent/
+├── csvs/        checkpoint_speedups.csv, best_checkpoint_speedups.csv,
+│                best_checkpoint_benchmark_family_results.csv, best_checkpoint_operation_type_results.csv
+├── models/      model_50.pt (every 50 iters)
+├── eval/        checkpoint_100.json ({bench: exec_time_ns})
+├── logs/        exec_data.json, train/, train_ppo/, eval/
+└── tags/
+```
 
 ## HPC Hardware
 

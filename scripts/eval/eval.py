@@ -19,6 +19,8 @@ from utils.file_logger import FileLogger
 from utils.config import Config
 from utils.log import print_info, print_success
 from utils.implementation import get_agent_runs_root, get_autoschedular_impl, import_autoschedular_module
+
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datetime import timedelta
 from time import time
 import json
@@ -222,6 +224,25 @@ if _ckpt:
         if os.path.exists(src_eval):
             shutil.copy2(src_eval, ckpt_file)
             print_success(f"Saved eval results to eval/checkpoint_{_ckpt}{_suffix}.json")
+
+            # Auto-update the experiment ranking CSV (results/<agent>_agent/csvs/checkpoint_speedups.csv)
+            try:
+                import json as _json
+                from utils.csvs import compute_geo_mean_speedup, rebuild_best_checkpoint, update_checkpoint_speedup
+                with open(ckpt_file) as f:
+                    _eval_data = _json.load(f)
+                _baseline_file = getattr(cfg, "eval_json_file", None) or getattr(cfg, "json_file", None)
+                if _baseline_file and os.path.exists(os.path.join(_PROJECT_ROOT, _baseline_file)):
+                    with open(os.path.join(_PROJECT_ROOT, _baseline_file)) as f:
+                        _baseline = _json.load(f)
+                    _gm = compute_geo_mean_speedup(_eval_data, _baseline)
+                    if _gm is not None:
+                        _csv = update_checkpoint_speedup(_agent_dir, int(_ckpt), _gm)
+                        print_info(f"Updated {_csv}")
+                        rebuild_best_checkpoint(_agent_dir)
+                        print_info("Updated best_checkpoint_speedups.csv")
+            except Exception as _e:
+                print_info(f"checkpoint_speedups.csv update skipped: {_e}")
 
         # Copy key log files
         src_logs = os.path.join(fl.logs_dir, "eval")
