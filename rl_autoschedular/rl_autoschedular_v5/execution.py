@@ -162,6 +162,15 @@ class Execution(metaclass=Singleton):
 
         self.exec_data_file = exec_data_file
         self.main_exec_data = main_exec_data
+        self.cache: Optional[dict[str, dict[str, int]]] = None  # in-memory snapshot, None = read file per lookup
+
+    def refresh_cache(self):
+        """Load exec_data_file into memory once. On failure keep self.cache=None (file fallback)."""
+        try:
+            with open(self.exec_data_file, "r") as file:
+                self.cache = json.load(file)
+        except Exception:
+            self.cache = None
 
     def execute_code(self, module: Module, bench_name: str, seq: list[list['Action']], root_exec_time: Optional[int] = None) -> tuple[int, bool, bool, Optional[str]]:
         """Executes the given MLIR module and measures execution time.
@@ -320,6 +329,12 @@ class Execution(metaclass=Singleton):
         # Start by checking the main execution data
         if self.main_exec_data and bench_name in self.main_exec_data and cache_key in self.main_exec_data[bench_name]:
             return self.main_exec_data[bench_name][cache_key]
+
+        # In-memory snapshot (refresh_cache) — avoids re-parsing the file per lookup
+        if self.cache is not None:
+            if bench_name in self.cache and cache_key in self.cache[bench_name]:
+                return self.cache[bench_name][cache_key]
+            return None
 
         # If no hit in the main cache file, check the temporary cache file
         if not self.exec_data_file:

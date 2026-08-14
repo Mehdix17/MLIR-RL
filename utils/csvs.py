@@ -30,19 +30,6 @@ DATASET_BASELINES = {
     "ops_and_blocks": "results/ops_and_blocks_results/baselines/mlir/base_eval.json",
 }
 
-BENCHMARK_FAMILIES_JSON = os.path.join(PROJECT_ROOT, "scripts", "plots", "benchmark_families.json")
-
-
-def load_benchmark_families() -> dict:
-    """Load the ground-truth benchmark -> family mapping."""
-    if not os.path.isfile(BENCHMARK_FAMILIES_JSON):
-        raise FileNotFoundError(
-            f"Benchmark family mapping not found: {BENCHMARK_FAMILIES_JSON}\n"
-            "Run: python scripts/plots/build_benchmark_families.py"
-        )
-    with open(BENCHMARK_FAMILIES_JSON) as f:
-        return json.load(f)
-
 
 def load_baseline(dataset: str) -> dict:
     path = os.path.join(PROJECT_ROOT, DATASET_BASELINES[dataset])
@@ -120,15 +107,37 @@ def rebuild_checkpoint_speedups(results_dir: str, baseline: dict) -> int:
     return len(rows)
 
 
+MODEL_PREFIXES = {"albert", "bart", "bert", "convnext_tiny", "distilbert", "efficientnet_b0",
+                  "gat", "gin", "gpt2", "llama3_2_1b", "mobilenet_v3_small", "resnet50",
+                  "resnext50", "t5", "vgg16", "vit_b_16", "whisper_base", "yolov8m"}
+OP_TYPES = {"add", "conv_2d", "matmul", "pooling", "relu"}
+
+
+def benchmark_group(bench_name: str) -> tuple[str, str]:
+    """Group a benchmark into ('model', <model>) | ('op', <op_type>) | ('unknown', name).
+
+    Model benchmarks start with the model prefix (albert_*, llama3_2_1b_*, ...); synthetic
+    op benchmarks start with the op name (add_*, conv_2d_*, matmul_*, ...). Longest prefix
+    first — model names contain underscores (llama3_2_1b, mobilenet_v3_small, ...).
+    """
+    for p in sorted(MODEL_PREFIXES, key=len, reverse=True):
+        if bench_name.startswith(p + "_"):
+            return ("model", p)
+    for p in OP_TYPES:
+        if bench_name.startswith(p + "_"):
+            return ("op", p)
+    return ("unknown", bench_name)
+
+
 def generate_comparison_csv(
     results_dir: str,
     agent: str,
     baseline: dict,
     filter_type: str,   # "models_only" | "ops_only"
     exclude: list,
-    families_map: dict,
 ) -> str:
-    """Per-agent best-checkpoint comparison CSV (best_checkpoint_results.csv / operation_type_results.csv)."""
+    """Per-agent best-checkpoint comparison CSV (best_checkpoint_benchmark_family_results.csv /
+    best_checkpoint_operation_type_results.csv), grouped by model family / op type."""
     eval_dir = os.path.join(results_dir, "eval")
     ckpt_files = get_checkpoint_files(eval_dir)
     if not ckpt_files:
@@ -151,38 +160,31 @@ def generate_comparison_csv(
         eval_data = json.load(f)
 
     exclude_lower = {e.lower() for e in exclude}
-    family_speedups: dict[str, list] = {}
+    group_speedups: dict[str, list] = {}
     for bench_name, opt_ns in eval_data.items():
-        fam = families_map.get(bench_name, "unknown")
-        if fam == "unknown":
+        kind, group = benchmark_group(bench_name)
+        if kind == "unknown":
+            continue
+        if filter_type == "models_only" and kind != "model":
+            continue
+        if filter_type == "ops_only" and kind != "op":
+            continue
+        if any(x in group for x in exclude_lower):
             continue
         root = baseline.get(bench_name, 0)
         if root <= 0 or not opt_ns or opt_ns <= 0:
             continue
-        sp = root / opt_ns
-        family_speedups.setdefault(fam, []).append(sp)
+        group_speedups.setdefault(group, []).append(root / opt_ns)
 
     if filter_type == "models_only":
         stem = "best_checkpoint_benchmark_family_results"
-        items = sorted(
-            (fam for fam, sps in family_speedups.items()
-             if fam != "ops" and not any(x in fam for x in exclude_lower)),
-            key=lambda f: math.exp(sum(math.log(s) for s in family_speedups[f]) / len(family_speedups[f])),
-            reverse=True,
-        )
-        rows = [[fam, agent, f"{math.exp(sum(math.log(s) for s in family_speedups[fam]) / len(family_speedups[fam])):.4f}"]
-                for fam in items]
     else:
         stem = "best_checkpoint_operation_type_results"
-        items = sorted(
-            (fam for fam, sps in family_speedups.items()
-             if fam != "ops" and fam not in exclude_lower and fam != "unknown"),
-            key=lambda f: math.exp(sum(math.log(s) for s in family_speedups[f]) / len(family_speedups[f])),
-            reverse=True,
-        )
-        rows = [[fam, agent, f"{math.exp(sum(math.log(s) for s in family_speedups[fam]) / len(family_speedups[fam])):.4f}"]
-                for fam in items]
-
+    rows = [[g, agent, f"{math.exp(sum(math.log(s) for s in sps) / len(sps)):.4f}"]
+            for g, sps in sorted(
+                group_speedups.items(),
+                key=lambda kv: math.exp(sum(math.log(s) for s in kv[1]) / len(kv[1])),
+                reverse=True)]
     path = csv_path(results_dir, stem)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", newline="") as f:
@@ -232,9 +234,8 @@ def main() -> int:
     m = rebuild_best_checkpoint(args.results_dir)
     print(f"best_checkpoint_speedups.csv: {'1 row' if m else 'no data'} -> {csv_path(args.results_dir, 'best_checkpoint_speedups')}")
     if args.all:
-        families = load_benchmark_families()
-        p1 = generate_comparison_csv(args.results_dir, args.agent, baseline, "models_only", [], families)
-        p2 = generate_comparison_csv(args.results_dir, args.agent, baseline, "ops_only", [], families)
+        p1 = generate_comparison_csv(args.results_dir, args.agent, baseline, "models_only", [])
+        p2 = generate_comparison_csv(args.results_dir, args.agent, baseline, "ops_only", [])
         print(f"best_checkpoint_benchmark_family_results.csv: {p1}")
         print(f"best_checkpoint_operation_type_results.csv:  {p2}")
     return 0

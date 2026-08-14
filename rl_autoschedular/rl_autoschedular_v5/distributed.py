@@ -34,6 +34,7 @@ from rl_autoschedular_v5.utils.log import print_alert, print_error, print_info
 
 # One group = 4 rollouts in parallel, each capped by MIN_EXEC_TIMEOUT (default 300s).
 GROUP_TIMEOUT = int(os.getenv('DASK_GROUP_TIMEOUT', '600'))
+CACHE_REFRESH_INTERVAL = int(os.getenv('DASK_CACHE_REFRESH_INTERVAL', '5'))
 
 _worker_data: Optional[tuple[Benchmarks, Optional[dict[str, dict[str, int]]]]] = None
 
@@ -64,6 +65,14 @@ def rollout_group(
     """
     data, main_exec_data = _get_worker_data()
 
+    exe = Execution(exec_data_file, main_exec_data)
+    # Snapshot the shared exec cache into memory every N iterations — lookups
+    # otherwise re-parse the 5MB file on every env step. Own execs are merged
+    # into the in-memory cache below, so a longer interval only delays OTHER
+    # workers' entries (each interval saves 16 × ~0.15s of JSON parsing).
+    if step % CACHE_REFRESH_INTERVAL == 0:
+        exe.refresh_cache()
+
     model = HiearchyModel().to(device)
     model.load_state_dict(weights)
 
@@ -91,6 +100,10 @@ def rollout_group(
         if exec_time is not None:
             cache_key = exe.get_code_cache_key(state.transformation_history)
             new_cache_data.setdefault(state.bench_name, {})[cache_key] = exec_time
+            # Keep own execs in the in-memory snapshot too (no file IO) so a
+            # longer refresh interval never re-executes this worker's own work.
+            if exe.cache is not None:
+                exe.cache.setdefault(state.bench_name, {})[cache_key] = exec_time
 
     return group_idx, (sum(tcs, TrajectoryCollector()), new_cache_data, entropies, speedups)
 
@@ -152,11 +165,23 @@ def collect_distributed_trajectory(data: Benchmarks, model: HiearchyModel, step:
     all_entropies: list[float] = []
     all_speedups: list[float] = []
     segments: list[TrajectoryCollector] = []
+    # On-disk cache = what all workers started with; entries in it that a worker
+    # re-executed are cross-worker duplicates (live cache broadcast would save them)
+    try:
+        with open(exe.exec_data_file) as f:
+            _merged_cache = json.load(f)
+    except Exception:
+        _merged_cache = {}
+    duplicate_misses = 0
     for group_idx, (segment, cache, entropies, speedups) in gathered:
         segments.append(segment)
-        new_cache_data.update(cache)
         all_entropies.extend(entropies)
         all_speedups.extend(speedups)
+        for bench, kv in cache.items():
+            for key, t in kv.items():
+                if bench in _merged_cache and key in _merged_cache[bench]:
+                    duplicate_misses += 1
+                new_cache_data.setdefault(bench, {})[key] = t
     failed_groups = len(groups) - len(segments)
     if failed_groups:
         print_error(f"{failed_groups} group(s) failed this iteration — their benchmarks are skipped")
@@ -168,6 +193,9 @@ def collect_distributed_trajectory(data: Benchmarks, model: HiearchyModel, step:
     fl['train/reward'].extend(tc.rewards)
     fl['train/final_speedup'].extend(all_speedups)
     exe.update_execution_cache(new_cache_data)
+    if duplicate_misses:
+        print_info(f"{duplicate_misses} cross-worker duplicate execs this iteration "
+                   f"(live cache broadcast would save them)")
 
     # Surface benchmark failures instead of letting them pass silently
     total_dispatched = sum(len(g) for g in groups)

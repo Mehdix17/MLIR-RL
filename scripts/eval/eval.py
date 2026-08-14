@@ -229,8 +229,7 @@ if _ckpt:
             try:
                 import json as _json
                 from utils.csvs import (compute_geo_mean_speedup, generate_comparison_csv,
-                                        load_benchmark_families, rebuild_best_checkpoint,
-                                        update_checkpoint_speedup)
+                                        rebuild_best_checkpoint, update_checkpoint_speedup)
                 with open(ckpt_file) as f:
                     _eval_data = _json.load(f)
                 _baseline_file = getattr(cfg, "eval_json_file", None) or getattr(cfg, "json_file", None)
@@ -248,9 +247,8 @@ if _ckpt:
                             _agent_name = os.path.basename(os.path.normpath(_agent_dir))
                             if _agent_name.endswith("_agent"):
                                 _agent_name = _agent_name[:-6]
-                            _fams = load_benchmark_families()
-                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "models_only", [], _fams)
-                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "ops_only", [], _fams)
+                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "models_only", [])
+                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "ops_only", [])
                             print_info("Updated breakdown csvs (benchmark family / op type)")
                         except Exception as _e2:
                             print_info(f"breakdown csvs skipped: {_e2}")
