@@ -34,8 +34,9 @@ ppo_module = import_autoschedular_module("ppo", AUTOSCHEDULER_IMPL)
 collect_trajectory = ppo_module.collect_trajectory
 ppo_update = ppo_module.ppo_update
 value_update = ppo_module.value_update
-# Distributed PPO (V5.1): DASK_NODES > 0 → collect across Dask workers, update on the driver.
-if int(os.getenv('DASK_NODES', '0')) > 0:
+# Distributed PPO (V5.1): Dask enabled (config dask_node_count > 0 or DASK_NODES env)
+# → collect across Dask workers, update on the driver.
+if import_autoschedular_module("utils.dask_manager", AUTOSCHEDULER_IMPL).ENABLED:
     collect_trajectory = import_autoschedular_module("distributed", AUTOSCHEDULER_IMPL).collect_distributed_trajectory
 
 logging.basicConfig(

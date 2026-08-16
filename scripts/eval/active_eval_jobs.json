@@ -1,26 +1,34 @@
 {
-  "16787661": {
-    "agent": "paper_original",
-    "start": 18700,
-    "end": 20000,
+  "17260081": {
+    "agent": "v5_distributed.json",
+    "start": 50,
+    "end": 5000,
     "step": 100,
-    "state": "RUNNING",
-    "node": "bn001"
+    "state": "PENDING",
+    "node": "(Priority)"
   },
-  "16787663": {
-    "agent": "paper_transformer_large",
-    "start": 13200,
-    "end": 13800,
+  "17260082": {
+    "agent": "v5_no_transformer.json",
+    "start": 50,
+    "end": 5000,
     "step": 100,
-    "state": "RUNNING",
-    "node": "bn001"
+    "state": "PENDING",
+    "node": "(Priority)"
   },
-  "16787664": {
-    "agent": "paper_transformer_small",
-    "start": 19300,
-    "end": 20000,
+  "17260083": {
+    "agent": "v5_legacy_paper.json",
+    "start": 50,
+    "end": 5000,
     "step": 100,
-    "state": "RUNNING",
-    "node": "bn002"
+    "state": "PENDING",
+    "node": "(Priority)"
+  },
+  "17260084": {
+    "agent": "v5_no_transformer_legacy_paper.json",
+    "start": 50,
+    "end": 5000,
+    "step": 100,
+    "state": "PENDING",
+    "node": "(Priority)"
   }
 }

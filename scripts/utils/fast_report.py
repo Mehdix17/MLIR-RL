@@ -51,6 +51,7 @@ def update_experiment_states(agent_reports):
 
 DATASET_MAPPINGS = {
     "ops_and_blocks": load_experiments(),
+    "legacy_paper": {k: v for k, v in load_experiments().items() if 'legacy_paper' in v},
     "new": {
         "v0": "results/new_dataset_results/v0_agent",
         "v4_6": "results/new_dataset_results/v4_6_agent",
@@ -58,7 +59,7 @@ DATASET_MAPPINGS = {
         "v4_8": "results/new_dataset_results/v4_8_agent",
         "v4_9_small": "results/new_dataset_results/v4_9_small_agent",
         "v4_9_large": "results/new_dataset_results/v4_9_large_agent",
-    }
+    },
 }
 
 def get_slurm_jobs():
@@ -286,7 +287,7 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
 def main():
     parser = argparse.ArgumentParser(description="Fast progress reporting tool")
     parser.add_argument("-d", "--dataset", default="ops_and_blocks", 
-                        choices=["ops_and_blocks", "new"], help="Dataset to report on")
+                        choices=["ops_and_blocks", "legacy_paper", "new"], help="Dataset to report on")
     args = parser.parse_args()
     
     t0 = time.time()

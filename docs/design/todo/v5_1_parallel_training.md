@@ -23,7 +23,13 @@
 >    `--exclusive`, 16 workers pack onto ~2 physical nodes); seed policy =
 >    **matched seeds** (both runs share the same seed — the only difference is
 >    the architecture); pipelining = **out of v1** (tracked in
->    `v5_future_ideas.md`).
+>    `v5_future_ideas.md`). SIZING REVISED 2026-08-14 from live measurement
+>    (ps on bn* nodes): workers ~0.7GB RSS, ~4 cores during exec bursts →
+>    worker sizing now lives in the JSON config (`dask_worker_cores=8`,
+>    `dask_worker_mem=3GB`, `dask_worker_exclusive=false`,
+>    `dask_node_count=16` in `config/v5/v5_distributed.json`); precedence
+>    env > config > default. No launch env vars needed for a standard
+>    distributed run: `sbatch scripts/train/train.sh config/v5/v5_distributed.json`.
 
 ---
 

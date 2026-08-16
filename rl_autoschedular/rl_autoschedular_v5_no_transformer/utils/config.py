@@ -1,6 +1,6 @@
 from typing import Literal, Any, Optional
 from typeguard import check_type, CollectionCheckStrategy
-from rl_autoschedular_v5.utils.singleton import Singleton
+from rl_autoschedular_v5_no_transformer.utils.singleton import Singleton
 import json
 import os
 

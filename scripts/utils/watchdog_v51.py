@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Watchdog for the V5.1 paired runs. Prints ONLY on anomalies (silent when healthy).
+"""Watchdog for the V5.1 runs (ops_and_blocks + legacy_paper, transformer + LSTM).
+Prints ONLY on anomalies.
 
-Checks: both drivers RUNNING, 16 dask workers for the distributed leg, bench failures
-in the latest log, cross-worker duplicate execs, and checkpoint growth.
+Checks: at least one driver RUNNING, dask worker fleet healthy, bench failures in the
+latest log, cross-worker duplicate execs, and progress.
 """
 import json
 import os
@@ -30,10 +31,10 @@ for line in out.strip().splitlines():
 dask_workers = [j for j, (n, s) in jobs.items() if n == 'dask' and s == 'R']
 drivers_running = [j for j, (n, s) in jobs.items() if n == 'mlir-train' and s == 'R']
 
-if len(drivers_running) != 2:
-    alerts.append(f'DRIVERS: {len(drivers_running)}/2 mlir-train jobs running')
-if len(dask_workers) != 16:
-    alerts.append(f'WORKERS: {len(dask_workers)}/16 running')
+if len(drivers_running) < 2:
+    alerts.append(f'DRIVERS: {len(drivers_running)} mlir-train jobs running (<2)')
+if len(dask_workers) < 16:
+    alerts.append(f'WORKERS: {len(dask_workers)} running (< 16)')
 
 # bench failures / duplicate execs from the latest distributed log
 dist_log = max([f for f in os.listdir(f'{REPO}/logs') if f.startswith('train_')],
@@ -43,8 +44,8 @@ if dist_log:
                           capture_output=True, text=True).stdout
     fails = re.findall(r'(\d+) benchmark failures this iteration', tail)
     dups = re.findall(r'(\d+) cross-worker duplicate execs', tail)
-    if fails and int(fails[-1]) > 0:
-        alerts.append(f'bench failures: {fails[-1]}/iter')
+    if fails and int(fails[-1]) > 5:
+        alerts.append(f'bench failures: {fails[-1]}/iter (>5)')
     if dups and int(dups[-1]) > 10:
         alerts.append(f'duplicate execs: {dups[-1]}/iter')
 

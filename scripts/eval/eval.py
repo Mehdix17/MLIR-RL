@@ -11,6 +11,11 @@ import signal
 import torch
 from typing import Optional
 
+# Eval is always single-node: dask params (config dask_node_count / DASK_NODES)
+# fire only for training jobs. Must be set before the package imports below,
+# because the package's DaskManager.ENABLED is evaluated at module import time.
+os.environ['DASK_TRAINING_ONLY'] = '1'
+
 def _sigabrt_handler(signum, frame):
     raise RuntimeError("MLIR native code crashed (SIGABRT) — caught and continuing")
 signal.signal(signal.SIGABRT, _sigabrt_handler)

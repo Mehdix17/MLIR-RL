@@ -1,8 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
-#SBATCH --mem=16G
-#SBATCH --cpus-per-task=64
+# Lean driver sizing (measured: distributed driver ~2 cores / ~3.3GB RSS — dispatch + PPO only).
+# 8c/8G = ~4x CPU and ~2.5x RAM headroom. The old 64c/16G was for the single-node path
+# (64-parallel collection in-process); if a single-node run is ever relaunched, bump via:
+#   sbatch --cpus-per-task=64 --mem=16G scripts/train/train.sh <config>
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=8
 #SBATCH --constraint=bergamo
 #SBATCH --time=7-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out

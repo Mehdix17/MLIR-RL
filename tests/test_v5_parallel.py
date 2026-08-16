@@ -65,7 +65,7 @@ class TestReportParallel(unittest.TestCase):
 class TestConfigs(unittest.TestCase):
     def test_paper_hyperparameter_parity(self):
         paper = json.load(open(REPO / 'config/ops_and_blocks/train/paper_original.json'))
-        for cfg_name in ('v5_single_node.json', 'v5_distributed.json'):
+        for cfg_name in ('v5_single_node.json', 'v5_distributed.json', 'v5_no_transformer.json'):
             cfg = json.load(open(REPO / 'config' / 'v5' / cfg_name))
             for key in PAPER_PARITY_KEYS:
                 self.assertEqual(
@@ -79,6 +79,9 @@ class TestConfigs(unittest.TestCase):
         self.assertEqual(cfg['results_dir'], 'results/ops_and_blocks_results/v5_distributed_agent')
         self.assertEqual(cfg['implementation'], 'rl_autoschedular_v5')
         self.assertEqual(cfg['bench_count'], 64)
+        self.assertEqual(cfg['dask_node_count'], 16)
+        self.assertEqual(cfg['dask_worker_cores'], 8)
+        self.assertEqual(cfg['dask_worker_mem'], '3GB')
 
 
 class TestSeed(unittest.TestCase):

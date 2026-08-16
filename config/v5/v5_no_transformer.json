@@ -48,14 +48,6 @@
   "ppo_clip_range": 0.2,
   "gae_lambda": 0.95,
   "max_grad_norm": 0.5,
-  "transformer_d_model": 64,
-  "transformer_nhead": 2,
-  "transformer_num_layers": 2,
-  "transformer_ffn_dim": 128,
-  "transformer_dropout": 0.1,
-  "transformer_activation": "gelu",
-  "transformer_pooling": "cls",
-  "transformer_use_action_history_token": false,
   "bench_count": 64,
   "dask_worker_cores": 8,
   "dask_worker_mem": "3GB",
@@ -63,13 +55,12 @@
   "lr": 0.001,
   "seed": 42,
   "tags": [
-    "ops_and_blocks",
-    "v5",
-    "transformer",
-    "distributed"
+    "v5_no_transformer",
+    "lstm",
+    "ablation"
   ],
-  "results_dir": "results/ops_and_blocks_results/v5_distributed_agent",
-  "implementation": "rl_autoschedular_v5",
+  "results_dir": "results/ops_and_blocks_results/v5_no_transformer_agent",
+  "implementation": "rl_autoschedular_v5_no_transformer",
   "json_file": "results/ops_and_blocks_results/baselines/mlir/base_train.json",
   "eval_json_file": "results/ops_and_blocks_results/baselines/mlir/base_eval.json",
   "dask_node_count": 16

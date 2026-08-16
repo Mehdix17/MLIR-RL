@@ -14,7 +14,7 @@ from .singleton import Singleton
 from .log import print_alert, print_error, print_info, print_success
 
 if TYPE_CHECKING:
-    from rl_autoschedular_v5.benchmarks import Benchmarks
+    from rl_autoschedular_v5_no_transformer.benchmarks import Benchmarks
     from distributed import Future
 
 def _dask_node_count() -> int:
@@ -23,7 +23,7 @@ def _dask_node_count() -> int:
     if env is not None:
         return int(env)
     try:
-        from rl_autoschedular_v5.utils.config import Config
+        from rl_autoschedular_v5_no_transformer.utils.config import Config
         return int(getattr(Config(), 'dask_node_count', 0) or 0)
     except Exception:
         return 0
@@ -87,7 +87,7 @@ class DaskManager(metaclass=Singleton):
         # conda activate wants the env dir.
         dask_conda_env = (os.getenv('CONDA_ENV') or '').replace('/bin/activate', '')
         # Worker sizing: env override > JSON config > measured defaults
-        from rl_autoschedular_v5.utils.config import Config
+        from rl_autoschedular_v5_no_transformer.utils.config import Config
         _cfg = Config()
         _cores = getattr(_cfg, 'dask_worker_cores', None)
         _mem = getattr(_cfg, 'dask_worker_mem', None)

@@ -32,7 +32,7 @@
   "normalize_bounds": "max",
   "normalize_adv": "standard",
   "reuse_experience": "none",
-  "benchmarks_folder_path": "data/ops_and_blocks",
+  "benchmarks_folder_path": "data/legacy_paper/nn",
   "replay_count": 0,
   "nb_iterations": 20000,
   "ppo_epochs": 4,
@@ -63,14 +63,13 @@
   "lr": 0.001,
   "seed": 42,
   "tags": [
-    "ops_and_blocks",
-    "v5",
-    "transformer",
-    "distributed"
+    "v5_legacy_paper",
+    "legacy_paper",
+    "ops_and_blocks"
   ],
-  "results_dir": "results/ops_and_blocks_results/v5_distributed_agent",
+  "results_dir": "results/legacy_paper_results/v5_legacy_paper_agent",
   "implementation": "rl_autoschedular_v5",
-  "json_file": "results/ops_and_blocks_results/baselines/mlir/base_train.json",
-  "eval_json_file": "results/ops_and_blocks_results/baselines/mlir/base_eval.json",
+  "json_file": "results/legacy_paper_results/baselines/mlir/base_train.json",
+  "eval_json_file": "results/legacy_paper_results/baselines/mlir/base_eval.json",
   "dask_node_count": 16
 }
