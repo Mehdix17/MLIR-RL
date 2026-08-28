@@ -14,7 +14,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 EXPERIMENTS_FILE = os.path.join(PROJECT_ROOT, "experiments.json")
 
 
-def load_experiments() -> dict:
+def load_experiments(dataset: str | None = None) -> list[dict]:
     """Load active experiments from the repo-root experiments.json registry.
 
     The report-progress skill reads this file to know which runs to report.
@@ -22,9 +22,10 @@ def load_experiments() -> dict:
     try:
         with open(EXPERIMENTS_FILE) as f:
             data = json.load(f)
-        return {e["name"]: e["results_dir"] for e in data.get("experiments", [])}
+        return [e for e in data.get("experiments", [])
+                if not e.get("archived") and (dataset in (None, "all") or e.get("dataset") == dataset)]
     except Exception:
-        return {}
+        return []
 
 
 def update_experiment_states(agent_reports):
@@ -34,10 +35,10 @@ def update_experiment_states(agent_reports):
             data = json.load(f)
     except Exception:
         return
-    states = {r["version"]: r["state"] for r in agent_reports}
+    states = {r["results_dir"]: r["state"] for r in agent_reports}
     updated = False
     for e in data.get("experiments", []):
-        state = states.get(e["name"])
+        state = states.get(e["results_dir"])
         if state and state != e.get("state"):
             e["state"] = state
             updated = True
@@ -49,18 +50,17 @@ def update_experiment_states(agent_reports):
         os.replace(tmp, EXPERIMENTS_FILE)
 
 
-DATASET_MAPPINGS = {
-    "ops_and_blocks": load_experiments(),
-    "legacy_paper": {k: v for k, v in load_experiments().items() if 'legacy_paper' in v},
-    "new": {
+NEW_DATASET_EXPERIMENTS = [
+    {"name": name, "results_dir": results_dir, "dataset": "new", "config": name}
+    for name, results_dir in {
         "v0": "results/new_dataset_results/v0_agent",
         "v4_6": "results/new_dataset_results/v4_6_agent",
         "v4_7": "results/new_dataset_results/v4_7_agent",
         "v4_8": "results/new_dataset_results/v4_8_agent",
         "v4_9_small": "results/new_dataset_results/v4_9_small_agent",
         "v4_9_large": "results/new_dataset_results/v4_9_large_agent",
-    },
-}
+    }.items()
+]
 
 def get_slurm_jobs():
     """Query squeue in the background."""
@@ -167,8 +167,12 @@ def scan_train_logs():
             continue
     return version_jobs
 
-def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
+def get_agent_stats(experiment, active_jobs, train_log_data):
     """Aggregate stats for a specific agent version."""
+    version = experiment["name"]
+    reg_dir = experiment["results_dir"]
+    dataset = experiment["dataset"]
+    config_key = os.path.splitext(os.path.basename(experiment.get("config", version)))[0]
     agent_dir = os.path.join(PROJECT_ROOT, reg_dir)
     models_dir = os.path.join(agent_dir, "models")
     eval_dir = os.path.join(agent_dir, "eval")
@@ -200,6 +204,7 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
                     evaluated_ckpts.append(int(m.group(1)))
     evaluated_ckpts.sort()
     evaluated_count = len(evaluated_ckpts)
+    last_evaluated = evaluated_ckpts[-1] if evaluated_ckpts else None
 
     # 3. Slurm Jobs correlating to this agent
     slurm_job_id = None
@@ -209,7 +214,7 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
     
     # Check if this agent is currently running training or evaluating
     log_info = None
-    version_logs = train_log_data.get(version, {})
+    version_logs = train_log_data.get(config_key, {})
     if version_logs:
         # Prefer the log whose job is still active; else the most advanced one
         log_info = next((v for jid, v in version_logs.items() if jid in active_jobs), None)
@@ -231,13 +236,15 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
             with open(active_eval_jobs_json) as f:
                 active_evals = json.load(f)
             for jid, info in active_evals.items():
-                if jid in active_jobs and info.get("agent") == version:
+                if jid not in active_jobs or info.get("agent") not in {version, config_key}:
+                    continue
+                start, end, step = info["start"], info["end"], info["step"]
+                eval_ckpts_evaluating += len(range(start, end + 1, step))
+                if job_type != "Train":
                     slurm_job_id = jid
                     slurm_state = active_jobs[jid]["state"]
                     slurm_node = active_jobs[jid]["node"]
                     job_type = "Eval"
-                    start, end, step = info["start"], info["end"], info["step"]
-                    eval_ckpts_evaluating += len(range(start, end + 1, step))
         except Exception:
             pass
 
@@ -270,8 +277,11 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
 
     return {
         "version": version,
+        "dataset": dataset,
+        "results_dir": reg_dir,
         "max_trained": max_trained,
         "evaluated_count": evaluated_count,
+        "last_evaluated": last_evaluated,
         "evaluating_count": eval_ckpts_evaluating,
         "pending_count": pending_count,
         "slurm_job_id": slurm_job_id,
@@ -286,8 +296,8 @@ def get_agent_stats(version, reg_dir, active_jobs, train_log_data):
 
 def main():
     parser = argparse.ArgumentParser(description="Fast progress reporting tool")
-    parser.add_argument("-d", "--dataset", default="ops_and_blocks", 
-                        choices=["ops_and_blocks", "legacy_paper", "new"], help="Dataset to report on")
+    parser.add_argument("-d", "--dataset", default="all",
+                        choices=["all", "ops_and_blocks", "legacy_paper", "new"], help="Dataset to report on")
     args = parser.parse_args()
     
     t0 = time.time()
@@ -302,14 +312,14 @@ def main():
         quota = f_quota.result()
         train_log_data = f_logs.result()
 
-    agents = DATASET_MAPPINGS.get(args.dataset, DATASET_MAPPINGS["ops_and_blocks"])
+    agents = NEW_DATASET_EXPERIMENTS if args.dataset == "new" else load_experiments(args.dataset)
     
     # Process agent metrics in parallel
     agent_reports = []
     with ThreadPoolExecutor(max_workers=len(agents)) as executor:
         futures = {
-            executor.submit(get_agent_stats, version, reg_dir, active_jobs, train_log_data): version
-            for version, reg_dir in agents.items()
+            executor.submit(get_agent_stats, experiment, active_jobs, train_log_data): experiment
+            for experiment in agents
         }
         for fut in futures:
             agent_reports.append(fut.result())
@@ -330,7 +340,7 @@ def main():
     # Add our current interactive job
     for jid, info in active_jobs.items():
         if "interact" in info["name"] or "salloc" in info["name"] or "srun" in info["name"]:
-            slurm_rows.append(f"| `{jid}` | interactive | Interactive Shell | **{info['state']}** | `{info['node']}` |")
+            slurm_rows.append(f"| `{jid}` | `-` | interactive | Interactive Shell | **{info['state']}** | `{info['node']}` |")
             
     for rep in agent_reports:
         if rep["slurm_job_id"]:
@@ -338,24 +348,24 @@ def main():
             state = rep["slurm_state"]
             node = rep["slurm_node"]
             jtype = rep["job_type"]
-            slurm_rows.append(f"| `{jid}` | `{rep['version']}` | {jtype} | **{state}** | `{node}` |")
+            slurm_rows.append(f"| `{jid}` | `{rep['dataset']}` | `{rep['version']}` | {jtype} | **{state}** | `{node}` |")
             if rep.get("worker_count"):
                 slurm_rows.append(
-                    f"| `{rep['worker_count']}× dask` | `{rep['version']}` | Workers | **RUNNING** | "
+                    f"| `{rep['worker_count']}× dask` | `{rep['dataset']}` | `{rep['version']}` | Workers | **RUNNING** | "
                     f"`{', '.join(rep['worker_nodes'])}` |"
                 )
             
     if slurm_rows:
-        print("| Job ID | Agent Version | Job Type | State | Compute Node |")
-        print("|---|---|---|---|---|")
+        print("| Job ID | Dataset | Agent Version | Job Type | State | Compute Node |")
+        print("|---|---|---|---|---|---|")
         print("\n".join(slurm_rows))
     else:
         print("*No active Slurm jobs found for the current user.*")
     print()
 
-    # Table 2: Training Progress
+    # Table 2: Training Progress (compact columns — Job ID lives in Table 1; rows fit a terminal line)
     print("### 2. Training Progress")
-    print("| Version | Job ID | Iteration | Progress % | Status | Workers | Bench Failures | Latest Checkpoint |")
+    print("| Dataset | Version | Iteration | Progress % | Status | Workers | Failures | Latest Ckpt |")
     print("|---|---|---|---|---|---|---|---|")
     for rep in agent_reports:
         log = rep["train_log"]
@@ -367,22 +377,23 @@ def main():
                 status = f"Running ({rep['slurm_state']})"
             elif status == "running":
                 status = "Stopped (Timeout/Cancelled)"
-            
+
             ckpt = rep["max_trained"] if rep["max_trained"] > 0 else "N/A"
             workers = rep.get("worker_count") or "-"
             failures = log.get("bench_failures")
             failures_s = f"**{failures}**" if failures and failures > 0 else (str(failures) if failures is not None else "-")
-            print(f"| `{rep['version']}` | `{log['job_id']}` | `{log['iteration']} / {log['total']}` | `{prog:.1f}%` | {status} | `{workers}` | {failures_s} | `{ckpt}` |")
+            print(f"| `{rep['dataset']}` | `{rep['version']}` | `{log['iteration']}` | `{prog:.1f}%` | {status} | `{workers}` | {failures_s} | `{ckpt}` |")
         else:
-            print(f"| `{rep['version']}` | `N/A` | `0 / 20000` | `0.0%` | Not Started | `-` | - | `N/A` |")
+            print(f"| `{rep['dataset']}` | `{rep['version']}` | `0` | `0.0%` | Not Started | `-` | - | `N/A` |")
     print()
 
     # Table 3: Evaluation Progress
     print("### 3. Evaluation Progress")
-    print("| Agent Version | Evaluated | Evaluating | Pending | Max Trained Checkpoint |")
-    print("|---|---|---|---|---|")
+    print("| Dataset | Agent Version | Evaluated | Last Evaluated | Evaluating | Pending | Max Trained Checkpoint |")
+    print("|---|---|---|---|---|---|---|")
     for rep in agent_reports:
-        print(f"| `{rep['version']}` | {rep['evaluated_count']} checkpoints | {rep['evaluating_count']} | {rep['pending_count']} checkpoints | `{rep['max_trained']}` |")
+        le = f"`{rep['last_evaluated']}`" if rep['last_evaluated'] is not None else "`-`"
+        print(f"| `{rep['dataset']}` | `{rep['version']}` | {rep['evaluated_count']} checkpoints | {le} | {rep['evaluating_count']} | {rep['pending_count']} checkpoints | `{rep['max_trained']}` |")
     print()
 
     # Table 4: Lustre Quota

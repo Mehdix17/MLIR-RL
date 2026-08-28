@@ -119,8 +119,8 @@ def main():
         # Update policy model with PPO
         ppo_update(trajectory, model, optimizer)
 
-        # Save model + optimizer state every 50 iterations
-        if step % 50 == 0:
+        # Save model + optimizer state every 100 iterations (multiples of 100)
+        if step % 100 == 0:
             torch.save(
                 {'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'step': step},
                 os.path.join(fl.models_dir, f'model_{step}.pt')

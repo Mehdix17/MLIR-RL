@@ -1,0 +1,10 @@
+{
+  "eval_config": "config/v5/v5_legacy_paper.json",
+  "results_dir": "results/legacy_paper_results/v5_legacy_paper_agent",
+  "dataset": "legacy_paper",
+  "num_runs": 5,
+  "aggregator": "median",
+  "cpus_per_task": 64,
+  "mem": "100G",
+  "time": "7-00:00:00"
+}

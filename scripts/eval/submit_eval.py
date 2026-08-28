@@ -82,7 +82,7 @@ def main():
             agent_name = agent
             break
     if not agent_name:
-        agent_name = config_name.replace("_eval.json", "")
+        agent_name = config_name.replace(".json", "").replace("_eval", "")
 
     print(f"Resolved Config Path: {config_path}")
     print(f"Agent Version: {agent_name}")

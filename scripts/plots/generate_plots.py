@@ -18,6 +18,7 @@ DATASET_DIRS = {
     "new": "results/new_dataset_results",
     "single_ops": "results/single_ops_dataset_results",
     "ops_and_blocks": "results/ops_and_blocks_results",
+    "legacy_paper": "results/legacy_paper_results",
 }
 
 FONT_SETTINGS = {
@@ -34,7 +35,9 @@ AGENT_COLORS = {
     "paper_transformer_large": "#DD8452",
     "paper_transformer_small": "#55A868",
     "v5_single_node": "#C44E52",
-    "v5_distributed": "#8172B3",
+    "v5_distributed": "#0072B2",
+    "v5_legacy_paper": "#0072B2",
+    "v5_no_transformer": "#D55E00",
 }
 
 FALLBACK_COLORS = ["#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B3", "#937860", "#DA8BC3", "#8C8C8C", "#CCB974", "#64B5CD"]
@@ -50,7 +53,8 @@ AGENT_DISPLAY_NAMES = {
     "paper_transformer_small": "paper_tf_small",
     "paper_transformer_large": "paper_tf_large",
     "v5_single_node": "v5_single_node",
-    "v5_distributed": "v5_distributed",
+    "v5_distributed": "v5",
+    "v5_legacy_paper": "v5",
 }
 
 EVOLUTION_CSV = "checkpoint_speedups.csv"
@@ -65,14 +69,9 @@ def get_benchmark_family(bench_name: str, families: dict) -> str:
     return "unknown"
 
 
-def next_exp_dir() -> str:
-    base = os.path.join(PROJECT_ROOT, "plots", "experimentation_plots")
-    os.makedirs(base, exist_ok=True)
-    nums = [
-        int(d[3:]) for d in os.listdir(base)
-        if d.startswith("exp") and d[3:].isdigit()
-    ]
-    return os.path.join("plots", "experimentation_plots", f"exp{max(nums, default=0) + 1}")
+def next_exp_dir(dataset: str, agents: list) -> str:
+    name = "_".join(agents)
+    return os.path.join("plots", "experimentation_plots", dataset, name)
 
 
 def load_agent_csv(dataset: str, agent: str, stem: str, csv_override: str | None) -> pd.DataFrame:
@@ -103,7 +102,7 @@ def plot_evolution(df: pd.DataFrame, png_path: str, custom_title: str = None):
         color = AGENT_COLORS.get(agent, FALLBACK_COLORS[i % len(FALLBACK_COLORS)])
         ax.plot(
             adf["checkpoint"], adf["speedup"],
-            label=agent, color=color,
+            label=AGENT_DISPLAY_NAMES.get(agent, agent), color=color,
             linewidth=LINE_STYLE["linewidth"],
             marker=LINE_STYLE["marker"],
             markersize=LINE_STYLE["markersize"],
@@ -154,7 +153,7 @@ def plot_comparison(
         x = np.arange(len(families)) + (i - (n_agents - 1) / 2) * width
         ax.bar(
             x, [adf.loc[f, "speedup"] if f in adf.index else 0.0 for f in families],
-            width=width, label=agent, color=color, edgecolor="white", linewidth=0.5,
+            width=width, label=AGENT_DISPLAY_NAMES.get(agent, agent), color=color, edgecolor="white", linewidth=0.5,
         )
 
     ax.axhline(y=1.0, color="black", linestyle="--", linewidth=1, alpha=0.5, label="MLIR Baseline (1.0×)")
@@ -181,7 +180,7 @@ def plot_comparison(
 def main():
     parser = argparse.ArgumentParser(description="MLIR-RL Plot Generator (reads CSVs, writes PNGs only)")
     parser.add_argument("-d", "--dataset",
-                        choices=["new", "single_ops", "ops_and_blocks"], required=True)
+                        choices=["new", "single_ops", "ops_and_blocks", "legacy_paper"], required=True)
     parser.add_argument("-a", "--agents", nargs="+", required=True,
                         help="Agent directory prefixes (e.g. paper_original paper_transformer_small)")
     parser.add_argument("-m", "--mode",
@@ -206,7 +205,7 @@ def main():
         out_dir = (args.out_dir if os.path.isabs(args.out_dir)
                    else os.path.join(PROJECT_ROOT, args.out_dir))
     else:
-        out_dir = os.path.join(PROJECT_ROOT, next_exp_dir())
+        out_dir = os.path.join(PROJECT_ROOT, next_exp_dir(args.dataset, args.agents))
 
     # ── Resolve file names based on mode / filter ─────────────────────────────
     if args.mode == "evolution":
@@ -220,7 +219,7 @@ def main():
         excl_tag = ("_no_" + "_no_".join(e.split("_")[0] for e in args.exclude)) if args.exclude else ""
         png_stem = f"best_checkpoint_benchmark_family_results{excl_tag}"
 
-    png_path = (args.png if args.png else os.path.join(out_dir, "pngs", f"{png_stem}.png"))
+    png_path = (args.png if args.png else os.path.join(out_dir, f"{png_stem}.png"))
     if not os.path.isabs(png_path):
         png_path = os.path.join(PROJECT_ROOT, png_path)
 

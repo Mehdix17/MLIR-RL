@@ -1,32 +1,16 @@
 {
-  "17260081": {
-    "agent": "v5_distributed.json",
-    "start": 50,
-    "end": 5000,
+  "17376481": {
+    "agent": "v5_no_transformer",
+    "start": 15150,
+    "end": 18450,
     "step": 100,
     "state": "PENDING",
     "node": "(Priority)"
   },
-  "17260082": {
-    "agent": "v5_no_transformer.json",
-    "start": 50,
-    "end": 5000,
-    "step": 100,
-    "state": "PENDING",
-    "node": "(Priority)"
-  },
-  "17260083": {
-    "agent": "v5_legacy_paper.json",
-    "start": 50,
-    "end": 5000,
-    "step": 100,
-    "state": "PENDING",
-    "node": "(Priority)"
-  },
-  "17260084": {
-    "agent": "v5_no_transformer_legacy_paper.json",
-    "start": 50,
-    "end": 5000,
+  "17376482": {
+    "agent": "v5_no_transformer_legacy_paper",
+    "start": 8750,
+    "end": 11450,
     "step": 100,
     "state": "PENDING",
     "node": "(Priority)"

@@ -3,7 +3,7 @@ name: cleanup-checkpoints
 description: Keep only the top 9 checkpoints of an experiment's models/ folder (3 best by CSV speedup + their ±50 neighbors), deleting the rest. DANGEROUS, irreversible operation — must follow the dry-run → user-confirmation → apply flow exactly. Use when the user asks to clean/prune/trim checkpoints or free space in a models/ folder.
 ---
 
-# Checkpoint Cleanup — Top-9 Retention
+# Checkpoint Cleanup — Top-9 (non-anchor) Retention
 
 This skill deletes model checkpoint files. **A wrong deletion is irreversible.**
 Follow the flow below EXACTLY. Never skip a step, never improvise the keep/delete
@@ -16,11 +16,15 @@ selection, never delete without explicit user confirmation.
    auto-updated by the eval script and regenerable via `utils/csvs.py`
    (columns: `checkpoint, speedup` — the CSV is per-experiment).
 2. **Neighbors** of each top checkpoint: `±50` (e.g. top = 200 → also 150 and 250).
-3. Final keep set = (top3 ∪ neighbors) **∩ checkpoints that actually exist on disk**,
-   **plus the highest-numbered checkpoint (the `--resume` anchor — resume loads the
-   latest `model_<n>.pt`, so it must never be deleted)**.
-   Everything else in `models/` is deleted. Nothing outside `model_<n>.pt` files is
-   ever touched.
+3. Final keep set = (top3 ∪ neighbors) **∩ checkpoints that actually exist on disk**
+   — i.e. **9 checkpoints that do NOT count the resume anchor**.
+4. **Plus the resume anchor** (the highest-numbered checkpoint) kept **separately** —
+   `--resume` loads the latest `model_<n>.pt`, so it must never be deleted and it is
+   never part of the 9. (If one neighbor is missing on disk the non-anchor count may
+   be < 9; the anchor is still extra.)
+
+Everything else in `models/` is deleted. Nothing outside `model_<n>.pt` files is
+ever touched.
 
 ## Flow (mandatory)
 

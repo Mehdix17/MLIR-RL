@@ -1,14 +1,12 @@
 # Evaluation Progress Tracker
 
-**Last Updated:** 2026-08-16 17:14:53
+**Last Updated:** 2026-08-23 05:31:39
 
 ## Active Slurm Jobs
 | Job ID | Agent Version | Checkpoint Range | State | Node |
 |---|---|---|---|---|
-| 17260081 | `v5_distributed.json` | 50–5000 (step 100) | **PENDING** | `(Priority)` |
-| 17260082 | `v5_no_transformer.json` | 50–5000 (step 100) | **PENDING** | `(Priority)` |
-| 17260083 | `v5_legacy_paper.json` | 50–5000 (step 100) | **PENDING** | `(Priority)` |
-| 17260084 | `v5_no_transformer_legacy_paper.json` | 50–5000 (step 100) | **PENDING** | `(Priority)` |
+| 17376481 | `v5_no_transformer` | 15150–18450 (step 100) | **PENDING** | `(Priority)` |
+| 17376482 | `v5_no_transformer_legacy_paper` | 8750–11450 (step 100) | **PENDING** | `(Priority)` |
 
 ## Agent Progress Summary
 | Agent Version | Evaluated | Evaluating | Pending | Max Trained |

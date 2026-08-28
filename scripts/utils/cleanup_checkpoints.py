@@ -89,8 +89,9 @@ def read_rankings(csv_path: str, agent: str) -> dict[int, float]:
 def select_keep(disk_models: set[int], rankings: dict[int, float]) -> set[int]:
     """top-3 by speedup (only checkpoints that exist on disk) + their ±50 neighbors.
 
-    The highest-numbered checkpoint is ALWAYS kept: --resume loads the latest
-    model_<n>.pt, so deleting it breaks resumption.
+    The resume anchor (highest-numbered checkpoint) is an EXTRA beyond that keep set,
+    always retained separately (--resume loads the latest model_<n>.pt). The returned
+    set is the 9 non-anchor keep files.
     """
     ranked = sorted((c for c in disk_models if c in rankings), key=lambda c: rankings[c], reverse=True)
     top3 = ranked[:TOP_N]
@@ -98,8 +99,12 @@ def select_keep(disk_models: set[int], rankings: dict[int, float]) -> set[int]:
     for c in top3:
         keep.add(c - NEIGHBOR_STEP)
         keep.add(c + NEIGHBOR_STEP)
-    keep.add(max(disk_models))  # resume anchor
     return {c for c in keep if c in disk_models}
+
+
+def resume_anchor(disk_models: set[int]) -> int:
+    """Highest-numbered checkpoint, always kept for --resume."""
+    return max(disk_models)
 
 
 def plan(models_dir: str, csv_path: str, agent: str):
@@ -109,9 +114,10 @@ def plan(models_dir: str, csv_path: str, agent: str):
     rankings = read_rankings(csv_path, agent)
     ranked = sorted((c for c in disk_models if c in rankings), key=lambda c: rankings[c], reverse=True)
     keep = select_keep(disk_models, rankings)
-    delete = disk_models - keep
+    anchor = resume_anchor(disk_models)
+    delete = disk_models - keep - {anchor}
     missing = sorted(set(rankings) - disk_models)
-    return disk_models, ranked, keep, delete, missing
+    return disk_models, ranked, keep, delete, missing, anchor
 
 
 def main() -> int:
@@ -137,15 +143,17 @@ def main() -> int:
     csv_path = resolve_csv_path(args.csv, args.experiment)
     if not os.path.isdir(models_dir):
         sys.exit(f"ERROR: models dir not found: {models_dir}")
-    disk_models, ranked, keep, delete, missing = plan(models_dir, csv_path, args.agent)
+    disk_models, ranked, keep, delete, missing, anchor = plan(models_dir, csv_path, args.agent)
 
     print(f"models dir : {models_dir}")
     print(f"csv        : {csv_path} (agent '{args.agent}')")
     print(f"on disk    : {len(disk_models)} checkpoints")
-    print(f"resume anchor: model_{max(disk_models)}.pt (always kept — --resume loads the latest)")
+    print(f"resume anchor: model_{anchor}.pt (kept extra — --resume loads the latest)")
     rankings = read_rankings(csv_path, args.agent)
     print(f"ranked top3: {[(c, round(rankings[c], 3)) for c in ranked[:TOP_N]]}")
     print(f"KEEP ({len(keep)}): {sorted(keep)}")
+    if anchor not in keep:
+        print(f" + resume anchor model_{anchor}.pt (not counted in the {len(keep)} above)")
     print(f"DELETE ({len(delete)}): {sorted(delete)}")
     if missing:
         print(f"NOTE: {len(missing)} CSV checkpoints not on disk (ignored): {missing}")
@@ -178,14 +186,15 @@ def self_test() -> int:
                           (350, 1.4), (400, 2.5), (450, 1.5), (500, 1.6), (550, 1.7),
                           (600, 1.9), (650, 1.8), (700, 1.2), (800, 1.1)]:
                 f.write(f"my_agent,{n},{sp}\r\n")
-        disk, ranked, keep, delete, _ = plan(os.path.join(tmp, "models"), csv, "my_agent")
-        # 800 is the latest checkpoint → resume anchor, kept even though its speedup (1.1) is low
-        expected_keep = {150, 200, 250, 350, 400, 450, 550, 600, 650, 800}
+        disk, ranked, keep, delete, _, anchor = plan(os.path.join(tmp, "models"), csv, "my_agent")
+        # 9 non-anchor keep = top3 {400,200,600} + neighbors ; 800 is the resume anchor, extra
+        expected_keep = {150, 200, 250, 350, 400, 450, 550, 600, 650}
         assert keep == expected_keep, f"keep={sorted(keep)} expected={sorted(expected_keep)}"
-        assert delete == disk - expected_keep
-        assert len(keep) == 10
-        assert max(disk) in keep  # resume anchor invariant
-        print(f"self-test PASS: keep={sorted(keep)} delete={sorted(delete)}")
+        assert anchor == 800
+        assert delete == disk - expected_keep - {anchor}
+        assert len(keep) == 9  # 9 without counting the resume anchor
+        assert anchor in disk and anchor not in keep  # anchor kept separately
+        print(f"self-test PASS: keep={sorted(keep)} (+anchor {anchor}) delete={sorted(delete)}")
         return 0
 
 

@@ -246,7 +246,7 @@ class LSTMEmbedding(nn.Module):
         """Initialize the LSTM embedding layer."""
         super(LSTMEmbedding, self).__init__()
 
-        embedding_size = OpFeatures.size()
+        embedding_size = 411  # match paper_original LSTMEmbedding (rl_autoschedular_paper/model.py); NOT OpFeatures.size() (711) — ablation parity
 
         self.output_size = embedding_size + ActionHistory.size()
 

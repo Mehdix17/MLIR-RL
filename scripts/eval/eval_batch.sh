@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-eval-batch
 #SBATCH --partition=compute
-#SBATCH --mem=16G
+#SBATCH --mem=32G
 #SBATCH --cpus-per-task=64
 #SBATCH --constraint=bergamo
 #SBATCH --time=7-00:00:00

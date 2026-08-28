@@ -1,9 +1,9 @@
 ---
-name: commit
+name: commit-push-pr
 description: Automated git workflow for staging, formatting conventional commits, branch safety validation, pushing, and PR suggestions. Use this when the user asks to commit, push, or manage repository changes.
 ---
 
-# Git Workflow Automation (Staging, Committing, Pushing, & PRs)
+# Commit, Push, and PR Workflow
 
 When this skill is invoked, follow this step-by-step workflow to safely and conventionally manage code changes.
 

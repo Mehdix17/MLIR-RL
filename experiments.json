@@ -4,46 +4,52 @@
       "name": "v5_single_node",
       "config": "config/v5/v5_single_node.json",
       "results_dir": "results/ops_and_blocks_results/v5_single_node_agent",
+      "dataset": "ops_and_blocks",
       "mode": "single_node",
       "seed": 42,
       "state": "stopped",
-      "description": "V5.1 baseline: single-node PPO, 64 benches/iter. CANCELLED (2026-08-14) after 1423 iters: distributed leg is ~2x faster (2357 iters in same wall time); checkpoints preserved for possible resume."
+      "description": "V5.1 baseline: single-node PPO, 64 benches/iter. CANCELLED (2026-08-14) after 1423 iters: distributed leg is ~2x faster (2357 iters in same wall time); checkpoints preserved for possible resume.",
+      "archived": true
     },
     {
-      "name": "v5_distributed",
+      "name": "v5",
       "config": "config/v5/v5_distributed.json",
       "results_dir": "results/ops_and_blocks_results/v5_distributed_agent",
+      "dataset": "ops_and_blocks",
       "mode": "distributed",
       "seed": 42,
-      "state": "running",
-      "description": "V5.1: distributed PPO, driver + 16 dask workers, 64 benches/iter"
+      "state": "stopped",
+      "description": "V5.1 PPO, 64 benches/iter"
     },
     {
       "name": "v5_no_transformer",
       "config": "config/v5/v5_no_transformer.json",
       "results_dir": "results/ops_and_blocks_results/v5_no_transformer_agent",
+      "dataset": "ops_and_blocks",
       "mode": "distributed",
       "seed": 42,
-      "state": "running",
-      "description": "V5 ablation: distributed PPO with LSTM embedding (paper_original) instead of transformer encoder"
+      "state": "stopped",
+      "description": "V5 ablation: LSTM embedding (paper_original) instead of transformer encoder"
     },
     {
-      "name": "v5_legacy_paper",
+      "name": "v5",
       "config": "config/v5/v5_legacy_paper.json",
       "results_dir": "results/legacy_paper_results/v5_legacy_paper_agent",
+      "dataset": "legacy_paper",
       "mode": "distributed",
       "seed": 42,
-      "state": "running",
-      "description": "V5.1 rl_autoschedular_v5 on the legacy_paper dataset (1354 benches)"
+      "state": "stopped",
+      "description": "V5.1 rl_autoschedular_v5 (1354 benches)"
     },
     {
-      "name": "v5_no_transformer_legacy_paper",
+      "name": "v5_no_transformer",
       "config": "config/v5/v5_no_transformer_legacy_paper.json",
       "results_dir": "results/legacy_paper_results/v5_no_transformer_legacy_paper_agent",
+      "dataset": "legacy_paper",
       "mode": "distributed",
       "seed": 42,
       "state": "running",
-      "description": "V5.1 rl_autoschedular_v5_no_transformer on the legacy_paper dataset (1354 benches)"
+      "description": "V5.1 rl_autoschedular_v5_no_transformer (1354 benches)"
     }
   ]
 }

@@ -177,7 +177,7 @@ Phase 3: feature-develop       →  implementation + move doc to docs/design/don
 ### Utility Skills
 
 - **`/report-progress`**: Active Slurm jobs, training, evals, Lustre quota in one call (`scripts/utils/fast_report.py`).
-- **`/commit`**: Conventional git helper with branch safety check.
+- **`/commit-push-pr`**: Conventional git helper with branch safety check.
 - **`/graphify`**: Query `graphify-out/graph.json` for codebase/architecture questions. Use before reading files.
 - **`plot-experimentation-results`**: Generate line evolution charts and comparison plots from training/eval results.
 - **`research-paper-writing`**: Scientific writing assistant for the MLIR-RL paper — structure, prose, figures, and LaTeX.
