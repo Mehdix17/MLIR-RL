@@ -162,6 +162,7 @@ def scan_train_logs():
                     "status": status,
                     "distributed": distributed,
                     "bench_failures": bench_failures,
+                    "mtime": os.path.getmtime(fpath),
                 }
         except Exception:
             continue
@@ -212,23 +213,28 @@ def get_agent_stats(experiment, active_jobs, train_log_data):
     slurm_node = "N/A"
     job_type = "N/A"
     
-    # Legacy alias for renamed experiments (legacy_paper -> paper_wrong_split -> mlir_rl_v1_paper)
-    LEGACY_ALIAS = {
-        "v5_mlir_rl_v1_paper": "v5_legacy_paper",
-        "v5_no_transformer_mlir_rl_v1_paper": "v5_no_transformer_legacy_paper",
-        "v5_paper_wrong_split": "v5_legacy_paper",
-        "v5_no_transformer_paper_wrong_split": "v5_no_transformer_legacy_paper",
+    # Legacy aliases for renamed experiments, newest first:
+    # mlir_rl_v1_paper -> paper_original -> legacy_paper (wrong_split name never ran training)
+    LEGACY_ALIASES = {
+        "v5_mlir_rl_v1_paper": ["v5_paper_original", "v5_legacy_paper"],
+        "v5_no_transformer_mlir_rl_v1_paper": ["v5_no_transformer_paper_original", "v5_no_transformer_legacy_paper"],
+        "v5_paper_wrong_split": ["v5_legacy_paper"],
+        "v5_no_transformer_paper_wrong_split": ["v5_no_transformer_legacy_paper"],
     }
-    alias_key = LEGACY_ALIAS.get(config_key)
 
     # Check if this agent is currently running training or evaluating
     log_info = None
-    version_logs = train_log_data.get(config_key, {}) or (train_log_data.get(alias_key, {}) if alias_key else {})
+    version_logs = dict(train_log_data.get(config_key, {}))
+    for alias_key in LEGACY_ALIASES.get(config_key, []):
+        for jid, v in train_log_data.get(alias_key, {}).items():
+            version_logs.setdefault(jid, v)
     if version_logs:
-        # Prefer the log whose job is still active; else the most advanced one
+        # Prefer the log whose job is still active; else the most recently written one.
+        # (max iteration is wrong: stale logs from crashed runs can show a higher
+        # loop counter than the current run, e.g. 20000 looped with 0 successful iters.)
         log_info = next((v for jid, v in version_logs.items() if jid in active_jobs), None)
         if log_info is None:
-            log_info = max(version_logs.values(), key=lambda v: v["iteration"])
+            log_info = max(version_logs.values(), key=lambda v: v.get("mtime", 0))
     if log_info:
         jid = log_info["job_id"]
         if jid in active_jobs:
