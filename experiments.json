@@ -19,7 +19,8 @@
       "mode": "distributed",
       "seed": 42,
       "state": "stopped",
-      "description": "V5.1 PPO, 64 benches/iter"
+      "description": "V5.1 PPO, 64 benches/iter",
+      "archived": true
     },
     {
       "name": "v5_no_transformer",
@@ -29,27 +30,28 @@
       "mode": "distributed",
       "seed": 42,
       "state": "stopped",
-      "description": "V5 ablation: LSTM embedding (paper_original) instead of transformer encoder"
+      "description": "V5 ablation: LSTM embedding (paper_original) instead of transformer encoder",
+      "archived": true
     },
     {
-      "name": "v5",
-      "config": "config/v5/v5_legacy_paper.json",
-      "results_dir": "results/legacy_paper_results/v5_legacy_paper_agent",
-      "dataset": "legacy_paper",
+      "name": "v5_mlir_rl_v1_paper",
+      "config": "config/v5/v5_mlir_rl_v1_paper.json",
+      "results_dir": "results/mlir_rl_v1_paper_results/v5_agent",
+      "dataset": "mlir_rl_v1_paper",
       "mode": "distributed",
       "seed": 42,
       "state": "stopped",
-      "description": "V5.1 rl_autoschedular_v5 (1354 benches)"
+      "description": "V5 transformer on exact paper split (1250 train / 19 eval), bergamo baselines"
     },
     {
-      "name": "v5_no_transformer",
-      "config": "config/v5/v5_no_transformer_legacy_paper.json",
-      "results_dir": "results/legacy_paper_results/v5_no_transformer_legacy_paper_agent",
-      "dataset": "legacy_paper",
+      "name": "v5_no_transformer_mlir_rl_v1_paper",
+      "config": "config/v5/v5_no_transformer_mlir_rl_v1_paper.json",
+      "results_dir": "results/mlir_rl_v1_paper_results/v5_no_transformer_agent",
+      "dataset": "mlir_rl_v1_paper",
       "mode": "distributed",
       "seed": 42,
-      "state": "running",
-      "description": "V5.1 rl_autoschedular_v5_no_transformer (1354 benches)"
+      "state": "failed",
+      "description": "V5 LSTM (no transformer) on exact paper split, bergamo baselines"
     }
   ]
 }

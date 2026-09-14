@@ -28,7 +28,7 @@ DATASET_BASELINES = {
     "new": "results/new_dataset_results/baselines/mlir/eval_base.json",
     "single_ops": "results/single_ops_dataset_results/baselines/mlir/base_eval.json",
     "ops_and_blocks": "results/ops_and_blocks_results/baselines/mlir/base_eval.json",
-    "legacy_paper": "results/legacy_paper_results/baselines/mlir/base_eval.json",
+    "mlir_rl_v1_paper": "results/mlir_rl_v1_paper_results/baselines/mlir/base_eval.json",
 }
 
 

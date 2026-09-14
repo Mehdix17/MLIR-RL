@@ -1,0 +1,10 @@
+{
+  "eval_config": "config/v5/v5_mlir_rl_v1_paper.json",
+  "results_dir": "results/mlir_rl_v1_paper_results/v5_agent",
+  "dataset": "mlir_rl_v1_paper",
+  "num_runs": 5,
+  "aggregator": "median",
+  "cpus_per_task": 64,
+  "mem": "100G",
+  "time": "7-00:00:00"
+}

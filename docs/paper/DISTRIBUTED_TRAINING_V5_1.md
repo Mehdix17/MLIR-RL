@@ -284,8 +284,8 @@ benchmarks in the older dataset, under investigation.
 |---|---|---|---|
 | v5_distributed | ops_and_blocks (12 K) | Transformer | training |
 | v5_no_transformer | ops_and_blocks (12 K) | LSTM (paper) | training |
-| v5_legacy_paper | legacy_paper (1,202) | Transformer | training |
-| v5_no_transformer_legacy_paper | legacy_paper (1,202) | LSTM (paper) | training |
+| v5_mlir_rl_v1_paper | mlir_rl_v1_paper (1,357) | Transformer | training |
+| v5_no_transformer_mlir_rl_v1_paper | mlir_rl_v1_paper (1,357) | LSTM (paper) | training |
 
 The 2 × 2 design isolates the encoder contribution (Transformer vs LSTM) and
 the dataset contribution (modern 12 K-benchmark set vs the original paper set).

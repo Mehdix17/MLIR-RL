@@ -212,9 +212,18 @@ def get_agent_stats(experiment, active_jobs, train_log_data):
     slurm_node = "N/A"
     job_type = "N/A"
     
+    # Legacy alias for renamed experiments (legacy_paper -> paper_wrong_split -> mlir_rl_v1_paper)
+    LEGACY_ALIAS = {
+        "v5_mlir_rl_v1_paper": "v5_legacy_paper",
+        "v5_no_transformer_mlir_rl_v1_paper": "v5_no_transformer_legacy_paper",
+        "v5_paper_wrong_split": "v5_legacy_paper",
+        "v5_no_transformer_paper_wrong_split": "v5_no_transformer_legacy_paper",
+    }
+    alias_key = LEGACY_ALIAS.get(config_key)
+
     # Check if this agent is currently running training or evaluating
     log_info = None
-    version_logs = train_log_data.get(config_key, {})
+    version_logs = train_log_data.get(config_key, {}) or (train_log_data.get(alias_key, {}) if alias_key else {})
     if version_logs:
         # Prefer the log whose job is still active; else the most advanced one
         log_info = next((v for jid, v in version_logs.items() if jid in active_jobs), None)
@@ -248,12 +257,33 @@ def get_agent_stats(experiment, active_jobs, train_log_data):
         except Exception:
             pass
 
-    # 4. Pending evaluations
+    # 4. Pending evaluations (model-driven, grid-agnostic)
+    # Pending = checkpoints that have a model file but no eval json.
+    # This is the truth on disk, not a synthetic 100-grid expectation.
+    # User standard is 100-grid but historic evals used 50-offset; we count any eval as covering its model.
+    model_steps = []
+    for md in models_dirs:
+        if not os.path.isdir(md):
+            continue
+        for f in os.listdir(md):
+            m = re.match(r"model_(\d+)\.pt", f)
+            if m:
+                model_steps.append(int(m.group(1)))
+    model_steps = sorted(set(model_steps))
     pending_count = 0
-    if max_trained > 0:
-        for ckpt in range(100, max_trained + 1, 100):
-            if ckpt not in evaluated_ckpts:
-                pending_count += 1
+    if model_steps:
+        evaluated_set = set(evaluated_ckpts)
+        pending_count = sum(1 for m in model_steps if m not in evaluated_set)
+    elif log_info and log_info.get("total"):
+        # Fallback when no model files yet (e.g. just started): use log total
+        total = int(log_info["total"])
+        expected = total // 100
+        evaluated_within = sum(1 for c in evaluated_ckpts if c <= total)
+        pending_count = max(0, expected - evaluated_within)
+    elif max_trained > 0:
+        expected = max_trained // 100
+        evaluated_within = sum(1 for c in evaluated_ckpts if c <= max_trained)
+        pending_count = max(0, expected - evaluated_within)
                 
     # 5. Distributed dask workers (only for distributed runs whose driver is active)
     worker_count = 0
@@ -297,7 +327,7 @@ def get_agent_stats(experiment, active_jobs, train_log_data):
 def main():
     parser = argparse.ArgumentParser(description="Fast progress reporting tool")
     parser.add_argument("-d", "--dataset", default="all",
-                        choices=["all", "ops_and_blocks", "legacy_paper", "new"], help="Dataset to report on")
+                        choices=["all", "ops_and_blocks", "mlir_rl_v1_paper", "new"], help="Dataset to report on")
     args = parser.parse_args()
     
     t0 = time.time()
@@ -334,14 +364,9 @@ def main():
     print(f"**Generated in:** {time.time() - t0:.2f}s | **Dataset:** {args.dataset}")
     print()
     
-    # Table 1: Active Slurm Jobs
+    # Table 1: Active Slurm Jobs (interactive sessions hidden)
     print("### 1. Active Slurm Jobs")
     slurm_rows = []
-    # Add our current interactive job
-    for jid, info in active_jobs.items():
-        if "interact" in info["name"] or "salloc" in info["name"] or "srun" in info["name"]:
-            slurm_rows.append(f"| `{jid}` | `-` | interactive | Interactive Shell | **{info['state']}** | `{info['node']}` |")
-            
     for rep in agent_reports:
         if rep["slurm_job_id"]:
             jid = rep["slurm_job_id"]
@@ -363,37 +388,61 @@ def main():
         print("*No active Slurm jobs found for the current user.*")
     print()
 
-    # Table 2: Training Progress (compact columns — Job ID lives in Table 1; rows fit a terminal line)
+    # Table 2: Training Progress (precise status; no Workers/Latest Ckpt — those live in Table 1 / Evaluation)
     print("### 2. Training Progress")
-    print("| Dataset | Version | Iteration | Progress % | Status | Workers | Failures | Latest Ckpt |")
-    print("|---|---|---|---|---|---|---|---|")
+    print("| Dataset | Version | Iteration | Progress % | Status | Failures |")
+    print("|---|---|---|---|---|---|")
+    # Helper to resolve sacct state for non-active jobs (Timeout vs Cancelled vs Failed)
+    def _sacct_status(jid: str) -> str:
+        try:
+            out = subprocess.check_output(
+                ["sacct", "-j", str(jid), "--format=State", "--noheader", "--parsable2"],
+                timeout=2, stderr=subprocess.DEVNULL
+            ).decode().strip().splitlines()
+            # sacct prints e.g. "COMPLETED" or "TIMEOUT" or "CANCELLED by ..." per line
+            for line in out:
+                s = line.strip().split()[0].upper()
+                if "TIMEOUT" in s:
+                    return "Timeout"
+                if "CANCELLED" in s:
+                    return "Cancelled"
+                if "FAILED" in s:
+                    return "Failed"
+                if "COMPLETED" in s:
+                    return "Finished"
+            return ""
+        except Exception:
+            return ""
+
     for rep in agent_reports:
         log = rep["train_log"]
         if log:
             prog = (log['iteration']/log['total'])*100
-            # Correlate status with Slurm state
             status = log['status']
             if rep["slurm_job_id"] and rep["job_type"] == "Train":
                 status = f"Running ({rep['slurm_state']})"
+            elif status == "FINISHED":
+                status = "Finished"
+            elif status == "FAILED":
+                status = "Failed"
             elif status == "running":
-                status = "Stopped (Timeout/Cancelled)"
-
-            ckpt = rep["max_trained"] if rep["max_trained"] > 0 else "N/A"
-            workers = rep.get("worker_count") or "-"
+                # No active job and not finished/failed → resolve via sacct
+                sacct = _sacct_status(log["job_id"]) if log.get("job_id") else ""
+                status = sacct if sacct in ("Timeout", "Cancelled", "Failed", "Finished") else "Timeout"
             failures = log.get("bench_failures")
             failures_s = f"**{failures}**" if failures and failures > 0 else (str(failures) if failures is not None else "-")
-            print(f"| `{rep['dataset']}` | `{rep['version']}` | `{log['iteration']}` | `{prog:.1f}%` | {status} | `{workers}` | {failures_s} | `{ckpt}` |")
+            print(f"| `{rep['dataset']}` | `{rep['version']}` | `{log['iteration']}` | `{prog:.1f}%` | {status} | {failures_s} |")
         else:
-            print(f"| `{rep['dataset']}` | `{rep['version']}` | `0` | `0.0%` | Not Started | `-` | - | `N/A` |")
+            print(f"| `{rep['dataset']}` | `{rep['version']}` | `0` | `0.0%` | Not Started | - |")
     print()
 
-    # Table 3: Evaluation Progress
+    # Table 3: Evaluation Progress (Max Trained removed; Last Evaluated is last column)
     print("### 3. Evaluation Progress")
-    print("| Dataset | Agent Version | Evaluated | Last Evaluated | Evaluating | Pending | Max Trained Checkpoint |")
-    print("|---|---|---|---|---|---|---|")
+    print("| Dataset | Agent Version | Evaluated | Evaluating | Pending | Last Evaluated |")
+    print("|---|---|---|---|---|---|")
     for rep in agent_reports:
         le = f"`{rep['last_evaluated']}`" if rep['last_evaluated'] is not None else "`-`"
-        print(f"| `{rep['dataset']}` | `{rep['version']}` | {rep['evaluated_count']} checkpoints | {le} | {rep['evaluating_count']} | {rep['pending_count']} checkpoints | `{rep['max_trained']}` |")
+        print(f"| `{rep['dataset']}` | `{rep['version']}` | {rep['evaluated_count']} checkpoints | {rep['evaluating_count']} | {rep['pending_count']} checkpoints | {le} |")
     print()
 
     # Table 4: Lustre Quota

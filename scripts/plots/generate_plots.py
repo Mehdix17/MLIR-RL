@@ -18,7 +18,7 @@ DATASET_DIRS = {
     "new": "results/new_dataset_results",
     "single_ops": "results/single_ops_dataset_results",
     "ops_and_blocks": "results/ops_and_blocks_results",
-    "legacy_paper": "results/legacy_paper_results",
+    "mlir_rl_v1_paper": "results/mlir_rl_v1_paper_results",
 }
 
 FONT_SETTINGS = {
@@ -36,7 +36,7 @@ AGENT_COLORS = {
     "paper_transformer_small": "#55A868",
     "v5_single_node": "#C44E52",
     "v5_distributed": "#0072B2",
-    "v5_legacy_paper": "#0072B2",
+    "v5_mlir_rl_v1_paper": "#0072B2",
     "v5_no_transformer": "#D55E00",
 }
 
@@ -54,7 +54,7 @@ AGENT_DISPLAY_NAMES = {
     "paper_transformer_large": "paper_tf_large",
     "v5_single_node": "v5_single_node",
     "v5_distributed": "v5",
-    "v5_legacy_paper": "v5",
+    "v5_mlir_rl_v1_paper": "v5",
 }
 
 EVOLUTION_CSV = "checkpoint_speedups.csv"
@@ -180,7 +180,7 @@ def plot_comparison(
 def main():
     parser = argparse.ArgumentParser(description="MLIR-RL Plot Generator (reads CSVs, writes PNGs only)")
     parser.add_argument("-d", "--dataset",
-                        choices=["new", "single_ops", "ops_and_blocks", "legacy_paper"], required=True)
+                        choices=["new", "single_ops", "ops_and_blocks", "mlir_rl_v1_paper"], required=True)
     parser.add_argument("-a", "--agents", nargs="+", required=True,
                         help="Agent directory prefixes (e.g. paper_original paper_transformer_small)")
     parser.add_argument("-m", "--mode",

@@ -1,7 +1,7 @@
 {
-  "max_num_stores_loads": 7,
-  "max_num_loops": 7,
-  "max_num_load_store_dim": 7,
+  "max_num_stores_loads": 12,
+  "max_num_loops": 12,
+  "max_num_load_store_dim": 12,
   "num_tile_sizes": 7,
   "num_pad_multiples": 3,
   "num_unroll_factors": 3,
@@ -55,13 +55,13 @@
   "lr": 0.001,
   "seed": 42,
   "tags": [
-    "v5_no_transformer_legacy_paper",
-    "legacy_paper",
+    "v5_no_transformer_mlir_rl_v1_paper",
+    "mlir_rl_v1_paper",
     "v5_no_transformer"
   ],
-  "results_dir": "results/legacy_paper_results/v5_no_transformer_legacy_paper_agent",
+  "results_dir": "results/mlir_rl_v1_paper_results/v5_no_transformer_agent",
   "implementation": "rl_autoschedular_v5_no_transformer",
-  "json_file": "results/legacy_paper_results/baselines/mlir/base_train.json",
-  "eval_json_file": "results/legacy_paper_results/baselines/mlir/base_eval.json",
+  "json_file": "results/mlir_rl_v1_paper_results/baselines/mlir/base_train.json",
+  "eval_json_file": "results/mlir_rl_v1_paper_results/baselines/mlir/base_eval.json",
   "dask_node_count": 16
 }
