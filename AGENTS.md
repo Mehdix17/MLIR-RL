@@ -44,12 +44,11 @@ Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda internally.
 
 | Dataset | Files | Dtype | Purpose |
 |---------|-------|-------|---------|
-| `new_dataset/all/` | 12K+ | f32 | Primary training/eval (24 NN models) |
-| `single_ops_dataset/all/` | ~1,569 | f32 | Paper single-op benchmarks (18 models) |
-| `ops_and_blocks/all/` | ~8,962 | f32 | Merged single-ops + multi-op blocks |
-| `lqcd/` | 155 | f64 | Lattice QCD kernels + full models |
+| `ops_and_blocks/` | ~8,093 | f32 | Primary training/eval (18 NN models, single-op + multi-op blocks) |
+| `legacy_paper/` | ~1,354 | mixed | Paper reproduction (NN + Lattice QCD benchmarks) |
+| `full_models/` | ~70 | mixed | Source ONNX/MLIR models before extraction (~29GB) |
 
-Pipeline: `raw model → MLIR → extract blocks → baseline timing → train/eval split`. Key scripts: `data_utils/orchestrate.py`, `data_utils/extract/extract_blocks.py`, `scripts/baseline/get_base.py`, `scripts/data/split_json.py`.
+Pipeline: `raw model → MLIR → extract blocks → baseline timing → JSON split`. Key scripts: `data_utils/orchestrate.py`, `data_utils/extract/extract_blocks.py`, `scripts/baseline/get_base.py`, `scripts/data/split_json.py`.
 
 **MLIR file requirements:** `{tag = "operation_NNN"}` on linalg ops, `@nanoTime()` wrapper, weights as function args, `@main` returning `(tensor, i64)`.
 

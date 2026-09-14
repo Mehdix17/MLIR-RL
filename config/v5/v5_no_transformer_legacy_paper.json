@@ -32,7 +32,7 @@
   "normalize_bounds": "max",
   "normalize_adv": "standard",
   "reuse_experience": "none",
-  "benchmarks_folder_path": "data/legacy_paper/nn",
+  "benchmarks_folder_path": "data/mlir_rl_v1_paper",
   "replay_count": 0,
   "nb_iterations": 20000,
   "ppo_epochs": 4,

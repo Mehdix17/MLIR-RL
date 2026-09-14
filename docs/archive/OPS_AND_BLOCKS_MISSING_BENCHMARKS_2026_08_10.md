@@ -10,7 +10,7 @@
 - **Backups**: `results/ops_and_blocks_results/baselines/mlir/base_train.json.bak`
   and `base_eval.json.bak` (originals with all names intact).
 - **To restore**: copy the names back into the JSONs once the `.mlir` files exist
-  again (e.g. regenerated from `data/raw_models/`), then delete the `.bak` files.
+  again (e.g. regenerated from `data/full_models/`), then delete the `.bak` files.
 
 After removal: train split = 6464 benches, eval split = 1629 benches.
 
