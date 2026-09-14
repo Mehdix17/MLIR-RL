@@ -120,20 +120,35 @@ def find_csv(csvs_dir: str, stem_patterns: list[str]) -> pd.DataFrame | None:
     return None
 
 
+def find_agent_csvs(base_results_dir: str, agents: list[str], stem: str) -> pd.DataFrame | None:
+    """Load one CSV per agent from results/<agent>_agent/csvs/ and merge them."""
+    frames = []
+    for agent in agents:
+        path = os.path.join(base_results_dir, f"{agent}_agent", "csvs", f"{stem}.csv")
+        if os.path.isfile(path):
+            df = pd.read_csv(path)
+            for col in df.select_dtypes(include="object").columns:
+                df[col] = df[col].str.strip()
+            # Per-experiment CSVs carry no agent_version column — tag rows by source agent
+            if "agent_version" not in df.columns:
+                df["agent_version"] = agent
+            frames.append(df)
+    return pd.concat(frames, ignore_index=True) if frames else None
+
+
 
 # ── Report builder ────────────────────────────────────────────────────────────
 
 def build_report(exp_dir: str, dataset: str, agents: list[str]) -> str:
-    csvs_dir = os.path.join(exp_dir, "csvs")
     pngs_dir = os.path.join(exp_dir, "pngs")
 
     baseline = load_baseline(dataset)
     families_map = load_benchmark_families()
     base_results_dir = os.path.join(PROJECT_ROOT, DATASET_DIRS[dataset])
 
-    evo_df   = find_csv(csvs_dir, ["checkpoint_evolution"])
-    model_df = find_csv(csvs_dir, ["best_checkpoint_results"])
-    op_df    = find_csv(csvs_dir, ["operation_type_results"])
+    evo_df   = find_agent_csvs(base_results_dir, agents, "checkpoint_speedups")
+    model_df = find_agent_csvs(base_results_dir, agents, "best_checkpoint_benchmark_family_results")
+    op_df    = find_agent_csvs(base_results_dir, agents, "best_checkpoint_operation_type_results")
 
     lines = []
 

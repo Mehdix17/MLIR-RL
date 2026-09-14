@@ -25,9 +25,6 @@ venv/
 dask-logs/
 logs/
 results/*
-tmp/
-graphify-out/
-plots/
 
 # Heavy local dependencies and datasets
 llvm-project/
@@ -37,3 +34,6 @@ data/*
 old_data/*
 
 demo/models/*
+
+graphify-out/
+tmp/

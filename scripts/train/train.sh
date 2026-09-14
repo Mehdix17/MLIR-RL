@@ -1,10 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=mlir-train
 #SBATCH --partition=compute
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=12
+# Lean driver sizing (measured: distributed driver ~2 cores / ~3.3GB RSS — dispatch + PPO only).
+# 8c/8G = ~4x CPU and ~2.5x RAM headroom. The old 64c/16G was for the single-node path
+# (64-parallel collection in-process); if a single-node run is ever relaunched, bump via:
+#   sbatch --cpus-per-task=64 --mem=16G scripts/train/train.sh <config>
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=8
 #SBATCH --constraint=bergamo
-#SBATCH --time=3-00:00:00
+#SBATCH --time=7-00:00:00
 #SBATCH --output=/scratch/mb10856/MLIR-RL/logs/train_%j.out
 #SBATCH --error=/scratch/mb10856/MLIR-RL/logs/train_%j.err
 #SBATCH --mail-type=END,FAIL
@@ -31,7 +35,8 @@ if [[ -f "$PROJECT_ROOT/.env" ]]; then
 fi
 
 # Slurm nodes start with a stripped PATH; restore standard utilities before activating the venv
-export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+# (/opt/slurm/default/bin needed by DaskManager for sbatch/squeue when DASK_NODES > 0)
+export PATH="/usr/local/bin:/usr/bin:/bin:/opt/slurm/default/bin:$PATH"
 
 source "${CONDA_ENV:-$HOME/envs/mlir/bin/activate}"
 export LD_LIBRARY_PATH=$HOME/envs/mlir/lib:$LD_LIBRARY_PATH

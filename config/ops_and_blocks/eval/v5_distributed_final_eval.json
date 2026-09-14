@@ -1,0 +1,10 @@
+{
+  "eval_config": "config/v5/v5_distributed.json",
+  "results_dir": "results/ops_and_blocks_results/v5_distributed_agent",
+  "dataset": "ops_and_blocks",
+  "num_runs": 5,
+  "aggregator": "median",
+  "cpus_per_task": 64,
+  "mem": "100G",
+  "time": "7-00:00:00"
+}

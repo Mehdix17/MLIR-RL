@@ -6,11 +6,11 @@ import re
 from pathlib import Path
 from typing import Optional
 
-DEFAULT_IMPLEMENTATION = "rl_autoschedular_v0"
+DEFAULT_IMPLEMENTATION = "rl_autoschedular"
 
 # Preserve legacy naming for already-produced results.
 LEGACY_IMPLEMENTATION_META = {
-    "rl_autoschedular_v0": {
+    "rl_autoschedular": {
         "agent_dir": "old_agent",
         "base_prefix": "old",
         "display_name": "Baseline RL",
@@ -73,8 +73,7 @@ def _implementation_token(implementation: str) -> str:
     # Canonical names for versioned agents:
     #   rl_autoschedular_v1 -> v1
     #   rl_autoschedular_v2 -> v2
-    #   rl_autoschedular_v2_5 -> v2_5
-    version_match = re.fullmatch(r"rl_autoschedular_v([\d_]+)", implementation)
+    version_match = re.fullmatch(r"rl_autoschedular_v(\d+)", implementation)
     if version_match:
         return f"v{version_match.group(1)}"
 
@@ -116,8 +115,8 @@ def get_base_prefix(implementation: Optional[str] = None) -> str:
 
 
 def get_agent_runs_root(results_dir: str, implementation: Optional[str] = None) -> Path:
-    """Return results/<experiment>/ directly — no impl subdir nesting."""
-    return Path(results_dir)
+    """Return results/<experiment>/<impl_agent_subdir>."""
+    return Path(results_dir) / get_agent_subdir(implementation)
 
 
 def get_base_file_path(results_dir: str, implementation: Optional[str] = None) -> Path:

@@ -1,60 +1,47 @@
-import os
-import sys
-import base64
-import subprocess
-import dill
+import multiprocessing
+from multiprocessing import Process, Queue
+from queue import Empty as QueueEmpty
 from typing import Callable, Optional, TypeVar
 
 T = TypeVar('T')
-ENABLED = False
-TRANSFORM_ENABLED = False
+ENABLED = True
+T = TypeVar('T')
 
 
 class BindingsProcess:
     @staticmethod
-    def call(func: Callable[..., T], *args, timeout: Optional[float] = None, enabled: Optional[bool] = None) -> T:
-        if enabled is None:
-            enabled = ENABLED
-        if not enabled:
+    def call(func: Callable[..., T], *args, timeout: Optional[float] = None) -> T:
+        if not ENABLED:
             return func(*args)
 
-        serialized = base64.b64encode(dill.dumps((func, args))).decode('ascii')
-        script = (
-            "import dill, base64, os, sys, io\n"
-            "func, args = dill.loads(base64.b64decode(" + repr(serialized) + "))\n"
-            "old_stdout, old_stderr = sys.stdout, sys.stderr\n"
-            "sys.stdout = sys.stderr = open(os.devnull, 'w')\n"
-            "try:\n"
-            "    result = func(*args)\n"
-            "    sys.stdout, sys.stderr = old_stdout, old_stderr\n"
-            "    sys.stdout.write('__BINDINGS_OK__' + repr(result) + '\\n')\n"
-            "except Exception as e:\n"
-            "    sys.stdout, sys.stderr = old_stdout, old_stderr\n"
-            "    sys.stdout.write('__BINDINGS_ERR__' + repr(e) + '\\n')\n"
-        )
+        def func_wrapper(q: Queue):
+            try:
+                q.put(func(*args))
+            except Exception as e:
+                q.put(e)
 
-        proc = subprocess.run(
-            [sys.executable, '-c', script],
-            capture_output=True, text=True, timeout=timeout,
-            env={**os.environ, 'PYTHONUNBUFFERED': '1'},
-        )
+        q = Queue()
+        p = Process(target=func_wrapper, args=(q,), daemon=True)
+        p.start()
+        p.join(timeout)
+        if p.is_alive():
+            p.kill()
+            p.join()
+            raise TimeoutError(f"Bindings call {func.__name__} timed out after {timeout}s")
 
-        stdout = proc.stdout.strip()
-        if proc.returncode != 0:
+        ec = p.exitcode
+        if ec:
+            raise Exception(f"Bindings call {func.__name__} failed with exit code: {ec}")
+
+        try:
+            res = q.get_nowait()
+        except QueueEmpty:
+            func_name = getattr(func, '__name__', str(func))
             raise Exception(
-                f"Bindings call {getattr(func, '__name__', str(func))} failed with exit code {proc.returncode}\n"
-                f"stderr: {proc.stderr[:500]}"
+                f"Bindings call {func_name} failed: subprocess exited without result "
+                "(likely a crash in native code)"
             )
 
-        if stdout.startswith('__BINDINGS_OK__'):
-            return eval(stdout[len('__BINDINGS_OK__'):])
-        elif stdout.startswith('__BINDINGS_ERR__'):
-            raise Exception(
-                f"Bindings call error: {stdout[len('__BINDINGS_ERR__'):]}\n"
-                f"stderr: {proc.stderr[:200]}"
-            )
-        else:
-            raise Exception(
-                f"Bindings call unexpected output: {stdout[:200]}\n"
-                f"stderr: {proc.stderr[:200]}"
-            )
+        if isinstance(res, Exception):
+            raise res
+        return res

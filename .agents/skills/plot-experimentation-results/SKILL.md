@@ -1,6 +1,6 @@
 ---
 name: plot-experimentation-results
-description: Unified runbook for generating line evolution charts and benchmark family bar comparison plots for MLIR-RL experimentations. Creates underlying CSV data automatically if missing and plots figures using customized parameters.
+description: Unified runbook for generating line evolution charts and benchmark family bar comparison plots for MLIR-RL experimentations. Reads per-experiment CSVs (results/<exp>_agent/csvs/) and writes only images into plots/. Does NOT generate or update CSVs — that is utils/csvs.py's job.
 ---
 
 # MLIR-RL Experimentation Plotting Skill
@@ -10,6 +10,20 @@ Use this skill to generate:
 - **Model family bar charts**: speedup per model (bert, gpt2, resnet50, ...) — excludes synthetic op benchmarks
 - **Operation type bar charts**: speedup per op type (add, conv_2d, matmul, pooling, relu) — only synthetic op benchmarks
 
+CSV data is separate from plots: each experiment owns its CSVs in
+`results/<exp>_agent/csvs/` (`checkpoint_speedups.csv`,
+`best_checkpoint_speedups.csv`,
+`best_checkpoint_benchmark_family_results.csv`,
+`best_checkpoint_operation_type_results.csv`). They are updated automatically
+after each eval (eval.py hook) and regenerable at any time with `utils/csvs.py`.
+This skill only consumes them and writes PNGs.
+
+**Best-checkpoint plots are final numbers — generate them AFTER `final-checkpoint-eval`.**
+The `best_checkpoint_*results*.csv` files reflect the **median** of 5 eval runs (written by
+`final_eval.py`, which picks the best checkpoint and saves it to `csvs/`). Running the
+comparison plots before that yields stale single-run bests. The `checkpoint_evolution`
+line chart can be made at any time — it reads the per-checkpoint ranking CSV.
+
 ---
 
 ## 🎯 Step 1. Ask the User (Interactive Menu)
@@ -18,55 +32,59 @@ Use the `ask_question` tool with `is_multi_select: false` for each item:
 
 1. **Dataset**: suggest `ops_and_blocks` | `new` | `single_ops`
 2. **Agent versions**: suggest the set of paper or ablation agents based on the dataset
-3. **Output folder**: suggest numbered paths based on the base directory `plots/experimentation_plots/`.
-   - Auto-detect the next unused `exp<N>` directory by checking which ones already exist.
-   - Suggestions should be absolute-style paths like:
-     - `plots/experimentation_plots/exp1` (next available)
-     - `plots/experimentation_plots/exp2`
-   - Let the user write a custom path if none of the suggestions suit them.
-4. **Update CSV Data**: ask the user if they want to rebuild/update the underlying CSV data from raw checkpoint JSON files (suggest: `Yes (rebuild/update CSVs)` | `No (reuse existing CSVs)`).
-   - If they select `Yes`, pass the `--force-csv` flag when running the plotting commands in Step 2.
+3. **Output folder**: defaults to `plots/experimentation_plots/<dataset>/<experimentation>/`,
+   where `<experimentation>` is the underscore-joined agent list (e.g.
+   `plots/experimentation_plots/ops_and_blocks/v5_distributed/`). Images are written
+   directly into that dir (no `pngs/` subfolder, no numbered `exp<N>` dirs). Pass a
+   custom path via `--out-dir` if it doesn't suit.
+4. **Refresh CSVs first?** If new eval results exist since the last plot, regenerate the
+   experiments' CSVs before plotting:
+   ```bash
+   python utils/csvs.py --results-dir results/<dataset>_results/<exp>_agent --agent <exp> [--all]
+   ```
+   (eval.py already auto-updates `checkpoint_speedups.csv` after each eval — this is only
+   needed when the CSVs are missing or the comparison CSVs are stale.)
 
 ---
 
 ## 🛠️ Step 2. Generate the Plots
 
-Run four plots per experimentation session into the chosen `<out-dir>` using `--out-dir=<path>` (use `=` to avoid argparse ambiguity, and include `--force-csv` if requested in Step 1):
+Run the plots per experimentation session. PNGs land directly in `<out-dir>/`; no CSVs are written by this step. When the dataset matches the run, the default `<out-dir>` is `plots/experimentation_plots/<dataset>/<agents>/`:
 
 ### 1. Checkpoint Evolution Line Chart
 ```bash
 source ~/envs/mlir/bin/activate && set -a && source .env && set +a
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m evolution --out-dir=<out-dir> [--force-csv] \
+  -d <dataset> -m evolution --out-dir=<out-dir> \
   -a <agent1> <agent2> ...
 ```
-→ Saves: `<out-dir>/csvs/checkpoint_evolution.csv` and `<out-dir>/pngs/checkpoint_evolution.png`
+→ Saves: `<out-dir>/checkpoint_evolution.png` (reads `results/<exp>_agent/csvs/checkpoint_speedups.csv`)
 *Only multiples-of-100 checkpoints are included for a smooth curve.*
 
 ### 2. Model Family Comparison (all model families)
 ```bash
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m comparison --filter-type models_only --out-dir=<out-dir> [--force-csv] \
+  -d <dataset> -m comparison --filter-type models_only --out-dir=<out-dir> \
   -a <agent1> <agent2> ...
 ```
-→ Saves: `<out-dir>/csvs/best_checkpoint_results.csv` and `<out-dir>/pngs/best_checkpoint_results.png`
+→ Saves: `<out-dir>/best_checkpoint_benchmark_family_results.png`
 *Uses best checkpoint per agent (highest overall geo-mean). Excludes all op-type benchmarks.*
 
 ### 3. Model Family Comparison (without LLaMA)
 ```bash
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m comparison --filter-type models_only --exclude llama3_2_1b --out-dir=<out-dir> [--force-csv] \
+  -d <dataset> -m comparison --filter-type models_only --exclude llama3_2_1b --out-dir=<out-dir> \
   -a <agent1> <agent2> ...
 ```
-→ Saves: `<out-dir>/csvs/best_checkpoint_results_no_llama3.csv` and `<out-dir>/pngs/best_checkpoint_results_no_llama3.png`
+→ Saves: `<out-dir>/best_checkpoint_benchmark_family_results_no_llama3.png`
 
 ### 4. Operation Type Comparison
 ```bash
 python scripts/plots/generate_plots.py \
-  -d <dataset> -m comparison --filter-type ops_only --out-dir=<out-dir> [--force-csv] \
+  -d <dataset> -m comparison --filter-type ops_only --out-dir=<out-dir> \
   -a <agent1> <agent2> ...
 ```
-→ Saves: `<out-dir>/csvs/operation_type_results.csv` and `<out-dir>/pngs/operation_type_results.png`
+→ Saves: `<out-dir>/best_checkpoint_operation_type_results.png`
 *Only shows bars for the 5 synthetic op families (see Benchmark Classification below).*
 
 ---
@@ -95,41 +113,31 @@ Edit the `USER-CUSTOMIZABLE PLOTTING PARAMETERS` block at the top of [scripts/pl
 - `FONT_SETTINGS`: title, label, tick, legend font sizes
 - `LINE_STYLE`: line width, marker, markersize, grid alpha
 
+### V5 paper palette (required)
+
+Use the Okabe–Ito colorblind-safe palette consistently in V5 figures:
+
+| Experiment | Color | Hex |
+|---|---|---|
+| `v5` (`v5_distributed` or `v5_legacy_paper` on disk) | deep academic blue | `#0072B2` |
+| `v5_no_transformer` | vermilion | `#D55E00` |
+
+These are configured in `AGENT_COLORS`; do not substitute the Matplotlib default blue.
+
+`legacy_paper` contains operation benchmarks only. Generate its evolution and
+operation-type charts; do not generate model-family or no-LLaMA charts when
+`best_checkpoint_benchmark_family_results.csv` has no data rows.
+
 Override titles and paths at runtime:
 - `--title "My Title"` — custom plot title
-- `--csv path/to/file.csv` — direct CSV path override
+- `--csv path/to/file.csv` — direct CSV path override (legacy aggregate CSVs)
 - `--png path/to/file.png` — direct PNG path override
-- `--force-csv` — rebuild CSV even if it already exists
 
 ---
 
-## 📋 Step 4. Generate the Experimentation Report
-
-After all plots are generated, run the report script to produce `experimentation_report.md` in the experiment directory (at the same level as `csvs/` and `pngs/`):
-
-```bash
-source ~/envs/mlir/bin/activate && set -a && source .env && set +a
-python scripts/plots/generate_report.py \
-  --exp-dir=<out-dir> \
-  -d <dataset> \
-  -a <agent1> <agent2> ...
-```
-
-The report includes:
-- **Best checkpoint summary**: ranked table with peak geo-mean speedup per agent
-- **Per-agent detailed stats**: valid benchmarks, failed count, geo-mean, arith-mean, best/worst speedup
-- **Model family performance table**: all families × all agents
-- **Model family table excluding LLaMA** (if the no-LLaMA CSV exists)
-- **Operation type performance table**: add, conv_2d, matmul, pooling, relu
-- **Top-5 individual benchmarks**: model benchmarks and op-type benchmarks per agent
-- **Plot references**: list of all generated PNGs
-
----
-
-## 📊 Step 5. Present Results
+## 📊 Step 4. Present Results
 
 After running, provide the user with:
-1. Clickable links to each generated CSV and PNG in `<out-dir>/csvs/` and `<out-dir>/pngs/`
-2. Clickable link to `<out-dir>/experimentation_report.md`
-3. A brief summary table: agent | best checkpoint | geo-mean speedup
+1. Clickable links to the generated PNGs in `<out-dir>/` (CSVs live in each experiment's `results/<exp>_agent/csvs/`, not in the plot output)
+2. A brief summary table: agent | best checkpoint | geo-mean speedup
 

@@ -1,1 +1,18 @@
-{}
+{
+  "17950857": {
+    "agent": "v5_mlir_rl_v1_paper",
+    "start": 6250,
+    "end": 14200,
+    "step": 50,
+    "state": "PENDING",
+    "node": "(None)"
+  },
+  "17950858": {
+    "agent": "v5_no_transformer_mlir_rl_v1_paper",
+    "start": 7200,
+    "end": 14250,
+    "step": 50,
+    "state": "PENDING",
+    "node": "(Priority)"
+  }
+}

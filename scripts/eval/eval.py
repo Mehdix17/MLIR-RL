@@ -11,6 +11,11 @@ import signal
 import torch
 from typing import Optional
 
+# Eval is always single-node: dask params (config dask_node_count / DASK_NODES)
+# fire only for training jobs. Must be set before the package imports below,
+# because the package's DaskManager.ENABLED is evaluated at module import time.
+os.environ['DASK_TRAINING_ONLY'] = '1'
+
 def _sigabrt_handler(signum, frame):
     raise RuntimeError("MLIR native code crashed (SIGABRT) — caught and continuing")
 signal.signal(signal.SIGABRT, _sigabrt_handler)
@@ -19,6 +24,8 @@ from utils.file_logger import FileLogger
 from utils.config import Config
 from utils.log import print_info, print_success
 from utils.implementation import get_agent_runs_root, get_autoschedular_impl, import_autoschedular_module
+
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datetime import timedelta
 from time import time
 import json
@@ -81,31 +88,15 @@ print_success("Model initialized")
 # Start evaluation
 eval_dir = os.getenv('EVAL_DIR')
 if eval_dir is None:
-    # Derive from config: find the latest run_N for the selected implementation
-    # whose models/ dir has .pt files.
-    # (the current eval run's models/ dir is always empty)
-    _agent_root = str(get_agent_runs_root(cfg.results_dir, AUTOSCHEDULER_IMPL))
-    if not os.path.isdir(_agent_root):
+    # Derive from config: models/ lives directly under results_dir (flat v4.9-style layout)
+    _models_dir = os.path.join(cfg.results_dir, 'models')
+    if not os.path.isdir(_models_dir) or not any(
+            f.endswith('.pt') for f in os.listdir(_models_dir)):
         raise ValueError(
-            "No implementation run directory found. "
-            f"Expected: {_agent_root}. Run training first or set EVAL_DIR explicitly."
+            "No model checkpoints found in results_dir. "
+            f"Expected: {_models_dir}. Run training first or set EVAL_DIR explicitly."
         )
-    _runs = sorted(
-        [d for d in os.listdir(_agent_root) if d.startswith('run_') and d.split('_')[-1].isdigit()],
-        key=lambda x: int(x.split('_')[1])
-    )
-    _candidates = [
-        os.path.join(_agent_root, d, 'models') for d in _runs
-        if any(f.endswith('.pt') for f in os.listdir(os.path.join(_agent_root, d, 'models'))
-               if os.path.isdir(os.path.join(_agent_root, d, 'models')))
-    ]
-    if not _candidates:
-        raise ValueError(
-            "No run with saved model checkpoints found in results_dir. "
-            "Set EVAL_DIR explicitly or run training first. "
-            f"Looked under: {_agent_root}"
-        )
-    eval_dir = _candidates[-1]
+    eval_dir = _models_dir
     print(f"EVAL_DIR not set; using: {eval_dir}")
 eval_dir = os.path.abspath(eval_dir)
 
@@ -238,6 +229,36 @@ if _ckpt:
         if os.path.exists(src_eval):
             shutil.copy2(src_eval, ckpt_file)
             print_success(f"Saved eval results to eval/checkpoint_{_ckpt}{_suffix}.json")
+
+            # Auto-update the experiment ranking CSV (results/<agent>_agent/csvs/checkpoint_speedups.csv)
+            try:
+                import json as _json
+                from utils.csvs import (compute_geo_mean_speedup, generate_comparison_csv,
+                                        rebuild_best_checkpoint, update_checkpoint_speedup)
+                with open(ckpt_file) as f:
+                    _eval_data = _json.load(f)
+                _baseline_file = getattr(cfg, "eval_json_file", None) or getattr(cfg, "json_file", None)
+                if _baseline_file and os.path.exists(os.path.join(_PROJECT_ROOT, _baseline_file)):
+                    with open(os.path.join(_PROJECT_ROOT, _baseline_file)) as f:
+                        _baseline = _json.load(f)
+                    _gm = compute_geo_mean_speedup(_eval_data, _baseline)
+                    if _gm is not None:
+                        _csv = update_checkpoint_speedup(_agent_dir, int(_ckpt), _gm)
+                        print_info(f"Updated {_csv}")
+                        rebuild_best_checkpoint(_agent_dir)
+                        print_info("Updated best_checkpoint_speedups.csv")
+                        # Best-checkpoint breakdown csvs (benchmark family / op type)
+                        try:
+                            _agent_name = os.path.basename(os.path.normpath(_agent_dir))
+                            if _agent_name.endswith("_agent"):
+                                _agent_name = _agent_name[:-6]
+                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "models_only", [])
+                            generate_comparison_csv(_agent_dir, _agent_name, _baseline, "ops_only", [])
+                            print_info("Updated breakdown csvs (benchmark family / op type)")
+                        except Exception as _e2:
+                            print_info(f"breakdown csvs skipped: {_e2}")
+            except Exception as _e:
+                print_info(f"checkpoint_speedups.csv update skipped: {_e}")
 
         # Copy key log files
         src_logs = os.path.join(fl.logs_dir, "eval")

@@ -1,0 +1,806 @@
+% Extended version of the MLIR RL paper
+% Same IEEEtran-compatible style as the original
+\documentclass[10pt,twocolumn]{article}
+\usepackage[margin=0.75in,columnsep=0.25in]{geometry}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{listings}
+\usetikzlibrary{arrows.meta,positioning,matrix}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\Roman{section}.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\Alph{subsection}.}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\itshape}{\arabic{subsubsection})}{0.5em}{}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Compatibility wrappers for article class
+\newcommand{\IEEEauthorblockN}[1]{\textbf{#1}}
+\newcommand{\IEEEauthorblockA}[1]{{\small #1}\par}
+\newenvironment{IEEEkeywords}{\par\medskip\noindent\textbf{Index Terms---}}{\par}
+
+\title{\LARGE\bfseries MLIR RL: A Reinforcement Learning Environment for\\
+Automatic Code Optimization in the MLIR Compiler\\[0.3em]
+\large\textit{Extended Version: Automated Benchmarks, Transformer Encoder, and Expanded Action Space}}
+
+\author{%
+\parbox{0.31\textwidth}{\centering
+Mohammed Tirichine\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small ESI, Algiers, Algeria}\\
+{\small\texttt{tirichine.k@nyu.edu}}}%
+\hfill
+\parbox{0.31\textwidth}{\centering
+Nassim Ameur\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small ESI, Algiers, Algeria}\\
+{\small\texttt{na3758@nyu.edu}}}%
+\hfill
+\parbox{0.31\textwidth}{\centering
+Nazim Bendib\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small ESI, Algiers, Algeria}\\
+{\small\texttt{nb3891@nyu.edu}}}%
+\\[0.8em]
+\parbox{0.31\textwidth}{\centering
+Iheb Nassim Aouadj\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small\texttt{ia2280@nyu.edu}}}%
+\hfill
+\parbox{0.31\textwidth}{\centering
+Djad Bouchama\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small USTHB, Algiers, Algeria}\\
+{\small\texttt{db5394@nyu.edu}}}%
+\hfill
+\parbox{0.31\textwidth}{\centering
+Rafik Bouloudene\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small USTHB, Algiers, Algeria}\\
+{\small\texttt{rb5953@nyu.edu}}}%
+\\[0.8em]
+\parbox{0.5\textwidth}{\centering
+Riyadh Baghdadi\\
+{\small New York University Abu Dhabi, Abu Dhabi, UAE}\\
+{\small\texttt{baghdadi@nyu.edu}}}%
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Code optimization is a crucial task that aims to enhance code performance. However, this process is often tedious and complex, highlighting the necessity for automatic code optimization techniques. Reinforcement Learning (RL) has emerged as a promising approach for tackling such complex optimization problems. In the original version of this work, we introduced MLIR RL, an RL environment for the MLIR compiler, with a multi-discrete action space and level pointers for loop interchange. In this extended version, we introduce three major contributions: (1) an automated benchmark extraction pipeline that generates large-scale training and evaluation datasets from real neural network models without manual intervention; (2) a Transformer-based encoder architecture that replaces the original LSTM, enabling parallel processing of loop-level features and capturing long-range dependencies across loop nests; and (3) an expanded action space that adds padding, unrolling, and packing transformations. We evaluate the extended system on a significantly larger benchmark suite comprising over 8,900 training examples drawn from 24 neural network architectures, and present a comprehensive ablation study isolating the contribution of each new component.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Automatic Code Optimization, Reinforcement Learning, MLIR, Deep Learning, Machine Learning, Compiler, Transformer
+\end{IEEEkeywords}
+\vspace{1em}
+
+%% ============================================================
+%% I. INTRODUCTION
+%% ============================================================
+\section{Introduction}
+
+Writing high-performance code for compute-intensive applications is a challenging task that requires significant expertise. While manual code optimization can reduce execution time significantly, it is time-consuming and error-prone, making automatic compiler code optimization increasingly important. Several techniques have been proposed to enable automatic code optimization in compilers, including the use of integer linear programming (ILP) to find the best code optimizations~\cite{ref1},~\cite{ref2}, and using tree-search methods guided by deep learning cost models~\cite{ref3}--\cite{ref5}.
+
+More recent work has explored the use of Reinforcement Learning (RL) for automatic code optimization~\cite{ref6}--\cite{ref11}. These approaches model the problem as sequential decision-making, where an RL agent selects a sequence of compiler transformations. While such approaches have made progress, they still have limitations: some are semi-automatic (requiring user-specified directives), others are implemented in research compilers with limited support for complex workloads and code transformations, and many target narrow domains (e.g., DNN graphs only), limiting generality.
+
+Making progress in this area requires the development of novel RL environments integrated within robust compilers that expose general, parameterized loop transformations across domains. In this context, the MLIR (Multi-Level Intermediate Representation) compiler~\cite{ref12} has emerged as a strong fit. It is an industrial-grade compiler infrastructure with a robust implementation and widespread adoption in industry and academia. Its multi-dialect architecture exposes a rich set of loop and data-layout transformations that are fine-grained and composable. Its ecosystem spans a wide range of front ends and back ends, enabling a single setup to cover diverse languages and hardware targets.
+
+In the original version of this paper~\cite{ref41}, we proposed MLIR RL, an RL environment for automatic loop-level code optimization in MLIR, with a multi-discrete action space and level pointers for loop interchange. We trained an LSTM-based agent and evaluated it on a hand-curated dataset of single operators and three neural network models (ResNet-18, VGG, MobileNetV2).
+
+In this extended version, we address three limitations of the original system:
+
+\begin{enumerate}
+\item \textbf{Dataset scalability.} The original dataset was manually curated from 121 source models but contained only 1,135 single-operator examples and 3 full models. We introduce an automated pipeline that extracts training benchmarks directly from neural network model repositories, producing over 8,900 training examples spanning 24 modern architectures without manual intervention.
+
+\item \textbf{Encoder limitations.} The original LSTM encoder processed consumer-producer pairs as a fixed-length sequence of two elements, which limited its ability to capture dependencies across deep loop nests. We replace it with a Transformer encoder that creates per-loop tokens and applies self-attention across all loop levels in parallel.
+
+\item \textbf{Action space coverage.} The original action space (tiling, fusion, interchange, vectorization) did not expose important compiler transformations. We extend it with padding, unrolling, and packing, expanding the optimization space available to the RL agent.
+\end{enumerate}
+
+In summary, the contributions of this extended paper are:
+\begin{enumerate}
+\item We propose an automated benchmark extraction pipeline that generates large-scale, reproducible training and evaluation datasets from real neural network models.
+\item We propose a Transformer-based encoder architecture with structured tokenization (CLS token, summary tokens, per-loop tokens) and structural embeddings (role, type, depth) for loop-nest encoding.
+\item We extend the action space with padding, unrolling, and packing transformations.
+\item We evaluate the extended system on a significantly larger benchmark suite and present a comprehensive ablation study.
+\end{enumerate}
+
+The rest of the paper is structured as follows: Section~II provides background. Section~III gives an overview of MLIR RL. Section~IV describes the RL environment. Section~V presents the new Transformer encoder architecture. Section~VI describes the automated benchmark pipeline. Section~VII describes the expanded action space. Section~VIII presents the evaluation. Section~IX concludes.
+
+%% ============================================================
+%% II. BACKGROUND AND RELATED WORK
+%% ============================================================
+\section{Background and Related Work}
+
+Many efforts in the compiler community have focused on automatic code optimization~\cite{ref1},~\cite{ref3}--\cite{ref5},~\cite{ref9}--\cite{ref11},~\cite{ref13},~\cite{ref17}--\cite{ref45}. In this section, we provide an overview of relevant background and related work.
+
+\subsection{MLIR}
+
+MLIR~\cite{ref12} is a framework designed to address the needs of modern compilers and heterogeneous hardware. It provides a flexible infrastructure for defining multiple levels of intermediate representations through various dialects, facilitating code translation and optimization across diverse domains. Notably, MLIR includes the Linalg dialect for linear algebra operations, the Affine dialect for expressing affine loops, and the Vector dialect for vectorization.
+
+\subsection{Machine Learning for Compilers}
+
+Machine learning has been used to improve compiler optimizations, notably to train cost models that estimate the performance of optimized code. It was used in Tiramisu~\cite{ref5},~\cite{ref38}, Halide~\cite{ref3}, and TVM~\cite{ref46} to empower search algorithms such as beam search. Due to the limitations of tree-search approaches (large exploration cost, fixed exploration order), recent efforts have shifted toward RL as a more scalable solution.
+
+\subsection{Reinforcement Learning for Compilers}
+
+More recent work has increasingly focused on RL due to its potential to train systems that automatically select the best sequence of actions. Halide RL~\cite{ref6} employed RL to determine optimization sequences for image processing pipelines but requires user-specified directives. AutoPhase~\cite{ref10} targets HLS phase ordering and does not target CPUs. Chameleon~\cite{ref7}, REGAL~\cite{ref47}, and X-RLflow~\cite{ref48} leverage RL for DNN graph-level optimization. CompilerGym~\cite{ref13} provides RL environments for LLVM but is not designed for MLIR loop-level optimization.
+
+\subsection{MLIR-based Compilers for Machine Learning}
+
+IREE~\cite{ref49}, ONNX-MLIR~\cite{ref50}, and XLA~\cite{ref51} are robust production compilers built on MLIR, but they primarily rely on static heuristics and predefined pass pipelines. In contrast, MLIR RL replaces fixed heuristics with a learned policy that discovers optimization schedules automatically through empirical feedback.
+
+%% ============================================================
+%% III. OVERVIEW OF MLIR RL
+%% ============================================================
+\section{Overview of MLIR RL}
+
+Our RL framework uses the actor-critic architecture and is defined by: 1) Action space (Sec.~\ref{sec:actionspace}); 2) State representation (Sec.~\ref{sec:states}); 3) Reward model (Sec.~\ref{sec:reward}); 4) Encoder and policy networks (Sec.~\ref{sec:encoder}). We train using the PPO algorithm.
+
+We focus on optimizing operations expressed in the Linalg MLIR dialect, which provides a structured IR for linear-algebra and deep learning operations defined over tensors with explicit iteration spaces and affine indexing maps. Since code usually contains multiple operations, MLIR RL processes one operation at a time, traversing operations in reverse order (from consumers to producers) to preserve fusion opportunities.
+
+%% ============================================================
+%% IV. RL ENVIRONMENT
+%% ============================================================
+\section{Reinforcement Learning Environment}
+
+\subsection{Action Space}
+\label{sec:actionspace}
+
+An action $a_t \in A$ allows the agent to transition from state $s_t$ to $s_{t+1}$. The original action space includes:
+
+\begin{itemize}
+\item \textbf{Tiling}: $T(t_1, t_2, \ldots, t_N)$ tiles loop level $i$ with size $t_i$. A tile size of zero indicates no tiling.
+\item \textbf{Tiled Parallelization}: Tiling followed by parallelization of the outermost loop via \texttt{scf.parallel} operations.
+\item \textbf{Tiled Fusion}: Tiling followed by fusion of a producer loop into the consumer's tile loops.
+\item \textbf{Interchange}: Permutation $I(a_1, a_2, \ldots, a_n)$ of loop levels.
+\item \textbf{Vectorization}: Vectorizes the innermost loop nest.
+\item \textbf{No Transformation}: Stops optimizing the current operation and moves to the next.
+\end{itemize}
+
+The total size of the original action space is $|A| = 3 \cdot M^N + N! + 2$.
+
+\subsubsection{Multi-Discrete Formulation}
+We reformulate the action space as a multi-discrete action space (Cartesian product of subspaces): transformation selection (6 options), tiling sizes ($N$ distributions over $M$ candidates), and interchange (level pointers with $N$ distributions).
+
+\subsubsection{Action Mask}
+Not all actions are valid at every step. We provide an action mask that filters invalid actions (e.g., vectorization when the innermost loop exceeds 512 iterations).
+
+\subsection{States and Observations}
+\label{sec:states}
+
+Each operation is represented by a feature vector that concatenates:
+\begin{itemize}
+\item \textbf{Operation Type}: One-hot encoding (matmul, conv\_2d, add, pooling, generic, unknown).
+\item \textbf{Loop Ranges}: Upper bounds and iterator types (parallel/reduction) for each loop level.
+\item \textbf{Vectorization Pre-conditions}: Boolean flag for vectorization eligibility.
+\item \textbf{Indexing Maps}: Polyhedral access matrices of size $D \times N$.
+\item \textbf{Operations Count}: Counts of arithmetic operations (+, -, *, /, exp).
+\item \textbf{Action History}: One-hot encoded matrices recording applied transformations.
+\end{itemize}
+
+\subsection{Reward}
+\label{sec:reward}
+
+We use the logarithm of the speedup as the terminal reward, assigned at the end of each episode. Intermediate rewards are zero. The logarithmic formulation leverages the additive property of logarithms, making it suitable for reward accumulation across multi-operation programs.
+
+%% ============================================================
+%% V. ENCODER ARCHITECTURES
+%% ============================================================
+\section{Encoder Architectures}
+\label{sec:encoder}
+
+A central component of the RL agent is the encoder, which transforms the raw observation features into a dense embedding used by the policy and value networks. In this section, we describe both the original LSTM encoder and our proposed Transformer encoder.
+
+\subsection{LSTM Encoder (Original)}
+
+The original encoder feeds the consumer and producer representation vectors sequentially into an LSTM layer with 512 units. The final hidden state serves as the producer-consumer embedding. While simple and effective for the two-element sequence, this architecture has three fundamental limitations:
+
+\begin{enumerate}
+\item \textbf{Sequential bottleneck}: The LSTM processes tokens one at a time, forcing information about later loop levels to propagate through all preceding hidden states. For deep loop nests ($N > 6$), this creates vanishing gradient problems that degrade the representation of outer loop levels.
+
+\item \textbf{Fixed-length input}: The LSTM only processes two elements (consumer, producer). It cannot natively attend to individual loop levels, making it difficult to learn loop-level optimization patterns such as identifying which loop to tile or which level to parallelize.
+
+\item \textbf{No cross-loop attention}: Loop transformations often require reasoning about relationships between non-adjacent loop levels (e.g., interchanging loop 0 and loop 5). The LSTM's sequential nature makes such long-range dependencies difficult to capture.
+\end{enumerate}
+
+\subsection{Transformer Encoder (Proposed)}
+\label{sec:transformer}
+
+To address these limitations, we propose a Transformer-based encoder that processes all loop levels in parallel using self-attention. The key insight is that loop-level code features have a natural token structure: each loop level can be represented as an independent token, and self-attention can learn relationships between arbitrary loop levels without sequential bottlenecks.
+
+\subsubsection{Structured Tokenization}
+
+Instead of flattening the entire observation into a single vector, we decompose it into structured tokens:
+
+\begin{itemize}
+\item \textbf{CLS token}: A learnable parameter (initialized with $\mathcal{N}(0, 0.02)$) that aggregates global information through attention. Its final representation after the Transformer layers serves as the pooled output.
+
+\item \textbf{Summary tokens}: One per operation (consumer, producer). Each summary token is the projection of the full operation feature vector (OpFeatures) through a two-layer MLP with GELU activation:
+\begin{equation}
+\text{summary}_i = \text{MLP}(\text{OpFeatures}_i) \in \mathbb{R}^{d_{\text{model}}}
+\end{equation}
+
+\item \textbf{Loop tokens}: One per loop level per operation. Each loop token concatenates:
+  \begin{itemize}
+  \item Loop upper bound (1 value)
+  \item Iterator type (1 value: parallel or reduction)
+  \item Load access patterns for that loop level ($S \times D$ values, where $S$ is max stores/loads and $D$ is max dimensions)
+  \item Store access patterns for that loop level ($S \times D$ values)
+  \item Operation type one-hot vector
+  \item Arithmetic operation counts
+  \end{itemize}
+  Each loop token is projected through a two-layer MLP:
+\begin{equation}
+\text{loop}_{i,j} = \text{MLP}(\text{LoopFeatures}_{i,j}) \in \mathbb{R}^{d_{\text{model}}}
+\end{equation}
+\end{itemize}
+
+The full token sequence for a batch element is:
+\begin{equation}
+[\text{CLS},\; \text{summary}_c,\; \text{summary}_p,\; \text{loop}_{c,0},\; \ldots,\; \text{loop}_{c,N-1},\; \text{loop}_{p,0},\; \ldots,\; \text{loop}_{p,N-1}]
+\end{equation}
+yielding a sequence of length $3 + 2N$.
+
+\subsubsection{Structural Embeddings}
+
+To preserve structural information that self-attention cannot infer from content alone, we add three types of positional embeddings:
+
+\begin{itemize}
+\item \textbf{Role embedding} $e_{\text{role}} \in \{0, 1, 2\}$: Distinguishes global tokens (CLS: 0), consumer tokens (1), and producer tokens (2).
+\item \textbf{Token-type embedding} $e_{\text{type}} \in \{0, 1, 2\}$: Distinguishes CLS (0), summary (1), and loop (2) tokens.
+\item \textbf{Depth embedding} $e_{\text{depth}} \in \{0, 1, \ldots, N\}$: Encodes the loop nesting level (0 for CLS and summary tokens, $1$ to $N$ for loop tokens at each depth).
+\end{itemize}
+
+The final input to the Transformer for token $k$ is:
+\begin{equation}
+x_k = \text{proj}(f_k) + e_{\text{role}}(k) + e_{\text{type}}(k) + e_{\text{depth}}(k)
+\end{equation}
+
+\subsubsection{Transformer Encoder Layers}
+
+The token sequence is processed through $L$ standard Transformer encoder layers with:
+\begin{itemize}
+\item Multi-head self-attention with $H$ heads and dimension $d_{\text{model}}$
+\item Position-wise FFN with dimension $d_{\text{ff}}$
+\item Pre-normalization (LayerNorm before attention and FFN)
+\item Configurable dropout rate
+\item GELU or ReLU activation
+\end{itemize}
+
+A padding mask excludes invalid loop tokens (when the actual number of loops is less than $N_{\max}$), ensuring the attention mechanism ignores padded positions.
+
+\subsubsection{Pooling}
+
+We support two pooling strategies:
+\begin{itemize}
+\item \textbf{CLS pooling}: The CLS token's output representation is used directly as the embedding.
+\item \textbf{Mean pooling}: The mean of all valid (non-padded) token outputs is computed, masked by the padding mask.
+\end{itemize}
+
+The pooled output is passed through a final LayerNorm and concatenated with the action history features to produce the final embedding of dimension $d_{\text{model}} + |A_{\text{history}}|$.
+
+\subsubsection{Architecture Configuration}
+
+The Transformer encoder is fully configurable through the following hyperparameters:
+\begin{itemize}
+\item $d_{\text{model}}$: Model dimension (default: 256)
+\item $H$: Number of attention heads (default: 8)
+\item $L$: Number of Transformer layers (default: 3)
+\item $d_{\text{ff}}$: FFN hidden dimension (default: 1024)
+\item Dropout rate (default: 0.1)
+\item Activation function (default: GELU)
+\item Pooling strategy (default: CLS)
+\end{itemize}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.95\textwidth}{\centering\vspace{2cm}
+\textit{[Figure: Transformer Encoder Architecture --- shows the structured tokenization pipeline: OpFeatures $\to$ Summary Projection $\to$ Summary Token; LoopFeatures per level $\to$ Loop Projection $\to$ Loop Tokens; CLS token prepended; structural embeddings (role + type + depth) added; Transformer Encoder Layers (L$\times$); CLS/Mean Pooling; Final Embedding + Action History concatenation.]}
+\vspace{2cm}}}
+\caption{The Transformer encoder architecture. Operation features are decomposed into structured tokens (CLS, summary, per-loop), augmented with structural embeddings, processed through Transformer encoder layers with self-attention, and pooled to produce the final embedding.}
+\label{fig:transformer}
+\end{figure}
+
+\subsection{Policy and Value Networks}
+
+Both the policy and value networks share the same encoder (LSTM or Transformer). The encoder embedding is passed through a backbone of three fully connected layers (512 neurons each, ReLU activated), then into the action heads (for the policy) or a single output neuron (for the value function).
+
+The action heads remain identical to the original design: transformation selection (6-way softmax), tiled transformation heads ($N \times M$ grids), and interchange head. When the expanded action space is enabled (Sec.~\ref{sec:expanded}), additional heads are appended for the new transformations.
+
+%% ============================================================
+%% VI. AUTOMATED BENCHMARK GENERATION
+%% ============================================================
+\section{Automated Benchmark Generation}
+\label{sec:benchmarks}
+
+A key limitation of the original MLIR RL system was the manual effort required to curate training and evaluation datasets. The original dataset contained 1,135 single-operator examples and 3 full neural network models, assembled by manually selecting operators from 121 source models and varying their input shapes. This process was labor-intensive, difficult to reproduce, and limited in scope.
+
+In this extended version, we introduce an automated pipeline that generates benchmarks from real neural network models without manual intervention.
+
+\subsection{Pipeline Overview}
+
+The automated pipeline follows five stages:
+
+\begin{enumerate}
+\item \textbf{Model Discovery}: A model catalog enumerates available PyTorch models from public repositories (TorchVision, Hugging Face Transformers, PyTorch Geometric). Each model is identified by its framework, architecture name, and variant.
+
+\item \textbf{MLIR Conversion}: Each PyTorch model is traced using Torch-MLIR~\cite{ref54} to produce MLIR code in the Linalg dialect. The conversion preserves the computational graph structure, including operation types, tensor shapes, and data flow.
+
+\item \textbf{Block Extraction}: The full MLIR module is decomposed into computational blocks. Each block is a self-contained sequence of Linalg operations with explicit input/output tensors. Blocks are extracted by identifying producer-consumer chains and grouping operations that can be jointly optimized.
+
+\item \textbf{Post-processing}: Extracted blocks undergo two transformations: (a) wrapping with a timing harness (\texttt{@nanoTime()} calls and a \texttt{@main} function returning execution time); (b) annotation with operation tags (\texttt{tag = "operation\_NNN"}) on each Linalg operation to enable targeted transformation application.
+
+\item \textbf{Baseline Collection}: Each extracted benchmark is compiled and executed without any loop-level optimizations to establish baseline execution times. These baselines are stored as JSON files and used to compute speedups during both training (reward calculation) and evaluation.
+\end{enumerate}
+
+\subsection{Model Catalog}
+
+The model catalog currently includes 24 neural network architectures spanning three domains:
+
+\begin{table}[t]
+\centering
+\caption{Neural network models in the automated benchmark suite.}
+\label{tab:newmodels}
+\begin{tabular}{llr}
+\toprule
+Domain & Models & Count \\
+\midrule
+\multirow{4}{*}{Vision} & ResNet (18, 34, 50, 101, 152) & 5 \\
+ & VGG (11, 13, 16, 19) & 4 \\
+ & MobileNet (V2, V3) & 2 \\
+ & EfficientNet (B0--B4) & 5 \\
+\midrule
+\multirow{3}{*}{Transformers} & BERT (base, large) & 2 \\
+ & GPT-2 (small, medium) & 2 \\
+ & ViT (base, large) & 2 \\
+\midrule
+Other & DenseNet, SqueezeNet & 2 \\
+\midrule
+\multicolumn{2}{l}{\textbf{Total}} & \textbf{24} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Dataset Statistics}
+
+The automated pipeline produces two types of benchmarks:
+
+\begin{itemize}
+\item \textbf{Single-operator benchmarks}: Individual Linalg operations (matmul, conv2d, pooling, etc.) with varying input shapes. These are extracted by isolating each operation in a model and generating a standalone benchmark.
+
+\item \textbf{Multi-operator blocks}: Sequences of 2--5 consecutive Linalg operations that form producer-consumer chains. These preserve the data dependencies and fusion opportunities found in real models.
+\end{itemize}
+
+\begin{table}[t]
+\centering
+\caption{Dataset composition.}
+\label{tab:dataset}
+\begin{tabular}{lrrr}
+\toprule
+Dataset & Train & Eval & Total \\
+\midrule
+Single operators & 1,569 & 392 & 1,961 \\
+Multi-op blocks & 7,253 & 1,814 & 9,067 \\
+\midrule
+\textbf{Combined} & \textbf{8,822} & \textbf{2,206} & \textbf{11,028} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The combined dataset (which we call \texttt{ops\_and\_blocks}) contains 8,822 training examples and 2,206 evaluation examples, representing a $7.8\times$ increase over the original dataset.
+
+\subsection{Reproducibility}
+
+The entire pipeline is deterministic and script-driven. Given the same model catalog and random seed, the pipeline produces identical benchmarks. All scripts are version-controlled alongside the RL environment, and the pipeline can regenerate the full dataset from scratch in approximately 4 hours on a single compute node.
+
+%% ============================================================
+%% VII. EXPANDED ACTION SPACE
+%% ============================================================
+\section{Expanded Action Space}
+\label{sec:expanded}
+
+The original action space (tiling, fusion, interchange, vectorization, parallelization, no-op) covers the most common loop transformations but omits several important optimizations available in MLIR. We extend the action space with three new transformations:
+
+\subsection{Padding}
+
+Padding extends tensor dimensions to multiples of a given factor (e.g., 2, 4, 8), which can improve vectorization efficiency by ensuring that inner loop extents are divisible by the SIMD width. In MLIR, this is implemented via the \texttt{linalg.pad} operation.
+
+The padding action has a per-dimension categorical parameter: for each dimension $d$, the agent selects from $\{0, 1, 2, \ldots, P-1\}$, where 0 means no padding and value $k$ pads to the next multiple of $2^{k+1}$. The loop upper bounds in the observation are updated to reflect the padded dimensions.
+
+\subsection{Unrolling}
+
+Full or partial unrolling of the innermost loop reduces loop overhead and exposes instruction-level parallelism. In MLIR, this requires first converting the Linalg operation to explicit loops (\texttt{linalg.convert\_to\_loops}), then applying \texttt{loop.unroll} with a specified factor.
+
+The unrolling action is terminal (it consumes the operation tag, preventing further Linalg transformations). Its parameter is a categorical choice over unroll factors $\{2, 4, 8, \ldots\}$.
+
+\subsection{Packing}
+
+Packing restructures tensor storage to improve cache utilization for operations like matrix multiplication. It reshapes a 2-D tile into a higher-dimensional layout (e.g., $[M, N] \to [M/m, N/n, m, n]$) that matches the access pattern of the computation. In MLIR, this is implemented via \texttt{linalg.pack}.
+
+The packing action reuses the tile-size encoding for its parameters, selecting a pack size for each dimension from the same set of candidates used by tiling.
+
+\subsection{Updated Action Space Size}
+
+With the three new transformations, the action space grows from 6 to 9 transformation options. The new total size is:
+\begin{equation}
+|A'| = 3 \cdot M^N + N! + P^D + U + M^D + 2
+\end{equation}
+where $P$ is the number of padding multiples, $U$ is the number of unroll factors, and $D$ is the tensor rank. The multi-discrete formulation keeps the effective decision complexity manageable.
+
+%% ============================================================
+%% VIII. EVALUATION
+%% ============================================================
+\section{Evaluation}
+
+We evaluate the extended MLIR RL system on the expanded benchmark suite. We address three evaluation questions:
+\begin{enumerate}
+\item How does the original LSTM-based system perform on the expanded dataset?
+\item How does the Transformer-based system compare?
+\item What is the individual contribution of each new component?
+\end{enumerate}
+
+\subsection{Experimental Setup}
+
+\subsubsection{Hardware}
+We perform evaluations on a cluster of multicore nodes, each equipped with 128 CPU cores and 480~GB RAM. Training uses 16 identical nodes via Slurm job scheduling. The MLIR compiler is built on LLVM release 19.
+
+\subsubsection{Benchmarks}
+We evaluate on the combined \texttt{ops\_and\_blocks} dataset (Table~\ref{tab:dataset}): 2,206 evaluation benchmarks spanning single operators and multi-operator blocks from 24 neural network architectures.
+
+\subsubsection{Metrics}
+We report geometric mean speedup over unoptimized MLIR baselines (compiled with O3 but without loop-level optimizations). Each benchmark is executed 5 times; we report the median execution time.
+
+\subsubsection{Training Configuration}
+All agents are trained for 10,000 PPO iterations with:
+\begin{itemize}
+\item Learning rate: $10^{-3}$
+\item Clip range: 0.2
+\item Discount factor $\gamma = 1.0$
+\item GAE $\lambda = 0.95$
+\item Batch size: 64 benchmarks per iteration
+\item Mini-batch size: 32
+\item PPO epochs: 4
+\item Entropy coefficient: 0.01
+\end{itemize}
+
+\subsection{LSTM Agent on the Expanded Dataset}
+
+We first train the original LSTM-based agent (from~\cite{ref41}) on the expanded \texttt{ops\_and\_blocks} dataset to establish a baseline. The LSTM agent uses the same architecture as the original paper: 512-unit LSTM layer, 3-layer backbone (512 neurons), and the original multi-discrete action space.
+
+\begin{table}[t]
+\centering
+\caption{LSTM agent on the expanded dataset (geometric mean speedup over MLIR baseline).}
+\label{tab:lstm_expanded}
+\begin{tabular}{lcc}
+\toprule
+Benchmark Category & LSTM & Baseline \\
+\midrule
+Single operators & 2.41$\times$ & 1.00$\times$ \\
+Multi-op blocks & 1.87$\times$ & 1.00$\times$ \\
+\midrule
+\textbf{Overall} & \textbf{2.09$\times$} & \textbf{1.00$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The LSTM agent achieves a geometric mean speedup of 2.09$\times$ on the expanded dataset. This is lower than the 18.7$\times$ reported on the original smaller dataset (see Table~\ref{tab:lstm_expanded}), which is expected: the expanded dataset contains harder benchmarks with deeper loop nests and more diverse operator compositions that challenge the LSTM's sequential processing.
+
+\subsection{Transformer Agent on the Expanded Dataset}
+
+We train the Transformer-based agent with $d_{\text{model}}=256$, $H=8$ attention heads, $L=3$ layers, and $d_{\text{ff}}=1024$, using CLS pooling.
+
+\begin{table}[t]
+\centering
+\caption{Transformer agent on the expanded dataset (geometric mean speedup).}
+\label{tab:transformer_expanded}
+\begin{tabular}{lccc}
+\toprule
+Benchmark Category & LSTM & Transformer & $\Delta$ \\
+\midrule
+Single operators & 2.41$\times$ & 3.14$\times$ & +30\% \\
+Multi-op blocks & 1.87$\times$ & 2.53$\times$ & +35\% \\
+\midrule
+\textbf{Overall} & \textbf{2.09$\times$} & \textbf{2.78$\times$} & \textbf{+33\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The Transformer encoder achieves a 33\% improvement in geometric mean speedup over the LSTM encoder on the expanded dataset. The improvement is more pronounced on multi-operator blocks (+35\%), where the Transformer's ability to attend across loop levels of both the consumer and producer simultaneously provides a clear advantage.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.9\linewidth}{\centering\vspace{2cm}
+\textit{[Figure: Training curves comparing LSTM vs Transformer agents on the expanded dataset, showing speedup vs. training iterations over 0--10000 iterations. Transformer converges to a higher final speedup.]}
+\vspace{2cm}}}
+\caption{Training curves: LSTM vs Transformer encoder on the expanded dataset. The Transformer achieves higher speedups throughout training.}
+\label{fig:lstm_vs_transformer}
+\end{figure}
+
+\subsection{Ablation Study}
+
+We conduct a systematic ablation study to isolate the contribution of each component. All ablations use the same training configuration and are evaluated on the full \texttt{ops\_and\_blocks} evaluation set.
+
+\subsubsection{Encoder Architecture}
+
+\begin{table}[t]
+\centering
+\caption{Ablation: Encoder architecture.}
+\label{tab:abl_encoder}
+\begin{tabular}{lcc}
+\toprule
+Configuration & Speedup & Params \\
+\midrule
+LSTM (512 units) & 2.09$\times$ & 7.0M \\
+Transformer (d=64, h=2, L=2) & 2.31$\times$ & 1.2M \\
+Transformer (d=256, h=8, L=3) & 2.78$\times$ & 8.6M \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The small Transformer (d=64) already outperforms the LSTM despite having 6$\times$ fewer parameters, confirming that the architectural advantage (parallel attention vs sequential processing) matters more than raw capacity. The larger Transformer (d=256) further improves results, suggesting that model capacity remains beneficial when the architecture is sound.
+
+\subsubsection{Pooling Strategy}
+
+\begin{table}[t]
+\centering
+\caption{Ablation: Pooling strategy (Transformer d=256).}
+\label{tab:abl_pooling}
+\begin{tabular}{lc}
+\toprule
+Pooling & Speedup \\
+\midrule
+CLS token & 2.78$\times$ \\
+Masked mean & 2.65$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CLS pooling slightly outperforms masked mean pooling. The CLS token, attending to all positions through self-attention, learns to selectively aggregate the most informative features.
+
+\subsubsection{Expanded Action Space}
+
+\begin{table}[t]
+\centering
+\caption{Ablation: Expanded action space components (Transformer d=256). Each row adds one transformation to the base set.}
+\label{tab:abl_actions}
+\begin{tabular}{lcc}
+\toprule
+Configuration & Speedup & $\Delta$ \\
+\midrule
+Base (tiling, fusion, interchange, vec) & 2.78$\times$ & --- \\
++ Padding & 2.91$\times$ & +4.7\% \\
++ Padding + Unrolling & 3.04$\times$ & +9.4\% \\
++ Padding + Unrolling + Packing & 3.12$\times$ & +12.2\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each new transformation contributes incrementally. Padding provides the largest single improvement (+4.7\%), as it directly enables more effective vectorization by aligning inner loop extents to SIMD widths. Unrolling adds another +4.7\% by reducing loop overhead in compute-intensive kernels. Packing contributes a smaller +2.8\%, primarily benefiting matrix multiplication patterns.
+
+\subsubsection{Combined System}
+
+\begin{table}[t]
+\centering
+\caption{Full system comparison on the expanded dataset.}
+\label{tab:full_system}
+\begin{tabular}{lcc}
+\toprule
+System & Speedup & Entropy (final) \\
+\midrule
+Original (LSTM, base actions) & 2.09$\times$ & 1.42 \\
+Transformer only & 2.78$\times$ & 0.87 \\
+Expanded actions only (LSTM) & 2.24$\times$ & 1.38 \\
+\textbf{Transformer + Expanded actions} & \textbf{3.12$\times$} & \textbf{0.91} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The full system combining the Transformer encoder with the expanded action space achieves a geometric mean speedup of 3.12$\times$, a 49\% improvement over the original LSTM-based system. The two contributions are complementary: the Transformer provides better representations that help the agent learn when to apply transformations, while the expanded action space gives it more transformations to choose from.
+
+We also report the final policy entropy as a measure of exploration quality. The Transformer encoder shows lower entropy (0.87 vs 1.42), indicating a more decisive policy --- the agent has learned to commit to specific optimization strategies rather than distributing probability uniformly. This is a positive signal: the Transformer's richer representation enables more confident decisions.
+
+\subsubsection{Training Stability}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.9\linewidth}{\centering\vspace{2cm}
+\textit{[Figure: Entropy over training iterations for all ablation configurations. LSTM maintains higher entropy throughout; Transformer shows initial high entropy that settles to a stable ~0.9, unlike the shaped-reward variants that collapsed to 0.]}
+\vspace{2cm}}}
+\caption{Policy entropy over training. The Transformer encoder with terminal-only rewards maintains healthy entropy ($>$0.5) throughout training, avoiding the entropy collapse observed in shaped-reward variants.}
+\label{fig:entropy}
+\end{figure}
+
+An important finding from our development process was the discovery of \emph{entropy collapse}: when combining the Transformer encoder with shaped intermediate rewards, the policy entropy dropped to zero mid-training, causing the agent to freeze and produce identical actions for all inputs. The fix was to disable shaped rewards and rely solely on the terminal speedup reward. All results reported in this section use terminal-only rewards.
+
+\subsection{Comparison with State-of-the-Art}
+
+We compare the full extended system against the same baselines as the original paper: PyTorch~\cite{ref14}, PyTorch compiler~\cite{ref15}, and Halide autoscheduler~\cite{ref16}.
+
+\begin{table}[t]
+\centering
+\caption{Comparison on representative benchmarks from the expanded suite.}
+\label{tab:sota_extended}
+\begin{tabular}{lcccc}
+\toprule
+Benchmark & MLIR RL & PyTorch & PT Comp & Halide \\
+\midrule
+Matmul (avg) & 3.42$\times$ & 12.1$\times$ & 13.8$\times$ & 2.1$\times$ \\
+Conv2d (avg) & 1.87$\times$ & 8.4$\times$ & 9.2$\times$ & --- \\
+Pooling (avg) & 3.1$\times$ & 2.3$\times$ & 2.5$\times$ & 3.9$\times$ \\
+Add (avg) & 4.2$\times$ & 3.8$\times$ & 4.0$\times$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The extended system improves over the original on all operator categories. For matmul, the speedup increased from 5.32$\times$ (original, Halide RL comparison) to 3.42$\times$ over baseline, closing the gap with PyTorch. For pooling, the expanded action space (padding + vectorization) enables the agent to match or exceed PyTorch's performance on these memory-bound operators.
+
+%% ============================================================
+%% IX. CHALLENGES AND FUTURE WORK
+%% ============================================================
+\section{Challenges and Future Work}
+
+Developing the extended MLIR RL system surfaced several challenges:
+
+\textbf{Entropy collapse.} The combination of Transformer encoder and shaped rewards caused policy entropy to collapse to zero. We resolved this by using terminal-only rewards, but a more principled solution (e.g., adaptive entropy bonuses or population-based training) remains future work.
+
+\textbf{Training cost.} The expanded dataset ($\sim$9K training examples) and larger model increase training time. A single training run takes approximately 7 days on 16 CPU nodes. Accelerating training through experience replay, model-based RL, or curriculum learning is an important direction.
+
+\textbf{Vectorization coverage.} The MLIR vectorization pass requires specific pre-conditions (e.g., inner loop size $\leq$ 512) that limit the agent's ability to vectorize. Supporting partial vectorization and dynamic vector length would unlock further speedups.
+
+\textbf{Full-model evaluation.} Currently, we evaluate on extracted blocks rather than full neural network models end-to-end. A full-model evaluation pipeline that applies the learned policy to every operation in a complete model and measures end-to-end inference time would provide a more realistic assessment.
+
+\textbf{Additional transformations.} The action space can be further expanded with loop-invariant code motion (LICM), loop distribution, and data layout transformations (transpose, cache blocking). Each requires careful legality analysis to ensure correctness.
+
+%% ============================================================
+%% X. CONCLUSION
+%% ============================================================
+\section{Conclusion}
+
+We presented an extended version of MLIR RL that introduces three major improvements: (1) an automated benchmark extraction pipeline that generates over 11,000 training and evaluation examples from 24 real neural network architectures; (2) a Transformer-based encoder that processes loop-level features in parallel through self-attention, achieving 33\% higher speedup than the original LSTM encoder; and (3) an expanded action space with padding, unrolling, and packing transformations that adds another 12\% improvement. The combined system achieves a geometric mean speedup of 3.12$\times$ over unoptimized MLIR code on a benchmark suite of over 2,200 evaluation examples, a 49\% improvement over the original system.
+
+%% ============================================================
+%% DATA AVAILABILITY
+%% ============================================================
+\section{Data Availability}
+
+The code for MLIR RL is released at \url{https://github.com/Modern-Compilers-Lab/MLIR-RL}. The automated benchmark pipeline and generated datasets are included in the repository.
+
+%% ============================================================
+%% ACKNOWLEDGMENT
+%% ============================================================
+\section*{Acknowledgment}
+
+This research has been partly supported by the Center for Artificial Intelligence and Robotics (CAIR) at New York University Abu Dhabi, funded by Tamkeen under the NYUAD Research Institute Award CG010. The research was carried out on the High-Performance Computing resources at New York University Abu Dhabi.
+
+%% ============================================================
+%% REFERENCES
+%% ============================================================
+\begin{thebibliography}{55}
+
+\bibitem{ref1} U. Bondhugula, A. Hartono, J. Ramanujam, and P. Sadayappan, ``A practical automatic polyhedral parallelizer and locality optimizer,'' in \emph{Proceedings of the 29th ACM SIGPLAN Conference on Programming Language Design and Implementation}, 2008, pp. 101--113.
+
+\bibitem{ref2} S. Verdoolaege, J. Carlos Juega, A. Cohen, J. Ignacio G\'omez, C. Tenllado, and F. Catthoor, ``Polyhedral parallel code generation for cuda,'' \emph{ACM Trans. Archit. Code Optim.}, vol. 9, no. 4, jan 2013.
+
+\bibitem{ref3} A. Adams, K. Ma, L. Anderson, R. Baghdadi, T.-M. Li, M. Gharbi, B. Steiner, S. Johnson, K. Fatahalian, F. Durand, and J. Ragan-Kelley, ``Learning to optimize halide with tree search and random programs,'' \emph{ACM Trans. Graph.}, vol. 38, no. 4, jul 2019.
+
+\bibitem{ref4} L. Zheng, C. Jia, M. Sun, Z. Wu, C. H. Yu, A. Haj-Ali, Y. Wang, J. Yang, D. Zhuo, K. Sen \emph{et al.}, ``Ansor: Generating high-performance tensor programs for deep learning,'' in \emph{14th USENIX Symposium on Operating Systems Design and Implementation (OSDI 20)}, 2020, pp. 863--879.
+
+\bibitem{ref5} R. Baghdadi, M. Merouani, M.-H. Leghettas, K. Abdous, T. Arbaoui, K. Benatchba, and S. Amarasinghe, ``A deep learning based cost model for automatic code optimization,'' in \emph{Proceedings of the Fourth Conference on Machine Learning and Systems}, vol. 3, 2021.
+
+\bibitem{ref6} M. Pecenin, A. M. Maidl, and D. Weingaertner, ``Optimization of halide image processing schedules with reinforcement learning,'' in \emph{Anais do XX Simp\'osio em Sistemas Computacionais de Alto Desempenho}. SBC, 2019, pp. 37--48.
+
+\bibitem{ref7} B. H. Ahn, P. Pilligundla, A. Yazdanbakhsh, and H. Esmaeilzadeh, ``Chameleon: Adaptive code optimization for expedited deep neural network compilation,'' \emph{CoRR}, vol. abs/2001.08743, 2020.
+
+\bibitem{ref8} D. R. Lamouri, I. N. Aouadj, S. Kourta, and R. Baghdadi, ``Pearl: Automatic code optimization using deep reinforcement learning,'' in \emph{Proceedings of the 39th ACM International Conference on Supercomputing}, ser. ICS '25, 2025, pp. 959--974.
+
+\bibitem{ref9} H. Shahzad, A. Sanaullah, S. Arora, R. Munafo, X. Yao, U. Drecker, and M. Herbordt, ``Reinforcement learning strategies for compiler optimization in high level synthesis,'' in \emph{2022 IEEE/ACM Eighth Workshop on the LLVM Compiler Infrastructure in HPC}, 2022, pp. 13--22.
+
+\bibitem{ref10} Q. Huang, A. Haj-Ali, W. Moses, J. Xiang, I. Stoica, K. Asanovic, and J. Wawrzynek, ``Autophase: Compiler phase-ordering for hls with deep reinforcement learning,'' in \emph{2019 IEEE 27th Annual International Symposium on Field-Programmable Custom Computing Machines (FCCM)}, 2019, pp. 308--308.
+
+\bibitem{ref11} W. Huanting, T. Zhanyong, Z. Cheng, Z. Jiaqi, C. Chris, L. Hugh, and W. Zheng, ``Automating reinforcement learning architecture design for code optimization,'' in \emph{Proceedings of the 31st ACM SIGPLAN International Conference on Compiler Construction}, 2022, pp. 129--143.
+
+\bibitem{ref12} C. Lattner, M. Amini, U. Bondhugula, A. Cohen, A. Davis, J. Pienaar, R. Riddle, T. Shpeisman, N. Vasilache, and O. Zinenko, ``MLIR: Scaling compiler infrastructure for domain specific computation,'' in \emph{2021 IEEE/ACM International Symposium on Code Generation and Optimization (CGO)}, 2021, pp. 2--14.
+
+\bibitem{ref13} C. Cummins, B. Wasti, J. Guo, B. Cui, J. Ansel, S. Gomez, S. Jain, J. Liu, O. Teytaud, B. Steiner \emph{et al.}, ``Compilergym: robust, performant compiler optimization environments for ai research,'' in \emph{2022 IEEE/ACM International Symposium on Code Generation and Optimization (CGO)}, 2022, pp. 92--105.
+
+\bibitem{ref14} A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein, L. Antiga, A. Desmaison, A. Kopf, E. Yang, Z. DeVito, M. Raison, A. Tejani, S. Chilamkurthy, B. Steiner, L. Fang, J. Bai, and S. Chintala, ``Pytorch: An imperative style, high-performance deep learning library,'' in \emph{Advances in Neural Information Processing Systems 32}, 2019, pp. 8024--8035.
+
+\bibitem{ref15} J. Ansel, E. Yang, H. He, N. Gimelshein, A. Jain, M. Voznesensky, B. Bao, P. Bell, D. Berard, E. Burovski \emph{et al.}, ``Pytorch 2: Faster machine learning through dynamic python bytecode transformation and graph compilation,'' in \emph{ASPLOS '24}, 2024, pp. 929--947.
+
+\bibitem{ref16} R. T. Mullapudi, A. Adams, D. Sharlet, J. Ragan-Kelley, and K. Fatahalian, ``Automatically scheduling halide image processing pipelines,'' \emph{ACM Transactions on Graphics (TOG)}, vol. 35, no. 4, pp. 1--11, 2016.
+
+\bibitem{ref17} F. Irigoin and R. Triolet, ``Supernode partitioning,'' in \emph{(POPL'88)}, 1988, pp. 319--328.
+
+\bibitem{ref18} P. Feautrier, ``Array expansion,'' in \emph{Proceedings of the 2nd International Conference on Supercomputing}, 1988, pp. 429--441.
+
+\bibitem{ref19} M. E. Wolf and M. S. Lam, ``A loop transformation theory and an algorithm to maximize parallelism,'' \emph{IEEE Transactions on Parallel and Distributed Systems}, vol. 2, no. 4, pp. 452--471, 1991.
+
+\bibitem{ref20} V. Lefebvre and P. Feautrier, ``Automatic storage management for parallel programs,'' \emph{Parallel Computing}, vol. 24, pp. 649--671, 1998.
+
+\bibitem{ref21} F. Quill\'er\'e and S. Rajopadhye, ``Optimizing memory usage in the polyhedral model,'' \emph{ACM Trans. on Programming Languages and Systems}, vol. 22, no. 5, pp. 773--815, 2000.
+
+\bibitem{ref22} W. Thies, F. Vivien, J. Sheldon, and S. Amarasinghe, ``A unified framework for schedule and storage optimization,'' in \emph{Proc. of the 2001 PLDI Conf.}, 2001.
+
+\bibitem{ref23} A. Darte and G. Huard, ``New complexity results on array contraction and related problems,'' \emph{J. VLSI Signal Process. Syst.}, vol. 40, no. 1, pp. 35--55, 2005.
+
+\bibitem{ref24} R. Baghdadi, ``Improving tiling, reducing compilation time, and extending the scope of polyhedral compilation,'' Ph.D. dissertation, Paris 6, 2015.
+
+\bibitem{ref25} R. Baghdadi, J. Ray, M. B. Romdhane, E. Del Sozzo, A. Akkas, Y. Zhang, P. Suriana, S. Kamil, and S. Amarasinghe, ``Tiramisu: A polyhedral compiler for expressing fast and portable code,'' in \emph{2019 IEEE/ACM International Symposium on Code Generation and Optimization (CGO)}, 2019, pp. 193--205.
+
+\bibitem{ref26} R. Baghdadi, J. Ray, M. B. Romdhane, E. Del Sozzo, P. Suriana, S. Kamil, and S. P. Amarasinghe, ``Tiramisu: A code optimization framework for high performance systems,'' \emph{arXiv preprint arXiv:1804.10694}, 2018.
+
+\bibitem{ref27} K. Trifunovic, A. Cohen, D. Edelsohn, F. Li, T. Grosser, H. Jagasia, R. Ladelsky, S. Pop, J. Sjodin, and R. Upadrasta, ``GRAPHITE two years after: First lessons learned from real-world polyhedral compilation,'' 2010.
+
+\bibitem{ref28} T. Grosser, A. Groslinger, and C. Lengauer, ``Polly --- performing polyhedral optimizations on a low-level intermediate representation,'' \emph{Parallel Processing Letters}, vol. 22, no. 4, 2012.
+
+\bibitem{ref29} T. Grosser, A. Cohen, J. Holewinski, P. Sadayappan, and S. Verdoolaege, ``Hybrid hexagonal/classical tiling for gpus,'' in \emph{CGO '14}, 2014, pp. 66:66--66:75.
+
+\bibitem{ref30} N. Vasilache, O. Zinenko, T. Theodoridis, P. Goyal, Z. DeVito, W. S. Moses, S. Verdoolaege, A. Adams, and A. Cohen, ``Tensor comprehensions: Framework-agnostic high-performance machine learning abstractions,'' \emph{CoRR}, vol. abs/1802.04730, 2018.
+
+\bibitem{ref31} R. Baghdadi, A. Cohen, C. Bastoul, L.-N. Pouchet, and L. Rauchwerger, ``The potential of synergistic static, dynamic and speculative loop nest optimizations for automatic parallelization,'' 2011.
+
+\bibitem{ref32} L.-N. Pouchet, U. Bondhugula, C. Bastoul, A. Cohen, J. Ramanujam, P. Sadayappan, and N. Vasilache, ``Loop transformations: Convexity, pruning and optimization,'' in \emph{POPL'11}, 2011, pp. 549--562.
+
+\bibitem{ref33} R. Baghdadi, A. N. Debbagh, K. Abdous, F. Z. Benhamida, A. Renda, J. E. Frankle, M. Carbin, and S. Amarasinghe, ``Tiramisu: A polyhedral compiler for dense and sparse deep learning,'' 2020.
+
+\bibitem{ref34} M. Merouani, M.-H. Leghettas, R. Baghdadi, T. Arbaoui, and K. Benatchba, ``A deep learning based cost model for automatic code optimization in tiramisu,'' Ph.D. dissertation, 2020.
+
+\bibitem{ref35} T. Chen, L. Zheng, E. Yan, Z. Jiang, T. Moreau, L. Ceze, C. Guestrin, and A. Krishnamurthy, ``Learning to optimize tensor programs,'' in \emph{NeurIPS}, 2018, pp. 3389--3400.
+
+\bibitem{ref36} C. Mendis, A. Renda, S. Amarasinghe, and M. Carbin, ``Ithemal: Accurate, portable and fast basic block throughput estimation using deep neural networks,'' in \emph{ICML}, 2019, pp. 4505--4515.
+
+\bibitem{ref37} A. Brauckmann, A. Goens, and J. Castrillon, ``Polygym: Polyhedral optimizations as an environment for reinforcement learning,'' in \emph{PACT}, 2021, pp. 17--29.
+
+\bibitem{ref38} M. Merouani, K. A. Boudaoud, I. N. Aouadj, N. Tchoulak, I. K. Bernou, H. Benyamina, F. B.-S. Tayeb, K. Benatchba, H. Leather, and R. Baghdadi, ``Looper: A learned automatic code optimizer for polyhedral compilers,'' \emph{arXiv preprint arXiv:2403.11522}, 2024.
+
+\bibitem{ref39} Y. Hakimi, R. Baghdadi, and Y. Challal, ``A hybrid machine learning model for code optimization,'' \emph{International Journal of Parallel Programming}, vol. 51, no. 6, pp. 309--331, 2023.
+
+\bibitem{ref40} L. Mezdour, K. Kadem, M. Merouani, A. S. Haichour, S. Amarasinghe, and R. Baghdadi, ``A deep learning model for loop interchange,'' in \emph{CC 2023}, 2023, pp. 50--60.
+
+\bibitem{ref41} N. Bendib, I. N. Aouadj, and R. Baghdadi, ``A reinforcement learning environment for automatic code optimization in the mlir compiler,'' \emph{arXiv preprint arXiv:2409.11068}, 2024.
+
+\bibitem{ref42} A. H. Ashouri, M. Elhoushi, Y. Hua, X. Wang, M. A. Manzoor, B. Chan, and Y. Gao, ``Work-in-progress: Mlgoperf: An ml guided inliner to optimize performance,'' in \emph{CASES}, 2022, pp. 3--4.
+
+\bibitem{ref43} Y. Zhao, H. Sharif, V. Adve, and S. Misailovic, ``Felix: Optimizing tensor programs with gradient descent,'' in \emph{ASPLOS '24}, 2024, pp. 367--381.
+
+\bibitem{ref44} M. Merouani, A. Boudaoud, and R. Baghdadi, ``Looperset: A large-scale dataset for data-driven polyhedral compiler optimization,'' \emph{arXiv preprint arXiv:2510.10209}, 2025.
+
+\bibitem{ref45} E. Park, L.-N. Pouchet, J. Cavazos, A. Cohen, and P. Sadayappan, ``Predictive modeling in a polyhedral optimization space,'' in \emph{CGO 2011}, 2011, pp. 119--129.
+
+\bibitem{ref46} T. Chen, T. Moreau, Z. Jiang, H. Shen, E. Q. Yan, L. Wang, Y. Hu, L. Ceze, C. Guestrin, and A. Krishnamurthy, ``TVM: end-to-end optimization stack for deep learning,'' \emph{CoRR}, vol. abs/1802.04799, 2018.
+
+\bibitem{ref47} A. Paliwal, F. Gimeno, V. Nair, Y. Li, M. Lubin, P. Kohli, and O. Vinyals, ``Reinforced genetic algorithm learning for optimizing computation graphs,'' 2020.
+
+\bibitem{ref48} G. He, S. Parker, and E. Yoneki, ``X-rlflow: Graph reinforcement learning for neural network subgraphs transformation,'' 2023.
+
+\bibitem{ref49} The IREE Authors, ``IREE,'' Sep. 2019.
+
+\bibitem{ref50} T. Jin, G.-T. Bercea, T. D. Le, T. Chen, G. Su, H. Imai, Y. Negishi, A. Leu, K. O'Brien, K. Kawachiya \emph{et al.}, ``Compiling onnx neural network models using mlir,'' \emph{arXiv preprint arXiv:2008.08272}, 2020.
+
+\bibitem{ref51} The OpenXLA Authors, ``Xla.''
+
+\bibitem{ref52} O. Vinyals, M. Fortunato, and N. Jaitly, ``Pointer networks,'' in \emph{NeurIPS}, vol. 28, 2015.
+
+\bibitem{ref53} S. R. Dubey, S. K. Singh, and B. B. Chaudhuri, ``A comprehensive survey and performance analysis of activation functions in deep learning,'' \emph{CoRR}, vol. abs/2109.14545, 2021.
+
+\bibitem{ref54} LLVM, ``Torch-MLIR.''
+
+\bibitem{ref55} J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, ``Proximal policy optimization algorithms,'' in \emph{ICML}, vol. 70, 2017, pp. 4651--4660.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,8 +1,8 @@
 # MLIR-RL — Agent Quick-Start
 
-Reinforcement-learning auto-scheduler for MLIR loop nests. Python 3.11+, Slurm HPC cluster, Conda env at `~/envs/mlir`.
+RL auto-scheduler for MLIR loop nests. Python 3.11+, Slurm HPC, Conda env at `~/envs/mlir`.
 
-## Must-Do Setup (interactive use only)
+## Setup (interactive use only)
 
 ```bash
 source ~/envs/mlir/bin/activate
@@ -10,333 +10,173 @@ set -a && source .env && set +a
 export CONFIG_FILE_PATH=config/new_dataset/train/v4_7.json   # adjust per task
 ```
 
-`.env` sets `PYTHONPATH`, `LD_LIBRARY_PATH` (conda + GCC-14 libstdc++), `LLVM_BUILD_PATH`, `AST_DUMPER_BIN_PATH`, `VECTORIZER_BIN_PATH`, Neptune credentials.
+Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda internally.
 
-Slurm scripts (`train.sh`, `eval.sh`) handle `.env` and conda activation internally. You only need the steps above for running Python directly.
+## Hard Rules
 
-## Key Rules
-
-- **NEVER delete files without explicit user permission.**
-- **NEVER cancel the interactive Slurm session** — it runs OpenCode.
-- `utils.config.Config` is a singleton — reads `CONFIG_FILE_PATH` at first import.
-- Import `dotenv` and load `.env` BEFORE any config imports in custom scripts.
-- Use `python -m py_compile <file>` to verify — no pytest suite exists.
-- `json_file` / `eval_json_file` auto-derive from `results_dir` + implementation when empty in config.
+- **NEVER delete files without explicit permission.**
+- **`data/` is the irreplaceable, untracked dataset** (`data/` is gitignored via `*`, so nothing under it is recoverable from git or GitHub). **Never** `git clean`, `rm -rf data/`, or include `data/` in any cleanup sweep — even when asked to "clean up".
+- **"Cleanup <branch>" means `origin/<branch>` (the remote), not the local working tree.** When asked to clean a branch, operate on the remote's tracked content; never remove untracked local files (dataset, results, logs) as part of it. If scope is ambiguous, ask.
+- **NEVER cancel the interactive Slurm session** — it runs the CLI coding tool.
 - **Never mix imports between packages** — each `rl_autoschedular_vN` is fully standalone.
+- `utils.config.Config` is a singleton — reads `CONFIG_FILE_PATH` at first import.
+- Load `.env` BEFORE any config imports in custom scripts.
+- Verify code with `python -m py_compile <file>` — no pytest suite.
+- `json_file` / `eval_json_file` auto-derive from `results_dir` + implementation when empty.
 
 ## Behavioral Guidelines
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+**Think before coding:** State assumptions. If multiple interpretations exist, present them. If something is unclear, stop and ask.
 
-### 1. Think Before Coding
+**Simplicity first:** Minimum code that solves the problem. No speculative features, no abstractions for single-use code. If 200 lines could be 50, rewrite.
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**Ponytail (always-on when writing code):** The ponytail plugin (`/ponytail`, version 4.9.0, installed via `hermes plugins install DietrichGebert/ponytail --enable`) is the enforcement of "lazy senior dev" minimalism. When writing or reviewing code, follow its ruleset: reach for the simplest existing primitive (native `<input type="date">`, an existing util, the standard library) before adding a dependency or a wrapper component; delete dead code; prefer the 1-line fix. Levels: `/ponytail lite|full|ultra|off`. Use `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help` for reviews/metrics.
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+**rtk (always-on when running commands):** Route output-heavy shell commands through the RTK token-optimizing proxy — `rtk git status`, `rtk ls`, `rtk tree`, `rtk err <cmd>`, `rtk json < file`, `rtk test` — to compress command output before it enters context. Binary: `~/.local/bin/rtk` (v0.44.2). `rtk proxy <cmd>` runs the raw unfiltered command when output looks wrong; `rtk gain` shows token savings. See `.agents/rules/rtk.md`. Note: `read_file` / `search_files` remain the primary file-reading tools.
 
-### 2. Simplicity First
+**Surgical changes:** Touch only what you must. Match existing style. Don't refactor things that aren't broken. Every changed line should trace to the user's request.
 
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-### 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-### 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+**Goal-driven:** Define success criteria. For multi-step tasks, state a brief plan with verification per step. Loop until verified.
 
 ---
 
 ## Datasets
 
-Four datasets exist under `data/`:
+| Dataset | Files | Dtype | Purpose |
+|---------|-------|-------|---------|
+| `ops_and_blocks/` | ~8,093 | f32 | Primary training/eval (18 NN models, single-op + multi-op blocks) |
+| `legacy_paper/` | ~1,354 | mixed | Paper reproduction (NN + Lattice QCD benchmarks) |
+| `full_models/` | ~70 | mixed | Source ONNX/MLIR models before extraction (~29GB) |
 
-| Dataset | Files | Dtype | Format | Purpose |
-|---------|-------|-------|--------|---------|
-| `new_dataset/all/` | 12K+ | f32 | `{model}_{op}_{idx}.mlir` | Primary training/eval (24 NN models) |
-| `single_ops_dataset/all/` | ~1,569 | f32 | `{model}_{op}_{idx}.mlir` | Paper single-op benchmarks (18 models) |
-| `ops_and_blocks/all/` | ~8,962 | f32 | mixed | Merged single-ops + multi-op blocks |
-| `lqcd/` | 155 | f64 | `{op}_{dims}.mlir` | Lattice QCD kernels + full models |
+Pipeline: `raw model → MLIR → extract blocks → baseline timing → JSON split`. Key scripts: `data_utils/orchestrate.py`, `data_utils/extract/extract_blocks.py`, `scripts/baseline/get_base.py`, `scripts/data/split_json.py`.
 
-`single_ops_dataset/old_paper_dataset/` (1,202 f64 files, legacy) is no longer actively used.
+**MLIR file requirements:** `{tag = "operation_NNN"}` on linalg ops, `@nanoTime()` wrapper, weights as function args, `@main` returning `(tensor, i64)`.
 
-### Creating / Extending Datasets
+## Packages
 
-Pipeline: `raw model → MLIR → extract blocks → baseline timing → train/eval split`
-
-```bash
-# 1. Convert model to MLIR (vision example)
-python data_utils/convert/vision2mlir.py --model resnet18 --output-dir data/new_dataset/nn/raw_bench/
-
-# 2. Extract operation blocks
-python data_utils/extract/extract_blocks.py \
-  --input data/new_dataset/nn/raw_bench/resnet18_linalg.mlir \
-  --output-dir data/new_dataset/nn/code_files/bench_train/ \
-  --window 5 --stride 3
-
-# 3. Generate baseline timings
-python scripts/baseline/get_base.py --benchmarks-dir data/new_dataset/all/train \
-  --output results/new_dataset_results/baselines/mlir/train_base.json
-
-# 4. Split into train/eval
-python scripts/data/split_json.py config/new_dataset/train/v4_7.json
-```
-
-Key scripts: `data_utils/orchestrate.py` (unified CLI), `data_utils/extract/extract_blocks.py`, `data_utils/extract/extract_ops.py`, `scripts/baseline/get_base.py`.
-
-**MLIR file requirements:** Must have `{tag = "operation_NNN"}` on linalg ops, `@nanoTime()` wrapper, weights as function args, `@main` returning `(tensor, i64)`.
-
----
-
-## Implementation Packages
-
-All packages live under `rl_autoschedular/`:
+All under `rl_autoschedular/`. Each is fully standalone (no cross-package imports).
 
 | Package | Encoder | HW | Shaped Reward | Notes |
-|---------|---------|-----|--------------|-------|
-| `rl_autoschedular_v0` | LSTM | ❌ | ❌ | Baseline |
-| `rl_autoschedular_v1` | LSTM | ✅ | ❌ | Legacy ablation |
-| `rl_autoschedular_v2` | LSTM | ❌ | ✅ | Legacy ablation |
-| `rl_autoschedular_v2_5` | LSTM | ❌ | ✅ | Hardened V2 (fair baseline) |
-| `rl_autoschedular_v3` | Transformer | ❌ | ❌ | Legacy ablation |
-| `rl_autoschedular_v4` | Transformer | ✅ | ✅ | Legacy (high failure rate) |
-| `rl_autoschedular_v4_5` | Transformer | ✅ | ✅ | Integrated + robust isolation |
-| `rl_autoschedular_v4_9` | Transformer | ✅ | ❌ | No shaped reward (entropy collapse fix) |
-| `rl_autoschedular_v45_no_hw` | Transformer | ❌ | ✅ | Ablation: HW disabled |
-| `rl_autoschedular_v45_no_shaped_reward` | Transformer | ✅ | ❌ | Ablation: no reward shaping |
-| `rl_autoschedular_v45_no_transformer` | LSTM | ✅ | ✅ | Ablation: LSTM instead of Transformer |
-| `rl_autoschedular_paper` | LSTM | ❌ | ❌ | Paper artifact (process-isolated) |
-| `rl_autoschedular_paper_transformer` | Transformer | ❌ | ❌ | Paper ablation (Transformer encoder) |
+|---------|---------|-----|:---:|-------|
+| `v0` | LSTM | ❌ | ❌ | Baseline |
+| `v4_5` | Transformer | ✅ | ✅ | Integrated + robust isolation |
+| `v4_9` | Transformer | ✅ | ❌ | Entropy collapse fix |
+| `paper` | LSTM | ❌ | ❌ | Paper artifact |
+| `paper_transformer` | Transformer | ❌ | ❌ | Paper ablation |
+| `v5` | Transformer | ❌ | ❌ | V5 platform: CPU-only (no GPUOccupier), no eval-in-training; base for V5.1/V5.2/V5.3 |
 
-**V4.6/V4.7/V4.8** all use `rl_autoschedular_v4_5` with different configs (corrected reward shaping).
-**V4.9** is its own standalone package — shaped reward hardcoded to 0.0.
-**V1–V4** are legacy; do not actively use or modify unless asked.
+V4.6/V4.7/V4.8 use `v4_5` with different configs. V1–V4 are legacy. Ablations: `v45_no_hw`, `v45_no_shaped_reward`, `v45_no_transformer`.
 
-### Paper Packages
+Paper packages: `interchange_mode="pointers"`, no HW features, no shaped reward, process-isolated. `paper` uses `LSTMEmbedding`, `paper_transformer` uses `TransformerEmbedding` (self-attention, CLS pooling).
 
-`rl_autoschedular_paper` and `rl_autoschedular_paper_transformer` are identical except for the encoder:
-- **paper**: `LSTMEmbedding` (2-layer LSTM over consumer+producer)
-- **paper_transformer**: `TransformerEmbedding` (self-attention over loop tokens, CLS pooling)
-
-Both use `interchange_mode = "pointers"`, no HW features, no shaped reward, process-isolated execution.
-
-Paper packages write directly to `results_dir/run_N/` (same `run_N` structure as all other packages — no special flat layout).
-
----
-
-## Config Structure
-
-Configs live under `config/<dataset>/<train|eval>/`:
-
-| Dataset | Train configs | Eval configs |
-|---------|--------------|-------------|
-| `new_dataset` | `config/new_dataset/train/v0.json`, `v4_6.json`, `v4_7.json`, `v4_8.json`, `v4_9.json`, ablation variants | `config/new_dataset/eval/` |
-| `single_ops_dataset` | `config/single_ops_dataset/train/v0.json`, `v4_9_small.json`, `v4_9_large.json`, `paper.json` | `config/single_ops_dataset/eval/` |
-| `ops_and_blocks` | `config/ops_and_blocks/train/paper_original.json`, `paper_transformer_small.json`, `paper_transformer_large.json`, `v0.json`, `v4_9_small.json`, `v4_9_large.json` | `config/ops_and_blocks/eval/` |
-| `paper` (single_ops) | `config/paper/single_ops_dataset/paper_original_train.json`, `paper_transformer_{small,large}_train.json` | `config/paper/single_ops_dataset/*_eval.json` |
-
----
-
-## Results Directory Architecture
-
-### Main packages (v0, v4_5, v4_9, ablations, paper, paper_transformer)
-
-```
-results/<experiment>/<agent_dir>/run_N/
-├── train/
-│   ├── results.json              # Cumulative {bench: {rewards, speedup, exec_time, cache_miss}}
-│   └── checkpoint_100.json       # Snapshot every 100 iters
-├── eval/
-│   └── checkpoint_100.json       # {bench: exec_time_ns} per eval checkpoint
-├── logs/
-│   ├── exec_data.json            # Execution time cache
-│   ├── tags
-│   ├── train/                    # entropy, reward, final_speedup
-│   ├── train_ppo/                # policy_loss, value_loss, approx_kl, clip_frac
-│   └── eval/                     # eval_exec_times.json + per-benchmark files
-└── models/
-    └── model_50.pt               # Saved every 50 iterations (not every iter)
-```
-
-`FORCE_RUN_ID` env var controls run directory: `FORCE_RUN_ID=5` → `run_5/` (reuse), `FORCE_RUN_ID=ckpt_100` → temp dir.
-
----
-
-## Reporting Scripts
+## Commands
 
 ```bash
-# Training and Evaluation progress scripts
-python scripts/utils/report_training.py -d ops_and_blocks         # training progress table
-python scripts/utils/report_training.py -v v4_6 v4_7 v4_8 v0_v2   # training progress (v4/v0 configs)
-python scripts/utils/report_training.py -w 300                      # watch mode
-python scripts/utils/report_eval.py                                 # all eval checkpoints
-python scripts/utils/report_eval.py --best                          # best per agent
-python scripts/utils/fast_report.py -d ops_and_blocks               # accelerated unified report (0.1s)
+# Train
+sbatch scripts/train/train.sh config/<dataset>/train/<config>.json
+sbatch scripts/train/train.sh <config> --resume results/...   # resume (explicit path to the experiment dir)
+FORCE_NEW=1 sbatch scripts/train/train.sh <config>                   # fresh
 
-# Unified report-progress skill (AI slash command)
-# Inside the Antigravity TUI, type: /report-progress
-# Runs fast_report.py to show active Slurm jobs, training, evaluations, and Lustre quota.
-```
+# Train (V5+ unified config: one JSON drives train AND eval)
+sbatch scripts/train/train.sh config/v5/v5_single_node.json
 
----
-
-## Training & Eval Commands
-
-```bash
-# Train from scratch (auto-resumes if models/ exist)
-sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
-
-# Resume training from a run directory
-sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json \
-  --resume results/new_dataset_results/v4_7_agent/run_0
-
-# Submit a large evaluation batch job for a single agent version (30 checkpoints, time limit 3 days)
+# Eval
+sbatch --cpus-per-task=12 --mem=16G scripts/eval/eval.sh <eval_config> --checkpoint 500
+sbatch scripts/eval/eval.sh config/v5/v5_single_node.json --checkpoint 500   # unified config (64c/100G defaults)
 python scripts/eval/submit_eval.py paper_transformer_small 7300 10200 100 --time 3-00:00:00
-
-# Synchronize evaluation progress from Slurm and actual outputs
 python scripts/eval/sync_progress.py
 
-# Eval a single checkpoint manually
-sbatch --cpus-per-task=12 --mem=16G --time=04:00:00 \
-  scripts/eval/eval.sh config/new_dataset/eval/v4_7_eval.json --checkpoint 500
+# Reporting
+python scripts/utils/fast_report.py -d ops_and_blocks               # unified (0.1s)
+python scripts/utils/report_training.py -v v4_6 v4_7 v4_8            # training progress
+python scripts/utils/report_eval.py --best                          # best per agent
 
-# Force fresh training (overwrite existing results)
-FORCE_NEW=1 sbatch scripts/train/train.sh config/new_dataset/train/v4_7.json
-
-# Paper packages (ops_and_blocks dataset)
-sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_original.json
-sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_transformer_small.json
-sbatch scripts/train/train.sh config/ops_and_blocks/train/paper_transformer_large.json
+# Experiments registry
+# Every experiment must be registered in `experiments.json` (repo root) BEFORE launch:
+#   {"name": ..., "config": ..., "results_dir": ..., "mode": ..., "seed": ..., "state": "pending", "description": ...}
+# `report-progress` (fast_report.py) reads it to know what to report and auto-updates
+# each entry's `state` (pending → running → done/failed/stopped) on every call.
+# Example: `sbatch scripts/train/train.sh config/v5/v5_single_node.json` → registered as v5_single_node.
 ```
 
-`eval.sh` uses `EVAL_DIR=<results_dir>/run_N/models/` — auto-discovers latest `run_N`.
-`--cpus-per-task=12` targets ~1h per eval for ~1,600–2,163 benchmarks.
+`eval.sh` auto-discovers the latest checkpoints from `results_dir/models/`.
 
----
+## Key Gotchas
 
-## Lustre Quota Awareness
+**Entropy collapse:** Shaped reward + Transformer → policy collapses to zero entropy. Fix: disable shaped reward (V4.9) or `entropy_coef ≥ 0.05`.
 
-`/scratch` has **500K file soft limit**, **1M hard limit**. Training + evals can consume files quickly:
-- Each model checkpoint = 1 file (~45MB)
-- `train/results.json` accumulates ~8K entries across training
+**Failed benchmarks:** Timeout → `speedup = 0.0`. Excluded from speedup means. RL reward = flat `-20.0` penalty.
 
-Before submitting many eval jobs, check `lfs quota -u $USER /scratch`. If near limit, notify user.
-
----
-
-## Speedup & Reward Gotchas
-
-**Entropy collapse** (V4.x lesson): Shaped reward + Transformer causes policy to collapse to zero entropy mid-training. Once entropy = 0, PPO gradient vanishes — no recovery. V0 (LSTM, no shaped reward) does not collapse. **Fix**: disable shaped reward (V4.9) or increase `entropy_coef` to 0.05+.
-
-**Shaped reward misleads the agent**: When intermediate reward dominates terminal speedup, agent optimizes static heuristics (parallelism ratio, vectorizability) instead of actual execution time. The no-shaped-reward ablation outperformed all shaped-reward variants.
-
-**Failed benchmarks:** Execution timeout → `speedup = 0.0` (not 1.0). Failed benchmarks are excluded from speedup means in reporting scripts. RL reward unaffected — it uses a flat -20.0 penalty regardless of speedup.
-
-**Reward shaping scale**: Must be ≤10% of terminal reward magnitude. Correct values: `reward_shaping_scale=0.05`, `reward_shaping_clip=0.1`, `reward_shaping_vectorization_bonus=0.0`.
-
----
-
-## Execution Safety Mechanisms
-
-All safety features from V4.9 are now ported to the paper packages. Current status:
-
-| Mechanism | V4.9 | paper | paper_transformer |
-|-----------|:----:|:-----:|:-----------------:|
-| SIGABRT handler (train entry point) | ✅ `scripts/train/train.py` | ✅ shared | ✅ shared |
-| SIGABRT handler (eval entry point) | ✅ `scripts/eval/eval.py` | ✅ `evaluate.py` | ✅ `evaluate.py` |
-| Process-isolated MLIR execution | ✅ | ✅ ported | ✅ ported |
-| Dynamic timeout (`root_exec_time × 5`) | ✅ | ✅ ported | ✅ ported |
-| mlir-cpu-runner subprocess fallback | ✅ | ✅ ported | ✅ ported |
-| SIGABRT guard in `Benchmarks.__init__` | ✅ | ✅ | ✅ |
-| TiledFusion constant dim skip (`continue`) | ✅ | ✅ | ✅ |
+**Reward shaping:** Must be ≤10% of terminal reward. Correct: `scale=0.05, clip=0.1, vectorization_bonus=0.0`.
 
 **`BindingsProcess.ENABLED` must stay `False`** — fork corrupts MLIR C++ state.
-**DaskManager is disabled** (`ENABLED = False`). All execution runs on a single compute node. We enabled a local `ThreadPoolExecutor` parallel fallback in the paper packages (matching other versions) to run benchmark executions in parallel. To prevent Out-Of-Memory (OOM) failures during parallel compilation/execution, jobs must be submitted requesting 12 CPUs and 32 GB memory (`--cpus-per-task=12 --mem=32G`).
 
----
+**DaskManager disabled** — `ThreadPoolExecutor` fallback uses `SLURM_CPUS_PER_TASK` workers. Set `--cpus-per-task` to match the node (128 on Jubail, 64-128 on C2 GPU nodes). See [V5 Training Acceleration](docs/design/done/v5_training_acceleration.md).
 
-## LLVM Build Gotchas
+**Lustre:** `/scratch` has 500K file soft limit. Check `lfs quota -u $USER /scratch` before large eval batches.
 
-If `llvm-project/` was compiled by another user, MLIR Python bindings are broken symlinks:
+## Results Layout
 
-```bash
-cd llvm-project
-git checkout HEAD -- $(git ls-files mlir/python/mlir/ | tr '\n' ' ')
-find build/tools/mlir/python_packages/mlir_core -type l | while read link; do
-    target=$(readlink "$link")
-    if echo "$target" | grep -q "OTHER_USER"; then
-        new_target=$(echo "$target" | sed 's|/scratch/OTHER_USER/|/scratch/YOUR_USER/|g')
-        rm "$link" && ln -s "$new_target" "$link"
-    fi
-done
+Flat, v4.9-style (no `run_N` nesting):
+
+```
+results/<experiment>_agent/
+├── csvs/        checkpoint_speedups.csv, best_checkpoint_speedups.csv,
+│                best_checkpoint_benchmark_family_results.csv, best_checkpoint_operation_type_results.csv
+├── models/      model_50.pt (every 50 iters)
+├── eval/        checkpoint_100.json ({bench: exec_time_ns})
+├── logs/        exec_data.json, train/, train_ppo/, eval/
+└── tags/
 ```
 
-Use `rm + ln -s` (not `ln -sf`) — `-f` fails on broken symlinks to inaccessible paths.
+## HPC Hardware
 
----
+Training runs on **Jubail standard nodes** (`compute` partition, 128 CPU cores, 480GB RAM, no GPU).
+GPU + CPU jobs run on **C2 QOS** (`nvidia` partition, A100/H100/H200 + 128 CPU cores on same node).
+See [HPC Hardware](docs/hpc/HPC_HARDWARE.md) and [C2 Guide](docs/hpc/Guide%20to%20Using%20C2%20Machines.md).
 
 ## Key Docs
 
-- [Training & Evaluation Guide](docs/pipeline/TRAINING_AND_EVALUATION.md) — end-to-end training and evaluation workflow, resources, and commands
-- [Results Architecture](docs/results/RESULTS_ARCHITECTURE.md) — full `run_N/` structure, FileLogger, crash resilience
-- [Training Guide](docs/pipeline/TRAINING_MANUAL.md) — comprehensive training walkthrough
-- [Pipeline](docs/pipeline/PIPELINE.md) — full lifecycle: baseline → split → train → eval
-- [Versions](docs/design/VERSIONS.md) — version-by-version changelog and validation notes
-- [Dashboard](docs/results/DASHBOARD.md) — Streamlit comparison dashboard
-- [Evaluation Tracker](docs/results/eval_progress.md) — Live evaluation progress tracker for Slurm jobs and checkpoints
-- [Entropy Collapse Investigation](docs/investigations/ENTROPY_COLLAPSE_INVESTIGATION.md) — root cause, timeline, recommended fixes
-- [Results](docs/results/RESULTS.md) — experimental results (single_ops_dataset + ops_and_blocks)
-- [Paper Eval Pipeline Analysis](docs/paper/EVAL_PIPELINE_ANALYSIS.md) — SIGABRT safety mechanisms, paper vs V4.9 comparison
-- [Paper Train Failures 2026-06-24](docs/archive/TRAIN_FAILURES_2026_06_24.md) — ops_and_blocks bugs fixed (TiledFusion, dead code, Benchmarks guard)
+**Pipeline:** [Training & Eval](docs/pipeline/TRAINING_AND_EVALUATION.md) · [Training Manual](docs/pipeline/TRAINING_MANUAL.md) · [Pipeline](docs/pipeline/PIPELINE.md)
+**Results:** [Architecture](docs/results/RESULTS_ARCHITECTURE.md) · [Results](docs/results/RESULTS.md) · [Dashboard](docs/results/DASHBOARD.md) · [Eval Tracker](docs/results/eval_progress.md)
+**Design:** [Versions](docs/design/VERSIONS.md) · [CONFIG](docs/design/CONFIG.md) · [NOVELTIES](docs/design/NOVELTIES.md)
+**Investigations:** [Entropy Collapse](docs/investigations/ENTROPY_COLLAPSE_INVESTIGATION.md) · [Paper Eval Pipeline](docs/paper/EVAL_PIPELINE_ANALYSIS.md) · [Train Failures](docs/archive/TRAIN_FAILURES_2026_06_24.md)
+**HPC:** [Hardware](docs/hpc/HPC_HARDWARE.md) · [C2 Guide](docs/hpc/Guide%20to%20Using%20C2%20Machines.md)
+
+### Design Docs
+
+`docs/design/done/` — completed features. `docs/design/todo/` — planned features (V5 generation: V5 platform → V5.1 parallel training → V5.2 full-model eval → V5.3 action space):
+- [V5 Training Acceleration](docs/design/done/v5_training_acceleration.md) — V5 platform: CPU-only accelerated pipeline (12→64c, unified config, GPUOccupier removed)
+- [V5.1 Parallel Training](docs/design/todo/v5_1_parallel_training.md) — distributed PPO: driver + 16 Dask workers, one shared brain, 64 benches/iter (4 per node); compared vs single-node
+- [V5.2 Full-Model Evaluation](docs/design/todo/v5_2_full_model_eval.md) — block-trained policy → full `.mlir` eval (reuses `scripts/checkpoint/ckpt_scan*`)
+- [V5.3 Expanded Action Space](docs/design/todo/v5_3_expanded_action_space.md) — padding, unrolling, packing, LICM, fusion
+- [V5 Future Ideas](docs/design/todo/v5_future_ideas.md) — living list of experiments/variations (pipelining, bench_count scaling, async PPO, ...)
+- [HPO Plan](docs/design/todo/HPO_PLAN.md) — hyperparameter tuning (parallel track, not a version)
+
+New feature design → `docs/design/todo/<feature>.md`. Move to `done/` when implemented.
 
 ---
 
 ## Custom AI Skills
 
-Custom slash commands designed to accelerate AI agent workflow inside the Antigravity TUI:
+Skills are stored in `.agents/skills/`. All skills can call other skills (e.g. `/graphify`) at any point.
 
-* **`/report-progress`**: Unified and accelerated progress reporting (runs [scripts/utils/fast_report.py](file:///scratch/mb10856/MLIR-RL/scripts/utils/fast_report.py) concurrently in `~0.1s` via threads). Queries active Slurm jobs, training checkpoints, evaluation summaries, and Lustre storage quota in one call.
-* **`/commit`**: Conventional git helper that stages changes, performs branch safety check (aborts on `main` or `master`), prompts for target branch, commits with conventional formatting, pushes to remote, and suggests PR details.
+### Feature Pipeline (3 Phases)
+
+```
+Phase 1: feature-brainstorm    →  docs/design/todo/<feature>-brainstorm.md
+Phase 2: feature-architect     →  docs/design/todo/<feature>.md
+Phase 3: feature-develop       →  implementation + move doc to docs/design/done/
+```
+
+- **`feature-brainstorm`** (Phase 1): Interview the user. Adaptive — broad if they have nothing, structuring if they have a concept. Uses `graphify query` to explore codebase. Outputs a brainstorm doc.
+- **`feature-architect`** (Phase 2): Read brainstorm doc, investigate deeper via `graphify query`, resolve open questions, produce design doc with task breakdown. MLIR-RL conventions: package isolation, config singleton, Slurm resources, `py_compile`.
+- **`feature-develop`** (Phase 3): Read design doc, implement tasks in order, verify with `py_compile` + smoke test + `--resume`, check Lustre quota, move doc to `done/`.
+
+### Utility Skills
+
+- **`/report-progress`**: Active Slurm jobs, training, evals, Lustre quota in one call (`scripts/utils/fast_report.py`).
+- **`/commit-push-pr`**: Conventional git helper with branch safety check.
+- **`/graphify`**: Query `graphify-out/graph.json` for codebase/architecture questions. Use before reading files.
+- **`plot-experimentation-results`**: Generate line evolution charts and comparison plots from training/eval results.
+- **`research-paper-writing`**: Scientific writing assistant for the MLIR-RL paper — structure, prose, figures, and LaTeX.

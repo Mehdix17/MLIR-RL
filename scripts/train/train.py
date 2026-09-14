@@ -34,6 +34,10 @@ ppo_module = import_autoschedular_module("ppo", AUTOSCHEDULER_IMPL)
 collect_trajectory = ppo_module.collect_trajectory
 ppo_update = ppo_module.ppo_update
 value_update = ppo_module.value_update
+# Distributed PPO (V5.1): Dask enabled (config dask_node_count > 0 or DASK_NODES env)
+# → collect across Dask workers, update on the driver.
+if import_autoschedular_module("utils.dask_manager", AUTOSCHEDULER_IMPL).ENABLED:
+    collect_trajectory = import_autoschedular_module("distributed", AUTOSCHEDULER_IMPL).collect_distributed_trajectory
 
 logging.basicConfig(
     filename=f"logs/{os.getenv('SLURM_JOB_NAME', 'interactive')}_{os.environ['SLURM_JOB_ID']}.debug",
@@ -100,6 +104,15 @@ torch.set_grad_enabled(False)
 torch.set_num_threads(4)
 if cfg.debug:
     torch.autograd.set_detect_anomaly(True)
+
+# Reproducibility: seed all RNGs before model init (matched seeds for paired runs)
+if cfg.seed is not None:
+    import random
+    import numpy as np
+    torch.manual_seed(cfg.seed)
+    np.random.seed(cfg.seed)
+    random.seed(cfg.seed)
+    print_info(f"Seeded all RNGs with {cfg.seed}")
 
 # Initiate model
 model = Model().to(device)
